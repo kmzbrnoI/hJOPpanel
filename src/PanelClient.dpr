@@ -37,7 +37,6 @@ uses
   Nastaveni_Casu in 'Nastaveni_Casu.pas' {F_ModCasSet},
   DCC_Icons in 'DCC_Icons.pas',
   Soupravy in 'Soupravy.pas' {F_SprList},
-  HVRuc in 'HVRuc.pas' {F_HV_Ruc},
   LokoRuc in 'LokoRuc.pas',
   Resuscitation in 'Resuscitation.pas',
   Verze in 'Verze.pas',
@@ -65,7 +64,6 @@ begin
   Application.CreateForm(TF_HVDelete, F_HVDelete);
   Application.CreateForm(TF_ModCasSet, F_ModCasSet);
   Application.CreateForm(TF_SprList, F_SprList);
-  Application.CreateForm(TF_HV_Ruc, F_HV_Ruc);
   Application.CreateForm(TF_RegReq, F_RegReq);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))

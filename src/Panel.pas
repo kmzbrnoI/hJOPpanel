@@ -860,7 +860,7 @@ implementation
 
 uses StitVyl, TCPClientPanel, Symbols, Main, BottomErrors, GlobalConfig, Zpravy,
      SprEdit, Settings, HVMoveSt, fAuth, HVEdit, HVDelete, ModelovyCas,
-     Nastaveni_casu, HVRuc, LokoRuc, Sounds, fRegReq;
+     Nastaveni_casu, LokoRuc, Sounds, fRegReq;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
