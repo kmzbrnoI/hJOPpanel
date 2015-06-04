@@ -4,7 +4,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Souprava [...]'
-  ClientHeight = 393
+  ClientHeight = 410
   ClientWidth = 409
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -118,8 +118,8 @@ object F_SoupravaEdit: TF_SoupravaEdit
     OnKeyPress = E_SprDelkaKeyPress
   end
   object B_Save: TButton
-    Left = 7
-    Top = 361
+    Left = 6
+    Top = 374
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -128,12 +128,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 8
+    TabOrder = 7
     OnClick = B_SaveClick
   end
   object B_Storno: TButton
-    Left = 114
-    Top = 361
+    Left = 113
+    Top = 374
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -141,7 +141,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Storno'
-    TabOrder = 9
+    TabOrder = 8
     OnClick = B_StornoClick
   end
   object B_Help: TButton
@@ -156,18 +156,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Caption = 'N'#225'pov'#283'da'
     TabOrder = 2
     OnClick = B_HelpClick
-  end
-  object E_Poznamka: TEdit
-    Left = 9
-    Top = 329
-    Width = 393
-    Height = 21
-    Margins.Left = 2
-    Margins.Top = 2
-    Margins.Right = 2
-    Margins.Bottom = 2
-    TabOrder = 7
-    OnKeyPress = E_PoznamkaKeyPress
   end
   object SE_PocetVozu: TSpinEdit
     Left = 8
@@ -250,7 +238,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     ParentDoubleBuffered = False
-    TabOrder = 10
+    TabOrder = 9
     OnClick = BB_HV_AddClick
   end
   object SE_Delka: TSpinEdit
@@ -289,6 +277,14 @@ object F_SoupravaEdit: TF_SoupravaEdit
       'Vle'#269
       'Slu'#382
       'Lv')
+  end
+  object M_Poznamka: TMemo
+    Left = 8
+    Top = 330
+    Width = 393
+    Height = 39
+    TabOrder = 10
+    OnKeyPress = E_PoznamkaKeyPress
   end
   object T_Timeout: TTimer
     Enabled = False
