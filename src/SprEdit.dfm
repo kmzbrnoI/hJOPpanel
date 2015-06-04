@@ -54,15 +54,15 @@ object F_SoupravaEdit: TF_SoupravaEdit
     ParentFont = False
   end
   object Label1: TLabel
-    Left = 10
+    Left = 7
     Top = 312
-    Width = 108
+    Width = 109
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Pozn'#225'mky k souprav'#283':'
+    Caption = 'Pozn'#225'mka k souprav'#283':'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -128,7 +128,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 7
+    TabOrder = 8
     OnClick = B_SaveClick
   end
   object B_Storno: TButton
@@ -141,7 +141,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Storno'
-    TabOrder = 8
+    TabOrder = 9
     OnClick = B_StornoClick
   end
   object B_Help: TButton
@@ -238,7 +238,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     ParentDoubleBuffered = False
-    TabOrder = 9
+    TabOrder = 10
     OnClick = BB_HV_AddClick
   end
   object SE_Delka: TSpinEdit
@@ -283,7 +283,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 330
     Width = 393
     Height = 39
-    TabOrder = 10
+    TabOrder = 7
     OnKeyPress = E_PoznamkaKeyPress
   end
   object T_Timeout: TTimer
