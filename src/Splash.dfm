@@ -29,7 +29,7 @@ object F_splash: TF_splash
     Margins.Right = 2
     Margins.Bottom = 2
     AutoSize = False
-    Caption = #169' Jan Hor'#225#269'ek 2014'
+    Caption = #169' Jan Hor'#225#269'ek 2014-2015'
     Color = clWhite
     Font.Charset = EASTEUROPE_CHARSET
     Font.Color = clRed
