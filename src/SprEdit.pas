@@ -20,7 +20,6 @@ type
     L_S02: TLabel;
     B_Help: TButton;
     Label1: TLabel;
-    E_Poznamka: TEdit;
     SE_PocetVozu: TSpinEdit;
     GB_Sipky: TGroupBox;
     CHB_Sipka_L: TCheckBox;
@@ -32,6 +31,7 @@ type
     SE_Delka: TSpinEdit;
     CB_Typ: TComboBox;
     Label3: TLabel;
+    M_Poznamka: TMemo;
     procedure E_SprDelkaKeyPress(Sender: TObject; var Key: Char);
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
@@ -150,7 +150,7 @@ begin
 
  Self.SE_Delka.Value  := 0;
  Self.CB_Typ.Text     := '';
- Self.E_Poznamka.Text := '';
+ Self.M_Poznamka.Text := '';
 
  Self.PC_HVs.ActivePageIndex := 0;
  Self.HVs[0].FillHV(HVs, nil);
@@ -176,7 +176,7 @@ begin
  try
    Self.E_Nazev.Text := str[0];
    Self.SE_PocetVozu.Value := StrToInt(str[1]);
-   Self.E_Poznamka.Text := str[2];
+   Self.M_Poznamka.Text := str[2];
 
    if (str[3][1] = '1') then
      Self.CHB_Sipka_L.Checked := true
@@ -233,7 +233,7 @@ begin
   end;
 
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';'+
-            Self.E_Poznamka.Text + ';';
+            Self.M_Poznamka.Text + ';';
 
  if (Self.CHB_Sipka_L.Checked) then
   sprstr := sprstr + '1'
