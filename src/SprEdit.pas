@@ -148,8 +148,9 @@ begin
  for i := 1 to _MAX_HV_CNT-1 do
    Self.PC_HVs.Pages[i].TabVisible := false;
 
- Self.SE_Delka.Value := 0;
- Self.CB_Typ.Text    := '';
+ Self.SE_Delka.Value  := 0;
+ Self.CB_Typ.Text     := '';
+ Self.E_Poznamka.Text := '';
 
  Self.PC_HVs.ActivePageIndex := 0;
  Self.HVs[0].FillHV(HVs, nil);
