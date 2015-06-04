@@ -103,6 +103,7 @@ object F_RegReq: TF_RegReq
       Columns = <
         item
           Caption = 'Adresa'
+          Width = 80
         end
         item
           Caption = 'Lokomotiva'
@@ -112,8 +113,6 @@ object F_RegReq: TF_RegReq
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
-      ExplicitWidth = 205
-      ExplicitHeight = 185
     end
   end
   object B_Remote: TButton
