@@ -96,7 +96,7 @@ begin
  HV.Nazev       := Self.E_Name.Text;
  HV.Majitel     := Self.E_Majitel.Text;
  HV.Oznaceni    := Self.E_Oznaceni.Text;
- HV.Poznamka    := Self.M_Poznamka.Text;
+ HV.Poznamka    := Self.M_Poznamka.Lines[0];
  HV.Adresa      := StrToInt(Self.E_Adresa.Text);
  HV.Trida       := THVClass(Self.RG_Trida.ItemIndex);
  HV.Souprava    := '-';

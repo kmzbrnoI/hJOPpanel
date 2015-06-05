@@ -233,7 +233,7 @@ begin
   end;
 
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';'+
-            Self.M_Poznamka.Text + ';';
+            Self.M_Poznamka.Lines[0] + ';';
 
  if (Self.CHB_Sipka_L.Checked) then
   sprstr := sprstr + '1'

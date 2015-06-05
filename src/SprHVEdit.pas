@@ -158,7 +158,7 @@ begin
 
  HV.StanovisteA := THVStanoviste(Self.RG_HV1_dir.ItemIndex);
  HV.Adresa      := Self.Indexes[Self.CB_HV1_HV.ItemIndex];
- HV.Poznamka    := Self.M_HV1_Notes.Text;
+ HV.Poznamka    := Self.M_HV1_Notes.Lines[0];
  HV.funkce[0]   := Self.CHB_HV1_Svetla.Checked;
  HV.funkce[1]   := Self.CHB_HV1_F1.Checked;
  HV.funkce[2]   := Self.CHB_HV1_F2.Checked;
