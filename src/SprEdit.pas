@@ -86,11 +86,15 @@ uses SprHelp, Main, TCPClientPanel;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.E_PoznamkaKeyPress(Sender: TObject; var Key: Char);
+var i:Integer;
 begin
  // osetreni vstupu
- case (key) of
-  #13, '/', '\', '|', '(', ')', '[', ']', '-', ';': Key := #0;
- end;//case
+ for i := 0 to Length(_forbidden_chars)-1 do
+   if (_forbidden_chars[i] = Key) then
+     begin
+      Key := #0;
+      Exit();
+     end;
 end;
 
 procedure TF_SoupravaEdit.E_SprDelkaKeyPress(Sender: TObject;
@@ -224,13 +228,22 @@ end;//procedure
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla
 procedure TF_SoupravaEdit.B_SaveClick(Sender: TObject);
 var sprstr:string;
-    i:Integer;
+    i, j, k:Integer;
 begin
  if (Self.E_Nazev.Text = '') then
   begin
    Application.MessageBox('Vyplòte název soupravy', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
    Exit;
   end;
+
+ // kontrola M_Poznamka
+ for i := 1 to Length(Self.M_Poznamka.Lines[0]) do
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (_forbidden_chars[j] = Self.M_Poznamka.Lines[0][i]) then
+       begin
+        Application.MessageBox(PChar('Poznámka k soupravì obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
 
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';'+
             Self.M_Poznamka.Lines[0] + ';';
@@ -261,6 +274,15 @@ begin
      Application.MessageBox(PChar('Vyberte orientaci stanovištì A hnacího vozidla na záložce '+Self.PC_HVs.Pages[i].Caption), 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
      Exit;
     end;
+
+   // kontrola M_Poznamka
+   for j := 1 to Length(Self.HVs[i].M_HV1_Notes.Lines[0]) do
+     for k := 0 to Length(_forbidden_chars)-1 do
+       if (_forbidden_chars[k] = Self.HVs[i].M_HV1_Notes.Lines[0][j]) then
+         begin
+          Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+          Exit();
+         end;
 
    sprstr := sprstr +  Self.HVs[i].GetHVString();
   end;

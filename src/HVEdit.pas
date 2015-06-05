@@ -69,6 +69,7 @@ implementation
 
 procedure TF_HVEdit.B_ApplyClick(Sender: TObject);
 var HV:THV;
+    i, j:Integer;
 begin
  if (Self.E_Name.Text = '') then
   begin
@@ -92,6 +93,15 @@ begin
   end;
 
  HV := THV.Create();
+
+ // kontrola M_Poznamka
+ for i := 1 to Length(Self.M_Poznamka.Lines[0]) do
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (_forbidden_chars[j] = Self.M_Poznamka.Lines[0][i]) then
+       begin
+        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
 
  HV.Nazev       := Self.E_Name.Text;
  HV.Majitel     := Self.E_Majitel.Text;
@@ -300,11 +310,15 @@ begin
 end;
 
 procedure TF_HVEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
+var i:Integer;
 begin
  // osetreni vstupu
- case (key) of
-  #13, '/', '\', '|', '(', ')', '[', ']', '-', ';': Key := #0;
- end;//case
+ for i := 0 to Length(_forbidden_chars)-1 do
+   if (_forbidden_chars[i] = Key) then
+     begin
+      Key := #0;
+      Exit();
+     end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

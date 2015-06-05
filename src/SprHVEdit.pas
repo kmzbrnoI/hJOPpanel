@@ -51,10 +51,15 @@ implementation
 {$R *.dfm}
 
 procedure TF_SprHVEdit.M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
+var i:Integer;
 begin
- case (key) of
-  #13, '/', '\', '|', '(', ')', '[', ']', '-', ';': Key := #0;
- end;//case
+ // osetreni vstupu
+ for i := 0 to Length(_forbidden_chars)-1 do
+   if (_forbidden_chars[i] = Key) then
+     begin
+      Key := #0;
+      Exit();
+     end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

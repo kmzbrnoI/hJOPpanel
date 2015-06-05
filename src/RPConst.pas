@@ -33,6 +33,10 @@ const
 
   _UVAZKY_BLIK_PERIOD = 1500;      // perioda blikani soupravy u uvazky v ms
 
+  // zakazane znaky pro pouziti v komentarich; delka tohoto pole musi byt alespon 1
+  //   zakazane jsou proto, ze se pouzivaji jako oddelovace v komunikaci
+  _forbidden_chars : array [0..9] of char = (#13, '/', '\', '|', '(', ')', '[', ']', '-', ';');
+
 
 type
   TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
@@ -45,6 +49,7 @@ type
   TWordAr = array of Word;
 
   procedure ExtractStringsEx(Separator: Char; Content: string; Strings: TStrings);
+  function GetForbidderChars():string;
 
 implementation
 
@@ -76,5 +81,14 @@ var i: word;
    end;
   Strings.Add(s);
 end;
+
+function GetForbidderChars():string;
+var i:Integer;
+begin
+ Result := '';
+ for i := 0 to Length(_forbidden_chars)-2 do
+   Result := Result + _forbidden_chars[i] + ' ';
+ Result := Result + _forbidden_chars[Length(_forbidden_chars)-1];
+end;//function
 
 end.//unit
