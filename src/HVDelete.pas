@@ -42,9 +42,11 @@ begin
    Exit();
   end;
 
- PanelTCPClient.PanelHVRemove(Self.sender_or, Self.HVIndexes[Self.CB_HV.ItemIndex]);
-
- Self.Close();
+ if (Application.MessageBox(PChar('Opravdu odstranit hnací vozidlo '+Self.CB_HV.Items.Strings[Self.CB_HV.ItemIndex]+' z databáze?'), 'Opravdu?', MB_YESNO OR MB_ICONWARNING) = mrYes) then
+  begin
+   PanelTCPClient.PanelHVRemove(Self.sender_or, Self.HVIndexes[Self.CB_HV.ItemIndex]);
+   Self.Close();
+  end;
 end;//procedure
 
 procedure TF_HVDelete.B_StornoClick(Sender: TObject);
