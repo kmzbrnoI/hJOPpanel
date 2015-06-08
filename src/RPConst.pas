@@ -35,7 +35,7 @@ const
 
   // zakazane znaky pro pouziti v komentarich; delka tohoto pole musi byt alespon 1
   //   zakazane jsou proto, ze se pouzivaji jako oddelovace v komunikaci
-  _forbidden_chars : array [0..9] of char = (#13, '/', '\', '|', '(', ')', '[', ']', '-', ';');
+  _forbidden_chars : array [0..6] of char = (#13, '/', '\', '|', '[', ']', ';');
 
 
 type
