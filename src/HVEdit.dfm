@@ -29,7 +29,7 @@ object F_HVEdit: TF_HVEdit
     Width = 402
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 0
     OnChange = CB_HVChange
   end
