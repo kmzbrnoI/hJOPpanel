@@ -267,6 +267,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       'R'
       'Sp'
       'Os'
+      'MOs'
       'NEx'
       'Rn'
       'Sn'
