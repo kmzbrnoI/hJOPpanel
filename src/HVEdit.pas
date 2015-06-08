@@ -95,9 +95,9 @@ begin
  HV := THV.Create();
 
  // kontrola M_Poznamka
- for i := 1 to Length(Self.M_Poznamka.Lines[0]) do
+ for i := 1 to Length(Self.M_Poznamka.Text) do
    for j := 0 to Length(_forbidden_chars)-1 do
-     if (_forbidden_chars[j] = Self.M_Poznamka.Lines[0][i]) then
+     if (_forbidden_chars[j] = Self.M_Poznamka.Text[i]) then
        begin
         Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
@@ -106,7 +106,7 @@ begin
  HV.Nazev       := Self.E_Name.Text;
  HV.Majitel     := Self.E_Majitel.Text;
  HV.Oznaceni    := Self.E_Oznaceni.Text;
- HV.Poznamka    := Self.M_Poznamka.Lines[0];
+ HV.Poznamka    := Self.M_Poznamka.Text;
  HV.Adresa      := StrToInt(Self.E_Adresa.Text);
  HV.Trida       := THVClass(Self.RG_Trida.ItemIndex);
  HV.Souprava    := '-';
