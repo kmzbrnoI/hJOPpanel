@@ -237,16 +237,16 @@ begin
   end;
 
  // kontrola M_Poznamka
- for i := 1 to Length(Self.M_Poznamka.Lines[0]) do
+ for i := 1 to Length(Self.M_Poznamka.Text) do
    for j := 0 to Length(_forbidden_chars)-1 do
-     if (_forbidden_chars[j] = Self.M_Poznamka.Lines[0][i]) then
+     if (_forbidden_chars[j] = Self.M_Poznamka.Text[i]) then
        begin
         Application.MessageBox(PChar('Poznámka k soupravì obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
        end;
 
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';'+
-            Self.M_Poznamka.Lines[0] + ';';
+            Self.M_Poznamka.Text + ';';
 
  if (Self.CHB_Sipka_L.Checked) then
   sprstr := sprstr + '1'
@@ -276,9 +276,9 @@ begin
     end;
 
    // kontrola M_Poznamka
-   for j := 1 to Length(Self.HVs[i].M_HV1_Notes.Lines[0]) do
+   for j := 1 to Length(Self.HVs[i].M_HV1_Notes.Text) do
      for k := 0 to Length(_forbidden_chars)-1 do
-       if (_forbidden_chars[k] = Self.HVs[i].M_HV1_Notes.Lines[0][j]) then
+       if (_forbidden_chars[k] = Self.HVs[i].M_HV1_Notes.Text[j]) then
          begin
           Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
           Exit();
