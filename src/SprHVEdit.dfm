@@ -103,13 +103,13 @@ object F_SprHVEdit: TF_SprHVEdit
     object CHB_HV1_Svetla: TCheckBox
       Left = 8
       Top = 16
-      Width = 49
+      Width = 74
       Height = 17
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
-      Caption = 'Sv'#283'tla'
+      Caption = 'F0 - sv'#283'tla'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -11
