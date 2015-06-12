@@ -75,6 +75,14 @@ object F_HVEdit: TF_HVEdit
       Height = 13
       Caption = 'Adresa:'
     end
+    object Label7: TLabel
+      Left = 232
+      Top = 212
+      Width = 152
+      Height = 13
+      Alignment = taRightJustify
+      Caption = 'Zak'#225'zan'#233' znaky: enter / \ | [ ] ;'
+    end
     object E_Name: TEdit
       Left = 112
       Top = 24
@@ -132,13 +140,13 @@ object F_HVEdit: TF_HVEdit
       object CHB_HV1_Svetla: TCheckBox
         Left = 8
         Top = 16
-        Width = 49
+        Width = 81
         Height = 17
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
-        Caption = 'Sv'#283'tla'
+        Caption = 'F0 - sv'#283'tla'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlack
         Font.Height = -11
@@ -377,7 +385,7 @@ object F_HVEdit: TF_HVEdit
       Left = 247
       Top = 126
       Width = 137
-      Height = 93
+      Height = 80
       Caption = ' T'#345#237'da '
       Items.Strings = (
         'parn'#237

@@ -32,6 +32,7 @@ type
     CB_Typ: TComboBox;
     Label3: TLabel;
     M_Poznamka: TMemo;
+    Label4: TLabel;
     procedure E_SprDelkaKeyPress(Sender: TObject; var Key: Char);
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);

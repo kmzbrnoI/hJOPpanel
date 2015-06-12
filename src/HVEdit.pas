@@ -39,6 +39,7 @@ type
     RG_StA: TRadioGroup;
     B_Apply: TButton;
     B_Cancel: TButton;
+    Label7: TLabel;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
