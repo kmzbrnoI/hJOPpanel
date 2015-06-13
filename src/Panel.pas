@@ -1850,7 +1850,8 @@ var i, index:Integer;
 begin
  if (Self.Menu.showing) then
   begin
-   Self.Menu.Click();
+   if (Button = TPanelButton.left) then Self.Menu.Click()
+     else if (Button = TPanelButton.right) then Self.Escape();
    Exit;
   end;
 
@@ -3023,7 +3024,7 @@ begin
       menu_str := menu_str + 'CAS>,';
     end;
 
-   if (Self.myORs[obl_rizeni].Rights.ModCasSet) then
+   if ((Self.myORs[obl_rizeni].Rights.ModCasSet) and (not ModCas.started)) then
     menu_str := menu_str + 'CAS,';
   end;
 
