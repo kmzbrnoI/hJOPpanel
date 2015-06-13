@@ -88,6 +88,7 @@ object F_HVEdit: TF_HVEdit
       Top = 24
       Width = 121
       Height = 21
+      MaxLength = 100
       TabOrder = 0
       Text = 'E_Name'
       OnKeyPress = M_PoznamkaKeyPress
@@ -97,6 +98,7 @@ object F_HVEdit: TF_HVEdit
       Top = 51
       Width = 121
       Height = 21
+      MaxLength = 100
       TabOrder = 1
       Text = 'E_Oznaceni'
       OnKeyPress = M_PoznamkaKeyPress
@@ -106,6 +108,7 @@ object F_HVEdit: TF_HVEdit
       Top = 78
       Width = 121
       Height = 21
+      MaxLength = 100
       TabOrder = 2
       Text = 'E_Majitel'
       OnKeyPress = M_PoznamkaKeyPress
@@ -117,6 +120,8 @@ object F_HVEdit: TF_HVEdit
       Height = 60
       Lines.Strings = (
         'M_Poznamka')
+      MaxLength = 1000
+      ScrollBars = ssVertical
       TabOrder = 7
       OnKeyPress = M_PoznamkaKeyPress
     end
@@ -377,6 +382,7 @@ object F_HVEdit: TF_HVEdit
       Top = 105
       Width = 121
       Height = 21
+      MaxLength = 4
       TabOrder = 3
       Text = 'E_Adresa'
       OnKeyPress = E_AdresaKeyPress

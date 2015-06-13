@@ -292,6 +292,8 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 330
     Width = 393
     Height = 39
+    MaxLength = 1000
+    ScrollBars = ssVertical
     TabOrder = 7
     OnKeyPress = E_PoznamkaKeyPress
   end

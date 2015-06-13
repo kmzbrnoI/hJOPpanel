@@ -80,6 +80,8 @@ object F_SprHVEdit: TF_SprHVEdit
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
+    MaxLength = 1000
+    ScrollBars = ssVertical
     TabOrder = 2
     OnKeyPress = M_HV1_NotesKeyPress
   end
