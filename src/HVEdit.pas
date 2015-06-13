@@ -144,6 +144,7 @@ begin
 end;
 
 procedure TF_HVEdit.CB_HVChange(Sender: TObject);
+var HV:THV;
 begin
  if ((Self.CB_HV.ItemIndex > -1) or (Self.new)) then
   begin
@@ -173,27 +174,28 @@ begin
 
    if (not Self.new) then
     begin
-     Self.E_Name.Text         := Self.HVs.HVs[Self.CB_HV.ItemIndex].Nazev;
-     Self.E_Oznaceni.Text     := Self.HVs.HVs[Self.CB_HV.ItemIndex].Oznaceni;
-     Self.E_Majitel.Text      := Self.HVs.HVs[Self.CB_HV.ItemIndex].Majitel;
-     Self.E_Adresa.Text       := IntToStr(Self.HVs.HVs[Self.CB_HV.ItemIndex].Adresa);
-     Self.M_Poznamka.Text     := Self.HVs.HVs[Self.CB_HV.ItemIndex].Poznamka;
-     Self.RG_Trida.ItemIndex  := Integer(Self.HVs.HVs[Self.CB_HV.ItemIndex].Trida);
-     Self.RG_StA.ItemIndex    := Integer(Self.HVs.HVs[Self.CB_HV.ItemIndex].StanovisteA);
+     HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
+     Self.E_Name.Text         := HV.Nazev;
+     Self.E_Oznaceni.Text     := HV.Oznaceni;
+     Self.E_Majitel.Text      := HV.Majitel;
+     Self.E_Adresa.Text       := IntToStr(HV.Adresa);
+     Self.M_Poznamka.Text     := HV.Poznamka;
+     Self.RG_Trida.ItemIndex  := Integer(HV.Trida);
+     Self.RG_StA.ItemIndex    := Integer(HV.StanovisteA);
 
-     Self.CHB_HV1_Svetla.Checked := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[0];
-     Self.CHB_HV1_F1.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[1];
-     Self.CHB_HV1_F2.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[2];
-     Self.CHB_HV1_F3.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[3];
-     Self.CHB_HV1_F4.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[4];
-     Self.CHB_HV1_F5.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[5];
-     Self.CHB_HV1_F6.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[6];
-     Self.CHB_HV1_F7.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[7];
-     Self.CHB_HV1_F8.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[8];
-     Self.CHB_HV1_F9.Checked  := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[9];
-     Self.CHB_HV1_F10.Checked := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[10];
-     Self.CHB_HV1_F11.Checked := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[11];
-     Self.CHB_HV1_F12.Checked := Self.HVs.HVs[Self.CB_HV.ItemIndex].funkce[12];
+     Self.CHB_HV1_Svetla.Checked := HV.funkce[0];
+     Self.CHB_HV1_F1.Checked  := HV.funkce[1];
+     Self.CHB_HV1_F2.Checked  := HV.funkce[2];
+     Self.CHB_HV1_F3.Checked  := HV.funkce[3];
+     Self.CHB_HV1_F4.Checked  := HV.funkce[4];
+     Self.CHB_HV1_F5.Checked  := HV.funkce[5];
+     Self.CHB_HV1_F6.Checked  := HV.funkce[6];
+     Self.CHB_HV1_F7.Checked  := HV.funkce[7];
+     Self.CHB_HV1_F8.Checked  := HV.funkce[8];
+     Self.CHB_HV1_F9.Checked  := HV.funkce[9];
+     Self.CHB_HV1_F10.Checked := HV.funkce[10];
+     Self.CHB_HV1_F11.Checked := HV.funkce[11];
+     Self.CHB_HV1_F12.Checked := HV.funkce[12];
     end;
 
   end else begin
@@ -302,7 +304,7 @@ begin
  Self.HVs       := HVs;
 
  Self.CB_HV.Enabled := true;
- HVs.FillHVs(Self.CB_HV, Self.HVIndexes);
+ HVs.FillHVs(Self.CB_HV, Self.HVIndexes, -1, nil, true);
  Self.CB_HVChange(Self.CB_HV);
 
  Self.Caption := 'Editovat hnací vozidlo';
