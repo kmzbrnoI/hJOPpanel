@@ -76,12 +76,12 @@ object F_HVEdit: TF_HVEdit
       Caption = 'Adresa:'
     end
     object Label7: TLabel
-      Left = 232
+      Left = 216
       Top = 212
-      Width = 152
+      Width = 168
       Height = 13
       Alignment = taRightJustify
-      Caption = 'Zak'#225'zan'#233' znaky: enter / \ | [ ] ;'
+      Caption = 'Zak'#225'zan'#233' znaky: enter / \ | [ ] ; { }'
     end
     object E_Name: TEdit
       Left = 112
