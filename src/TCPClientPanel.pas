@@ -913,7 +913,7 @@ begin
  list  := TStringList.Create();
  list2 := TStringList.Create();
 
- ExtractStrings(['(', ')'], [], PChar(data), list);
+ ExtractStrings(['{', '}'], [], PChar(data), list);
 
  for i := 0 to list.Count-1 do
   begin

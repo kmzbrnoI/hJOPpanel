@@ -53,7 +53,7 @@ begin
    list1 := TStringList.Create();
    list2 := TStringList.Create();
 
-   ExtractStrings(['(', ')'], [], PChar(data), list1);
+   ExtractStrings(['{', '}'], [], PChar(data), list1);
 
    Self.cnt := list1.Count;
 

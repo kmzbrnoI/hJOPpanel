@@ -48,7 +48,7 @@ begin
  Self.B_RemoveSpr.Enabled := false;
 
  sl := TStringList.Create();
- ExtractStrings(['(', ')'], [], PChar(str), sl);
+ ExtractStrings(['{', '}'], [], PChar(str), sl);
 
  for i := 0 to sl.Count-1 do
   begin

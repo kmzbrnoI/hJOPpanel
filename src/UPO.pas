@@ -145,7 +145,7 @@ begin
  for i := 0 to items.Count-1 do
   begin
    lines.Clear();
-   ExtractStrings(['(', ')'], [], PChar(items[i]), lines);
+   ExtractStrings(['{', '}'], [], PChar(items[i]), lines);
 
    if (lines.Count = 0) then continue;
 

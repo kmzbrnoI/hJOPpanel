@@ -166,7 +166,7 @@ var str1, str2:TStrings;
 begin
  str1 := TStringList.Create();
  str2 := TStringList.Create();
- ExtractStrings(['(', ')'], [], PChar(list), str1);
+ ExtractStrings(['{', '}'], [], PChar(list), str1);
 
  Self.stack.Clear();
  for i := 0 to str1.Count-1 do

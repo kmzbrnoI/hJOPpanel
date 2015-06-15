@@ -136,7 +136,7 @@ begin
 
  if (parsed.Count >= 6) then
   begin
-   ExtractStrings(['(', ')'], [], PChar(parsed[5]), str);
+   ExtractStrings(['{', '}'], [], PChar(parsed[5]), str);
    for i := 0 to str.Count-1 do
     begin
      str2.Clear();
