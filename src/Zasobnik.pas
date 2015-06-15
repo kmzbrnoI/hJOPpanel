@@ -364,7 +364,7 @@ begin
   end;//if Position.Y = Self.pos.Y
 
  // klik na cestu v zasobniku
- if ((Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
+ if ((Self.EZ = TOREZVolba.openned) and (Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
      (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count)) then
   begin
    if (((Position.Y - Self.pos.Y - 1) <> 0) or (Self.first_enabled)) then
