@@ -15,6 +15,28 @@ object F_Debug: TF_Debug
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
+  object Label1: TLabel
+    Left = 424
+    Top = 453
+    Width = 66
+    Height = 13
+    Caption = 'D'#233'lka zpr'#225'vy:'
+  end
+  object L_len: TLabel
+    Left = 545
+    Top = 453
+    Width = 25
+    Height = 13
+    Alignment = taRightJustify
+    Caption = 'L_len'
+  end
+  object Label2: TLabel
+    Left = 576
+    Top = 453
+    Width = 28
+    Height = 13
+    Caption = 'znak'#367
+  end
   object CHB_DataLogging: TCheckBox
     Left = 8
     Top = 8
@@ -48,9 +70,10 @@ object F_Debug: TF_Debug
     Left = 10
     Top = 309
     Width = 598
-    Height = 157
+    Height = 140
     ReadOnly = True
     TabOrder = 2
+    OnChange = M_DataChange
   end
   object B_ClearLog: TButton
     Left = 533

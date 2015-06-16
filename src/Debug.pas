@@ -15,6 +15,9 @@ type
     GB_SendData: TGroupBox;
     E_Send: TEdit;
     B_Send: TButton;
+    Label1: TLabel;
+    L_len: TLabel;
+    Label2: TLabel;
     procedure B_ClearLogClick(Sender: TObject);
     procedure LV_LogChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -22,6 +25,7 @@ type
       State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure B_SendClick(Sender: TObject);
     procedure E_SendKeyPress(Sender: TObject; var Key: Char);
+    procedure M_DataChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -59,6 +63,13 @@ begin
   Self.LV_Log.Canvas.Brush.Color := $FFEEEE;
  if (LeftStr(Item.SubItems.Strings[0], 4) = 'SEND') then
   Self.LV_Log.Canvas.Brush.Color := $EEFFEE;
+end;
+
+procedure TF_Debug.M_DataChange(Sender: TObject);
+var len:Cardinal;
+begin
+ len := Length(Self.M_Data.Text)-5;
+ Self.L_len.Caption := IntToStr(len div 1000) + ' ' + IntToStr(len mod 1000);
 end;
 
 procedure TF_Debug.B_SendClick(Sender: TObject);
