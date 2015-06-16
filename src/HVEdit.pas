@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel;
+  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
+  Generics.Collections;
 
 type
   TF_HVEdit = class(TForm)
@@ -40,11 +41,29 @@ type
     B_Apply: TButton;
     B_Cancel: TButton;
     Label7: TLabel;
+    Label8: TLabel;
+    SB_Take_Add: TSpeedButton;
+    SB_Take_Remove: TSpeedButton;
+    LV_Pom_Load: TListView;
+    SB_Rel_Add: TSpeedButton;
+    SB_Rel_Remove: TSpeedButton;
+    Label9: TLabel;
+    LV_Pom_Release: TListView;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure E_AdresaKeyPress(Sender: TObject; var Key: Char);
     procedure M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
+    procedure SB_Take_RemoveClick(Sender: TObject);
+    procedure SB_Rel_RemoveClick(Sender: TObject);
+    procedure LV_Pom_LoadChange(Sender: TObject; Item: TListItem;
+      Change: TItemChange);
+    procedure LV_Pom_ReleaseChange(Sender: TObject; Item: TListItem;
+      Change: TItemChange);
+    procedure LV_Pom_LoadDblClick(Sender: TObject);
+    procedure SB_Take_AddClick(Sender: TObject);
+    procedure SB_Rel_AddClick(Sender: TObject);
+    procedure LV_Pom_ReleaseDblClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -64,6 +83,8 @@ var
 
 implementation
 
+uses HVPomEdit;
+
 {$R *.dfm}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +92,7 @@ implementation
 procedure TF_HVEdit.B_ApplyClick(Sender: TObject);
 var HV:THV;
     i, j:Integer;
+    pomCV:THVPomCV;
 begin
  if (Self.E_Name.Text = '') then
   begin
@@ -127,11 +149,39 @@ begin
  HV.funkce[11]  := Self.CHB_HV1_F11.Checked;
  HV.funkce[12]  := Self.CHB_HV1_F12.Checked;
 
+
+ HV.POMtake.Clear();
+ HV.POMrelease.Clear();
+
+ // parse POM take
+ for i := 0 to Self.LV_Pom_Load.Items.Count-1 do
+  begin
+   try
+     pomCV.cv   := StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption);
+     pomCV.data := StrToInt(Self.LV_Pom_Load.Items.Item[i].SubItems.Strings[0]);
+     HV.POMtake.Add(pomCV);
+   except
+
+   end;
+  end;
+
+ // parse POM release
+ for i := 0 to Self.LV_Pom_Release.Items.Count-1 do
+  begin
+   try
+     pomCV.cv   := StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption);
+     pomCV.data := StrToInt(Self.LV_Pom_Release.Items.Item[i].SubItems.Strings[0]);
+     HV.POMrelease.Add(pomCV);
+   except
+
+   end;
+  end;
+
  if (Self.new) then
   begin
-   PanelTCPClient.PanelHVAdd(Self.sender_or, HV.GetPanelLokString());
+   PanelTCPClient.PanelHVAdd(Self.sender_or, '{'+HV.GetPanelLokString(true)+'}');
   end else begin
-   PanelTCPClient.PanelHVEdit(Self.sender_or, HV.GetPanelLokString());
+   PanelTCPClient.PanelHVEdit(Self.sender_or, '{'+HV.GetPanelLokString(true)+'}');
   end;
 
  HV.Free();
@@ -145,7 +195,14 @@ end;
 
 procedure TF_HVEdit.CB_HVChange(Sender: TObject);
 var HV:THV;
+    LI:TListItem;
+    pomCv:THVPomCv;
 begin
+ Self.SB_Take_Remove.Enabled := false;
+ Self.SB_Rel_Remove.Enabled  := false;
+ Self.LV_Pom_Load.Clear();
+ Self.LV_Pom_Release.Clear();
+
  if ((Self.CB_HV.ItemIndex > -1) or (Self.new)) then
   begin
    Self.B_Apply.Enabled := true;
@@ -172,6 +229,11 @@ begin
    Self.CHB_HV1_F11.Enabled := true;
    Self.CHB_HV1_F12.Enabled := true;
 
+   Self.SB_Take_Add.Enabled    := true;
+   Self.SB_Rel_Add.Enabled     := true;
+   Self.LV_Pom_Load.Enabled    := true;
+   Self.LV_Pom_Release.Enabled := true;
+
    if (not Self.new) then
     begin
      HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
@@ -196,6 +258,21 @@ begin
      Self.CHB_HV1_F10.Checked := HV.funkce[10];
      Self.CHB_HV1_F11.Checked := HV.funkce[11];
      Self.CHB_HV1_F12.Checked := HV.funkce[12];
+
+     for pomCv in HV.POMtake do
+      begin
+       LI := Self.LV_Pom_Load.Items.Add;
+       LI.Caption := IntToStr(pomCV.cv);
+       LI.SubItems.Add(IntToStr(pomCV.data));
+      end;
+
+     for pomCv in HV.POMrelease do
+      begin
+       LI := Self.LV_Pom_Release.Items.Add;
+       LI.Caption := IntToStr(pomCV.cv);
+       LI.SubItems.Add(IntToStr(pomCV.data));
+      end;
+
     end;
 
   end else begin
@@ -244,9 +321,15 @@ begin
    Self.CHB_HV1_F10.Checked := false;
    Self.CHB_HV1_F11.Checked := false;
    Self.CHB_HV1_F12.Checked := false;
+
+   Self.SB_Take_Add.Enabled    := false;
+   Self.SB_Rel_Add.Enabled     := false;
+   Self.LV_Pom_Load.Enabled    := false;
+   Self.LV_Pom_Release.Enabled := false;
+
   end;
 
-end;
+end;//procedure
 
 procedure TF_HVEdit.E_AdresaKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -292,6 +375,9 @@ begin
  Self.CHB_HV1_F11.Checked := false;
  Self.CHB_HV1_F12.Checked := false;
 
+ Self.SB_Take_Remove.Enabled := false;
+ Self.SB_Rel_Remove.Enabled  := false;
+
  Self.Caption := 'Nové hnací vozidlo';
  Self.Show();
  Self.ActiveControl := Self.E_Name;
@@ -312,6 +398,42 @@ begin
  Self.ActiveControl := Self.CB_HV;
 end;
 
+procedure TF_HVEdit.LV_Pom_LoadChange(Sender: TObject; Item: TListItem;
+  Change: TItemChange);
+begin
+ Self.SB_Take_Remove.Enabled := (Self.LV_Pom_Load.Selected <> nil);
+end;
+
+procedure TF_HVEdit.LV_Pom_LoadDblClick(Sender: TObject);
+begin
+ if (Self.LV_Pom_Load.Selected <> nil) then
+  begin
+   F_HV_Pom.OpenForm(StrToInt(Self.LV_Pom_Load.Selected.Caption), StrToInt(Self.LV_Pom_Load.Selected.SubItems.Strings[0]));
+   if (F_HV_Pom.saved) then
+     Self.LV_Pom_Load.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+  end else begin
+   Self.SB_Take_AddClick(Self);
+  end;
+end;
+
+procedure TF_HVEdit.LV_Pom_ReleaseChange(Sender: TObject; Item: TListItem;
+  Change: TItemChange);
+begin
+ Self.SB_Rel_Remove.Enabled := (Self.LV_Pom_Release.Selected <> nil);
+end;
+
+procedure TF_HVEdit.LV_Pom_ReleaseDblClick(Sender: TObject);
+begin
+ if (Self.LV_Pom_Release.Selected <> nil) then
+  begin
+   F_HV_Pom.OpenForm(StrToInt(Self.LV_Pom_Release.Selected.Caption), StrToInt(Self.LV_Pom_Release.Selected.SubItems.Strings[0]));
+   if (F_HV_Pom.saved) then
+     Self.LV_Pom_Release.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+  end else begin
+   Self.SB_Rel_AddClick(Self);
+  end;
+end;
+
 procedure TF_HVEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
 var i:Integer;
 begin
@@ -322,6 +444,60 @@ begin
       Key := #0;
       Exit();
      end;
+end;
+
+procedure TF_HVEdit.SB_Rel_AddClick(Sender: TObject);
+var LI:TListItem;
+    i:Integer;
+begin
+ F_HV_Pom.OpenForm(-1, 0);
+ if (F_HV_Pom.saved) then
+  begin
+   i := 0;
+   while ((i < Self.LV_Pom_Release.Items.Count) and (StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption) < F_HV_Pom.SE_CV.Value)) do Inc(i);
+
+   if ((Assigned(Self.LV_Pom_Release.Items.Item[i])) and (StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption) = F_HV_Pom.SE_CV.Value)) then
+    begin
+     Self.LV_Pom_Release.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+    end else begin
+     LI := Self.LV_Pom_Release.Items.Insert(i);
+     LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
+     LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+    end;
+  end;
+end;
+
+procedure TF_HVEdit.SB_Rel_RemoveClick(Sender: TObject);
+begin
+ if (Self.LV_Pom_Release.Selected <> nil) then
+  Self.LV_Pom_Release.Items.Delete(Self.LV_Pom_Release.ItemIndex);
+end;
+
+procedure TF_HVEdit.SB_Take_AddClick(Sender: TObject);
+var i:Integer;
+    LI:TListItem;
+begin
+ F_HV_Pom.OpenForm(-1, 0);
+ if (F_HV_Pom.saved) then
+  begin
+   i := 0;
+   while ((i < Self.LV_Pom_Load.Items.Count) and (StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption) < F_HV_Pom.SE_CV.Value)) do Inc(i);
+
+   if ((Assigned(Self.LV_Pom_Load.Items.Item[i])) and (StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption) = F_HV_Pom.SE_CV.Value)) then
+    begin
+     Self.LV_Pom_Load.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+    end else begin
+     LI := Self.LV_Pom_Load.Items.Insert(i);
+     LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
+     LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+    end;
+  end;
+end;
+
+procedure TF_HVEdit.SB_Take_RemoveClick(Sender: TObject);
+begin
+ if (Self.LV_Pom_Load.Selected <> nil) then
+  Self.LV_Pom_Load.Items.Delete(Self.LV_Pom_Load.ItemIndex);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

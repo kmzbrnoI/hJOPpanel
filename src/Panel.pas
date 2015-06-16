@@ -850,7 +850,7 @@ end;
 
    procedure ORHVList(Sender:string; data:string);
    procedure ORSprNew(Sender:string);
-   procedure ORSprEdit(Sender:string; spr:string);
+   procedure ORSprEdit(Sender:string; parsed:TStrings);
    procedure OROsvChange(Sender:string; code:string; state:boolean);
    procedure ORStackMsg(Sender:string; data:TStrings);
 
@@ -2842,13 +2842,13 @@ begin
     end;
 end;//procedure
 
-procedure TRelief.ORSprEdit(Sender:string; spr:string);
+procedure TRelief.ORSprEdit(Sender:string; parsed:TStrings);
 var i:Integer;
 begin
  for i := 0 to Self.myORs.Count-1 do
    if (Sender = Self.myORs[i].id) then
     begin
-     F_SoupravaEdit.EditSpr(spr, Self.myORs[i].HVs, Self.myORs[i].id);
+     F_SoupravaEdit.EditSpr(parsed, Self.myORs[i].HVs, Self.myORs[i].id);
      Exit();
     end;
 end;//procedure

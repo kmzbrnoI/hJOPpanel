@@ -48,7 +48,7 @@ type
 
 implementation
 
-uses TCPClientPanel, Main;
+uses TCPClientPanel, Main, RPConst;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -140,12 +140,12 @@ begin
  Self.critical := critical;
 
  Self.items.Clear();
- ExtractStrings(['[', ']'], [], PChar(data), items);
+ ExtractStringsEx([']'], ['['], data, items);
 
  for i := 0 to items.Count-1 do
   begin
    lines.Clear();
-   ExtractStrings(['{', '}'], [], PChar(items[i]), lines);
+   ExtractStringsEx([']'], ['['], items[i], lines);
 
    if (lines.Count = 0) then continue;
 
@@ -154,7 +154,7 @@ begin
      if (j > _UPO_HEIGHT-2) then break;
 
      line.Clear();
-     ExtractStrings(['|'], [], PChar(lines[j]), line);
+     ExtractStringsEx(['|'], [], lines[j], line);
 
      // parsovani zarovnani
      if (line.Count > 1) then

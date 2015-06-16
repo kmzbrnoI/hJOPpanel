@@ -66,7 +66,7 @@ type
   public
 
     procedure NewSpr(HVs:THVDb; sender:string);
-    procedure EditSpr(spr:string; HVs:THVDb; sender:string);
+    procedure EditSpr(parsed:TStrings; HVs:THVDb; sender:string);
 
     procedure TechError(err:string);
     procedure TechACK();
@@ -168,35 +168,31 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla
-procedure TF_SoupravaEdit.EditSpr(spr:string; HVs:THVDb; sender:string);
-var str:TStrings;
-    i:Integer;
+procedure TF_SoupravaEdit.EditSpr(parsed:TStrings; HVs:THVDb; sender:string);
+var i:Integer;
 begin
  Self.HVDb  := HVs;
  Self.OblR  := sender;
 
- str := TStringList.Create();
- ExtractStringsEx(';', spr, str);
-
  try
-   Self.E_Nazev.Text := str[0];
-   Self.SE_PocetVozu.Value := StrToInt(str[1]);
-   Self.M_Poznamka.Text := str[2];
+   Self.E_Nazev.Text := parsed[2];
+   Self.SE_PocetVozu.Value := StrToInt(parsed[3]);
+   Self.M_Poznamka.Text := parsed[4];
 
-   if (str[3][1] = '1') then
+   if (parsed[5][1] = '1') then
      Self.CHB_Sipka_L.Checked := true
    else
      Self.CHB_Sipka_L.Checked := false;
 
-   if (str[3][2] = '1') then
+   if (parsed[5][2] = '1') then
      Self.CHB_Sipka_S.Checked := true
    else
      Self.CHB_Sipka_S.Checked := false;
 
-   Self.SE_Delka.Value := StrToInt(str[4]);
-   Self.CB_Typ.Text    := str[5];
+   Self.SE_Delka.Value := StrToInt(parsed[6]);
+   Self.CB_Typ.Text    := parsed[7];
 
-   Self.sprHVs.ParseHVs(str[6]);
+   Self.sprHVs.ParseHVs(parsed[8]);
  except
   Application.MessageBox('Neplatný formát dat soupravy !', 'Nelze editovat soupravu', MB_OK OR MB_ICONWARNING);
   Exit();
@@ -218,7 +214,6 @@ begin
  else
    Self.BB_HV_Add.Enabled := true;
 
- str.Free();
  Self.ActiveControl := Self.E_Nazev;
  Self.Caption := 'Souprava '+Self.E_Nazev.Text;
  Self.Show();
@@ -246,8 +241,8 @@ begin
         Exit();
        end;
 
- sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';'+
-            Self.M_Poznamka.Text + ';';
+ sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' +
+            Self.M_Poznamka.Text + '};';
 
  if (Self.CHB_Sipka_L.Checked) then
   sprstr := sprstr + '1'
@@ -260,6 +255,8 @@ begin
   sprstr := sprstr + '0;';
 
  sprstr := sprstr + IntToStr(Self.SE_Delka.Value) + ';' + Self.CB_Typ.Text + ';';
+
+ sprstr := sprstr + '{';
 
  for i := 0 to _MAX_HV_CNT-1 do
   begin
@@ -285,9 +282,10 @@ begin
           Exit();
          end;
 
-   sprstr := sprstr +  Self.HVs[i].GetHVString();
+   sprstr := sprstr + Self.HVs[i].GetHVString();
   end;
 
+ sprstr := sprstr + '}';
  PanelTCPClient.PanelSprChange(Self.OblR, sprstr);
 
  Screen.Cursor := crHourGlass;

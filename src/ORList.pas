@@ -34,6 +34,8 @@ var
 
 implementation
 
+uses RPConst;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor TORDb.Create();
@@ -53,14 +55,14 @@ begin
    list1 := TStringList.Create();
    list2 := TStringList.Create();
 
-   ExtractStrings(['{', '}'], [], PChar(data), list1);
+   ExtractStringsEx([']'], ['['], data, list1);
 
    Self.cnt := list1.Count;
 
    for i := 0 to list1.Count-1 do
     begin
      list2.Clear();
-     ExtractStrings([','], [], PChar(list1[i]), list2);
+     ExtractStringsEx([','], [], list1[i], list2);
 
      try
        Self.data[i].id   := list2[0];

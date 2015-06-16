@@ -79,7 +79,7 @@ type
 
 implementation
 
-uses Panel, Symbols;
+uses Panel, Symbols, RPConst;
 
 // format souboru hintu:
 //  csv soubor, kde na kazdem radku je jeden hint
@@ -227,7 +227,7 @@ var sl:TStrings;
     i:Integer;
 begin
  sl := TStringList.Create();
- ExtractStrings([',', ';'], [], PChar(items), sl);
+ ExtractStringsEx([',', ';'], [], items, sl);
 
  Self.Items.cnt := sl.Count;
 
@@ -302,7 +302,7 @@ begin
   begin
    ReadLn(f, line);
    parsed.Clear();
-   ExtractStrings([',', ';'], [], PChar(line), parsed);
+   ExtractStringsEx([',', ';'], [], line, parsed);
 
    try
      if (parsed.Count >= 2) then

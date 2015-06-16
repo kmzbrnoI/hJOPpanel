@@ -82,7 +82,7 @@ var
 
 implementation
 
-uses Main, Verze, BottomErrors, Sounds;
+uses Main, Verze, BottomErrors, Sounds, RPConst;
 
 {$R *.dfm}
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ begin
 
  if (parsed.Count >= 5) then
   begin
-   ExtractStrings(['|'], [], PChar(parsed[4]), str);
+   ExtractStringsEx(['|'], [], parsed[4], str);
    for i := 0 to str.Count-1 do
     Self.senders.Add(str[i]);
   end;
@@ -136,11 +136,11 @@ begin
 
  if (parsed.Count >= 6) then
   begin
-   ExtractStrings(['{', '}'], [], PChar(parsed[5]), str);
+   ExtractStringsEx([']'], ['['], parsed[5], str);
    for i := 0 to str.Count-1 do
     begin
      str2.Clear();
-     ExtractStrings(['|'], [], PChar(str[i]), str2);
+     ExtractStringsEx(['|'], [], str[i], str2);
 
      try
       podm.blok     := str2[0];

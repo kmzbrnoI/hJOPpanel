@@ -105,12 +105,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
     ParentFont = False
   end
   object Label4: TLabel
-    Left = 239
+    Left = 278
     Top = 311
-    Width = 162
+    Width = 123
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Zak'#225'zan'#233' znaky: enter / \ | [ ] ; { }'
+    Caption = 'Zak'#225'zan'#233' znaky: enter { }'
   end
   object E_Nazev: TEdit
     Left = 7

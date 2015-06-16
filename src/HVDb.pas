@@ -2,7 +2,8 @@ unit HVDb;
 
 interface
 
-uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows;
+uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,
+     Generics.Collections;
 
 const
   _MAX_HV = 128;
@@ -12,6 +13,11 @@ type
   THVClass = (parni = 0, diesel = 1, motor = 2, elektro = 3);
   TFunkce = array[0.._MAX_FUNC] of boolean;
   THVStanoviste = (lichy = 0, sudy = 1);              // v jakem smeru se nachazi stanoviste A
+
+  THVPomCV = record                                 // jeden zaznam POM se sklada z
+    cv:Word;                                           // oznaceni CV a
+    data:Byte;                                         // dat, ktera se maji do CV zapsat.
+  end;
 
   THV = class
    private
@@ -32,13 +38,17 @@ type
      smer:Integer;
      token:string;
 
+     POMtake : TList<THVPomCV>;                          // seznam POM pri prevzeti do automatu
+     POMrelease : TList<THVPomCV>;                       // seznam POM pri uvolneni to rucniho rizeni
+
      procedure ParseFromToken(data:string);
      procedure ParseData(data:string);
      constructor Create(data:string); overload;
      constructor Create(); overload;
      constructor CreateFromToken(data:string);
+     destructor Destroy(); override;
 
-     function GetPanelLokString():string;
+     function GetPanelLokString(pom:boolean = true):string;
   end;
 
   THVDb = class
@@ -96,7 +106,7 @@ var str:TStrings;
     i:Integer;
 begin
  str := TStringList.Create();
- ExtractStrings(['[', ']'], [], PChar(data), str);
+ ExtractStringsEx([']'], ['['], data, str);
 
  Self.ClearList();
 
@@ -113,7 +123,7 @@ var str:TStrings;
     i:Integer;
 begin
  str := TStringList.Create();
- ExtractStrings(['[', ']'], [], PChar(data), str);
+ ExtractStringsEx([']'], ['['], data, str);
 
  Self.ClearList();
 
@@ -161,11 +171,15 @@ end;//procedure
 constructor THV.Create(data:string);
 begin
  inherited Create();
+ Self.POMtake    := TList<THVPomCv>.Create();
+ Self.POMrelease := TList<THVPomCv>.Create();
  Self.ParseData(data);
 end;//ctor
 
 constructor THV.Create();
 begin
+ Self.POMtake    := TList<THVPomCv>.Create();
+ Self.POMrelease := TList<THVPomCv>.Create();
  inherited Create();
 end;//ctor
 
@@ -175,16 +189,27 @@ begin
  Self.ParseFromToken(data);
 end;//ctor
 
+destructor THV.Destroy();
+begin
+ Self.POMtake.Free();
+ Self.POMrelease.Free();
+ inherited Destroy();
+end;//dtor
+
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure THV.ParseData(data:string);
-var str:TStrings;
+var str, str2, str3:TStrings;
     i:Integer;
+    pomCv:THVPomCv;
+    tmp:string;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_supne|rychlost_kmph|smer|
+ // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
  // souprava je bud cislo soupravy, nebo znak '-'
- str := TStringList.Create();
- ExtractStringsEx('|', data, str);
+ str  := TStringList.Create();
+ str2 := TStringList.Create();
+ str3 := TStringList.Create();
+ ExtractStringsEx(['|'] , [], data, str);
 
  Self.DefaultData();
 
@@ -210,11 +235,40 @@ begin
    Self.rychlost_stupne := StrToInt(str[9]);
    Self.rychlost_kmph   := StrToInt(str[10]);
    Self.smer            := StrToInt(str[11]);
+
+   if (str.Count > 12) then
+    begin
+     // pom-take
+     ExtractStringsEx([']'] , ['['], str[12], str2);
+     for tmp in str2 do
+      begin
+       str3.Clear();
+       ExtractStringsEx(['|'] , [], tmp, str3);
+       pomCV.cv   := StrToInt(str3[0]);
+       pomCV.data := StrToInt(str3[1]);
+       Self.POMtake.Add(pomCV);
+      end;
+
+     // pom-release
+     str2.Clear();
+     ExtractStringsEx([']'] , ['['], str[13], str2);
+     for tmp in str2 do
+      begin
+       str3.Clear();
+       ExtractStringsEx(['|'] , [], tmp, str3);
+       pomCV.cv   := StrToInt(str3[0]);
+       pomCV.data := StrToInt(str3[1]);
+       Self.POMrelease.Add(pomCV);
+      end;
+    end;//if str.Count > 11
+
  except
 
  end;
 
  str.Free();
+ str2.Free();
+ str3.Free();
 end;//procedure
 
 procedure THV.ParseFromToken(data:string);
@@ -222,7 +276,7 @@ var str:TStrings;
 // format zapisu: addr|token
 begin
  str := TStringList.Create();
- ExtractStringsEx('|', data, str);
+ ExtractStringsEx(['|'], [], data, str);
 
  Self.DefaultData();
 
@@ -255,12 +309,13 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function THV.GetPanelLokString():string;
+function THV.GetPanelLokString(pom:boolean = true):string;
 var i:Integer;
+    pomCV:THVPomCv;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce
+ // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|||{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
  // souprava je bud cislo soupravy, nebo znak '-'
- Result := Self.Nazev + '|' + Self.Majitel + '|' + Self.Oznaceni + '|' + Self.Poznamka + '|' +
+ Result := Self.Nazev + '|' + Self.Majitel + '|' + Self.Oznaceni + '|{' + Self.Poznamka + '}|' +
            IntToStr(Self.adresa) + '|' + IntToStr(Integer(Self.Trida)) + '|' + Self.souprava + '|' +
            IntToStr(Integer(Self.StanovisteA)) + '|';
 
@@ -271,6 +326,25 @@ begin
    else
      Result := Result + '0';
   end;
+
+ Result := Result + '|';
+
+ if (pom) then
+  begin
+   Result := Result + '|||';
+
+   // cv-take
+   Result := Result + '{';
+   for pomCV in Self.POMtake do
+     Result := Result + '[{' + IntToStr(POMcv.cv) + '|' + IntToStr(POMcv.data) + '}]';
+   Result := Result + '}|{';
+
+   // cv-release
+   for pomCV in Self.POMrelease do
+     Result := Result + '[{' + IntToStr(POMcv.cv) + '|' + IntToStr(POMcv.data) + '}]';
+   Result := Result + '}|';
+  end;// if pom
+
 end;//function
 
 ////////////////////////////////////////////////////////////////////////////////

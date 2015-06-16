@@ -40,7 +40,8 @@ uses
   LokoRuc in 'LokoRuc.pas',
   Resuscitation in 'Resuscitation.pas',
   Verze in 'Verze.pas',
-  fRegReq in 'fRegReq.pas' {F_RegReq};
+  fRegReq in 'fRegReq.pas' {F_RegReq},
+  HVPomEdit in 'HVPomEdit.pas' {F_HV_Pom};
 
 {$R *.res}
 
@@ -65,6 +66,7 @@ begin
   Application.CreateForm(TF_ModCasSet, F_ModCasSet);
   Application.CreateForm(TF_SprList, F_SprList);
   Application.CreateForm(TF_RegReq, F_RegReq);
+  Application.CreateForm(TF_HV_Pom, F_HV_Pom);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))
   else

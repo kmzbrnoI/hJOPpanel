@@ -48,7 +48,7 @@ begin
  Self.B_RemoveSpr.Enabled := false;
 
  sl := TStringList.Create();
- ExtractStrings(['{', '}'], [], PChar(str), sl);
+ ExtractStringsEx([']'], ['['], str, sl);
 
  for i := 0 to sl.Count-1 do
   begin
@@ -71,7 +71,7 @@ var sl,slhv:TStrings;
 begin
  sl := TStringList.Create();
  slhv := TStringList.Create();
- ExtractStringsEx(';', str, sl);
+ ExtractStringsEx([';'], [], str, sl);
 
  try
    LI := Self.LV_Soupravy.Items.Add;
@@ -79,7 +79,7 @@ begin
 
    if (sl.Count > 6) then
     begin
-     ExtractStrings(['[', ']'], [], PChar(sl[6]), slhv);
+     ExtractStringsEx([']'], ['['], sl[6], slhv);
      if (slhv.Count > 0) then
       begin
        LI.SubItems.Add(Self.ParseHV(slhv[0]));
@@ -113,7 +113,7 @@ begin
  sl := TStringList.Create();
 
  try
-   ExtractStringsEx('|', str, sl);
+   ExtractStringsEx(['|'], [], str, sl);
    Result := sl[4] + ' : ' + sl[0] + ' (' + sl[2] + ')';
  except
 

@@ -398,7 +398,7 @@ end;//procedure
 procedure TPanelTCPClient.DataReceived(const data: string);
 begin
  Self.parsed.Clear();
- ExtractStrings([';'], [], PChar(data), Self.parsed);
+ ExtractStringsEx([';'], [#13, #10], data, Self.parsed);
 
  Self.data := data;
 
@@ -531,7 +531,7 @@ begin
   DCC.Parse(parsed)
 
  else if (parsed[1] = 'SPR-LIST') then
-  F_SprList.ParseLoko(RightStr(Self.data, Length(Self.data)-12));
+  F_SprList.ParseLoko(parsed[2]);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -573,7 +573,7 @@ begin
   Relief.ORSprNew(parsed[0])
 
  else if (parsed[1] = 'SPR-EDIT') then
-  Relief.ORSprEdit(parsed[0], RightStr(Self.data, Length(Self.data)-Length(parsed[1])-Length(parsed[0])-2 ))
+  Relief.ORSprEdit(parsed[0], parsed)
 
  else if (parsed[1] = 'SPR-EDIT-ERR') then
   F_SoupravaEdit.TechError(parsed[2])
@@ -749,12 +749,12 @@ begin
   if (parsed.Count >= 9) then
    begin
     data := TStringList.Create();
-    ExtractStrings([','], [], PChar(parsed[8]), data);
+    ExtractStringsEx([','], [], parsed[8], data);
 
     for i := 0 to data.Count-1 do
      begin
       UvazkaSpr.strings := TStringList.Create();
-      ExtractStrings(['|'], [], PChar(data[i]), UvazkaSpr.strings);
+      ExtractStringsEx(['|'], [], data[i], UvazkaSpr.strings);
 
       if (LeftStr(data[i], 1) = '$') then
        begin
@@ -913,12 +913,12 @@ begin
  list  := TStringList.Create();
  list2 := TStringList.Create();
 
- ExtractStrings(['{', '}'], [], PChar(data), list);
+ ExtractStringsEx([']'], ['['], data, list);
 
  for i := 0 to list.Count-1 do
   begin
    list2.Clear();
-   ExtractStrings(['|'], [], PChar(list[i]), list2);
+   ExtractStringsEx(['|'], [], list[i], list2);
 
    try
      case (list2[1][1]) of

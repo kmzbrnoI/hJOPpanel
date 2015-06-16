@@ -166,13 +166,13 @@ var str1, str2:TStrings;
 begin
  str1 := TStringList.Create();
  str2 := TStringList.Create();
- ExtractStrings(['{', '}'], [], PChar(list), str1);
+ ExtractStringsEx([']'], ['['], list, str1);
 
  Self.stack.Clear();
  for i := 0 to str1.Count-1 do
   begin
    str2.Clear();
-   ExtractStrings(['|'], [], PChar(str1[i]), str2);
+   ExtractStringsEx(['|'], [], str1[i], str2);
 
    try
     stack_jc.id := StrToInt(str2[0]);
@@ -220,7 +220,7 @@ var str:TStrings;
     stack_jc:TORStackJC;
 begin
  str := TStringList.Create();
- ExtractStrings(['|'], [], PChar(data), str);
+ ExtractStringsEx(['|'], [], data, str);
 
  try
    stack_jc.id := StrToInt(str[0]);
