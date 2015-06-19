@@ -45,21 +45,31 @@ implementation
 
 {$R *.dfm}
 
-uses TCPClientPanel, Zpravy;
+uses TCPClientPanel, Zpravy, RPConst;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Message.B_SendClick(Sender: TObject);
 var LI:TListItem;
+    i, j:Integer;
 begin
  if (Self.M_Send.Text = '') then Exit(); 
+
+ // kontrola M_Send
+ for i := 1 to Length(Self.M_Send.Text) do
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (_forbidden_chars[j] = Self.M_Send.Text[i]) then
+       begin
+        Application.MessageBox(PChar('Zpráva obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze odeslat zprávu', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
 
  LI := Self.LV_Messages.Items.Add;
  LI.Caption  := FormatDateTime('hh:nn:ss', Now);
  LI.SubItems.Add('');
  LI.SubItems.Add(Self.M_Send.Text);
 
- PanelTCPClient.PanelMessage((((Self.Parent as TTabSheet).Parent as TPageControl).Parent as TF_Messages).id, Self.id, Self.M_Send.Lines.Strings[0]);
+ PanelTCPClient.PanelMessage((((Self.Parent as TTabSheet).Parent as TPageControl).Parent as TF_Messages).id, Self.id, Self.M_Send.Text);
  Self.M_Send.Clear();
 
  Self.LV_Messages.Scroll(0, 100);
@@ -125,14 +135,21 @@ begin
 end;
 
 procedure TF_Message.M_SendKeyPress(Sender: TObject; var Key: Char);
+var i:Integer;
 begin
  if (Key = #13) then
   begin
    Self.B_SendClick(Self.B_Send);
    Key := #0;
   end;
- if (Key = ';') then
-  Key := #0;
+
+ // osetreni zakazanych znaku
+ for i := 0 to Length(_forbidden_chars)-1 do
+   if (_forbidden_chars[i] = Key) then
+     begin
+      Key := #0;
+      Exit();
+     end;
 end;
 
 procedure TF_Message.SetFocus();
