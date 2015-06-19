@@ -852,7 +852,7 @@ end;//procedure
 
 procedure TPanelTCPClient.PanelMessage(senderid:string; recepientid:string; msg:string);
 begin
- Self.SendLn(senderid+';MSG;'+recepientid+';'+msg);
+ Self.SendLn(senderid+';MSG;'+recepientid+';{'+msg+'}');
 end;//procedure
 
 procedure TPanelTCPClient.PanelSprChange(Sender:string; msg:string);
