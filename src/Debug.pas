@@ -68,7 +68,11 @@ end;
 procedure TF_Debug.M_DataChange(Sender: TObject);
 var len:Cardinal;
 begin
- len := Length(Self.M_Data.Text)-5;
+ if (Length(Self.M_Data.Text) >= 5) then
+   len := Length(Self.M_Data.Text)-5
+ else
+   len := Length(Self.M_Data.Text);
+
  Self.L_len.Caption := IntToStr(len div 1000) + ' ' + IntToStr(len mod 1000);
 end;
 
