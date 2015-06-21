@@ -72,12 +72,23 @@ begin
 end;//procedure
 
 procedure TF_StitVyl.B_OKClick(Sender: TObject);
+var i, j:Integer;
  begin
+ // kontrola teztu na zakazane znaky
+ for i := 1 to Length(Self.E_Popisek.Text) do
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (_forbidden_chars[j] = Self.E_Popisek.Text[i]) then
+       begin
+        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
+
   Self.Close;
   Self.callback(Self.OpenStitVyl, Self.E_Popisek.Text);
  end;//procedure
 
 procedure TF_StitVyl.E_PopisekKeyPress(Sender: TObject; var Key: Char);
+var i:Integer;
  begin
   if (Key = #13) then B_OKClick(Self);
   if (Key = #27) then
@@ -85,6 +96,14 @@ procedure TF_StitVyl.E_PopisekKeyPress(Sender: TObject; var Key: Char);
     Self.Close;
     Relief.Escape();
    end;
+
+ // osetreni vstupu
+ for i := 0 to Length(_forbidden_chars)-1 do
+   if (_forbidden_chars[i] = Key) then
+     begin
+      Key := #0;
+      Exit();
+     end;
  end;//procedure
 
 procedure TF_StitVyl.E_PopisekChange(Sender: TObject);
