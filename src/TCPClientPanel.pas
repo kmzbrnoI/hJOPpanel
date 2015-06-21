@@ -804,7 +804,7 @@ end;
 
 procedure TPanelTCPClient.PanelAuthorise(Sender:string;rights:TORControlRights; username,password:string);
 begin
- Self.SendLn(Sender+';AUTH;'+IntToStr(Integer(rights))+';'+username+';'+password+';');
+ Self.SendLn(Sender+';AUTH;'+IntToStr(Integer(rights))+';{'+username+'};{'+password+'}');
 end;//procedure
 
 procedure TPanelTCPClient.PanelFirstGet(Sender:string);
@@ -825,8 +825,8 @@ end;//procedure
 procedure TPanelTCPClient.PanelSetStitVyl(typ:Integer; stitvyl:string);
 begin
  case (typ) of
-  _STITEK: Self.SendLn('-;STIT;'+stitvyl+';');
-  _VYLUKA: Self.SendLn('-;VYL;'+stitvyl+';');
+  _STITEK: Self.SendLn('-;STIT;{'+stitvyl+'}');
+  _VYLUKA: Self.SendLn('-;VYL;{'+stitvyl+'}');
  end;
 end;//procedure
 
