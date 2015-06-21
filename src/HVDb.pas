@@ -357,11 +357,11 @@ var i:Integer;
     f:string;
 begin
  // predame server a port
- args := '-s ' + GlobConfig.data.server.host + ' -pt ' + IntToStr(GlobConfig.data.server.port) + ' ';
+ args := '-s "' + GlobConfig.data.server.host + '" -pt ' + IntToStr(GlobConfig.data.server.port) + ' ';
 
  // predat uzivatele ?
- if (GlobConfig.data.reg.reg_user) then
-   args := args + '-u ' + GlobConfig.data.auth.username + ' -p ' + GlobConfig.data.auth.password + ' ';
+ if ((GlobConfig.data.reg.reg_user) and (GlobConfig.data.auth.username <> '')) then
+   args := args + '-u "' + GlobConfig.data.auth.username + '" -p "' + GlobConfig.data.auth.password + '" ';
 
  // kontrola tokenu
  for i := 0 to Self.count-1 do
@@ -376,7 +376,7 @@ begin
  f := ExpandFileName(GlobConfig.data.reg.reg_fn);
  res := ShellExecute(F_Main.Handle, 'open', PChar(f), PChar(args), PChar(ExtractFilePath(GlobConfig.data.reg.reg_fn)), SW_SHOWNORMAL);
  if (res < 32) then
-   raise Exception.Create('Shell execute error '+IntToStr(res));
+   raise Exception.Create('Nelze spustit regulator - chyba '+IntToStr(res));
 
 end;//procedure
 
