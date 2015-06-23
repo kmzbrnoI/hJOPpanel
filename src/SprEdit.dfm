@@ -180,7 +180,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 47
     Width = 177
     Height = 47
-    Caption = ' Ozna'#269'en'#237' sm'#283'ru'
+    Caption = ' Ozna'#269'en'#237' sm'#283'ru '
     TabOrder = 5
     object CHB_Sipka_L: TCheckBox
       Left = 44
