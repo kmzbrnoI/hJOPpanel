@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, ComCtrls, Spin, RPConst;
+  Dialogs, ExtCtrls, StdCtrls, ComCtrls, Spin, RPConst, Hash;
 
 type
   TF_Settings = class(TForm)
@@ -91,6 +91,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure E_usernameKeyPress(Sender: TObject; var Key: Char);
     procedure B_Reg_ProchClick(Sender: TObject);
+    procedure E_PasswordChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -126,7 +127,7 @@ begin
  if (GlobConfig.data.auth.autoauth) then
   begin
    GlobConfig.data.auth.username           := Self.E_username.Text;
-   GlobConfig.data.auth.password           := Self.E_Password.Text;
+   GlobConfig.data.auth.password           := GenerateHash(Self.E_Password.Text);
   end else begin
    GlobConfig.data.auth.username           := '';
    GlobConfig.data.auth.password           := '';
@@ -270,6 +271,11 @@ begin
   Self.E_Password.PasswordChar := '*';
 end;
 
+procedure TF_Settings.E_PasswordChange(Sender: TObject);
+begin
+ if (Self.E_Password.Text = '') then Self.CHB_ShowPassword.Enabled := true; 
+end;
+
 procedure TF_Settings.E_usernameKeyPress(Sender: TObject; var Key: Char);
 begin
  if ((Key = ';') or (Key = ',')) then Key := #0;
@@ -327,9 +333,13 @@ begin
  Self.CHB_RememberAuth.Checked := data.auth.autoauth;
  Self.CHB_RememberAuthClick(Self.CHB_RememberAuth);
  Self.E_username.Text          := data.auth.username;
- Self.E_Password.Text          := data.auth.password;
+ if (data.auth.password = '') then
+   Self.E_Password.Text        := ''
+ else
+   Self.E_Password.Text        := 'heslo';
+
  Self.CHB_Forgot.Checked       := ((data.auth.forgot) and (data.auth.autoauth));
- Self.CHB_ShowPassword.Enabled := not CHB_Forgot.Checked;
+ Self.CHB_ShowPassword.Enabled := (data.auth.password = '');
 
  Self.E_Snd_Trat.Text       := data.sounds.sndTratSouhlas;
  Self.E_Snd_Error.Text      := data.sounds.sndChyba;

@@ -49,7 +49,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_Regulator
+    ActivePage = TS_Rights
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -400,8 +400,6 @@ object F_Settings: TF_Settings
     object TS_Rights: TTabSheet
       Caption = 'Autorizace'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 28
       object GB_Auth: TGroupBox
         Left = 32
         Top = 16
@@ -449,6 +447,7 @@ object F_Settings: TF_Settings
           PasswordChar = '*'
           TabOrder = 2
           Text = 'Edit1'
+          OnChange = E_PasswordChange
           OnKeyPress = E_usernameKeyPress
         end
         object CHB_ShowPassword: TCheckBox
@@ -512,7 +511,6 @@ object F_Settings: TF_Settings
     object TS_Regulator: TTabSheet
       Caption = 'Regul'#225'tor'
       ImageIndex = 7
-      ExplicitHeight = 255
       object Label17: TLabel
         Left = 96
         Top = 21

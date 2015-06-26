@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      PotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils;
+     Zasobnik, UPO, IBUtils, Hash;
 
 const
   //limity poli
@@ -2651,7 +2651,7 @@ begin
   end else begin
    F_Auth.OpenForm('Vyžadována autorizace');
    username := F_Auth.E_username.Text;
-   password := F_Auth.E_Password.Text;
+   password := GenerateHash(F_Auth.E_Password.Text);
   end;
 
  for i := 0 to Self.myORs.Count-1 do

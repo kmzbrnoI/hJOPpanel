@@ -41,7 +41,8 @@ uses
   Resuscitation in 'Resuscitation.pas',
   Verze in 'Verze.pas',
   fRegReq in 'fRegReq.pas' {F_RegReq},
-  HVPomEdit in 'HVPomEdit.pas' {F_HV_Pom};
+  HVPomEdit in 'HVPomEdit.pas' {F_HV_Pom},
+  Hash in 'Hash.pas';
 
 {$R *.res}
 

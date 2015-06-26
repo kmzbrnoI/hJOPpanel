@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls;
+  Dialogs, StdCtrls, Hash;
 
 type
   TF_Auth = class(TForm)
@@ -41,7 +41,7 @@ begin
   begin
    GlobConfig.data.auth.autoauth   := true;
    GlobConfig.data.auth.username   := Self.E_username.Text;
-   GlobConfig.data.auth.password   := Self.E_Password.Text;
+   GlobConfig.data.auth.password   := GenerateHash(Self.E_Password.Text);
    GlobConfig.data.auth.forgot     := Self.CHB_Forgot.Checked;
   end;
 
