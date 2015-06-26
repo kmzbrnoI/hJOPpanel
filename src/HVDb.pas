@@ -41,6 +41,8 @@ type
      POMtake : TList<THVPomCV>;                          // seznam POM pri prevzeti do automatu
      POMrelease : TList<THVPomCV>;                       // seznam POM pri uvolneni to rucniho rizeni
 
+     funcVyznam:array[0.._MAX_FUNC] of string;        // seznam popisu funkci hnaciho vozidla
+
      procedure ParseFromToken(data:string);
      procedure ParseData(data:string);
      constructor Create(data:string); overload;
@@ -204,7 +206,10 @@ var str, str2, str3:TStrings;
     pomCv:THVPomCv;
     tmp:string;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|
+ //   rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ //   {vyznam-F0;vyznam-F1;...}|
+
  // souprava je bud cislo soupravy, nebo znak '-'
  str  := TStringList.Create();
  str2 := TStringList.Create();
@@ -262,6 +267,18 @@ begin
       end;
     end;//if str.Count > 11
 
+   if (str.Count > 14) then
+    begin
+     ExtractStringsEx([';'], [], str[14], str2);
+     for i := 0 to _MAX_FUNC do
+       if (i < str2.Count) then
+        Self.funcVyznam[i] := str2[i]
+       else
+        Self.funcVyznam[i] := '';
+    end else begin
+     for i := 0 to _MAX_FUNC do
+       Self.funcVyznam[i] := '';
+    end;
  except
 
  end;
