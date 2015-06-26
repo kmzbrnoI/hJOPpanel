@@ -14,6 +14,10 @@ type
   TFunkce = array[0.._MAX_FUNC] of boolean;
   THVStanoviste = (lichy = 0, sudy = 1);              // v jakem smeru se nachazi stanoviste A
 
+  // mod posilani dat hnaciho vozidla klientovi
+  // full: s POM
+  TLokStringMode = (normal = 0, full = 1);
+
   THVPomCV = record                                 // jeden zaznam POM se sklada z
     cv:Word;                                           // oznaceni CV a
     data:Byte;                                         // dat, ktera se maji do CV zapsat.
@@ -50,7 +54,7 @@ type
      constructor CreateFromToken(data:string);
      destructor Destroy(); override;
 
-     function GetPanelLokString(pom:boolean = true):string;
+     function GetPanelLokString(mode:TLokStringMode = normal):string;
   end;
 
   THVDb = class
@@ -326,11 +330,13 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function THV.GetPanelLokString(pom:boolean = true):string;
+function THV.GetPanelLokString(mode:TLokStringMode = normal):string;
 var i:Integer;
     pomCV:THVPomCv;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|||{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|-|stanovisteA|funkce|rychlost_stupne|
+ //   rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ //   {vyznam-F0;vyznam-F1;...}|
  // souprava je bud cislo soupravy, nebo znak '-'
  Result := Self.Nazev + '|' + Self.Majitel + '|' + Self.Oznaceni + '|{' + Self.Poznamka + '}|' +
            IntToStr(Self.adresa) + '|' + IntToStr(Integer(Self.Trida)) + '|' + Self.souprava + '|' +
@@ -344,12 +350,10 @@ begin
      Result := Result + '0';
   end;
 
- Result := Result + '|';
+ Result := Result + '||||';
 
- if (pom) then
+ if (mode = full) then
   begin
-   Result := Result + '|||';
-
    // cv-take
    Result := Result + '{';
    for pomCV in Self.POMtake do
@@ -362,6 +366,15 @@ begin
    Result := Result + '}|';
   end;// if pom
 
+ Result := Result + '|{';
+ for i := 0 to _MAX_FUNC do
+  begin
+   if (Self.funcVyznam[i] <> '') then
+     Result := Result + '{' + Self.funcVyznam[i] + '};'
+   else
+     Result := Result + ';';
+  end;
+ Result := Result + '}|';
 end;//function
 
 ////////////////////////////////////////////////////////////////////////////////

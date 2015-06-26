@@ -178,7 +178,7 @@ begin
  HV.funkce[11]  := Self.CHB_HV1_F11.Checked;
  HV.funkce[12]  := Self.CHB_HV1_F12.Checked;
 
- Result := '[{' + HV.GetPanelLokString(false) + '}]';
+ Result := '[{' + HV.GetPanelLokString() + '}]';
 end;//function
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -179,9 +179,9 @@ begin
 
  if (Self.new) then
   begin
-   PanelTCPClient.PanelHVAdd(Self.sender_or, '{'+HV.GetPanelLokString(true)+'}');
+   PanelTCPClient.PanelHVAdd(Self.sender_or, '{'+HV.GetPanelLokString(full)+'}');
   end else begin
-   PanelTCPClient.PanelHVEdit(Self.sender_or, '{'+HV.GetPanelLokString(true)+'}');
+   PanelTCPClient.PanelHVEdit(Self.sender_or, '{'+HV.GetPanelLokString(full)+'}');
   end;
 
  HV.Free();
