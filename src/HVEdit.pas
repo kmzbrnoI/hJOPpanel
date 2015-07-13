@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
-  Generics.Collections;
+  Generics.Collections, AppEvnts;
 
 type
   TF_HVEdit = class(TForm)
@@ -20,20 +20,6 @@ type
     E_Majitel: TEdit;
     Label5: TLabel;
     M_Poznamka: TMemo;
-    GroupBox1: TGroupBox;
-    CHB_HV1_Svetla: TCheckBox;
-    CHB_HV1_F1: TCheckBox;
-    CHB_HV1_F2: TCheckBox;
-    CHB_HV1_F3: TCheckBox;
-    CHB_HV1_F4: TCheckBox;
-    CHB_HV1_F5: TCheckBox;
-    CHB_HV1_F6: TCheckBox;
-    CHB_HV1_F8: TCheckBox;
-    CHB_HV1_F7: TCheckBox;
-    CHB_HV1_F9: TCheckBox;
-    CHB_HV1_F10: TCheckBox;
-    CHB_HV1_F11: TCheckBox;
-    CHB_HV1_F12: TCheckBox;
     Label6: TLabel;
     E_Adresa: TEdit;
     RG_Trida: TRadioGroup;
@@ -49,6 +35,8 @@ type
     SB_Rel_Remove: TSpeedButton;
     Label9: TLabel;
     LV_Pom_Release: TListView;
+    LV_Funkce: TListView;
+    Label10: TLabel;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
@@ -64,6 +52,8 @@ type
     procedure SB_Take_AddClick(Sender: TObject);
     procedure SB_Rel_AddClick(Sender: TObject);
     procedure LV_Pom_ReleaseDblClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
 
@@ -71,6 +61,14 @@ type
     HVs:THVDb;
     new:boolean;
     sender_or:string;
+    CB_funkce:array[0.._MAX_FUNC] of TComboBox;
+    FOldListviewWindowProc: TWndMethod;
+
+    procedure InitFunkce();
+    procedure FreeFunkce();
+    procedure RepaintFunkce();
+    procedure LV_FunkceWindowproc(var Message: TMessage);
+
   public
     { Public declarations }
 
@@ -83,7 +81,7 @@ var
 
 implementation
 
-uses HVPomEdit;
+uses HVPomEdit, commctrl;
 
 {$R *.dfm}
 
@@ -135,20 +133,8 @@ begin
  HV.Souprava    := '-';
  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
 
- HV.funkce[0]   := Self.CHB_HV1_Svetla.Checked;
- HV.funkce[1]   := Self.CHB_HV1_F1.Checked;
- HV.funkce[2]   := Self.CHB_HV1_F2.Checked;
- HV.funkce[3]   := Self.CHB_HV1_F3.Checked;
- HV.funkce[4]   := Self.CHB_HV1_F4.Checked;
- HV.funkce[5]   := Self.CHB_HV1_F5.Checked;
- HV.funkce[6]   := Self.CHB_HV1_F6.Checked;
- HV.funkce[7]   := Self.CHB_HV1_F7.Checked;
- HV.funkce[8]   := Self.CHB_HV1_F8.Checked;
- HV.funkce[9]   := Self.CHB_HV1_F9.Checked;
- HV.funkce[10]  := Self.CHB_HV1_F10.Checked;
- HV.funkce[11]  := Self.CHB_HV1_F11.Checked;
- HV.funkce[12]  := Self.CHB_HV1_F12.Checked;
-
+ for i := 0 to _MAX_FUNC do
+  HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
 
  HV.POMtake.Clear();
  HV.POMrelease.Clear();
@@ -177,6 +163,10 @@ begin
    end;
   end;
 
+ // parse func vyznam
+ for i := 0 to _MAX_FUNC do
+   HV.funcVyznam[i] := Self.CB_funkce[i].Text;
+
  if (Self.new) then
   begin
    PanelTCPClient.PanelHVAdd(Self.sender_or, '{'+HV.GetPanelLokString(full)+'}');
@@ -197,6 +187,7 @@ procedure TF_HVEdit.CB_HVChange(Sender: TObject);
 var HV:THV;
     LI:TListItem;
     pomCv:THVPomCv;
+    i:Integer;
 begin
  Self.SB_Take_Remove.Enabled := false;
  Self.SB_Rel_Remove.Enabled  := false;
@@ -215,24 +206,14 @@ begin
    Self.RG_Trida.Enabled    := true;
    Self.RG_StA.Enabled      := true;
 
-   Self.CHB_HV1_Svetla.Enabled := true;
-   Self.CHB_HV1_F1.Enabled  := true;
-   Self.CHB_HV1_F2.Enabled  := true;
-   Self.CHB_HV1_F3.Enabled  := true;
-   Self.CHB_HV1_F4.Enabled  := true;
-   Self.CHB_HV1_F5.Enabled  := true;
-   Self.CHB_HV1_F6.Enabled  := true;
-   Self.CHB_HV1_F7.Enabled  := true;
-   Self.CHB_HV1_F8.Enabled  := true;
-   Self.CHB_HV1_F9.Enabled  := true;
-   Self.CHB_HV1_F10.Enabled := true;
-   Self.CHB_HV1_F11.Enabled := true;
-   Self.CHB_HV1_F12.Enabled := true;
-
    Self.SB_Take_Add.Enabled    := true;
    Self.SB_Rel_Add.Enabled     := true;
    Self.LV_Pom_Load.Enabled    := true;
    Self.LV_Pom_Release.Enabled := true;
+
+   Self.LV_Funkce.Enabled := true;
+   for i := 0 to _MAX_FUNC do
+     Self.CB_funkce[i].Enabled := true;
 
    if (not Self.new) then
     begin
@@ -245,19 +226,8 @@ begin
      Self.RG_Trida.ItemIndex  := Integer(HV.Trida);
      Self.RG_StA.ItemIndex    := Integer(HV.StanovisteA);
 
-     Self.CHB_HV1_Svetla.Checked := HV.funkce[0];
-     Self.CHB_HV1_F1.Checked  := HV.funkce[1];
-     Self.CHB_HV1_F2.Checked  := HV.funkce[2];
-     Self.CHB_HV1_F3.Checked  := HV.funkce[3];
-     Self.CHB_HV1_F4.Checked  := HV.funkce[4];
-     Self.CHB_HV1_F5.Checked  := HV.funkce[5];
-     Self.CHB_HV1_F6.Checked  := HV.funkce[6];
-     Self.CHB_HV1_F7.Checked  := HV.funkce[7];
-     Self.CHB_HV1_F8.Checked  := HV.funkce[8];
-     Self.CHB_HV1_F9.Checked  := HV.funkce[9];
-     Self.CHB_HV1_F10.Checked := HV.funkce[10];
-     Self.CHB_HV1_F11.Checked := HV.funkce[11];
-     Self.CHB_HV1_F12.Checked := HV.funkce[12];
+     for i := 0 to _MAX_FUNC do
+      Self.LV_Funkce.Items[i].Checked := HV.funkce[i];
 
      for pomCv in HV.POMtake do
       begin
@@ -273,7 +243,10 @@ begin
        LI.SubItems.Add(IntToStr(pomCV.data));
       end;
 
-    end;
+     for i := 0 to _MAX_FUNC do
+       Self.CB_funkce[i].Text := HV.funcVyznam[i];
+
+    end;//if not New
 
   end else begin
    Self.B_Apply.Enabled := false;
@@ -286,20 +259,6 @@ begin
    Self.RG_Trida.Enabled    := false;
    Self.RG_StA.Enabled      := false;
 
-   Self.CHB_HV1_Svetla.Enabled := false;
-   Self.CHB_HV1_F1.Enabled  := false;
-   Self.CHB_HV1_F2.Enabled  := false;
-   Self.CHB_HV1_F3.Enabled  := false;
-   Self.CHB_HV1_F4.Enabled  := false;
-   Self.CHB_HV1_F5.Enabled  := false;
-   Self.CHB_HV1_F6.Enabled  := false;
-   Self.CHB_HV1_F7.Enabled  := false;
-   Self.CHB_HV1_F8.Enabled  := false;
-   Self.CHB_HV1_F9.Enabled  := false;
-   Self.CHB_HV1_F10.Enabled := false;
-   Self.CHB_HV1_F11.Enabled := false;
-   Self.CHB_HV1_F12.Enabled := false;
-
    Self.E_Name.Text         := '';
    Self.E_Oznaceni.Text     := '';
    Self.E_Majitel.Text      := '';
@@ -308,24 +267,21 @@ begin
    Self.RG_Trida.ItemIndex  := -1;
    Self.RG_StA.ItemIndex    := -1;
 
-   Self.CHB_HV1_Svetla.Checked := true;
-   Self.CHB_HV1_F1.Checked  := false;
-   Self.CHB_HV1_F2.Checked  := false;
-   Self.CHB_HV1_F3.Checked  := false;
-   Self.CHB_HV1_F4.Checked  := false;
-   Self.CHB_HV1_F5.Checked  := false;
-   Self.CHB_HV1_F6.Checked  := false;
-   Self.CHB_HV1_F7.Checked  := false;
-   Self.CHB_HV1_F8.Checked  := false;
-   Self.CHB_HV1_F9.Checked  := false;
-   Self.CHB_HV1_F10.Checked := false;
-   Self.CHB_HV1_F11.Checked := false;
-   Self.CHB_HV1_F12.Checked := false;
+   Self.LV_Funkce.Items[0].Checked := true;
+   for i := 1 to _MAX_FUNC do
+    Self.LV_Funkce.Items[i].Checked := false;
 
    Self.SB_Take_Add.Enabled    := false;
    Self.SB_Rel_Add.Enabled     := false;
    Self.LV_Pom_Load.Enabled    := false;
    Self.LV_Pom_Release.Enabled := false;
+
+   Self.LV_Funkce.Enabled := false;
+   for i := 0 to _MAX_FUNC do
+    begin
+     Self.CB_funkce[i].Enabled := false;
+     Self.CB_funkce[i].Text    := '';
+    end;
 
   end;
 
@@ -340,9 +296,20 @@ begin
   end;//else case
 end;
 
-//procedure
+procedure TF_HVEdit.FormCreate(Sender: TObject);
+begin
+ Self.InitFunkce();
+end;
+
+procedure TF_HVEdit.FormDestroy(Sender: TObject);
+begin
+ Self.FreeFunkce();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HVEdit.HVAdd(sender_or:string; HVs:THVDb);
+var i:Integer;
 begin
  Self.sender_or := sender_or;
  Self.HVs       := HVs;
@@ -361,22 +328,15 @@ begin
  Self.RG_Trida.ItemIndex  := -1;
  Self.RG_StA.ItemIndex    := -1;
 
- Self.CHB_HV1_Svetla.Checked := true;
- Self.CHB_HV1_F1.Checked  := false;
- Self.CHB_HV1_F2.Checked  := false;
- Self.CHB_HV1_F3.Checked  := false;
- Self.CHB_HV1_F4.Checked  := false;
- Self.CHB_HV1_F5.Checked  := false;
- Self.CHB_HV1_F6.Checked  := false;
- Self.CHB_HV1_F7.Checked  := false;
- Self.CHB_HV1_F8.Checked  := false;
- Self.CHB_HV1_F9.Checked  := false;
- Self.CHB_HV1_F10.Checked := false;
- Self.CHB_HV1_F11.Checked := false;
- Self.CHB_HV1_F12.Checked := false;
+ Self.LV_Funkce.Items[0].Checked := true;
+ for i := 1 to _MAX_FUNC do
+  Self.LV_Funkce.Items[i].Checked := false;
 
  Self.SB_Take_Remove.Enabled := false;
  Self.SB_Rel_Remove.Enabled  := false;
+
+ for i := 0 to _MAX_FUNC do
+   Self.CB_funkce[i].Text := '';
 
  Self.Caption := 'Nové hnací vozidlo';
  Self.Show();
@@ -499,6 +459,89 @@ begin
  if (Self.LV_Pom_Load.Selected <> nil) then
   Self.LV_Pom_Load.Items.Delete(Self.LV_Pom_Load.ItemIndex);
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.InitFunkce();
+var i:Integer;
+    LI:TListItem;
+    strs:TStrings;
+begin
+ Self.LV_Funkce.Clear();
+ strs := TStringList.Create();
+
+ // seznam funkci:
+ strs.Add('svìtla');
+ strs.Add('svìtla zadní');
+ strs.Add('dálkový svìtlomet');
+ strs.Add('posun');
+ strs.Add('zvuk');
+ strs.Add('houkaèka krátká');
+ strs.Add('houkaèka dlouhá');
+ strs.Add('píšala krátká');
+ strs.Add('píšala dlouhá');
+
+ for i := 0 to _MAX_FUNC do
+  begin
+   LI := Self.LV_Funkce.Items.Add;
+   LI.Caption := 'F'+IntToStr(i);
+
+   Self.CB_funkce[i] := TComboBox.Create(Self);
+   Self.CB_funkce[i].Parent := Self.LV_Funkce;
+//   Self.CB_funkce[i].Font.Size := 8;
+   Self.CB_funkce[i].BevelInner := bvNone;
+   Self.CB_funkce[i].BevelOuter := bvNone;
+   Self.CB_funkce[i].BevelKind  := bkFlat;
+   Self.CB_funkce[i].Items.AddStrings(strs);
+   Self.CB_funkce[i].MaxLength  := 32;
+   Self.CB_funkce[i].OnKeyPress := Self.M_PoznamkaKeyPress;
+  end;//for
+
+ Self.FOldListviewWindowProc := Self.LV_Funkce.WindowProc;
+ Self.LV_Funkce.WindowProc := LV_FunkceWindowproc;
+ Self.RepaintFunkce();
+
+ strs.Free();
+end;//procedure
+
+procedure TF_HVEdit.FreeFunkce();
+var i:Integer;
+begin
+ for i := 0 to _MAX_FUNC do
+   FreeAndNil(Self.CB_funkce[i]);
+end;//procedure
+
+procedure TF_HVEdit.RepaintFunkce();
+var i:Integer;
+    r: TRect;
+    SInfo: TScrollInfo;
+    top_index: Integer;
+begin
+ SInfo.cbSize := SizeOf(SInfo);
+ SInfo.fMask := SIF_ALL;
+ GetScrollInfo(Self.LV_Funkce.Handle, SB_VERT, SInfo);
+ top_index := SInfo.nPos;
+
+ for i := 0 to _MAX_FUNC do
+  begin
+   with (Self.CB_funkce[i]) do
+    begin
+     ListView_GetSubItemRect(Self.LV_Funkce.Handle, i, 1, LVIR_BOUNDS, @r);
+     BoundsRect := r;
+     Visible := (i >= top_index);
+    end;//with
+  end;
+end;//procedure
+
+procedure TF_HVEdit.LV_FunkceWindowproc(var Message: TMessage);
+begin
+  Self.FOldListviewWindowProc(Message);
+  Case Message.Msg Of
+    WM_VSCROLL, WM_HSCROLL:
+      If Message.WParamLo <> SB_ENDSCROLL Then
+        Self.RepaintFunkce();
+  End;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

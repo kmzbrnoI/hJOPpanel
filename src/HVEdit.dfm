@@ -4,8 +4,8 @@ object F_HVEdit: TF_HVEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Edtiovat hnac'#237' vozidlo'
-  ClientHeight = 393
-  ClientWidth = 617
+  ClientHeight = 497
+  ClientWidth = 657
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,6 +14,8 @@ object F_HVEdit: TF_HVEdit
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -26,18 +28,18 @@ object F_HVEdit: TF_HVEdit
   object CB_HV: TComboBox
     Left = 8
     Top = 24
-    Width = 601
+    Width = 641
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 0
     OnChange = CB_HVChange
   end
   object GB_HV: TGroupBox
     Left = 8
     Top = 51
-    Width = 601
-    Height = 302
+    Width = 643
+    Height = 406
     Caption = ' Hnac'#237' vozidlo '
     TabOrder = 1
     object Label2: TLabel
@@ -61,13 +63,6 @@ object F_HVEdit: TF_HVEdit
       Height = 13
       Caption = 'Majitel:'
     end
-    object Label5: TLabel
-      Left = 16
-      Top = 212
-      Width = 52
-      Height = 13
-      Caption = 'Pozn'#225'mka:'
-    end
     object Label6: TLabel
       Left = 15
       Top = 108
@@ -76,16 +71,16 @@ object F_HVEdit: TF_HVEdit
       Caption = 'Adresa:'
     end
     object Label7: TLabel
-      Left = 258
-      Top = 212
+      Left = 262
+      Top = 172
       Width = 126
       Height = 13
       Alignment = taRightJustify
       Caption = 'Zak'#225'zan'#233' znaky: enter { }'
     end
     object Label8: TLabel
-      Left = 402
-      Top = 16
+      Left = 11
+      Top = 262
       Width = 146
       Height = 13
       Margins.Left = 2
@@ -101,8 +96,8 @@ object F_HVEdit: TF_HVEdit
       ParentFont = False
     end
     object SB_Take_Add: TSpeedButton
-      Left = 566
-      Top = 32
+      Left = 168
+      Top = 280
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -135,8 +130,8 @@ object F_HVEdit: TF_HVEdit
       OnClick = SB_Take_AddClick
     end
     object SB_Take_Remove: TSpeedButton
-      Left = 566
-      Top = 60
+      Left = 168
+      Top = 308
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -169,8 +164,8 @@ object F_HVEdit: TF_HVEdit
       OnClick = SB_Take_RemoveClick
     end
     object SB_Rel_Add: TSpeedButton
-      Left = 566
-      Top = 174
+      Left = 368
+      Top = 280
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -203,8 +198,8 @@ object F_HVEdit: TF_HVEdit
       OnClick = SB_Rel_AddClick
     end
     object SB_Rel_Remove: TSpeedButton
-      Left = 566
-      Top = 202
+      Left = 368
+      Top = 308
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -237,8 +232,8 @@ object F_HVEdit: TF_HVEdit
       OnClick = SB_Rel_RemoveClick
     end
     object Label9: TLabel
-      Left = 402
-      Top = 156
+      Left = 210
+      Top = 262
       Width = 141
       Height = 13
       Margins.Left = 2
@@ -252,6 +247,32 @@ object F_HVEdit: TF_HVEdit
       Font.Name = 'MS Sans Serif'
       Font.Style = []
       ParentFont = False
+    end
+    object Label10: TLabel
+      Left = 397
+      Top = 20
+      Width = 200
+      Height = 13
+      Caption = 'P'#345#237#345'azen'#237' v'#253'znam'#367' funkc'#237', ovl'#225'd'#225'n'#237' funkc'#237':'
+    end
+    object Label5: TLabel
+      Left = 15
+      Top = 172
+      Width = 52
+      Height = 13
+      Caption = 'Pozn'#225'mka:'
+    end
+    object M_Poznamka: TMemo
+      Left = 11
+      Top = 191
+      Width = 377
+      Height = 60
+      Lines.Strings = (
+        'M_Poznamka')
+      MaxLength = 1000
+      ScrollBars = ssVertical
+      TabOrder = 6
+      OnKeyPress = M_PoznamkaKeyPress
     end
     object E_Name: TEdit
       Left = 112
@@ -283,270 +304,6 @@ object F_HVEdit: TF_HVEdit
       Text = 'E_Majitel'
       OnKeyPress = M_PoznamkaKeyPress
     end
-    object M_Poznamka: TMemo
-      Left = 16
-      Top = 231
-      Width = 368
-      Height = 60
-      Lines.Strings = (
-        'M_Poznamka')
-      MaxLength = 1000
-      ScrollBars = ssVertical
-      TabOrder = 7
-      OnKeyPress = M_PoznamkaKeyPress
-    end
-    object GroupBox1: TGroupBox
-      Left = 247
-      Top = 16
-      Width = 137
-      Height = 105
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = ' Funkce '
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 5
-      object CHB_HV1_Svetla: TCheckBox
-        Left = 8
-        Top = 16
-        Width = 81
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F0 - sv'#283'tla'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 0
-      end
-      object CHB_HV1_F1: TCheckBox
-        Left = 8
-        Top = 32
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F1'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 1
-      end
-      object CHB_HV1_F2: TCheckBox
-        Left = 8
-        Top = 48
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F2'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 2
-      end
-      object CHB_HV1_F3: TCheckBox
-        Left = 8
-        Top = 64
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F3'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 3
-      end
-      object CHB_HV1_F4: TCheckBox
-        Left = 8
-        Top = 80
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F4'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 4
-      end
-      object CHB_HV1_F5: TCheckBox
-        Left = 48
-        Top = 32
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F5'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 5
-      end
-      object CHB_HV1_F6: TCheckBox
-        Left = 48
-        Top = 48
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F6'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 6
-      end
-      object CHB_HV1_F8: TCheckBox
-        Left = 48
-        Top = 80
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F8'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 8
-      end
-      object CHB_HV1_F7: TCheckBox
-        Left = 48
-        Top = 64
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F7'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 7
-      end
-      object CHB_HV1_F9: TCheckBox
-        Left = 86
-        Top = 32
-        Width = 33
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F9'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 9
-      end
-      object CHB_HV1_F10: TCheckBox
-        Left = 86
-        Top = 48
-        Width = 43
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F10'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 10
-      end
-      object CHB_HV1_F11: TCheckBox
-        Left = 86
-        Top = 64
-        Width = 43
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F11'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 11
-      end
-      object CHB_HV1_F12: TCheckBox
-        Left = 86
-        Top = 80
-        Width = 43
-        Height = 17
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Caption = 'F12'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 12
-      end
-    end
     object E_Adresa: TEdit
       Left = 112
       Top = 105
@@ -558,33 +315,33 @@ object F_HVEdit: TF_HVEdit
       OnKeyPress = E_AdresaKeyPress
     end
     object RG_Trida: TRadioGroup
-      Left = 247
-      Top = 126
-      Width = 137
-      Height = 80
-      Caption = ' T'#345#237'da '
+      Left = 239
+      Top = 16
+      Width = 149
+      Height = 83
+      Caption = ' Trakce '
       Items.Strings = (
         'parn'#237
         'diesel'
         'motor'
         'elektro')
-      TabOrder = 6
+      TabOrder = 4
     end
     object RG_StA: TRadioGroup
-      Left = 12
-      Top = 139
-      Width = 218
+      Left = 239
+      Top = 105
+      Width = 149
       Height = 58
       Caption = ' Stanovi'#353't'#283' A ve sm'#283'ru '
       Items.Strings = (
         'lich'#233'm'
         'sud'#233'm')
-      TabOrder = 4
+      TabOrder = 5
     end
     object LV_Pom_Load: TListView
-      Left = 402
-      Top = 34
-      Width = 158
+      Left = 11
+      Top = 280
+      Width = 152
       Height = 110
       Columns = <
         item
@@ -596,15 +353,15 @@ object F_HVEdit: TF_HVEdit
       MultiSelect = True
       ReadOnly = True
       RowSelect = True
-      TabOrder = 8
+      TabOrder = 7
       ViewStyle = vsReport
       OnChange = LV_Pom_LoadChange
       OnDblClick = LV_Pom_LoadDblClick
     end
     object LV_Pom_Release: TListView
-      Left = 402
-      Top = 174
-      Width = 158
+      Left = 210
+      Top = 280
+      Width = 152
       Height = 110
       Columns = <
         item
@@ -616,15 +373,44 @@ object F_HVEdit: TF_HVEdit
       ReadOnly = True
       RowSelect = True
       SortType = stData
-      TabOrder = 9
+      TabOrder = 8
       ViewStyle = vsReport
       OnChange = LV_Pom_ReleaseChange
       OnDblClick = LV_Pom_ReleaseDblClick
     end
+    object LV_Funkce: TListView
+      Left = 397
+      Top = 39
+      Width = 236
+      Height = 354
+      Checkboxes = True
+      Columns = <
+        item
+          Caption = 'Funkce'
+          MaxWidth = 50
+          MinWidth = 50
+        end
+        item
+          Caption = 'V'#253'znam'
+          MaxWidth = 150
+          MinWidth = 150
+          Width = 150
+        end>
+      ColumnClick = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ReadOnly = True
+      ParentFont = False
+      TabOrder = 9
+      ViewStyle = vsReport
+    end
   end
   object B_Apply: TButton
-    Left = 534
-    Top = 359
+    Left = 574
+    Top = 463
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -633,8 +419,8 @@ object F_HVEdit: TF_HVEdit
     OnClick = B_ApplyClick
   end
   object B_Cancel: TButton
-    Left = 453
-    Top = 359
+    Left = 493
+    Top = 463
     Width = 75
     Height = 25
     Caption = 'Storno'

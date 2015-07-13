@@ -273,6 +273,7 @@ begin
 
    if (str.Count > 14) then
     begin
+     str2.Clear();
      ExtractStringsEx([';'], [], str[14], str2);
      for i := 0 to _MAX_FUNC do
        if (i < str2.Count) then
@@ -366,7 +367,7 @@ begin
    Result := Result + '}|';
   end;// if pom
 
- Result := Result + '|{';
+ Result := Result + '{';
  for i := 0 to _MAX_FUNC do
   begin
    if (Self.funcVyznam[i] <> '') then
