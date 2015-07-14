@@ -271,6 +271,7 @@ begin
       end;
     end;//if str.Count > 11
 
+   // func-vyznam
    if (str.Count > 14) then
     begin
      str2.Clear();

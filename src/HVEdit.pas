@@ -487,14 +487,17 @@ begin
    LI.Caption := 'F'+IntToStr(i);
 
    Self.CB_funkce[i] := TComboBox.Create(Self);
-   Self.CB_funkce[i].Parent := Self.LV_Funkce;
-//   Self.CB_funkce[i].Font.Size := 8;
-   Self.CB_funkce[i].BevelInner := bvNone;
-   Self.CB_funkce[i].BevelOuter := bvNone;
-   Self.CB_funkce[i].BevelKind  := bkFlat;
-   Self.CB_funkce[i].Items.AddStrings(strs);
-   Self.CB_funkce[i].MaxLength  := 32;
-   Self.CB_funkce[i].OnKeyPress := Self.M_PoznamkaKeyPress;
+
+   with (Self.CB_funkce[i]) do
+    begin
+     Parent := Self.LV_Funkce;
+     BevelInner := bvNone;
+     BevelOuter := bvNone;
+     BevelKind  := bkFlat;
+     Items.AddStrings(strs);
+     MaxLength  := 32;
+     OnKeyPress := Self.M_PoznamkaKeyPress;
+    end;
   end;//for
 
  Self.FOldListviewWindowProc := Self.LV_Funkce.WindowProc;
