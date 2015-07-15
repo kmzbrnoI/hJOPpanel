@@ -74,6 +74,7 @@ type
 
     procedure HVAdd(sender_or:string; HVs:THVDb);
     procedure HVEdit(sender_or:string; HVs:THVDb);
+    procedure ParseVyznamy(vyznamy:string);
   end;
 
 var
@@ -91,6 +92,7 @@ procedure TF_HVEdit.B_ApplyClick(Sender: TObject);
 var HV:THV;
     i, j:Integer;
     pomCV:THVPomCV;
+    newVyznamy:string;
 begin
  if (Self.E_Name.Text = '') then
   begin
@@ -173,6 +175,16 @@ begin
   end else begin
    PanelTCPClient.PanelHVEdit(Self.sender_or, '{'+HV.GetPanelLokString(full)+'}');
   end;
+
+ // kontrola pridani novych vyznamu funkci
+ newVyznamy := '';
+ for i := 0 to _MAX_FUNC do
+  begin
+   if ((Self.CB_funkce[i].Text <> '') and (Self.CB_funkce[i].Items.IndexOf(Self.CB_funkce[i].Text) = -1)) then
+     newVyznamy := newVyznamy + '{' + Self.CB_funkce[i].Text + '};';
+  end;//for i
+ if (newVyznamy <> '') then
+  PanelTCPClient.SendLn('-;F-VYZN-ADD;{'+newVyznamy+'}');
 
  HV.Free();
  Self.Close();
@@ -465,21 +477,8 @@ end;//procedure
 procedure TF_HVEdit.InitFunkce();
 var i:Integer;
     LI:TListItem;
-    strs:TStrings;
 begin
  Self.LV_Funkce.Clear();
- strs := TStringList.Create();
-
- // seznam funkci:
- strs.Add('svÏtla');
- strs.Add('svÏtla zadnÌ');
- strs.Add('d·lkov˝ svÏtlomet');
- strs.Add('posun');
- strs.Add('zvuk');
- strs.Add('houkaËka kr·tk·');
- strs.Add('houkaËka dlouh·');
- strs.Add('pÌöùala kr·tk·');
- strs.Add('pÌöùala dlouh·');
 
  for i := 0 to _MAX_FUNC do
   begin
@@ -494,7 +493,6 @@ begin
      BevelInner := bvNone;
      BevelOuter := bvNone;
      BevelKind  := bkFlat;
-     Items.AddStrings(strs);
      MaxLength  := 32;
      OnKeyPress := Self.M_PoznamkaKeyPress;
     end;
@@ -503,8 +501,6 @@ begin
  Self.FOldListviewWindowProc := Self.LV_Funkce.WindowProc;
  Self.LV_Funkce.WindowProc := LV_FunkceWindowproc;
  Self.RepaintFunkce();
-
- strs.Free();
 end;//procedure
 
 procedure TF_HVEdit.FreeFunkce();
@@ -545,6 +541,24 @@ begin
         Self.RepaintFunkce();
   End;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.ParseVyznamy(vyznamy:string);
+var i:Integer;
+    sl:TStrings;
+begin
+ sl := TStringList.Create();
+ ExtractStringsEx([';'], [], vyznamy, sl);
+
+ for i := 0 to _MAX_FUNC do
+  begin
+   Self.CB_funkce[i].Items.Clear();
+   Self.CB_funkce[i].Items.AddStrings(sl);
+  end;//for i
+
+ sl.Free();
+end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
