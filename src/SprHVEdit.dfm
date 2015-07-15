@@ -2,7 +2,7 @@ object F_SprHVEdit: TF_SprHVEdit
   Left = 0
   Top = 0
   BorderStyle = bsNone
-  ClientHeight = 178
+  ClientHeight = 249
   ClientWidth = 386
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -11,18 +11,20 @@ object F_SprHVEdit: TF_SprHVEdit
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object L_S09: TLabel
     Left = 7
     Top = 105
-    Width = 55
+    Width = 145
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Pozn'#225'mky :'
+    Caption = 'Pozn'#225'mka k hnac'#237'mu vozidlu :'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -45,7 +47,7 @@ object F_SprHVEdit: TF_SprHVEdit
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    ItemHeight = 0
+    ItemHeight = 13
     ParentFont = False
     TabOrder = 0
     OnChange = CB_HV1_HVChange
@@ -74,8 +76,8 @@ object F_SprHVEdit: TF_SprHVEdit
   object M_HV1_Notes: TMemo
     Left = 7
     Top = 122
-    Width = 371
-    Height = 49
+    Width = 219
+    Height = 119
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -85,11 +87,11 @@ object F_SprHVEdit: TF_SprHVEdit
     TabOrder = 2
     OnKeyPress = M_HV1_NotesKeyPress
   end
-  object GroupBox1: TGroupBox
+  object GB_Funkce: TGroupBox
     Left = 239
     Top = 8
     Width = 137
-    Height = 105
+    Height = 233
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -102,239 +104,5 @@ object F_SprHVEdit: TF_SprHVEdit
     Font.Style = []
     ParentFont = False
     TabOrder = 3
-    object CHB_HV1_Svetla: TCheckBox
-      Left = 8
-      Top = 16
-      Width = 74
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F0 - sv'#283'tla'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 0
-    end
-    object CHB_HV1_F1: TCheckBox
-      Left = 8
-      Top = 32
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F1'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 1
-    end
-    object CHB_HV1_F2: TCheckBox
-      Left = 8
-      Top = 48
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F2'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 2
-    end
-    object CHB_HV1_F3: TCheckBox
-      Left = 8
-      Top = 64
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F3'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 3
-    end
-    object CHB_HV1_F4: TCheckBox
-      Left = 8
-      Top = 80
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F4'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 4
-    end
-    object CHB_HV1_F5: TCheckBox
-      Left = 48
-      Top = 32
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F5'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 5
-    end
-    object CHB_HV1_F6: TCheckBox
-      Left = 48
-      Top = 48
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F6'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 6
-    end
-    object CHB_HV1_F8: TCheckBox
-      Left = 48
-      Top = 80
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F8'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 8
-    end
-    object CHB_HV1_F7: TCheckBox
-      Left = 48
-      Top = 64
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F7'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 7
-    end
-    object CHB_HV1_F9: TCheckBox
-      Left = 86
-      Top = 32
-      Width = 33
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F9'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 9
-    end
-    object CHB_HV1_F10: TCheckBox
-      Left = 86
-      Top = 48
-      Width = 43
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F10'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 10
-    end
-    object CHB_HV1_F11: TCheckBox
-      Left = 86
-      Top = 64
-      Width = 43
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F11'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 11
-    end
-    object CHB_HV1_F12: TCheckBox
-      Left = 86
-      Top = 80
-      Width = 43
-      Height = 17
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Caption = 'F12'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 12
-    end
   end
 end

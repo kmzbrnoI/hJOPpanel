@@ -4,7 +4,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Souprava [...]'
-  ClientHeight = 410
+  ClientHeight = 478
   ClientWidth = 409
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,13 +22,13 @@ object F_SoupravaEdit: TF_SoupravaEdit
   object L_S01: TLabel
     Left = 7
     Top = 5
-    Width = 129
+    Width = 132
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = #268#237'slo soupravy (0.999999) :'
+    Caption = #268#237'slo soupravy (0..999999) :'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -55,7 +55,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object Label1: TLabel
     Left = 7
-    Top = 312
+    Top = 385
     Width = 109
     Height = 13
     Margins.Left = 2
@@ -106,7 +106,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object Label4: TLabel
     Left = 278
-    Top = 311
+    Top = 385
     Width = 123
     Height = 13
     Alignment = taRightJustify
@@ -127,7 +127,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object B_Save: TButton
     Left = 6
-    Top = 374
+    Top = 447
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -141,7 +141,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object B_Storno: TButton
     Left = 113
-    Top = 374
+    Top = 447
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -203,7 +203,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Left = 8
     Top = 100
     Width = 393
-    Height = 205
+    Height = 277
     MultiLine = True
     TabOrder = 6
     OnDrawTab = PageControlCloseButtonDrawTab
@@ -289,7 +289,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object M_Poznamka: TMemo
     Left = 8
-    Top = 330
+    Top = 403
     Width = 393
     Height = 39
     MaxLength = 1000

@@ -11,34 +11,27 @@ type
     CB_HV1_HV: TComboBox;
     RG_HV1_dir: TRadioGroup;
     M_HV1_Notes: TMemo;
-    GroupBox1: TGroupBox;
-    CHB_HV1_Svetla: TCheckBox;
-    CHB_HV1_F1: TCheckBox;
-    CHB_HV1_F2: TCheckBox;
-    CHB_HV1_F3: TCheckBox;
-    CHB_HV1_F4: TCheckBox;
-    CHB_HV1_F5: TCheckBox;
-    CHB_HV1_F6: TCheckBox;
-    CHB_HV1_F8: TCheckBox;
-    CHB_HV1_F7: TCheckBox;
-    CHB_HV1_F9: TCheckBox;
-    CHB_HV1_F10: TCheckBox;
-    CHB_HV1_F11: TCheckBox;
-    CHB_HV1_F12: TCheckBox;
+    GB_Funkce: TGroupBox;
     L_S09: TLabel;
     procedure M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
     procedure CB_HV1_HVChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     HVs:THVDb;
     sprHV:THV;
 
     Indexes: TWordAr;
+    CHB_funkce:array [0.._MAX_FUNC] of TCheckBox;
 
     function GetHV(addr:Word):THV;
 
+    procedure CreateCHBFunkce();
+    procedure DestroyCHBFunkce();
+
   public
 
-    constructor FillHV(HVs:THVDb; sprHV:THV);
+    procedure FillHV(HVs:THVDb; sprHV:THV);
     function GetHVString():string;
 
   end;
@@ -66,82 +59,48 @@ end;//procedure
 
 procedure TF_SprHVEdit.CB_HV1_HVChange(Sender: TObject);
 var HV:THV;
+    i:Integer;
 begin
  if (Self.CB_HV1_HV.ItemIndex < 0) then
   begin
    Self.RG_HV1_dir.Enabled     := false;
    Self.M_HV1_Notes.Enabled    := false;
-   Self.CHB_HV1_Svetla.Enabled := false;
-   Self.CHB_HV1_F1.Enabled     := false;
-   Self.CHB_HV1_F2.Enabled     := false;
-   Self.CHB_HV1_F3.Enabled     := false;
-   Self.CHB_HV1_F4.Enabled     := false;
-   Self.CHB_HV1_F5.Enabled     := false;
-   Self.CHB_HV1_F6.Enabled     := false;
-   Self.CHB_HV1_F7.Enabled     := false;
-   Self.CHB_HV1_F8.Enabled     := false;
-   Self.CHB_HV1_F9.Enabled     := false;
-   Self.CHB_HV1_F10.Enabled    := false;
-   Self.CHB_HV1_F11.Enabled    := false;
-   Self.CHB_HV1_F12.Enabled    := false;
+
+   for i := 0 to _MAX_FUNC do
+    begin
+     Self.CHB_funkce[i].Enabled := false;
+     Self.CHB_funkce[i].Checked := false;
+     Self.CHB_funkce[i].Caption := 'F'+IntToStr(i);
+    end;
 
    Self.RG_HV1_dir.ItemIndex   := -1;
    Self.M_HV1_Notes.Text       := '';
-   Self.CHB_HV1_Svetla.Checked := false;
-   Self.CHB_HV1_F1.Checked     := false;
-   Self.CHB_HV1_F2.Checked     := false;
-   Self.CHB_HV1_F3.Checked     := false;
-   Self.CHB_HV1_F4.Checked     := false;
-   Self.CHB_HV1_F5.Checked     := false;
-   Self.CHB_HV1_F6.Checked     := false;
-   Self.CHB_HV1_F7.Checked     := false;
-   Self.CHB_HV1_F8.Checked     := false;
-   Self.CHB_HV1_F9.Checked     := false;
-   Self.CHB_HV1_F10.Checked    := false;
-   Self.CHB_HV1_F11.Checked    := false;
-   Self.CHB_HV1_F12.Checked    := false;
   end else begin
    Self.RG_HV1_dir.Enabled     := true;
    Self.M_HV1_Notes.Enabled    := true;
-   Self.CHB_HV1_Svetla.Enabled := true;
-   Self.CHB_HV1_F1.Enabled     := true;
-   Self.CHB_HV1_F2.Enabled     := true;
-   Self.CHB_HV1_F3.Enabled     := true;
-   Self.CHB_HV1_F4.Enabled     := true;
-   Self.CHB_HV1_F5.Enabled     := true;
-   Self.CHB_HV1_F6.Enabled     := true;
-   Self.CHB_HV1_F7.Enabled     := true;
-   Self.CHB_HV1_F8.Enabled     := true;
-   Self.CHB_HV1_F9.Enabled     := true;
-   Self.CHB_HV1_F10.Enabled    := true;
-   Self.CHB_HV1_F11.Enabled    := true;
-   Self.CHB_HV1_F12.Enabled    := true;
 
    HV := Self.GetHV(Self.Indexes[Self.CB_HV1_HV.ItemIndex]);
    if (HV = nil) then Exit();        // tohleto by se teoreticky nikdy nemelo stat
 
+   for i := 0 to _MAX_FUNC do
+    begin
+     Self.CHB_funkce[i].Enabled := true;
+     Self.CHB_funkce[i].Checked := HV.funkce[i];
+     if (HV.funcVyznam[i] <> '') then
+       Self.CHB_funkce[i].Caption := 'F'+IntToStr(i)+': '+HV.funcVyznam[i]
+     else
+       Self.CHB_funkce[i].Caption := 'F'+IntToStr(i);
+    end;
+
    Self.RG_HV1_dir.ItemIndex   := Integer(HV.StanovisteA);
    Self.M_HV1_Notes.Text       := HV.Poznamka;
-   Self.CHB_HV1_Svetla.Checked := HV.funkce[0];
-   Self.CHB_HV1_F1.Checked     := HV.funkce[1];
-   Self.CHB_HV1_F2.Checked     := HV.funkce[2];
-   Self.CHB_HV1_F3.Checked     := HV.funkce[3];
-   Self.CHB_HV1_F4.Checked     := HV.funkce[4];
-   Self.CHB_HV1_F5.Checked     := HV.funkce[5];
-   Self.CHB_HV1_F6.Checked     := HV.funkce[6];
-   Self.CHB_HV1_F7.Checked     := HV.funkce[7];
-   Self.CHB_HV1_F8.Checked     := HV.funkce[8];
-   Self.CHB_HV1_F9.Checked     := HV.funkce[9];
-   Self.CHB_HV1_F10.Checked    := HV.funkce[10];
-   Self.CHB_HV1_F11.Checked    := HV.funkce[11];
-   Self.CHB_HV1_F12.Checked    := HV.funkce[12];
   end;//else
 
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-constructor TF_SprHVEdit.FillHV(HVs:THVDb; sprHV:THV);
+procedure TF_SprHVEdit.FillHV(HVs:THVDb; sprHV:THV);
 begin
  Self.HVs   := HVs;
  Self.sprHV := sprHV;
@@ -152,31 +111,34 @@ begin
    HVs.FillHVs(Self.CB_HV1_HV, Self.Indexes, sprHV.Adresa, sprHV);
 
  Self.CB_HV1_HVChange(Self.CB_HV1_HV);
-end;//contructor
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_SprHVEdit.FormCreate(Sender: TObject);
+begin
+ Self.CreateCHBFunkce();
+end;
+
+procedure TF_SprHVEdit.FormDestroy(Sender: TObject);
+begin
+ Self.DestroyCHBFunkce();
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 function TF_SprHVEdit.GetHVString():string;
 var HV:THV;
+    i:Integer;
 begin
  HV := THV.Create();
 
  HV.StanovisteA := THVStanoviste(Self.RG_HV1_dir.ItemIndex);
  HV.Adresa      := Self.Indexes[Self.CB_HV1_HV.ItemIndex];
  HV.Poznamka    := Self.M_HV1_Notes.Text;
- HV.funkce[0]   := Self.CHB_HV1_Svetla.Checked;
- HV.funkce[1]   := Self.CHB_HV1_F1.Checked;
- HV.funkce[2]   := Self.CHB_HV1_F2.Checked;
- HV.funkce[3]   := Self.CHB_HV1_F3.Checked;
- HV.funkce[4]   := Self.CHB_HV1_F4.Checked;
- HV.funkce[5]   := Self.CHB_HV1_F5.Checked;
- HV.funkce[6]   := Self.CHB_HV1_F6.Checked;
- HV.funkce[7]   := Self.CHB_HV1_F7.Checked;
- HV.funkce[8]   := Self.CHB_HV1_F8.Checked;
- HV.funkce[9]   := Self.CHB_HV1_F9.Checked;
- HV.funkce[10]  := Self.CHB_HV1_F10.Checked;
- HV.funkce[11]  := Self.CHB_HV1_F11.Checked;
- HV.funkce[12]  := Self.CHB_HV1_F12.Checked;
+
+ for i := 0 to _MAX_FUNC do
+   HV.funkce[i] := Self.CHB_funkce[i].Checked;
 
  Result := '[{' + HV.GetPanelLokString() + '}]';
 end;//function
@@ -199,6 +161,39 @@ begin
 
  Exit(nil);
 end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_SprHVEdit.CreateCHBFunkce();
+var i:Integer;
+    atop:Integer;
+begin
+ atop := 14;
+
+ for i := 0 to _MAX_FUNC do
+  begin
+   Self.CHB_funkce[i] := TCheckBox.Create(Self);
+
+   with (Self.CHB_funkce[i]) do
+    begin
+     Parent   := Self.GB_Funkce;
+     Top      := atop;
+     Left     := 8;
+     Caption  := 'F'+IntToStr(i);
+     AutoSize := false;
+     Width    := 120;
+
+     atop := atop + 16;
+    end;//with
+  end;//for i
+end;//procedure
+
+procedure TF_SprHVEdit.DestroyCHBFunkce();
+var i:Integer;
+begin
+ for i := 0 to _MAX_FUNC do
+   Self.CHB_funkce[i].Free();
+end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
