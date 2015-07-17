@@ -230,7 +230,7 @@ begin
 
  GlobConfig.LoadFile(config_fn);
 
- Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' - PANEL KLIENT - v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
+ Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' - hJOPpanel - v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
 
  F_splash.AddStav('Vytváøím plátno...');
 
@@ -393,7 +393,7 @@ end;
 
 procedure TF_Main.ShowAboutDialog();
 begin
- Application.MessageBox(PChar('Panel klient v'+NactiVerzi(Application.ExeName)+#13#10+
+ Application.MessageBox(PChar('hJOPpanel v'+NactiVerzi(Application.ExeName)+#13#10+
   'build '+GetLastBuildDate()+' '+GetLastBuildTime()+#13#10+
   'Vytvoøil Jan Horáèek (c) 2014-2015 pro KMŽ Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;//procedure

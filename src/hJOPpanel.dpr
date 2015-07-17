@@ -1,4 +1,4 @@
-program PanelClient;
+program hJOPpanel;
 
 uses
   Forms,
@@ -49,7 +49,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'Panel klient';
+  Application.Title := 'hJOPpanel';
   Application.CreateForm(TF_Main, F_Main);
   Application.CreateForm(TF_splash, F_splash);
   Application.CreateForm(TF_Debug, F_Debug);
