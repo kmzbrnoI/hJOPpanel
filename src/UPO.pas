@@ -48,7 +48,7 @@ type
 
 implementation
 
-uses TCPClientPanel, Main, RPConst;
+uses TCPClientPanel, fMain, RPConst;
 
 ////////////////////////////////////////////////////////////////////////////////
 

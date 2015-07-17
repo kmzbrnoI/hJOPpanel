@@ -19,7 +19,7 @@ var MyMsg:Cardinal;
 
 implementation
 
-uses Main;
+uses fMain;
 
 function NactiVerzi(const FileName: string): string;//cteni verze z nastaveni
 var

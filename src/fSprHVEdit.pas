@@ -1,4 +1,4 @@
-unit SprHVEdit;
+unit fSprHVEdit;
 
 interface
 

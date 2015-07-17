@@ -37,7 +37,7 @@ object F_HV_Pom: TF_HV_Pom
     MaxValue = 1023
     MinValue = 1
     TabOrder = 0
-    Value = 0
+    Value = 1
     OnKeyPress = SE_ValueKeyPress
   end
   object SE_Value: TSpinEdit

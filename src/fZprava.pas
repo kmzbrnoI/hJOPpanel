@@ -1,4 +1,4 @@
-unit Zprava;
+unit fZprava;
 
 interface
 
@@ -45,7 +45,7 @@ implementation
 
 {$R *.dfm}
 
-uses TCPClientPanel, Zpravy, RPConst;
+uses TCPClientPanel, fZpravy, RPConst;
 
 ////////////////////////////////////////////////////////////////////////////////
 

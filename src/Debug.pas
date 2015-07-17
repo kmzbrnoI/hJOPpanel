@@ -37,7 +37,7 @@ var
 
 implementation
 
-uses Sounds, Main, PotvrSekv, BottomErrors, TCPClientPanel;
+uses Sounds, fMain, fPotvrSekv, BottomErrors, TCPClientPanel;
 
 {$R *.dfm}
 

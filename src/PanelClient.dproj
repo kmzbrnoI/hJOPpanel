@@ -47,69 +47,69 @@
 			<DelphiCompile Include="PanelClient.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="Main.pas">
+			<DCCReference Include="fMain.pas">
 				<Form>F_Main</Form>
 			</DCCReference>
 			<DCCReference Include="GlobalConfig.pas"/>
 			<DCCReference Include="Panel.pas"/>
-			<DCCReference Include="PotvrSekv.pas"/>
+			<DCCReference Include="fPotvrSekv.pas"/>
 			<DCCReference Include="RPConst.pas"/>
 			<DCCReference Include="BottomErrors.pas"/>
 			<DCCReference Include="Sounds.pas"/>
 			<DCCReference Include="SoundsThread.pas"/>
 			<DCCReference Include="TCPClientPanel.pas"/>
 			<DCCReference Include="ListeningThread.pas"/>
-			<DCCReference Include="StitVyl.pas"/>
+			<DCCReference Include="fStitVyl.pas"/>
 			<DCCReference Include="MenuPanel.pas"/>
 			<DCCReference Include="Symbols.pas"/>
 			<DCCReference Include="Debug.pas">
 				<Form>F_Debug</Form>
 			</DCCReference>
 			<DCCReference Include="PGraphics.pas"/>
-			<DCCReference Include="settings.pas">
+			<DCCReference Include="fSettings.pas">
 				<Form>F_Settings</Form>
 			</DCCReference>
-			<DCCReference Include="Splash.pas">
+			<DCCReference Include="fSplash.pas">
 				<Form>F_splash</Form>
 			</DCCReference>
-			<DCCReference Include="SprEdit.pas">
+			<DCCReference Include="fSprEdit.pas">
 				<Form>F_SoupravaEdit</Form>
 			</DCCReference>
-			<DCCReference Include="SprHelp.pas">
+			<DCCReference Include="fSprHelp.pas">
 				<Form>F_SprHelp</Form>
 			</DCCReference>
-			<DCCReference Include="Zpravy.pas">
+			<DCCReference Include="fZpravy.pas">
 				<Form>F_Messages</Form>
 			</DCCReference>
 			<DCCReference Include="ORList.pas"/>
-			<DCCReference Include="Zprava.pas">
+			<DCCReference Include="fZprava.pas">
 				<Form>F_Message</Form>
 			</DCCReference>
 			<DCCReference Include="HVDb.pas"/>
-			<DCCReference Include="HVMoveSt.pas">
+			<DCCReference Include="fHVMoveSt.pas">
 				<Form>F_HV_Move</Form>
 			</DCCReference>
-			<DCCReference Include="SprHVEdit.pas">
+			<DCCReference Include="fSprHVEdit.pas">
 				<Form>F_SprHVEdit</Form>
 			</DCCReference>
 			<DCCReference Include="CloseTabSheet.pas"/>
 			<DCCReference Include="fAuth.pas">
 				<Form>F_Auth</Form>
 			</DCCReference>
-			<DCCReference Include="HVEdit.pas">
+			<DCCReference Include="fHVEdit.pas">
 				<Form>F_HVEdit</Form>
 			</DCCReference>
-			<DCCReference Include="HVDelete.pas">
+			<DCCReference Include="fHVDelete.pas">
 				<Form>F_HVDelete</Form>
 			</DCCReference>
 			<DCCReference Include="Zasobnik.pas"/>
 			<DCCReference Include="UPO.pas"/>
 			<DCCReference Include="ModelovyCas.pas"/>
-			<DCCReference Include="Nastaveni_Casu.pas">
+			<DCCReference Include="fNastaveni_Casu.pas">
 				<Form>F_ModCasSet</Form>
 			</DCCReference>
 			<DCCReference Include="DCC_Icons.pas"/>
-			<DCCReference Include="Soupravy.pas">
+			<DCCReference Include="fSoupravy.pas">
 				<Form>F_SprList</Form>
 			</DCCReference>
 			<DCCReference Include="LokoRuc.pas"/>
@@ -118,7 +118,7 @@
 			<DCCReference Include="fRegReq.pas">
 				<Form>F_RegReq</Form>
 			</DCCReference>
-			<DCCReference Include="HVPomEdit.pas">
+			<DCCReference Include="fHVPomEdit.pas">
 				<Form>F_HV_Pom</Form>
 			</DCCReference>
 			<DCCReference Include="Hash.pas"/>
@@ -157,8 +157,8 @@
 						<VersionInfo Name="AutoIncBuild">True</VersionInfo>
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">2</VersionInfo>
-						<VersionInfo Name="Release">8</VersionInfo>
-						<VersionInfo Name="Build">3</VersionInfo>
+						<VersionInfo Name="Release">9</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -170,7 +170,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Jan Horacek</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">JOP klient pro Ridici program</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">1.2.8.3</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.2.9.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">PanelClient.exe</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Jan Horacek</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Jan Horacek</VersionInfoKeys>

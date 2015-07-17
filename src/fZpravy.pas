@@ -1,10 +1,10 @@
-unit Zpravy;
+unit fZpravy;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, RPConst, StdCtrls, Zprava, CloseTabSheet, Themes,
+  Dialogs, ComCtrls, RPConst, StdCtrls, fZprava, CloseTabSheet, Themes,
   Generics.Collections;
 
 const

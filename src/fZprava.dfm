@@ -16,6 +16,8 @@ object F_Message: TF_Message
   Font.Style = []
   OldCreateOrder = False
   OnResize = FormResize
+  ExplicitWidth = 320
+  ExplicitHeight = 240
   PixelsPerInch = 96
   TextHeight = 13
   object M_Send: TMemo

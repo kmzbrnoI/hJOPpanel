@@ -1,10 +1,10 @@
-unit SprEdit;
+unit fSprEdit;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, SprHVEdit, Buttons,
+  Dialogs, StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fSprHVEdit, Buttons,
   CloseTabSheet, Themes;
 
 const
@@ -78,7 +78,7 @@ var
 
 implementation
 
-uses SprHelp, Main, TCPClientPanel;
+uses fSprHelp, fMain, TCPClientPanel;
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla
 

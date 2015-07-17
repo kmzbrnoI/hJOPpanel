@@ -1,4 +1,4 @@
-unit HVEdit;
+unit fHVEdit;
 
 interface
 
@@ -82,7 +82,7 @@ var
 
 implementation
 
-uses HVPomEdit, commctrl;
+uses fHVPomEdit, commctrl;
 
 {$R *.dfm}
 

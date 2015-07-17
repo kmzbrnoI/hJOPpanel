@@ -1,4 +1,4 @@
-unit settings;
+unit fSettings;
 
 interface
 
@@ -103,7 +103,7 @@ var
 
 implementation
 
-uses GlobalConfig, Symbols, Main, Resuscitation;
+uses GlobalConfig, Symbols, fMain, Resuscitation;
 
 ////////////////////////////////////////////////////////////////////////////////
 

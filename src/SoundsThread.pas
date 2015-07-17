@@ -27,7 +27,7 @@ type
 
 implementation
 
-uses Main;
+uses fMain;
 
 procedure TSndThread.Execute;
  begin

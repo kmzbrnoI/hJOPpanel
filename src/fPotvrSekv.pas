@@ -1,4 +1,4 @@
-unit PotvrSekv;
+unit fPotvrSekv;
 
 interface
 
@@ -82,7 +82,7 @@ var
 
 implementation
 
-uses Main, Verze, BottomErrors, Sounds, RPConst;
+uses fMain, Verze, BottomErrors, Sounds, RPConst;
 
 {$R *.dfm}
 ////////////////////////////////////////////////////////////////////////////////

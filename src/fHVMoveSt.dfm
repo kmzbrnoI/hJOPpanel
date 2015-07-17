@@ -36,7 +36,7 @@ object F_HV_Move: TF_HV_Move
     Width = 225
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 0
   end
   object CB_Stanice: TComboBox
@@ -45,7 +45,7 @@ object F_HV_Move: TF_HV_Move
     Width = 225
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 1
   end
   object B_Storno: TButton

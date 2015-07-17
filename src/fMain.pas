@@ -1,4 +1,4 @@
-unit Main;
+unit fMain;
 
 interface
 
@@ -88,7 +88,7 @@ var
 implementation
 
 uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds,
-  settings, Splash, ModelovyCas, DCC_Icons, Soupravy, RPConst;
+  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, RPConst;
 
 {$R *.dfm}
 

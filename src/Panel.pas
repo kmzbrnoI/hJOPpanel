@@ -4,7 +4,7 @@ interface
 
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
-     PotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
+     fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash;
 
 const
@@ -858,9 +858,9 @@ end;
 
 implementation
 
-uses StitVyl, TCPClientPanel, Symbols, Main, BottomErrors, GlobalConfig, Zpravy,
-     SprEdit, Settings, HVMoveSt, fAuth, HVEdit, HVDelete, ModelovyCas,
-     Nastaveni_casu, LokoRuc, Sounds, fRegReq;
+uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
+     fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
+     fNastaveni_casu, LokoRuc, Sounds, fRegReq;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin

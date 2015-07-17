@@ -76,7 +76,7 @@ type
 
 implementation
 
-uses GlobalConfig, Main, TCPClientPanel;
+uses GlobalConfig, fMain, TCPClientPanel;
 
 ////////////////////////////////////////////////////////////////////////////////
 

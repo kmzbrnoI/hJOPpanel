@@ -1,4 +1,4 @@
-unit Splash;
+unit fSplash;
 
 interface
 
@@ -31,7 +31,7 @@ implementation
 
 {$R *.dfm}
 
-uses Main, Verze, RPConst;
+uses fMain, Verze, RPConst;
 
 procedure TF_splash.FormCreate(Sender: TObject);
  begin

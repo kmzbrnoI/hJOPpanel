@@ -3,7 +3,7 @@ unit TCPClientPanel;
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
-     Classes, StrUtils, RPConst, Graphics, Windows, PotvrSekv, Forms, Controls,
+     Classes, StrUtils, RPConst, Graphics, Windows, fPotvrSekv, Forms, Controls,
      Generics.Collections;
 
 const
@@ -286,9 +286,9 @@ implementation
 // barva se prenasi jako 3 text, ktery obsahuje 3 sestnactkova cisla = napr. FFAAFF
 //  poradi barev: RED, GREEN, BLUE
 
-uses Panel, Main, StitVyl, BottomErrors, Sounds, ORList, Zpravy, Debug, SprEdit,
-      ModelovyCas, Nastaveni_casu, DCC_Icons, Soupravy, LokoRuc,
-      Resuscitation, GlobalCOnfig, HVDb, fRegReq, HVEdit;
+uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
+      ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
+      Resuscitation, GlobalCOnfig, HVDb, fRegReq, fHVEdit;
 
 ////////////////////////////////////////////////////////////////////////////////
 
