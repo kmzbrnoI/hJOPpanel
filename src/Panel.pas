@@ -1936,11 +1936,7 @@ begin
   begin
    if (Self.myORs[index].dk_click_server) then
     begin
-     case (Button) of
-      TPanelButton.left   : PanelTCPClient.SendLn(Self.myORs[index].id+';DK-CLICK;L');
-      TPanelButton.middle : PanelTCPClient.SendLn(Self.myORs[index].id+';DK-CLICK;M');
-      TPanelButton.right  : PanelTCPClient.SendLn(Self.myORs[index].id+';DK-CLICK;R');
-     end;//case
+     PanelTCPClient.SendLn(Self.myORs[index].id+';DK-CLICK;'+IntToStr(Integer(Button)));
     end else
      Self.ShowDKMenu(index);
    Exit();
