@@ -127,7 +127,7 @@ begin
  if (GlobConfig.data.auth.autoauth) then
   begin
    GlobConfig.data.auth.username           := Self.E_username.Text;
-   GlobConfig.data.auth.password           := GenerateHash(Self.E_Password.Text);
+   GlobConfig.data.auth.password           := GenerateHash(AnsiString(Self.E_Password.Text));
   end else begin
    GlobConfig.data.auth.username           := '';
    GlobConfig.data.auth.password           := '';

@@ -2647,7 +2647,7 @@ begin
   end else begin
    F_Auth.OpenForm('Vyžadována autorizace');
    username := F_Auth.E_username.Text;
-   password := GenerateHash(F_Auth.E_Password.Text);
+   password := GenerateHash(AnsiString(F_Auth.E_Password.Text));
   end;
 
  for i := 0 to Self.myORs.Count-1 do
