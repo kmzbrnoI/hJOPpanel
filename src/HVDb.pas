@@ -3,15 +3,15 @@ unit HVDb;
 interface
 
 uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,
-     Generics.Collections;
+     Generics.Collections, IBUtils;
 
 const
   _MAX_HV = 128;
-  _MAX_FUNC = 12;
+  _MAX_FUNC = 28;
 
 type
   THVClass = (parni = 0, diesel = 1, motor = 2, elektro = 3);
-  TFunkce = array[0.._MAX_FUNC] of boolean;
+  TFunkce = array [0.._MAX_FUNC] of boolean;
   THVStanoviste = (lichy = 0, sudy = 1);              // v jakem smeru se nachazi stanoviste A
 
   // mod posilani dat hnaciho vozidla klientovi
@@ -45,7 +45,7 @@ type
      POMtake : TList<THVPomCV>;                          // seznam POM pri prevzeti do automatu
      POMrelease : TList<THVPomCV>;                       // seznam POM pri uvolneni to rucniho rizeni
 
-     funcVyznam:array[0.._MAX_FUNC] of string;        // seznam popisu funkci hnaciho vozidla
+     funcVyznam:array [0.._MAX_FUNC] of string;                         // seznam popisu funkci hnaciho vozidla
 
      procedure ParseFromToken(data:string);
      procedure ParseData(data:string);

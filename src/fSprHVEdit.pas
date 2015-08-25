@@ -4,15 +4,17 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst;
+  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls, IBUtils;
 
 type
   TF_SprHVEdit = class(TForm)
     CB_HV1_HV: TComboBox;
     RG_HV1_dir: TRadioGroup;
     M_HV1_Notes: TMemo;
-    GB_Funkce: TGroupBox;
     L_S09: TLabel;
+    PC_Funkce: TPageControl;
+    TS_F0_F14: TTabSheet;
+    TS_F15_F28: TTabSheet;
     procedure M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
     procedure CB_HV1_HVChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -84,6 +86,7 @@ begin
 
    for i := 0 to _MAX_FUNC do
     begin
+     Self.CHB_funkce[i].Visible := true;
      Self.CHB_funkce[i].Enabled := true;
      Self.CHB_funkce[i].Checked := HV.funkce[i];
      if (HV.funcVyznam[i] <> '') then
@@ -111,6 +114,7 @@ begin
    HVs.FillHVs(Self.CB_HV1_HV, Self.Indexes, sprHV.Adresa, sprHV);
 
  Self.CB_HV1_HVChange(Self.CB_HV1_HV);
+ Self.PC_Funkce.ActivePageIndex := 0;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +172,7 @@ procedure TF_SprHVEdit.CreateCHBFunkce();
 var i:Integer;
     atop:Integer;
 begin
- atop := 14;
+ atop := 0;
 
  for i := 0 to _MAX_FUNC do
   begin
@@ -176,14 +180,19 @@ begin
 
    with (Self.CHB_funkce[i]) do
     begin
-     Parent   := Self.GB_Funkce;
+     if (i < 15) then
+       Parent := Self.TS_F0_F14
+     else
+       Parent := Self.TS_F15_F28;
+
      Top      := atop;
-     Left     := 8;
+     Left     := 2;
      Caption  := 'F'+IntToStr(i);
      AutoSize := false;
-     Width    := 120;
+     Width    := 130;
 
      atop := atop + 16;
+     if (i = 14) then aTop := 16;
     end;//with
   end;//for i
 end;//procedure

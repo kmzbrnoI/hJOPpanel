@@ -2,7 +2,7 @@ object F_SprHVEdit: TF_SprHVEdit
   Left = 0
   Top = 0
   BorderStyle = bsNone
-  ClientHeight = 249
+  ClientHeight = 287
   ClientWidth = 386
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -47,7 +47,7 @@ object F_SprHVEdit: TF_SprHVEdit
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    ItemHeight = 0
+    ItemHeight = 13
     ParentFont = False
     TabOrder = 0
     OnChange = CB_HV1_HVChange
@@ -77,7 +77,7 @@ object F_SprHVEdit: TF_SprHVEdit
     Left = 7
     Top = 122
     Width = 219
-    Height = 119
+    Height = 156
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -87,22 +87,23 @@ object F_SprHVEdit: TF_SprHVEdit
     TabOrder = 2
     OnKeyPress = M_HV1_NotesKeyPress
   end
-  object GB_Funkce: TGroupBox
-    Left = 239
+  object PC_Funkce: TPageControl
+    Left = 233
     Top = 8
-    Width = 137
-    Height = 233
-    Margins.Left = 2
-    Margins.Top = 2
-    Margins.Right = 2
-    Margins.Bottom = 2
-    Caption = ' Funkce '
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'MS Sans Serif'
-    Font.Style = []
-    ParentFont = False
+    Width = 145
+    Height = 270
+    ActivePage = TS_F15_F28
     TabOrder = 3
+    object TS_F0_F14: TTabSheet
+      Caption = 'F0-F14'
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+    end
+    object TS_F15_F28: TTabSheet
+      Caption = 'F15-F28'
+      ImageIndex = 1
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+    end
   end
 end
