@@ -330,7 +330,15 @@ end;//dtor
 
 function TPanelTCPClient.Connect(host:string; port:Word):Integer;
 begin
- if (Self.tcpClient.Connected) then Exit(1);
+ try
+   if (Self.tcpClient.Connected) then Exit(1);
+ except
+   try
+     Self.tcpClient.Disconnect(False);
+   except
+   end;
+   if (Self.tcpClient.IOHandler <> nil) then Self.tcpClient.IOHandler.InputBuffer.Clear;
+ end;
 
  Self.tcpClient.Host := host;
  Self.tcpClient.Port := port;
