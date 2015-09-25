@@ -93,7 +93,7 @@ type
     procedure B_Reg_ProchClick(Sender: TObject);
     procedure E_PasswordChange(Sender: TObject);
   private
-    { Private declarations }
+    passwdChanged: boolean;
   public
     procedure OpenForm();
   end;
@@ -124,14 +124,17 @@ begin
  GlobConfig.data.server.autoconnect        := Self.CHB_Autoconnect.Checked;
 
  GlobConfig.data.auth.autoauth             := Self.CHB_RememberAuth.Checked;
- if (GlobConfig.data.auth.autoauth) then
+ if (Self.passwdChanged) then
   begin
-   GlobConfig.data.auth.username           := Self.E_username.Text;
-   GlobConfig.data.auth.password           := GenerateHash(AnsiString(Self.E_Password.Text));
-  end else begin
-   GlobConfig.data.auth.username           := '';
-   GlobConfig.data.auth.password           := '';
-  end;
+   if (GlobConfig.data.auth.autoauth) then
+    begin
+     GlobConfig.data.auth.username           := Self.E_username.Text;
+     GlobConfig.data.auth.password           := GenerateHash(AnsiString(Self.E_Password.Text));
+    end else begin
+     GlobConfig.data.auth.username           := '';
+     GlobConfig.data.auth.password           := '';
+    end;
+  end;//if Self.passwdChanged
  GlobConfig.data.auth.forgot               := Self.CHB_Forgot.Checked;
 
  GlobConfig.data.sounds.sndTratSouhlas     := Self.E_Snd_Trat.Text;
@@ -273,6 +276,7 @@ end;
 
 procedure TF_Settings.E_PasswordChange(Sender: TObject);
 begin
+ Self.passwdChanged := true;
  if (Self.E_Password.Text = '') then Self.CHB_ShowPassword.Enabled := true; 
 end;
 
@@ -363,10 +367,9 @@ begin
   Self.LB_Symbols.ItemIndex := 0;
  end;
 
+ Self.passwdChanged := false;
  Self.Show();
 end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 
