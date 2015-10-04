@@ -49,7 +49,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_Rights
+    ActivePage = TS_Timer
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -251,13 +251,6 @@ object F_Settings: TF_Settings
         Height = 13
         Caption = 'Sada symbol'#367':'
       end
-      object Label10: TLabel
-        Left = 176
-        Top = 152
-        Width = 261
-        Height = 13
-        Caption = 'Zm'#283'ny v sad'#283' symbol'#367' se projev'#237' po restartu aplikace.'
-      end
       object LB_Symbols: TListBox
         Left = 248
         Top = 35
@@ -268,6 +261,7 @@ object F_Settings: TF_Settings
           'standartn'#237
           'zv'#283't'#353'en'#233)
         TabOrder = 0
+        OnDblClick = LB_SymbolsDblClick
       end
     end
     object TS_Vysvetlivky: TTabSheet
@@ -395,6 +389,7 @@ object F_Settings: TF_Settings
           '750'
           '1000')
         TabOrder = 0
+        OnDblClick = LB_TimerDblClick
       end
     end
     object TS_Rights: TTabSheet

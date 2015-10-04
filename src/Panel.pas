@@ -814,6 +814,8 @@ end;
    procedure DisableElements(orindex:Integer = -1);
    procedure Escape();
 
+   procedure UpdateSymbolSet();
+
    property PozadiColor:TColor read Colors.Pozadi write Colors.Pozadi;
    property KurzorRamecek:TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
    property KurzorObsah:TColor read CursorDraw.KurzorObsah write CursorDraw.KurzorObsah;
@@ -3592,6 +3594,17 @@ begin
    Self.ORInfoMsg(parsed[3]);
   end;
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.UpdateSymbolSet();
+begin
+ Self.CursorDraw.Pozadi        := TBitmap.Create();
+ Self.CursorDraw.Pozadi.Width  := SymbolSet._Symbol_Sirka+2;    // +2 kvuli okrajum kurzoru
+ Self.CursorDraw.Pozadi.Height := SymbolSet._Symbol_Vyska+2;
+ (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth*SymbolSet._Symbol_Sirka, Self.Graphics.PanelHeight*SymbolSet._Symbol_Vyska);
+ Self.Show();
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

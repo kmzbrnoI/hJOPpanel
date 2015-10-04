@@ -32,7 +32,6 @@ type
     B_Proch5: TButton;
     TS_Symbols: TTabSheet;
     Label9: TLabel;
-    Label10: TLabel;
     LB_Symbols: TListBox;
     TS_Vysvetlivky: TTabSheet;
     CHB_Vysv_Rel: TCheckBox;
@@ -100,6 +99,8 @@ type
     procedure B_Reg_ProchClick(Sender: TObject);
     procedure E_PasswordChange(Sender: TObject);
     procedure TB_RemeberChange(Sender: TObject);
+    procedure LB_SymbolsDblClick(Sender: TObject);
+    procedure LB_TimerDblClick(Sender: TObject);
   private
     passwdChanged: boolean;
   public
@@ -118,7 +119,11 @@ uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth;
 {$R *.dfm}
 
 procedure TF_Settings.B_ApplyClick(Sender: TObject);
+var ss, ss2:TSymbolSet;
+    oldss:TSymbolSetType;
 begin
+ Screen.Cursor := crHourGlass;
+
  GlobConfig.data.panel_fn                  := Self.E_Panel.Text;
  GlobConfig.data.vysv_fn                   := Self.E_Vysv.Text;
  GlobConfig.data.panel_mouse               := Self.RG_Mouse.ItemIndex;
@@ -155,6 +160,7 @@ begin
  if (Self.LB_Timer.ItemIndex > -1) then
    F_Main.T_Main.Interval       := StrToInt(Self.LB_Timer.Items.Strings[Self.LB_Timer.ItemIndex]);
 
+ oldss := GlobConfig.data.symbolSet;
  case (Self.LB_Symbols.ItemIndex) of
   1: GlobConfig.data.symbolSet := TSymbolSetType.bigger;
  else
@@ -174,6 +180,24 @@ begin
    Resusct.server_port := GlobConfig.data.server.port;
   end;
 
+ if (oldss <> GlobConfig.data.symbolSet) then
+  begin
+   try
+     ss := TSymbolSet.Create(GlobConfig.data.symbolSet);
+     ss2 := SymbolSet;
+     SymbolSet := ss;
+     Relief.UpdateSymbolSet();
+     ss2.Free();
+   except
+     on E:Exception do
+      begin
+       GlobConfig.data.symbolSet := oldss;
+       Application.MessageBox(PChar('Zmìna velikosti symbolù se nezdaøila'+#13#10+E.ToString), 'Chyba', MB_OK OR MB_ICONWARNING);
+      end;
+   end;
+  end;
+
+ Screen.Cursor := crDefault;
  Self.Close();
 end;
 
@@ -352,6 +376,16 @@ begin
      Self.CB_ORRights.ItemHeight := Integer(rights);
     end;// else SelCount > 1
   end;//else Selected = nil
+end;
+
+procedure TF_Settings.LB_SymbolsDblClick(Sender: TObject);
+begin
+ if (Self.LB_Symbols.ItemIndex > -1) then Self.B_ApplyClick(B_Apply); 
+end;
+
+procedure TF_Settings.LB_TimerDblClick(Sender: TObject);
+begin
+ if (Self.LB_Timer.ItemIndex > -1) then Self.B_ApplyClick(B_Apply);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
