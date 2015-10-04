@@ -247,9 +247,11 @@ begin
 end;
 
 procedure TF_Settings.CB_ORRightsChange(Sender: TObject);
+var i:Integer;
 begin
- if (Self.LB_AutoAuthOR.ItemIndex < 0) then Exit();
- GlobConfig.data.auth.ORs.AddOrSetValue(Self.LB_AutoAuthOR.Items.Strings[Self.LB_AutoAuthOR.ItemIndex], TORControlRights(Self.CB_ORRights.ItemIndex));
+ for i := 0 to Self.LB_AutoAuthOR.Items.Count-1 do
+   if (Self.LB_AutoAuthOR.Selected[i]) then
+     GlobConfig.data.auth.ORs.AddOrSetValue(Self.LB_AutoAuthOR.Items[i], TORControlRights(Self.CB_ORRights.ItemIndex));
 end;
 
 procedure TF_Settings.CHB_RememberAuthClick(Sender: TObject);
@@ -299,19 +301,45 @@ begin
 end;
 
 procedure TF_Settings.LB_AutoAuthORClick(Sender: TObject);
-var rights:TORControlRights;
+var rights, rights2:TORControlRights;
+    i:Integer;
 begin
- if (Self.LB_AutoAuthOR.ItemIndex > -1) then
+ if (Self.LB_AutoAuthOR.SelCount = 0) then
   begin
-   Self.CB_ORRights.Enabled := true;
-   if (GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items.Strings[Self.LB_AutoAuthOR.ItemIndex], rights)) then
-     Self.CB_ORRights.ItemIndex := Integer(rights)
-   else
-     Self.CB_ORRights.ItemIndex := 0;
+   // 0 vybranych polozek
+   Self.CB_ORRights.ItemIndex := -1;
+   Self.CB_ORRights.Enabled   := false;
   end else begin
-   Self.CB_ORRights.Enabled := false;
-  end;
-end;//procedure
+   Self.CB_ORRights.Enabled := true;
+   if (Self.LB_AutoAuthOR.SelCount = 1) then
+    begin
+     // 1 vybrana polozka
+     if (GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items[Self.LB_AutoAuthOR.ItemIndex], rights)) then
+      Self.CB_ORRights.ItemIndex := Integer(rights)
+     else
+      Self.CB_ORRights.ItemIndex := -1;
+    end else begin
+     // vic vybranych polozek -> pokud jsou opravenni stejna, vyplnime, jinak -1
+
+     for i := 0 to Self.LB_AutoAuthOR.Items.Count-1 do
+       if (Self.LB_AutoAuthOR.Selected[i]) then
+         GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items[i], rights);
+
+     for i := 0 to Self.LB_AutoAuthOR.Items.Count-1 do
+       if (Self.LB_AutoAuthOR.Selected[i]) then
+        begin
+         GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items[i], rights2);
+         if (rights2 <> rights) then
+          begin
+           Self.CB_ORRights.ItemIndex := -1;
+           Exit();
+          end;
+        end;
+
+     Self.CB_ORRights.ItemHeight := Integer(rights);
+    end;// else SelCount > 1
+  end;//else Selected = nil
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

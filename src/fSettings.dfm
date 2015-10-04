@@ -488,6 +488,7 @@ object F_Settings: TF_Settings
           Width = 217
           Height = 122
           ItemHeight = 13
+          MultiSelect = True
           TabOrder = 0
           OnClick = LB_AutoAuthORClick
         end
