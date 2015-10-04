@@ -62,10 +62,6 @@ type
     E_username: TEdit;
     Label15: TLabel;
     E_Password: TEdit;
-    GroupBox1: TGroupBox;
-    Label16: TLabel;
-    LB_AutoAuthOR: TListBox;
-    CB_ORRights: TComboBox;
     CHB_ShowPassword: TCheckBox;
     RG_Mouse: TRadioGroup;
     StaticText1: TStaticText;
@@ -78,6 +74,17 @@ type
     B_Reg_Proch: TButton;
     CHB_Reg_Rel: TCheckBox;
     OD_Reg: TOpenDialog;
+    TS_ORAuth: TTabSheet;
+    GroupBox1: TGroupBox;
+    Label16: TLabel;
+    LB_AutoAuthOR: TListBox;
+    CB_ORRights: TComboBox;
+    GroupBox2: TGroupBox;
+    TB_Remeber: TTrackBar;
+    ST_Rem1: TStaticText;
+    ST_Rem2: TStaticText;
+    ST_Rem3: TStaticText;
+    ST_Rem4: TStaticText;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -92,6 +99,7 @@ type
     procedure E_usernameKeyPress(Sender: TObject; var Key: Char);
     procedure B_Reg_ProchClick(Sender: TObject);
     procedure E_PasswordChange(Sender: TObject);
+    procedure TB_RemeberChange(Sender: TObject);
   private
     passwdChanged: boolean;
   public
@@ -103,7 +111,7 @@ var
 
 implementation
 
-uses GlobalConfig, Symbols, fMain, Resuscitation;
+uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -136,6 +144,7 @@ begin
     end;
   end;//if Self.passwdChanged
  GlobConfig.data.auth.forgot               := Self.CHB_Forgot.Checked;
+ GlobConfig.data.auth.auth_default_level   := Self.TB_Remeber.Position;
 
  GlobConfig.data.sounds.sndTratSouhlas     := Self.E_Snd_Trat.Text;
  GlobConfig.data.sounds.sndChyba           := Self.E_Snd_Error.Text;
@@ -279,7 +288,11 @@ end;
 procedure TF_Settings.E_PasswordChange(Sender: TObject);
 begin
  Self.passwdChanged := true;
- if (Self.E_Password.Text = '') then Self.CHB_ShowPassword.Enabled := true; 
+ if (Self.E_Password.Text = '') then
+  begin
+   Self.CHB_ShowPassword.Enabled := true;
+   Self.CHB_Forgot.Enabled       := true;
+  end;
 end;
 
 procedure TF_Settings.E_usernameKeyPress(Sender: TObject; var Key: Char);
@@ -371,7 +384,10 @@ begin
    Self.E_Password.Text        := 'heslo';
 
  Self.CHB_Forgot.Checked       := ((data.auth.forgot) and (data.auth.autoauth));
+ if (Self.CHB_Forgot.Checked) then Self.CHB_Forgot.Enabled := false;
  Self.CHB_ShowPassword.Enabled := (data.auth.password = '');
+ Self.TB_Remeber.Position      := GlobConfig.data.auth.auth_default_level;
+ Self.TB_RemeberChange(Self.TB_Remeber);
 
  Self.E_Snd_Trat.Text       := data.sounds.sndTratSouhlas;
  Self.E_Snd_Error.Text      := data.sounds.sndChyba;
@@ -397,7 +413,17 @@ begin
 
  Self.passwdChanged := false;
  Self.Show();
-end;//procedure
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Settings.TB_RemeberChange(Sender: TObject);
+begin
+ Self.ST_Rem1.Caption := _AUTH_DESC[Self.TB_Remeber.Position].short;
+ Self.ST_Rem2.Caption := _AUTH_DESC[Self.TB_Remeber.Position].save;
+ Self.ST_Rem3.Caption := _AUTH_DESC[Self.TB_Remeber.Position].use;
+ Self.ST_Rem4.Caption := _AUTH_DESC[Self.TB_Remeber.Position].save_hint;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

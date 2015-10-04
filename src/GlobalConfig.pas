@@ -26,7 +26,7 @@ type
     username,password:string;
     ORs:TDictionary<string, TORControlRights>;
     forgot:boolean;     // smazat autorizacni udaje po odpojeni ze serveru
-    auth_chb_remember:boolean;
+    auth_default_level:Integer;
   end;
 
   TRegConfig = record
@@ -128,7 +128,7 @@ begin
  Self.data.auth.username      := ini.ReadString('auth', 'username', '');
  Self.data.auth.password      := ini.ReadString('auth', 'password', '');
  Self.data.auth.forgot        := false;
- Self.data.auth.auth_chb_remember := ini.ReadBool('auth', 'F_auth_chb_remember', true);
+ Self.data.auth.auth_default_level := ini.ReadInteger('auth', 'auth_default_level', 1);
 
  str := TStringList.Create();
  ExtractStrings(['(', ')', ',', ';'], [], PChar(ini.ReadString('auth', 'ORs', '')), str);
@@ -189,7 +189,7 @@ begin
  ini.WriteBool('auth', 'autoauth', Self.data.auth.autoauth);
  ini.WriteString('auth', 'username', Self.data.auth.username);
  ini.WriteString('auth', 'password', Self.data.auth.password);
- ini.WriteBool('auth', 'F_auth_chb_remember', Self.data.auth.auth_chb_remember);
+ ini.WriteInteger('auth', 'auth_default_level', Self.data.auth.auth_default_level);
 
  str := '';
  for i := 0 to Relief.ORs.Count-1 do

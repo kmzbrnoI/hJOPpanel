@@ -4,7 +4,7 @@ object F_Settings: TF_Settings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsDialog
   Caption = 'Nastaven'#237
-  ClientHeight = 321
+  ClientHeight = 322
   ClientWidth = 641
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -45,7 +45,7 @@ object F_Settings: TF_Settings
     OnClick = B_StornoClick
   end
   object PC_Main: TPageControl
-    Left = 8
+    Left = 6
     Top = 8
     Width = 629
     Height = 273
@@ -398,14 +398,14 @@ object F_Settings: TF_Settings
       end
     end
     object TS_Rights: TTabSheet
-      Caption = 'Autorizace'
+      Caption = 'Login'
       ImageIndex = 6
       object GB_Auth: TGroupBox
-        Left = 32
+        Left = 41
         Top = 16
         Width = 257
         Height = 203
-        Caption = ' P'#345#237'stup k syst'#233'mu '
+        Caption = ' Login '
         TabOrder = 0
         object Label14: TLabel
           Left = 16
@@ -433,7 +433,7 @@ object F_Settings: TF_Settings
         object E_username: TEdit
           Left = 16
           Top = 43
-          Width = 193
+          Width = 225
           Height = 21
           TabOrder = 1
           Text = 'E_username'
@@ -442,7 +442,7 @@ object F_Settings: TF_Settings
         object E_Password: TEdit
           Left = 16
           Top = 91
-          Width = 193
+          Width = 225
           Height = 21
           PasswordChar = '*'
           TabOrder = 2
@@ -462,19 +462,91 @@ object F_Settings: TF_Settings
         object CHB_Forgot: TCheckBox
           Left = 16
           Top = 173
-          Width = 185
+          Width = 217
           Height = 17
-          Caption = 'Zapomenout login po odpojen'#237
+          Caption = 'Zapomenout login po odpojen'#237' od serveru'
           TabOrder = 4
         end
       end
-      object GroupBox1: TGroupBox
+      object GroupBox2: TGroupBox
         Left = 312
+        Top = 16
+        Width = 257
+        Height = 203
+        Caption = ' V'#253'choz'#237' zapamatov'#225'n'#237' hesla '
+        TabOrder = 1
+        object TB_Remeber: TTrackBar
+          Left = 10
+          Top = 16
+          Width = 41
+          Height = 177
+          Max = 2
+          Orientation = trVertical
+          ShowSelRange = False
+          TabOrder = 0
+          TickMarks = tmBoth
+          OnChange = TB_RemeberChange
+        end
+        object ST_Rem1: TStaticText
+          Left = 59
+          Top = 18
+          Width = 183
+          Height = 17
+          AutoSize = False
+          Caption = 'V'#253'choz'#237
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 1
+        end
+        object ST_Rem2: TStaticText
+          Left = 59
+          Top = 37
+          Width = 184
+          Height = 42
+          AutoSize = False
+          Caption = 
+            'Heslo bude ulo'#382'eno pouze pro toto spojen'#237', po odpojen'#237' od server' +
+            'u bude heslo smaz'#225'no.'
+          TabOrder = 2
+        end
+        object ST_Rem3: TStaticText
+          Left = 59
+          Top = 83
+          Width = 185
+          Height = 57
+          AutoSize = False
+          Caption = 
+            'P'#345'i zm'#283'n'#283' opr'#225'vn'#283'n'#237' oblasti '#345#237'zen'#237', otev'#345'en'#237' regul'#225'toru apod. bu' +
+            'de pou'#382'ito toto heslo, nemus'#237'te jej tedy znovu zad'#225'vat.'
+          TabOrder = 3
+        end
+        object ST_Rem4: TStaticText
+          Left = 59
+          Top = 140
+          Width = 184
+          Height = 57
+          AutoSize = False
+          Caption = 
+            'Heslo je ulo'#382'eno pouze v pam'#283'ti programu, '#382#225'dn'#253' jin'#253' program k n' +
+            #283'mu nem'#225' p'#345#237'stup, ve form'#283' hashe SHA 256.'
+          TabOrder = 4
+        end
+      end
+    end
+    object TS_ORAuth: TTabSheet
+      Caption = 'Autorizace O'#344
+      ImageIndex = 8
+      object GroupBox1: TGroupBox
+        Left = 176
         Top = 16
         Width = 268
         Height = 203
-        Caption = ' Automatick'#225' autorizace '
-        TabOrder = 1
+        Caption = ' Automatick'#225' autorizace oblast'#237' '#345#237'zen'#237' '
+        TabOrder = 0
         object Label16: TLabel
           Left = 16
           Top = 16
@@ -524,7 +596,7 @@ object F_Settings: TF_Settings
         Top = 82
         Width = 265
         Height = 17
-        Caption = 'P'#345'ed'#225'vat u'#382'ivatelsk'#233' jm'#233'no a heslo regul'#225'toru'
+        Caption = 'P'#345'ed'#225'vat regul'#225'toru u'#382'ivatelsk'#233' jm'#233'no a heslo'
         TabOrder = 0
       end
       object E_Regulator: TEdit
