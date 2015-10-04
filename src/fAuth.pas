@@ -73,7 +73,7 @@ uses GlobalConfig;
 
 procedure TF_Auth.B_ApplyClick(Sender: TObject);
 begin
- if (Self.TB_Remeber.Position < 2) then
+ if (Self.TB_Remeber.Position > 0) then
   begin
    GlobConfig.data.auth.autoauth := true;
    GlobConfig.data.auth.username := Self.E_username.Text;
