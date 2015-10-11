@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash;
+     Zasobnik, UPO, IBUtils, Hash, PngImage;
 
 const
   //limity poli
@@ -2523,6 +2523,7 @@ var Bmp:TBitmap;
     PR,PG,PB:^Byte;
     PYStart:Cardinal;
     aColor:TColor;
+    png: TPngImage;
 begin
  Self.CursorDraw.Pos.X := -2;
 
@@ -2562,7 +2563,15 @@ begin
     end;//for x
   end;//for y
 
- Bmp.SaveToFile(filename);
+
+ if (RightStr(filename, 3) = 'bmp') then
+   Bmp.SaveToFile(filename)
+ else begin
+   png := TPngImage.Create;
+   png.Assign(bmp);
+   png.SaveToFile(filename);
+   FreeAndNil(png);
+ end;
 
  FreeAndNil(Bmp);
 end;//procedure

@@ -141,8 +141,17 @@ begin
  if (Self.SD_Image.Execute(Self.Handle)) then
   begin
    fn := Self.SD_Image.FileName;
-   if (RightStr(fn, 4) <> '.bmp') then
-    fn := fn + '.bmp';
+
+   case (Self.SD_Image.FilterIndex) of
+    1: if (RightStr(fn, 4) <> '.png') then fn := fn + '.png';
+    2: if (RightStr(fn, 4) <> '.bmp') then fn := fn + '.bmp';
+   end;
+
+   if (FileExists(fn)) then
+     if (Application.MessageBox(PChar('Soubor ' +fn + ' již existuje, pøejete si ho nahradit?'),
+         'Nahradit soubor?', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+       Exit();
+
    Screen.Cursor := crHourGlass;
    Relief.Image(fn);
    Screen.Cursor := crDefault;
