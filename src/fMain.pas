@@ -143,7 +143,9 @@ begin
    fn := Self.SD_Image.FileName;
    if (RightStr(fn, 4) <> '.bmp') then
     fn := fn + '.bmp';
+   Screen.Cursor := crHourGlass;
    Relief.Image(fn);
+   Screen.Cursor := crDefault;
   end;
 end;
 
