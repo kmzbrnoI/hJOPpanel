@@ -1396,7 +1396,7 @@ begin
   end;
 
  case (PanelTCPClient.status) of
-  TPanelConnectionStatus.closed    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Spojení uzavøeno', clFuchsia, clBlack);
+  TPanelConnectionStatus.closed    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Odpojeno od serveru', clFuchsia, clBlack);
   TPanelConnectionStatus.opening   : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Otevírám spojení...', clFuchsia, clBlack);
   TPanelConnectionStatus.handshake : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Probíhá handshake...', clFuchsia, clBlack);
   TPanelConnectionStatus.opened    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', clFuchsia, clBlack);
