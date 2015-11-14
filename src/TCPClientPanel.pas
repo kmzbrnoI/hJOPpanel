@@ -199,7 +199,7 @@ implementation
   -;DCC;STOP                                                                    DCC vypnuto
   -;DCC;DISABLED                                                                neni mozno zmenit stav DCC z tohoto klienta
   -;SPR-LIST;(spr1)(spr2)(...)                                                  odeslani seznamu souprav ve vsech oblastech rizeni daneho panelu
-  or;AUTH;rights;comment;                                                       odpoved na pozadavek o autorizaci
+  or;AUTH;rights;comment;username                                               odpoved na pozadavek o autorizaci
   or;MENU;items
                                                                                   pokud je polozka '-', vypisuje se oddelovac
                                                                                   pokud je prvni znak polozky #, pole je disabled
@@ -427,6 +427,7 @@ begin
 
  F_Main.A_Connect.Enabled    := true;
  F_Main.A_Disconnect.Enabled := false;
+ F_Main.OnReliefLoginChange(Self, '-');
 
  if (GlobConfig.data.auth.forgot) then
   begin
@@ -603,10 +604,13 @@ begin
  if (parsed[1] = 'CHANGE') then
   Self.ParseORChange()
 
- else if (parsed[1] = 'AUTH') then
-  Relief.ORAuthoriseResponse(parsed[0], TORControlRights(StrToInt(parsed[2])), parsed[3])
+ else if (parsed[1] = 'AUTH') then begin
+  if parsed.Count > 4 then
+   Relief.ORAuthoriseResponse(parsed[0], TORControlRights(StrToInt(parsed[2])), parsed[3], parsed[4])
+  else
+   Relief.ORAuthoriseResponse(parsed[0], TORControlRights(StrToInt(parsed[2])), parsed[3])
 
- else if (parsed[1] = 'NUZ') then
+ end else if (parsed[1] = 'NUZ') then
    Relief.ORNUZ(parsed[0], TNuzStatus(StrToInt(parsed[2])))
 
  else if (parsed[1] = 'CAS') then

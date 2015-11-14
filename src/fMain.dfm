@@ -5,7 +5,7 @@ object F_Main: TF_Main
   BorderStyle = bsSingle
   Caption = 'hJOPpanel'
   ClientHeight = 386
-  ClientWidth = 776
+  ClientWidth = 922
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -3139,7 +3139,7 @@ object F_Main: TF_Main
   object P_Header: TPanel
     Left = 0
     Top = 0
-    Width = 776
+    Width = 922
     Height = 33
     Align = alTop
     BevelOuter = bvNone
@@ -3147,6 +3147,7 @@ object F_Main: TF_Main
     ParentBackground = False
     TabOrder = 0
     OnMouseMove = SB_MainMouseMove
+    ExplicitWidth = 776
     object P_Connection: TPanel
       Left = 8
       Top = 4
@@ -3286,7 +3287,7 @@ object F_Main: TF_Main
       end
     end
     object P_Time: TPanel
-      Left = 488
+      Left = 642
       Top = 4
       Width = 120
       Height = 25
@@ -3307,7 +3308,7 @@ object F_Main: TF_Main
       TabOrder = 2
     end
     object P_Date: TPanel
-      Left = 360
+      Left = 514
       Top = 4
       Width = 120
       Height = 25
@@ -3518,11 +3519,47 @@ object F_Main: TF_Main
         OnClick = SB_SoupravyClick
       end
     end
+    object P_Login: TPanel
+      Left = 260
+      Top = 4
+      Width = 210
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taLeftJustify
+      BevelOuter = bvNone
+      Color = clWhite
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -24
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentBackground = False
+      ParentFont = False
+      TabOrder = 7
+      Visible = False
+      object L_Login: TLabel
+        Left = 5
+        Top = 1
+        Width = 200
+        Height = 27
+        AutoSize = False
+        Caption = '-'
+        Font.Charset = EASTEUROPE_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -21
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
+    end
   end
   object SB_Main: TStatusBar
     Left = 0
     Top = 367
-    Width = 776
+    Width = 922
     Height = 19
     Panels = <
       item
@@ -3537,9 +3574,10 @@ object F_Main: TF_Main
         Width = 50
       end>
     OnMouseMove = SB_MainMouseMove
+    ExplicitWidth = 776
   end
   object P_Time_modelovy: TPanel
-    Left = 622
+    Left = 766
     Top = 4
     Width = 110
     Height = 25
@@ -3563,7 +3601,7 @@ object F_Main: TF_Main
     TabOrder = 2
   end
   object P_Zrychleni: TPanel
-    Left = 736
+    Left = 880
     Top = 4
     Width = 33
     Height = 25
@@ -3590,10 +3628,10 @@ object F_Main: TF_Main
     BkColor = clBlack
     Height = 12
     Width = 8
-    Left = 728
+    Left = 872
     Top = 56
     Bitmap = {
-      494C010164008801F80108000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
+      494C010164008801FC0108000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000020000000380100000100200000000000009C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4890,17 +4928,17 @@ object F_Main: TF_Main
   object T_Main: TTimer
     Interval = 200
     OnTimer = T_MainTimer
-    Left = 728
+    Left = 872
     Top = 112
   end
   object AE_Main: TApplicationEvents
     OnMessage = AE_MainMessage
-    Left = 728
+    Left = 872
     Top = 168
   end
   object AL_Main: TActionList
     Images = IL_Menu
-    Left = 728
+    Left = 872
     Top = 224
     object A_Connect: TAction
       Hint = 'P'#345'pojit se k serveru'
@@ -4933,10 +4971,10 @@ object F_Main: TF_Main
     end
   end
   object IL_Menu: TImageList
-    Left = 664
+    Left = 808
     Top = 56
     Bitmap = {
-      494C010106007C01000210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106007C01040210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000008080
@@ -5209,7 +5247,7 @@ object F_Main: TF_Main
   end
   object SD_Image: TSaveDialog
     Filter = 'Obr'#225'zek png (*.png)|*.png|Bitmapa (*.bmp)|*.bmp'
-    Left = 664
+    Left = 808
     Top = 112
   end
 end

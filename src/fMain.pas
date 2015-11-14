@@ -47,6 +47,8 @@ type
     SB_Soupravy: TSpeedButton;
     A_Settings: TAction;
     A_Mute: TAction;
+    P_Login: TPanel;
+    L_Login: TLabel;
     procedure FormDestroy(Sender: TObject);
     procedure SB_MainMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
@@ -70,12 +72,14 @@ type
 
    mute_time:TDateTime;
 
-    procedure OnReliefMove(Sender:TObject;Position:TPoint);
+    procedure OnReliefMove(Sender:TObject; Position:TPoint);
     procedure ShowAboutDialog();
 
   public
     DXD_Main:TDXDraw;
     close_app: boolean;
+
+     procedure OnReliefLoginChange(Sender:TObject; user:string);
 
      procedure Init(const config_fn:string = TGlobConfig._DEFAULT_FN);          // konfiguracni soubor se cte z argumentu programu
      procedure SetPanelSize(width,height:Integer);
@@ -227,8 +231,9 @@ begin
  Self.P_Time.Left := Self.P_Time_modelovy.Left - Self.P_Time.Width - 5;
  Self.P_Date.Left := Self.P_Time.Left - Self.P_Date.Width - 5;
 
- Self.P_Date.Visible := (Self.P_Date.Left > (Self.Panel2.Left+Self.Panel2.Width));
- Self.P_Time.Visible := (Self.P_Time.Left > (Self.Panel2.Left+Self.Panel2.Width));
+ Self.P_Login.Visible := ((Self.P_Login.Left+Self.P_Login.Width) < Self.P_Time_modelovy.Left);
+ Self.P_Date.Visible := (Self.P_Date.Left > (Self.P_Login.Left+Self.P_Login.Width));
+ Self.P_Time.Visible := (Self.P_Time.Left > (Self.P_Login.Left+Self.P_Login.Width));
 
  Self.P_Settings.BringToFront();
  Self.P_Connection.BringToFront();
@@ -284,6 +289,7 @@ begin
 
  Relief := TRelief.Create(Self);
  Relief.OnMove := Self.OnReliefMove;
+ Relief.OnLoginUserChange := Self.OnReliefLoginChange;
  return := Relief.Initialize(Self.DXD_Main, GlobConfig.data.panel_fn, GlobConfig.data.vysv_fn);
 
  if (return <> 0) then
@@ -411,6 +417,12 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
+procedure TF_Main.OnReliefLoginChange(Sender:TObject; user:string);
+begin
+ Self.L_Login.Caption := user;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.//unit
 

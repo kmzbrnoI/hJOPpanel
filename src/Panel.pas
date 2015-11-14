@@ -182,6 +182,7 @@ type
  // eventy:
 
  TMoveEvent = procedure(Sender:TObject;Position:TPoint) of object;
+ TLoginChangeEvent = procedure(Sender:TObject; str:string) of object;
 
  ///////////////////////////////////////////////////////////////////////////////
  // data k oblastem rizeni:
@@ -244,6 +245,8 @@ type
   dk_blik:Boolean;
   dk_click_server:boolean;
   stack:TORStack;
+
+  username:string;
 
   NUZ_status:TNUZstatus;
   RegPlease:TORRegPlease;
@@ -710,6 +713,7 @@ end;
   end;
 
   FOnMove  : TMoveEvent;
+  FOnLoginChange : TLoginChangeEvent;
 
    procedure PaintKurzor();
    procedure PaintKurzorBg(Pos:TPoint);
@@ -775,6 +779,7 @@ end;
    procedure DKMenuClickSUPERUSER(Sender:Integer; item:string);
    procedure DKMenuClickCAS(Sender:Integer; item:string);
    procedure DKMenuClickSetCAS(Sender:Integer; item:string);
+   procedure DKMenuClickINFO(Sender:Integer; item:string);
 
    procedure OSVMenuClick(Sender:Integer; item:string);
 
@@ -789,6 +794,9 @@ end;
 
    class function GetTechBlk(typ:Integer; symbol_index:Integer):TTechBlokToSymbol;
    procedure AddToTechBlk(typ:Integer; blok_id:Integer; symbol_index:Integer);
+
+   procedure UpdateLoginString();
+   function GetLoginString():string;
 
   public
 
@@ -827,11 +835,12 @@ end;
 
    //events
    property OnMove: TMoveEvent read FOnMove write FOnMove;
+   property OnLoginUserChange:TLoginChangeEvent read FOnLoginChange write FOnLoginChange;
 
    //komunikace se serverem
    // sender = id oblasti rizeni
 
-   procedure ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string='');
+   procedure ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string=''; username:string='');
    procedure ORInfoMsg(msg:string);
    procedure ORShowMenu(items:string);
    procedure ORNUZ(Sender:string; status:TNUZstatus);
@@ -2589,7 +2598,7 @@ end;//procedure
 //komunikace s oblastmi rizeni:
 
 //odpoved na autorizaci:
-procedure TRelief.ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string='');
+procedure TRelief.ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string=''; username:string='');
 var i,orindex:Integer;
     tmp:TORControlRights;
 begin
@@ -2601,6 +2610,8 @@ begin
 
  tmp := Self.myORs[orindex].tech_rights;
  Self.myORs[orindex].tech_rights := Rights;
+ Self.myORs[orindex].username    := username;
+ Self.UpdateLoginString();
 
  if ((Rights < tmp) and (Rights < write)) then
   begin
@@ -3035,6 +3046,7 @@ begin
     menu_str := menu_str + 'CAS,';
   end;
 
+ menu_str := menu_str + 'INFO,';
 
  Self.special_menu := dk;
  Self.menu_lastpos := Self.CursorDraw.Pos;
@@ -3143,6 +3155,31 @@ begin
  F_ModCasSet.OpenForm();
 end;//procedure
 
+procedure TRelief.DKMenuClickINFO(Sender:Integer; item:string);
+var lichy, rs:string;
+begin
+ if (Self.myORs[Sender].Lichy = 0) then
+  lichy := 'zleva doprava'
+ else if (Self.myORs[Sender].Lichy = 1) then
+  lichy := 'zprava doleva'
+ else lichy := 'nedefinován';
+
+ case (Self.myORs[Sender].tech_rights) of
+  TORControlRights.read      : rs := 'ke ètení';
+  TORControlRights.write     : rs := 'k zápisu';
+  TORControlRights.superuser : rs := 'superuser';
+ else
+  rs := 'nedefinováno';
+ end;
+
+ Application.MessageBox(PChar('Oblast øízení : ' + Self.myORs[Sender].Name + #13#10 +
+                              'ID : ' + Self.myORs[Sender].id + #13#10 +
+                              'Pøihlášen : ' + Self.myORs[Sender].username + #13#10 +
+                              'Lichý smìr : ' + lichy + #13#10 +
+                              'Oprávnìní : ' + rs),
+      PChar(Self.myORs[Sender].Name), MB_OK OR MB_ICONINFORMATION);
+end;
+
 procedure TRelief.OSVMenuClick(Sender:Integer; item:string);
 begin
  case (RightStr(item, 1))[1] of
@@ -3211,7 +3248,8 @@ begin
  else if (item = 'MSG') then Self.DKMenuClickMSG(obl_r, item)
  else if (item = 'SUPERUSER') then Self.DKMenuClickSUPERUSER(obl_r, item)
  else if ((item = 'CAS>') or (item = 'CAS<')) then Self.DKMenuClickCAS(obl_r, item)
- else if (item = 'CAS') then Self.DKMenuClickSetCAS(obl_r, item);
+ else if (item = 'CAS') then Self.DKMenuClickSetCAS(obl_r, item)
+ else if (item = 'INFO') then Self.DKMenuClickINFO(obl_r, item);      
 end;//procedure
 
 procedure TRelief.ParseLOKOMenuClick(item:string; obl_r:Integer);
@@ -3613,6 +3651,31 @@ begin
  Self.CursorDraw.Pozadi.Height := SymbolSet._Symbol_Vyska+2;
  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth*SymbolSet._Symbol_Sirka, Self.Graphics.PanelHeight*SymbolSet._Symbol_Vyska);
  Self.Show();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.UpdateLoginString();
+begin
+ if (Assigned(Self.OnLoginUserChange)) then
+   Self.OnLoginUserChange(Self, Self.GetLoginString());
+end;
+
+function TRelief.GetLoginString():string;
+var i:Integer;
+    res:string;
+begin
+ if (Self.myORs.Count = 0) then Exit('-');
+
+ if (Self.myORs[0].username = '') then
+  res := '-'
+ else
+  res := Self.myORs[0].username;
+
+ for i := 1 to Self.myORs.Count-1 do
+   if ((Self.myORs[i].username <> res) and (res <> '-')) then Exit('více uživatelù');
+
+ Result := res;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
