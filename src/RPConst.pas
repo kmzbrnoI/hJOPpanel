@@ -47,6 +47,7 @@ type
   TSymbolSetType = (normal = 0, bigger = 1);
 
   TWordAr = array of Word;
+  TIntAr = array of Integer;
 
   procedure ExtractStringsEx(Separators: TSysCharSet; Ignore: TSysCharSet; Content: string; var Strings: TStrings);
   function GetForbidderChars():string;

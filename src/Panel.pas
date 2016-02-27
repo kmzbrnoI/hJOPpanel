@@ -781,6 +781,10 @@ end;
    procedure DKMenuClickSetCAS(Sender:Integer; item:string);
    procedure DKMenuClickINFO(Sender:Integer; item:string);
 
+   procedure DKMenuClickMP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+   procedure DKMenuClickDP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+   procedure DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+
    procedure OSVMenuClick(Sender:Integer; item:string);
 
    procedure ParseLOKOMenuClick(item:string; obl_r:Integer);
@@ -845,6 +849,7 @@ end;
    procedure ORShowMenu(items:string);
    procedure ORNUZ(Sender:string; status:TNUZstatus);
    procedure ORConnectionOpenned();
+   procedure ORConnectionOpenned_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
 
    //Change blok
    procedure ORUsekChange(Sender:string; BlokID:integer; UsekPanelProp:TUsekPanelProp);
@@ -2629,6 +2634,15 @@ begin
  if ((Rights > TORControlRights.null) and (tmp = TORControlRights.null)) then
    Self.myORs[orindex].stack.enabled := true;
 
+ // zobrazovani chybove hlasky loginu
+ if (F_Auth.listening) then
+  begin
+   if (Rights = TORControlRights.null) then
+     F_Auth.AuthError(orindex, comment)
+   else
+     F_Auth.AuthOK(orindex);
+  end;
+
  if (comment <> '') then
   Self.ORInfoMsg(comment);
 end;//procedure
@@ -2658,28 +2672,47 @@ begin
 end;//procedure
 
 procedure TRelief.ORConnectionOpenned();
-var i:Integer;
+var i, j, cnt:Integer;
+    ors:TIntAr;
     rights:TOrControlRights;
-    username,password:string;
 begin
+ // zjistime pocet OR s zadanym opravnenim > null
+ cnt := 0;
+ for i := 0 to Self.ORs.Count-1 do
+   if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null)) then Inc(cnt);
+
+ // do \ors si priradime vsechna or s zadanym opravennim > null
+ SetLength(ors, cnt);
+ j := 0;
+ for i := 0 to Self.ORs.Count-1 do
+   if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null)) then
+    begin
+     ors[j] := i;
+     Inc(j);
+    end;
+
  if (GlobConfig.data.auth.autoauth) then
   begin
-   username := GlobConfig.data.auth.username;
-   password := GlobConfig.data.auth.password;
+   F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.ORConnectionOpenned_AuthCallback, ors);
+   Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors);
   end else begin
-   F_Auth.OpenForm('Vyžadována autorizace');
-   username := F_Auth.E_username.Text;
-   password := GenerateHash(AnsiString(F_Auth.E_Password.Text));
-  end;
-
- for i := 0 to Self.myORs.Count-1 do
-  begin
-   if (GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) then
-     PanelTCPClient.PanelAuthorise(Self.myORs[i].id, rights, username, password)
-   else
-     PanelTCPClient.PanelAuthorise(Self.myORs[i].id, read, username, password);
+   F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, ors);
   end;
 end;//procedure
+
+procedure TRelief.ORConnectionOpenned_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+var i:Integer;
+    rights:TOrControlRights;
+begin
+ for i := 0 to Self.myORs.Count-1 do
+  begin
+   if (GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) then begin
+     if (rights > TORControlRights.null) then
+       PanelTCPClient.PanelAuthorise(Self.myORs[i].id, rights, username, password)
+   end else
+     PanelTCPClient.PanelAuthorise(Self.myORs[i].id, read, username, password);
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //komunikace s oblastmi rizeni:
@@ -3063,29 +3096,37 @@ end;//procedure
 //DKMenu clicks:
 
 procedure TRelief.DKMenuClickMP(Sender:Integer; item:string);
-var username,password:string;
+var ors:TIntAr;
 begin
+ SetLength(ors, 1);
+ ors[0] := Sender;
+
  if ((GlobConfig.data.auth.autoauth) and (Self.myORs[Sender].tech_rights < TORCOntrolRights.superuser)) then
   begin
-   username := GlobConfig.data.auth.username;
-   password := GlobConfig.data.auth.password;
+   if (item = 'MP') then begin
+     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.DKMenuClickMP_AuthCallback, ors);
+     Self.DKMenuClickMP_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors);
+   end else begin
+     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.DKMenuClickDP_AuthCallback, ors);
+     Self.DKMenuClickDP_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors);
+   end;
   end else begin
-   F_Auth.OpenForm('Vyžadována autorizace');
-   username := F_Auth.E_username.Text;
-   password := F_Auth.E_Password.Text;
+   if (item = 'MP') then
+     F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickMP_AuthCallback, ors)
+   else
+     F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickDP_AuthCallback, ors)
   end;
-
- if (item = 'MP') then
-  begin
-   //>
-   PanelTCPClient.PanelAuthorise(Self.myORs[Sender].id, write, username, password);
-  end else
- ////////////////////////////
-  begin
-   //<
-   PanelTCPClient.PanelAuthorise(Self.myORs[Sender].id, read, username, password);
-  end;//<
 end;//procedure
+
+procedure TRelief.DKMenuClickMP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+begin
+ PanelTCPClient.PanelAuthorise(Self.ORs[ors[0]].id, write, username, password);
+end;
+
+procedure TRelief.DKMenuClickDP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+begin
+ PanelTCPClient.PanelAuthorise(Self.ORs[ors[0]].id, read, username, password);
+end;
 
 procedure TRelief.DKMenuClickNUZ(Sender:Integer; item:string);
 begin
@@ -3134,11 +3175,18 @@ begin
 end;//procedure
 
 procedure TRelief.DKMenuClickSUPERUSER(Sender:Integer; item:string);
+var ors: TIntAr;
 begin
- F_Auth.OpenForm('Vyžadována autorizace');
- PanelTCPClient.PanelAuthorise(Self.myORs[Sender].id, superuser, F_Auth.E_username.Text, F_Auth.E_Password.Text);
- Self.root_menu := false;
+ SetLength(ors, 1);
+ ors[0] := Sender;
+ F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, ors);
 end;//procedure
+
+procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr);
+begin
+ PanelTCPClient.PanelAuthorise(Self.myORs[ors[0]].id, superuser, username, password);
+ Self.root_menu := false;
+end;
 
 procedure TRelief.DKMenuClickCAS(Sender:Integer; item:string);
 begin
@@ -3673,7 +3721,10 @@ begin
   res := Self.myORs[0].username;
 
  for i := 1 to Self.myORs.Count-1 do
-   if ((Self.myORs[i].username <> res) and (res <> '-')) then Exit('více uživatelù');
+   if (res = '-') then
+     res := Self.myORs[i].username
+   else
+     if (Self.myORs[i].username <> res) then Exit('více uživatelù');
 
  Result := res;
 end;

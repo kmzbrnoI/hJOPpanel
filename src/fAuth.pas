@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Hash, ComCtrls;
+  Dialogs, StdCtrls, Hash, ComCtrls, ExtCtrls, Generics.Collections, RPConst;
 
 type
   TAuthLevelDesc = record
@@ -38,28 +38,57 @@ const
 
 
 type
+  TAuthFilledCallback = procedure (Sender:TObject; username:string; password:string; ors:TIntAr) of object;
+
   TF_Auth = class(TForm)
-    Label14: TLabel;
-    E_username: TEdit;
-    Label15: TLabel;
-    E_Password: TEdit;
+    P_Message: TPanel;
+    P_Body: TPanel;
     B_Apply: TButton;
     B_Cancel: TButton;
     TB_Remeber: TTrackBar;
-    Label1: TLabel;
     GB_RemberDesc: TGroupBox;
     ST_Rem2: TStaticText;
     ST_Rem4: TStaticText;
     ST_Rem1: TStaticText;
     ST_Rem3: TStaticText;
+    Label1: TLabel;
+    E_Password: TEdit;
+    Label15: TLabel;
+    E_username: TEdit;
+    Label14: TLabel;
+    ST_Error: TStaticText;
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_RemeberChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
-    { Private declarations }
+    callback:TAuthFilledCallback;                                               // callback volany pri vyplneni udaju
+    auth_errors:TDictionary<Integer, string>;                                   // chyby autorizace or ve formatu id_or:error
+    auth_remaining:TList<Integer>;                                              // OR_id, u kterych cekame na odpoved autorizace (pri prijimani odpovedi postupne mazeme prvky ze seznamu)
+    auth_ors:TIntAr;                                                            // OR k autorizaci (toto pole se nemeni)
+    flistening: boolean;                                                        // jestli poslouchame prichozi zpravy o (ne)uspesne autorizaci
+
+    procedure RefreshErrorMessage();
+
+    procedure ShowErrorMessage();
+    procedure HideErrorMessage();
+
+    procedure ShowLogging();
+    procedure ShowEnter();
+    procedure ShowRelogin();
+
   public
-    procedure OpenForm(caption:string);
+    procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr);
+    procedure Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr); // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
+
+    procedure AuthError(or_index:Integer; error:string);                        // zavolat pri prichodu chyby autorizace
+    procedure AuthOK(or_index:Integer);                                         // zavolat pri uspesne autorizaci
+
+    property listening:boolean read flistening;                                 // jestli poslouchame na odpovedi o autorizaci
+
   end;
 
 var
@@ -67,12 +96,21 @@ var
 
 implementation
 
-uses GlobalConfig;
+uses GlobalConfig, fMain;
 
 {$R *.dfm}
 
 procedure TF_Auth.B_ApplyClick(Sender: TObject);
+var i:Integer;
 begin
+ Self.auth_remaining.Clear();
+ for i := 0 to Length(Self.auth_ors)-1 do Self.auth_remaining.Add(Self.auth_ors[i]);
+ Self.flistening := true;
+
+ Self.auth_errors.Clear();
+ Self.HideErrorMessage();
+ Self.ShowLogging();
+
  if (Self.TB_Remeber.Position > 0) then
   begin
    GlobConfig.data.auth.autoauth := true;
@@ -81,14 +119,35 @@ begin
    GlobConfig.data.auth.forgot   := (Self.TB_Remeber.Position = 1);
   end;
 
- Self.Close();
+ Self.callback(Self, Self.E_username.Text, GenerateHash(AnsiString(Self.E_Password.Text)), Self.auth_ors);
 end;
 
 procedure TF_Auth.B_CancelClick(Sender: TObject);
 begin
+ Self.Close();
+end;
+
+procedure TF_Auth.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
  Self.E_username.Text := '';
  Self.E_Password.Text := '';
- Self.Close();
+
+ Self.auth_errors.Clear();
+ Self.auth_remaining.Clear();
+ Self.flistening := false;
+end;
+
+procedure TF_Auth.FormCreate(Sender: TObject);
+begin
+ Self.auth_errors := TDictionary<Integer, string>.Create();
+ Self.auth_remaining := TList<Integer>.Create();
+ Self.flistening := false;
+end;
+
+procedure TF_Auth.FormDestroy(Sender: TObject);
+begin
+ Self.auth_errors.Free();
+ Self.auth_remaining.Free();
 end;
 
 procedure TF_Auth.FormKeyPress(Sender: TObject; var Key: Char);
@@ -98,15 +157,43 @@ begin
  if ((Key = ';') or (Key = ',')) then Key := #0;
 end;
 
-procedure TF_Auth.OpenForm(caption:string);
+procedure TF_Auth.OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr);
 begin
+ Self.flistening := false;
+ Self.callback := callback;
+
+ Self.auth_ors := or_ids;
+ Self.auth_errors.Clear();
+
+ Self.RefreshErrorMessage();
+ Self.ShowEnter();
+
  Self.E_username.Text := '';
  Self.E_Password.Text := '';
  Self.TB_Remeber.Position := GlobConfig.data.auth.auth_default_level;
  Self.TB_RemeberChange(Self.TB_Remeber);
  Self.ActiveControl := Self.E_username;
  Self.Caption := caption;
- Self.ShowModal();
+
+ Self.Show();
+end;
+
+procedure TF_Auth.Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr);
+var i:Integer;
+begin
+ Self.flistening := true;
+ Self.callback := callback;
+
+ Self.auth_ors := or_ids;
+ Self.auth_errors.Clear();
+
+ Self.auth_remaining.Clear();
+ for i := 0 to Length(Self.auth_ors)-1 do Self.auth_remaining.Add(Self.auth_ors[i]);
+
+ Self.E_username.Text := username;
+ Self.E_Password.Text := '';
+ Self.TB_Remeber.Position := remember_level;
+ Self.Caption := caption;
 end;
 
 procedure TF_Auth.TB_RemeberChange(Sender: TObject);
@@ -116,5 +203,129 @@ begin
  Self.ST_Rem3.Caption := _AUTH_DESC[Self.TB_Remeber.Position].use;
  Self.ST_Rem4.Caption := _AUTH_DESC[Self.TB_Remeber.Position].save_hint;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.RefreshErrorMessage();
+var same:boolean;
+    Item: TPair<Integer, string>;
+    val, valDiff:string;
+begin
+ if (Self.auth_errors.Count = 0) then
+  begin
+   Self.HideErrorMessage();
+   Exit();
+  end;
+
+ // zkontrolujeme jestli jsou ve slovniku stejne hodnoty
+ same := true;
+ valDiff := '';
+ for val in Self.auth_errors.Values do
+  begin
+   if (valDiff = '') then valDiff := val;
+   
+   if (val <> valDiff) then
+    begin
+     same := false;
+     break;
+    end;
+  end;//for
+
+ if (same) then
+  begin
+   // zobrazime jen jednu chybu
+   Self.ST_Error.Caption := val;
+  end else begin
+   // zobrazime chybu pro kazdou oblast rizeni
+   Self.ST_Error.Caption := '';
+   for Item in Self.auth_errors do
+     Self.ST_Error.Caption := Self.ST_Error.Caption + relief.ORs[Item.Key].Name + ': ' + Item.Value + #13#10;
+  end;
+
+ Self.ShowErrorMessage();
+end;
+
+procedure TF_Auth.AuthError(or_index:Integer; error:string);
+begin
+ if (not Self.listening) then Exit();
+ 
+ Self.auth_errors.AddOrSetValue(or_index, error);
+ if (Self.auth_remaining.Contains(or_index)) then Self.auth_remaining.Remove(or_index);
+
+ if (not Self.Showing) then Self.Show();
+ Self.RefreshErrorMessage();
+
+ // znovu zobrazime prihlasovaci dialog
+ if (Self.auth_remaining.Count = 0) then Self.ShowRelogin();
+end;
+
+procedure TF_Auth.AuthOK(or_index:Integer);
+begin
+ if (not Self.auth_remaining.Contains(or_index) or (not Self.listening)) then Exit();
+
+ Self.auth_remaining.Remove(or_index);
+ Self.RefreshErrorMessage();
+
+ if (Self.auth_errors.Count = 0) then
+  begin
+   if (Self.auth_remaining.Count = 0) then
+    Self.Close()
+   else
+    Self.ShowRelogin();
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.ShowErrorMessage();
+begin
+ Self.P_Message.Visible := true;
+ Self.P_Body.Top := 110;
+ Self.Height := 500;
+
+ Self.ST_Error.Visible      := true;
+ Self.P_Message.Color       := $DEDEF2;
+ Self.P_Message.ShowCaption := false;
+end;
+
+procedure TF_Auth.HideErrorMessage();
+begin
+ Self.Height := 400;
+ Self.P_Message.Visible := false;
+ Self.P_Body.Top := 8;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.ShowLogging();
+begin
+ Self.E_username.Enabled := false;
+ Self.E_Password.Enabled := false;
+ Self.TB_Remeber.Enabled := false;
+ Self.B_Apply.Enabled    := false;
+
+ Self.ST_Error.Visible      := false;
+ Self.P_Message.Color       := $F7EDD9;
+ Self.P_Message.ShowCaption := true;
+ Self.P_Message.Visible     := true;
+ Self.P_Message.BringToFront();
+end;
+
+procedure TF_Auth.ShowEnter();
+begin
+ Self.E_username.Enabled := true;
+ Self.E_Password.Enabled := true;
+ Self.TB_Remeber.Enabled := true;
+ Self.B_Apply.Enabled    := true;
+end;
+
+procedure TF_Auth.ShowRelogin();
+begin
+ Self.ShowEnter();
+ Self.E_Password.Text := '';
+ Self.E_username.SetFocus();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.//unit
