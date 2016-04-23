@@ -412,7 +412,7 @@ procedure TF_Main.ShowAboutDialog();
 begin
  Application.MessageBox(PChar('hJOPpanel v'+NactiVerzi(Application.ExeName)+#13#10+
   'build '+GetLastBuildDate()+' '+GetLastBuildTime()+#13#10+
-  'Vytvoøil Jan Horáèek (c) 2014-2015 pro KMŽ Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
+  'Vytvoøil Jan Horáèek (c) 2014-2016 pro KMŽ Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

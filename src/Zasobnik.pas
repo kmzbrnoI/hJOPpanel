@@ -124,9 +124,12 @@ begin
     Self.AddJC(data[3])
    else if (data[2] = 'HINT') then
     begin
-    if (data.Count > 3) then
-      Self.hint := data[3]
-    else
+    if (data.Count > 3) then begin
+      if (Length(data[3]) > 8) then
+        Self.hint := LeftStr(data[3], 7) + '.'
+      else
+        Self.hint := data[3]
+    end else
       Self.hint := '';
     end
    else if (data[2] = 'UPO') then
