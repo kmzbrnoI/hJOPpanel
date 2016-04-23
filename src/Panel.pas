@@ -2899,7 +2899,7 @@ begin
  for i := 0 to Self.myORs.Count-1 do
    if (Sender = Self.myORs[i].id) then
     begin
-     F_SoupravaEdit.EditSpr(parsed, Self.myORs[i].HVs, Self.myORs[i].id);
+     F_SoupravaEdit.EditSpr(parsed, Self.myORs[i].HVs, Self.myORs[i].id, Self.myORs[i].Name);
      Exit();
     end;
 end;//procedure

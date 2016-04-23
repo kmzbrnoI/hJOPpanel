@@ -66,7 +66,7 @@ type
   public
 
     procedure NewSpr(HVs:THVDb; sender:string);
-    procedure EditSpr(parsed:TStrings; HVs:THVDb; sender:string);
+    procedure EditSpr(parsed:TStrings; HVs:THVDb; sender_id:string; owner:string);
 
     procedure TechError(err:string);
     procedure TechACK();
@@ -168,11 +168,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla
-procedure TF_SoupravaEdit.EditSpr(parsed:TStrings; HVs:THVDb; sender:string);
+procedure TF_SoupravaEdit.EditSpr(parsed:TStrings; HVs:THVDb; sender_id:string; owner:string);
 var i:Integer;
 begin
  Self.HVDb  := HVs;
- Self.OblR  := sender;
+ Self.OblR  := sender_id;
 
  try
    Self.E_Nazev.Text := parsed[2];
@@ -215,7 +215,7 @@ begin
    Self.BB_HV_Add.Enabled := true;
 
  Self.ActiveControl := Self.E_Nazev;
- Self.Caption := 'Souprava '+Self.E_Nazev.Text;
+ Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' – ' + owner;
  Self.Show();
 end;//procedure
 
