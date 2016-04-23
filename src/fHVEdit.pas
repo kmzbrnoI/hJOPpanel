@@ -329,6 +329,7 @@ begin
 
  Self.CB_HV.Enabled := false;
  Self.CB_HV.Clear();
+ Self.CB_HVChange(Self.CB_HV);
  Self.CB_HV.Items.Add('Nové hnací vozidlo');
  Self.CB_HV.ItemIndex := 0;
 
