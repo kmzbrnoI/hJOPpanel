@@ -396,6 +396,7 @@ begin
  end;
 
  F_Main.A_Connect.Enabled    := false;
+ F_Main.A_ReAuth.Enabled     := true;
  F_Main.A_Disconnect.Enabled := true;
 
  Self.fstatus := TPanelConnectionStatus.handshake;
@@ -426,6 +427,7 @@ begin
  Self.fstatus := TPanelConnectionStatus.closed;
 
  F_Main.A_Connect.Enabled    := true;
+ F_Main.A_ReAuth.Enabled     := false;
  F_Main.A_Disconnect.Enabled := false;
  F_Main.OnReliefLoginChange(Self, '-');
 

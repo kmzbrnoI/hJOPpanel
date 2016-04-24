@@ -18,6 +18,7 @@ object F_Auth: TF_Auth
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object P_Message: TPanel

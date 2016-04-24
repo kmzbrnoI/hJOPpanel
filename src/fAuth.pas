@@ -65,6 +65,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     callback:TAuthFilledCallback;                                               // callback volany pri vyplneni udaju
     auth_errors:TDictionary<Integer, string>;                                   // chyby autorizace or ve formatu id_or:error
@@ -82,7 +83,7 @@ type
     procedure ShowRelogin();
 
   public
-    procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean);
+    procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean; username:string = '');
     procedure Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean); // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
 
     procedure AuthError(or_index:Integer; error:string);                        // zavolat pri prichodu chyby autorizace
@@ -97,7 +98,7 @@ var
 
 implementation
 
-uses GlobalConfig, fMain;
+uses GlobalConfig, fMain, TCPClientPanel;
 
 {$R *.dfm}
 
@@ -145,6 +146,7 @@ begin
  Self.auth_errors.Clear();
  Self.auth_remaining.Clear();
  Self.flistening := false;
+ if (PanelTCPClient.status = TPanelConnectionStatus.opened) then F_Main.A_ReAuth.Enabled := true;
 end;
 
 procedure TF_Auth.FormCreate(Sender: TObject);
@@ -167,7 +169,12 @@ begin
  if ((Key = ';') or (Key = ',')) then Key := #0;
 end;
 
-procedure TF_Auth.OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean);
+procedure TF_Auth.FormShow(Sender: TObject);
+begin
+ F_Main.A_ReAuth.Enabled := false;
+end;
+
+procedure TF_Auth.OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean; username:string = '');
 begin
  Self.flistening := false;
  Self.callback := callback;
@@ -178,11 +185,14 @@ begin
  Self.RefreshErrorMessage();
  Self.ShowEnter();
 
- Self.E_username.Text := '';
+ Self.E_username.Text := username;
  Self.E_Password.Text := '';
  Self.TB_Remeber.Position := GlobConfig.data.auth.auth_default_level;
  Self.TB_RemeberChange(Self.TB_Remeber);
- Self.ActiveControl := Self.E_username;
+ if (username = '') then
+   Self.ActiveControl := Self.E_username
+ else
+   Self.ActiveControl := Self.E_Password;
  Self.Caption := caption;
 
  Self.B_Guest.Visible := allow_guest and GlobConfig.data.guest.allow;
@@ -282,7 +292,7 @@ begin
  Self.auth_remaining.Remove(or_index);
  Self.RefreshErrorMessage();
 
- if (Self.auth_errors.Count = 0) then
+ if ((Self.auth_errors.Count = 0) and (Self.Showing)) then
   begin
    if (Self.auth_remaining.Count = 0) then
     Self.Close()

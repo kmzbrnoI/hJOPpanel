@@ -49,6 +49,8 @@ type
     A_Mute: TAction;
     P_Login: TPanel;
     L_Login: TLabel;
+    A_ReAuth: TAction;
+    SB_Logout: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
     procedure SB_MainMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
@@ -68,6 +70,7 @@ type
     procedure A_SettingsExecute(Sender: TObject);
     procedure A_MuteExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure A_ReAuthExecute(Sender: TObject);
   private
 
    mute_time:TDateTime;
@@ -160,6 +163,11 @@ begin
    Relief.Image(fn);
    Screen.Cursor := crDefault;
   end;
+end;
+
+procedure TF_Main.A_ReAuthExecute(Sender: TObject);
+begin
+ if (Assigned(Relief)) then Relief.ReAuthorize();
 end;
 
 procedure TF_Main.A_SettingsExecute(Sender: TObject);

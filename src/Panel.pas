@@ -247,11 +247,18 @@ type
   stack:TORStack;
 
   username:string;
+  login:string;
 
   NUZ_status:TNUZstatus;
   RegPlease:TORRegPlease;
 
   HVs:THVDb;
+ end;
+
+ // prehlasovani pomoci Ctrl+R (reader vs. normalni uzivatel)
+ TReAuth = record
+  old_login:string;                                                             // guest -> username
+  old_ors:TList<Integer>;                                                       // (guest -> username) seznam indexu oblati rizeni k autorizaci
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
@@ -712,6 +719,8 @@ end;
    msg:string;
   end;
 
+  reAuth : TReAuth;
+
   FOnMove  : TMoveEvent;
   FOnLoginChange : TLoginChangeEvent;
 
@@ -781,8 +790,6 @@ end;
    procedure DKMenuClickSetCAS(Sender:Integer; item:string);
    procedure DKMenuClickINFO(Sender:Integer; item:string);
 
-   procedure DKMenuClickMP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
-   procedure DKMenuClickDP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
    procedure DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
    procedure OSVMenuClick(Sender:Integer; item:string);
@@ -801,6 +808,11 @@ end;
 
    procedure UpdateLoginString();
    function GetLoginString():string;
+
+   // procedure prehlasovani (Ctrl+R)
+   function AnyORWritable():boolean;
+   procedure AuthReadCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
+   procedure AuthWriteCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
   public
 
@@ -827,6 +839,8 @@ end;
    procedure Escape();
 
    procedure UpdateSymbolSet();
+
+   procedure ReAuthorize();
 
    property PozadiColor:TColor read Colors.Pozadi write Colors.Pozadi;
    property KurzorRamecek:TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
@@ -887,6 +901,7 @@ begin
  Self.Rozp  := TList<TPRozp>.Create();
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
+ Self.reAuth.old_ors := TList<Integer>.Create();
 end;//contructor
 
 function TRelief.Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string):Byte;
@@ -973,6 +988,7 @@ begin
  if (Assigned(Self.PM_Properties)) then FreeAndNil(Self.PM_Properties);
  if (Assigned(Self.Menu)) then FreeAndNil(Self.Menu);
  if (Assigned(Self.Graphics)) then FreeAndNil(Self.Graphics);
+ if (Assigned(Self.reAuth.old_ors)) then FreeAndNil(Self.reAuth.old_ors);
 
  for i in Self.Tech_blok.Keys do
    Self.Tech_blok[i].Free();
@@ -2629,7 +2645,10 @@ begin
    PanelTCPClient.PanelFirstGet(Sender);
 
  if (Rights = TORControlRights.null) then
-  Self.DisableElements(orindex);
+  begin
+   Self.DisableElements(orindex);
+   Self.myORs[orindex].login := '';
+  end;
 
  if ((Rights > TORControlRights.null) and (tmp = TORControlRights.null)) then
    Self.myORs[orindex].stack.enabled := true;
@@ -2710,10 +2729,13 @@ begin
      if (rights > TORControlRights.null) then
       begin
        if ((rights > TORControlRights.read) and (guest)) then rights := TORControlRights.read;
+       Self.myORs[i].login := username;
        PanelTCPClient.PanelAuthorise(Self.myORs[i].id, rights, username, password)
       end;
-   end else
+   end else begin
+     Self.myORs[i].login := username;
      PanelTCPClient.PanelAuthorise(Self.myORs[i].id, read, username, password);
+   end;
   end;
 end;
 
@@ -3107,29 +3129,19 @@ begin
  if ((GlobConfig.data.auth.autoauth) and (Self.myORs[Sender].tech_rights < TORCOntrolRights.superuser)) then
   begin
    if (item = 'MP') then begin
-     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.DKMenuClickMP_AuthCallback, ors, false);
-     Self.DKMenuClickMP_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
+     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.AuthWriteCallback, ors, false);
+     Self.AuthWriteCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
    end else begin
-     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.DKMenuClickDP_AuthCallback, ors, true);
-     Self.DKMenuClickDP_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
+     F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.AuthReadCallback, ors, true);
+     Self.AuthReadCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
    end;
   end else begin
    if (item = 'MP') then
-     F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickMP_AuthCallback, ors, false)
+     F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, ors, false)
    else
-     F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickDP_AuthCallback, ors, true)
+     F_Auth.OpenForm('Vyžadována autorizace', Self.AuthReadCallback, ors, true)
   end;
 end;//procedure
-
-procedure TRelief.DKMenuClickMP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
-begin
- PanelTCPClient.PanelAuthorise(Self.ORs[ors[0]].id, write, username, password);
-end;
-
-procedure TRelief.DKMenuClickDP_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
-begin
- PanelTCPClient.PanelAuthorise(Self.ORs[ors[0]].id, read, username, password);
-end;
 
 procedure TRelief.DKMenuClickNUZ(Sender:Integer; item:string);
 begin
@@ -3187,6 +3199,7 @@ end;//procedure
 
 procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 begin
+ Self.myORs[ors[0]].login := username;
  PanelTCPClient.PanelAuthorise(Self.myORs[ors[0]].id, superuser, username, password);
  Self.root_menu := false;
 end;
@@ -3730,6 +3743,124 @@ begin
      if (Self.myORs[i].username <> res) then Exit('více uživatelù');
 
  Result := res;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TRelief.AnyORWritable():boolean;
+var OblR:TORPanel;
+begin
+ for OblR in Self.ORs do
+   if (OblR.tech_rights > TORControlRights.read) then Exit(true);
+ Result := false;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.ReAuthorize();
+var fors:TIntAr;
+    i:Integer;
+begin
+ // pokud je alespon jedno OR pro zapis, odhlasujeme vsechny OR, na kterych je prihlsen uzivatel z prvni OR
+ // ciste teoreticky tedy muzeme postupne odhlasovat ruzne uzivatele z jednotlivych OR
+ // Tato situace by ale nemela nastavat, k jednomu panelu by mel byt prihlaseny vzdy jen jeden uzivatel,
+ // popr. uzivatel v nekolika OR a guest v nekolika dalsich OR.
+
+ if ((PanelTCPClient.status <> TPanelCOnnectionStatus.opened) or (F_Auth.Showing)) then Exit();
+
+ if (Self.AnyORWritable()) then
+  begin
+   if (not GlobConfig.data.guest.allow) then
+    begin
+     // ucet hosta neni povoleny -> odhlasime uzivatele a zobrazime vyzvu k prihlaseni noveho
+     GlobConfig.data.auth.autoauth := false;
+     GlobConfig.data.auth.username := '';
+     GlobConfig.data.auth.password := '';
+
+     SetLength(fors, Self.ORs.Count);
+     for i := 0 to Self.ORs.Count-1 do
+      begin
+       fors[i] := i;
+       Self.myORs[i].login := '';
+       PanelTCPClient.PanelAuthorise(Self.myORs[i].id, TORControlRights.null, '', '');
+      end;
+
+     F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true);
+     Exit();
+    end;
+
+   // jdeme prihlasit readera vsude
+   Self.reAuth.old_ors.Clear();
+
+   // zjistime si aktualne prihlasene uzivatele a ke kterym OR je prihlasen
+   Self.reAuth.old_login := '';
+   for i := 0 to Self.ORs.Count-1 do
+    begin
+     if ((Self.ORs[i].login <> '') and (Self.ORs[i].login <> GlobConfig.data.guest.username) and (Self.reAuth.old_login = '')) then
+       Self.reAuth.old_login := Self.ORs[i].login;
+     if ((Self.reAuth.old_login <> '') and (Self.reAuth.old_login = Self.ORs[i].login) and (Self.ORs[i].tech_rights >= TORControlRights.write)) then
+       Self.reAuth.old_ors.Add(i);
+    end;
+
+   // vytvorime pole indexu oblasti rizeni pro autorizacni proces
+   SetLength(fors, Self.reAuth.old_ors.Count);
+   for i := 0 to Self.reAuth.old_ors.Count-1 do fors[i] := Self.reAuth.old_ors[i];
+
+   // zapomeneme ulozeneho uzivatele
+   if ((GlobConfig.data.auth.autoauth) and (GlobConfig.data.auth.username = Self.reAuth.old_login)) then
+    begin
+     GlobConfig.data.auth.autoauth := false;
+     GlobConfig.data.auth.username := '';
+     GlobConfig.data.auth.password := '';
+    end;
+
+   // na OR v seznamu 'Self.reAuth.old_ors' prihlasime hosta
+   F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, fors, true);
+   Self.AuthReadCallback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, fors, false);
+  end else begin
+
+   if (Self.reAuth.old_ors.Count = 0) then
+    begin
+     // zadne OR nezapamatovany -> prihlasujeme uzivatele na vsechny OR
+     SetLength(fors, Self.ORs.Count);
+     for i := 0 to Self.ORs.Count-1 do fors[i] := i;
+     F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true)
+    end else begin
+     // OR zapamatovany -> prihlasujeme uzivatele jen na tyto OR
+
+     // vytvorime pole indexu oblasti rizeni pro autorizacni proces
+     SetLength(fors, Self.reAuth.old_ors.Count);
+     for i := 0 to Self.reAuth.old_ors.Count-1 do fors[i] := Self.reAuth.old_ors[i];
+
+     // na OR v seznamu 'Self.reAuth.old_ors' prihlasime skutecneho uzivatele
+     F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, fors, false, Self.reAuth.old_login);
+
+     Self.reAuth.old_login := '';
+     Self.reAuth.old_ors.Clear();
+    end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.AuthReadCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
+var i:Integer;
+begin
+ for i := 0 to Length(ors)-1 do
+  begin
+   Self.myORs[ors[i]].login := username;
+   PanelTCPClient.PanelAuthorise(Self.myORs[ors[i]].id, read, username, password);
+  end;
+end;
+
+procedure TRelief.AuthWriteCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
+var i:Integer;
+begin
+ for i := 0 to Length(ors)-1 do
+  begin
+   Self.myORs[ors[i]].login := username;
+   PanelTCPClient.PanelAuthorise(Self.myORs[ors[i]].id, write, username, password);
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
