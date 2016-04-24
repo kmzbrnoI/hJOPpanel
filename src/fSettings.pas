@@ -84,6 +84,12 @@ type
     ST_Rem2: TStaticText;
     ST_Rem3: TStaticText;
     ST_Rem4: TStaticText;
+    TS_Guest: TTabSheet;
+    Label10: TLabel;
+    E_Guest_Username: TEdit;
+    Label18: TLabel;
+    E_Guest_Password: TEdit;
+    CHB_Guest_Enable: TCheckBox;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -101,8 +107,11 @@ type
     procedure TB_RemeberChange(Sender: TObject);
     procedure LB_SymbolsDblClick(Sender: TObject);
     procedure LB_TimerDblClick(Sender: TObject);
+    procedure E_Guest_PasswordChange(Sender: TObject);
+    procedure CHB_Guest_EnableClick(Sender: TObject);
   private
     passwdChanged: boolean;
+    guestPasswdChanged: boolean;
   public
     procedure OpenForm();
   end;
@@ -156,6 +165,17 @@ begin
  GlobConfig.data.sounds.sndRizikovaFce     := Self.E_Snd_PS.Text;
  GlobConfig.data.sounds.sndPretizeni       := Self.E_Snd_Pretizeni.Text;
  GlobConfig.data.sounds.sndPrichoziZprava  := Self.E_Snd_Zprava.Text;
+
+ GlobConfig.data.guest.allow := Self.CHB_Guest_Enable.Checked;
+ if (Self.CHB_Guest_Enable.Checked) then
+  begin
+   GlobConfig.data.guest.username := Self.E_Guest_Username.Text;
+   if (Self.guestPasswdChanged) then GlobConfig.data.guest.password := GenerateHash(AnsiString(Self.E_Guest_Password.Text));
+  end else begin
+    GlobConfig.data.guest.username := '';
+    GlobConfig.data.guest.password := '';
+  end;
+
 
  if (Self.LB_Timer.ItemIndex > -1) then
    F_Main.T_Main.Interval       := StrToInt(Self.LB_Timer.Items.Strings[Self.LB_Timer.ItemIndex]);
@@ -287,6 +307,24 @@ begin
      GlobConfig.data.auth.ORs.AddOrSetValue(Self.LB_AutoAuthOR.Items[i], TORControlRights(Self.CB_ORRights.ItemIndex));
 end;
 
+procedure TF_Settings.CHB_Guest_EnableClick(Sender: TObject);
+begin
+ Self.E_Guest_Username.Enabled := Self.CHB_Guest_Enable.Checked;
+ Self.E_Guest_Password.Enabled := Self.CHB_Guest_Enable.Checked;
+
+ if (Self.CHB_Guest_Enable.Checked) then
+  begin
+   Self.E_Guest_Username.Text := GlobConfig.data.guest.username;
+   if (GlobConfig.data.guest.allow) then
+     Self.E_Guest_Password.Text := 'heslo'
+   else
+     Self.E_Guest_Password.Text := '';
+  end else begin
+   Self.E_Guest_Username.Text := '';
+   Self.E_Guest_Password.Text := '';
+  end;
+end;
+
 procedure TF_Settings.CHB_RememberAuthClick(Sender: TObject);
 begin
  Self.E_username.Enabled := Self.CHB_RememberAuth.Checked;
@@ -307,6 +345,11 @@ begin
   Self.E_Password.PasswordChar := #0
  else
   Self.E_Password.PasswordChar := '*';
+end;
+
+procedure TF_Settings.E_Guest_PasswordChange(Sender: TObject);
+begin
+ Self.guestPasswdChanged := true;
 end;
 
 procedure TF_Settings.E_PasswordChange(Sender: TObject);
@@ -429,6 +472,9 @@ begin
  Self.E_Snd_Pretizeni.Text  := data.sounds.sndPretizeni;
  Self.E_Snd_Zprava.Text     := data.sounds.sndPrichoziZprava;
 
+ Self.CHB_Guest_Enable.Checked := data.guest.allow;
+ Self.CHB_Guest_EnableClick(Self.CHB_Guest_Enable);
+
  Self.CB_ORRights.Enabled := false;
  Self.LB_AutoAuthOR.Clear();
  for i := 0 to Relief.ORs.Count-1 do
@@ -446,6 +492,7 @@ begin
  end;
 
  Self.passwdChanged := false;
+ Self.guestPasswdChanged := false;
  Self.Show();
 end;
 

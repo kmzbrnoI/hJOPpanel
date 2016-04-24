@@ -29,6 +29,11 @@ type
     auth_default_level:Integer;
   end;
 
+  TGuestConfig = record
+    allow:boolean;
+    username,password:string;      // heslo je uchovavano jako hash
+  end;
+
   TRegConfig = record
     reg_fn:string;
     reg_user:boolean;
@@ -41,6 +46,7 @@ type
     symbolSet:TSymbolSetType;
     server:TServerConfig;
     auth:TAuthConfig;
+    guest:TGuestConfig;
     reg:TRegConfig;
     vysv_fn:string;
     frmPos:TPoint;
@@ -145,6 +151,9 @@ begin
 
  str.Free();
 
+ Self.data.guest.allow        := ini.ReadBool('guest', 'allow', false);
+ Self.data.guest.username     := ini.ReadString('guest', 'username', '');
+ Self.data.guest.password     := ini.ReadString('guest', 'password', '');
 
  Self.data.frmPos.X := ini.ReadInteger('F_Main', 'X', 0);
  Self.data.frmPos.Y := ini.ReadInteger('F_Main', 'Y', 0);
@@ -196,6 +205,10 @@ begin
    if (Self.data.auth.ORs.TryGetValue(Relief.ORs[i].id, rights)) then
      str := str + '(' + Relief.ORs[i].id + ';' + IntToStr(Integer(rights)) + ')';
  ini.WriteString('auth', 'ORs', str);
+
+ ini.WriteBool('guest', 'allow', Self.data.guest.allow);
+ ini.WriteString('guest', 'username', Self.data.guest.username);
+ ini.WriteString('guest', 'password', Self.data.guest.password);
 
  ini.WriteInteger('F_Main', 'X', Self.data.frmPos.X);
  ini.WriteInteger('F_Main', 'Y', Self.data.frmPos.Y);

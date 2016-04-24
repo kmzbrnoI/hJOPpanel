@@ -38,7 +38,7 @@ const
 
 
 type
-  TAuthFilledCallback = procedure (Sender:TObject; username:string; password:string; ors:TIntAr) of object;
+  TAuthFilledCallback = procedure (Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean) of object;
 
   TF_Auth = class(TForm)
     P_Message: TPanel;
@@ -57,6 +57,7 @@ type
     E_username: TEdit;
     Label14: TLabel;
     ST_Error: TStaticText;
+    B_Guest: TButton;
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -81,8 +82,8 @@ type
     procedure ShowRelogin();
 
   public
-    procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr);
-    procedure Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr); // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
+    procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean);
+    procedure Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean); // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
 
     procedure AuthError(or_index:Integer; error:string);                        // zavolat pri prichodu chyby autorizace
     procedure AuthOK(or_index:Integer);                                         // zavolat pri uspesne autorizaci
@@ -107,11 +108,17 @@ begin
  for i := 0 to Length(Self.auth_ors)-1 do Self.auth_remaining.Add(Self.auth_ors[i]);
  Self.flistening := true;
 
+ if (Sender = Self.B_Guest) then
+  begin
+   Self.E_username.Text := GlobConfig.data.guest.username;
+   Self.E_Password.Text := 'heslo';
+  end;
+
  Self.auth_errors.Clear();
  Self.HideErrorMessage();
  Self.ShowLogging();
 
- if (Self.TB_Remeber.Position > 0) then
+ if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply)) then
   begin
    GlobConfig.data.auth.autoauth := true;
    GlobConfig.data.auth.username := Self.E_username.Text;
@@ -119,7 +126,10 @@ begin
    GlobConfig.data.auth.forgot   := (Self.TB_Remeber.Position = 1);
   end;
 
- Self.callback(Self, Self.E_username.Text, GenerateHash(AnsiString(Self.E_Password.Text)), Self.auth_ors);
+ if (Sender = Self.B_Apply) then
+   Self.callback(Self, Self.E_username.Text, GenerateHash(AnsiString(Self.E_Password.Text)), Self.auth_ors, false)
+ else
+   Self.callback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, Self.auth_ors, true);
 end;
 
 procedure TF_Auth.B_CancelClick(Sender: TObject);
@@ -157,7 +167,7 @@ begin
  if ((Key = ';') or (Key = ',')) then Key := #0;
 end;
 
-procedure TF_Auth.OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr);
+procedure TF_Auth.OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean);
 begin
  Self.flistening := false;
  Self.callback := callback;
@@ -175,10 +185,12 @@ begin
  Self.ActiveControl := Self.E_username;
  Self.Caption := caption;
 
+ Self.B_Guest.Visible := allow_guest and GlobConfig.data.guest.allow;
+
  Self.Show();
 end;
 
-procedure TF_Auth.Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr);
+procedure TF_Auth.Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean);
 var i:Integer;
 begin
  Self.flistening := true;
@@ -194,6 +206,7 @@ begin
  Self.E_Password.Text := '';
  Self.TB_Remeber.Position := remember_level;
  Self.Caption := caption;
+ Self.B_Guest.Visible := allow_guest and GlobConfig.data.guest.allow;
 end;
 
 procedure TF_Auth.TB_RemeberChange(Sender: TObject);
@@ -254,6 +267,9 @@ begin
 
  if (not Self.Showing) then Self.Show();
  Self.RefreshErrorMessage();
+
+ // po neuspesnem pokusu o prihlaseni povolime prihlaseni jako host
+ Self.B_Guest.Visible := GlobConfig.data.guest.allow;
 
  // znovu zobrazime prihlasovaci dialog
  if (Self.auth_remaining.Count = 0) then Self.ShowRelogin();

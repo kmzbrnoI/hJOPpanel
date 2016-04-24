@@ -91,9 +91,9 @@ object F_Auth: TF_Auth
       Caption = 'U'#382'ivatelsk'#233' jm'#233'no:'
     end
     object B_Apply: TButton
-      Left = 206
+      Left = 216
       Top = 327
-      Width = 75
+      Width = 57
       Height = 25
       Caption = 'OK'
       Default = True
@@ -102,9 +102,9 @@ object F_Auth: TF_Auth
       OnKeyPress = FormKeyPress
     end
     object B_Cancel: TButton
-      Left = 125
+      Left = 154
       Top = 327
-      Width = 75
+      Width = 56
       Height = 25
       Caption = 'Zru'#353'it'
       TabOrder = 4
@@ -199,6 +199,15 @@ object F_Auth: TF_Auth
       TabOrder = 0
       Text = 'E_username'
       OnKeyPress = FormKeyPress
+    end
+    object B_Guest: TButton
+      Left = 16
+      Top = 327
+      Width = 113
+      Height = 25
+      Caption = 'P'#345'ihl'#225'sit se jako host'
+      TabOrder = 6
+      OnClick = B_ApplyClick
     end
   end
 end

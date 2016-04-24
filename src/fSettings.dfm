@@ -49,7 +49,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_Timer
+    ActivePage = TS_Guest
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -439,7 +439,12 @@ object F_Settings: TF_Settings
           Top = 91
           Width = 225
           Height = 21
+          Hint = 
+            'Varov'#225'n'#237': po'#269'et znak'#367' neodpov'#237'd'#225' skute'#269'n'#233' d'#233'lce hesla, te'#269'ky v p' +
+            'oli jsou pouze ilustrativn'#237'.'
+          ParentShowHint = False
           PasswordChar = '*'
+          ShowHint = True
           TabOrder = 2
           Text = 'Edit1'
           OnChange = E_PasswordChange
@@ -574,6 +579,58 @@ object F_Settings: TF_Settings
             'opr'#225'vn'#283'n'#237' k z'#225'pisu'
             'superuser')
         end
+      end
+    end
+    object TS_Guest: TTabSheet
+      Caption = #218#269'et hosta'
+      ImageIndex = 9
+      object Label10: TLabel
+        Left = 200
+        Top = 72
+        Width = 90
+        Height = 13
+        Caption = 'U'#382'ivatelsk'#233' jm'#233'no:'
+      end
+      object Label18: TLabel
+        Left = 200
+        Top = 120
+        Width = 30
+        Height = 13
+        Caption = 'Heslo:'
+      end
+      object E_Guest_Username: TEdit
+        Left = 200
+        Top = 91
+        Width = 225
+        Height = 21
+        TabOrder = 0
+        Text = 'E_username'
+        OnKeyPress = E_usernameKeyPress
+      end
+      object E_Guest_Password: TEdit
+        Left = 200
+        Top = 139
+        Width = 225
+        Height = 21
+        Hint = 
+          'Varov'#225'n'#237': po'#269'et znak'#367' neodpov'#237'd'#225' skute'#269'n'#233' d'#233'lce hesla, te'#269'ky v p' +
+          'oli jsou pouze ilustrativn'#237'.'
+        ParentShowHint = False
+        PasswordChar = '*'
+        ShowHint = True
+        TabOrder = 1
+        Text = 'Edit1'
+        OnChange = E_Guest_PasswordChange
+        OnKeyPress = E_usernameKeyPress
+      end
+      object CHB_Guest_Enable: TCheckBox
+        Left = 200
+        Top = 49
+        Width = 105
+        Height = 17
+        Caption = 'Povolit '#250#269'et hosta'
+        TabOrder = 2
+        OnClick = CHB_Guest_EnableClick
       end
     end
     object TS_Regulator: TTabSheet
