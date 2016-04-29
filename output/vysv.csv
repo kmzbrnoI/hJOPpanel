@@ -1,0 +1,76 @@
+MP;Místní provoz
+DP;Dálkový provoz
+OSV;Osvětlení
+LOKO;Lokomotivy
+MSG;Zprávy
+CAS>;Spustit modelový čas
+CAS<;Zastavit modelový čas
+CAS;Nastavit modelový čas
+INFO;Zobrazit informace
+
+S+;Přestavit výhybku do polohy plus
+S-;Přestavit výhybku do polohy mínus
+NS+;Nouzové stavění do polohy plus
+NS-;Nouzové stavění do polohy mínus
+STIT;Editace štítku
+VYL;Editace výluky
+NUZ>;Nouzové uvolnění závěru
+NUZ<;Zrušení nouzového uvolnění závěru
+ZAV>;Zavedení nouzového závěru
+ZAV<;Zrušení nouzového závěru
+ZAST>;Zavedení zastávky
+ZAST<;Zrušení zastávky
+KC;Konec jízdní cesty
+VB;Variantní bod
+
+VC>;Počátek vlakové cesty
+VC<;Zrušení počátku vlakové cesty
+PC>;Počátek posunové cesty
+PC<;Zrušení počátku posunové cesty
+ZAM>;Zamknutí návěstidla do STŮJ
+ZAM<;Odemknutí návěstidla
+STUJ;Zrušení návěsti
+DN;Dodatečná návěst
+RC;Rušení jízdní cesty
+AB>;Automatické stavění
+AB<;Zrušení automatického stavění
+PN>;Zapnutí přivolávací návěsti
+PN<;Zrušení přivolávací návěsti
+PP>;Počátek nouzové posunové cesty
+PP<;Zrušení počátku nouzové posunové cesty
+PPN;Prodloužení svícení PN
+RNZ;Zrušení NZ po nouzové cestě
+
+UZ;Uzavření přejezdu
+ZUZ;Zrušení uzavření přejezdu
+NOT>;Nouzové otevření přejezdu
+NOT<;Zrušení nouzového otevření přejezdu
+
+ZTS>;Žádost o traťový souhlas
+ZTS<;Zrušení žádosti o traťový souhlas
+UTS;Udělení traťového souhlasu
+ZAK>;Zavedení zákazu odjezdu na trať
+ZAK<;Zrušení zákazu odjezdu na trať
+OTS;Odmítnutí žádosti o traťový souhlas
+RBP;Rušení poruchy blokové podmínky
+BP>;Zavedení blokové podmínky
+BP<;Zrušení blokové podmínky
+
+NOVÝ vlak;Zavedení nové soupravy
+EDIT vlak;Editace soupravy
+ZRUŠ vlak;Odstranění soupravy z kolejiště
+UVOL vlak;Odstranění soupravy z bloku
+VEZMI vlak;Navrátit vlak do kontroly automatu
+PŘESUŇ vlak>;Přesunout vlak na jinou kolej
+PŘESUŇ vlak<;Ukončit přesouvání vlaku
+JEĎ vlak;Odjet s vlakem ze zastávky
+RUČ vlak;Převzít loko do ručního ovladače
+
+NOVÁ loko;Vytvořit novou lokomotivu
+EDIT loko;Editovat lokomotivu
+SMAZAT loko;Smazat lokomotivu
+PŘEDAT loko;Předat lokomotivu do stanice
+RUČ loko;Převzít loko do ručního ovladače
+
+UK;Uvolnění klíče
+ZUK;Zrušení uvolnění klíče

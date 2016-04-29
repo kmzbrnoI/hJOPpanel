@@ -56,5 +56,10 @@ __history/
 # Castalia statistics file
 *.stat
 
-outunit/
-output/
+outunit/*
+output/panely
+output/*.lnk
+output/*.ini
+output/*.exe
+output/sounds/*
+output/desktop.bat
