@@ -292,6 +292,9 @@ begin
  Self.auth_remaining.Remove(or_index);
  Self.RefreshErrorMessage();
 
+ // necessary
+ if (Self.auth_errors.Count = 0) then Self.flistening := false;
+
  if ((Self.auth_errors.Count = 0) and (Self.Showing)) then
   begin
    if (Self.auth_remaining.Count = 0) then
