@@ -293,7 +293,7 @@ begin
  Self.RefreshErrorMessage();
 
  // necessary
- if (Self.auth_errors.Count = 0) then Self.flistening := false;
+ if ((Self.auth_errors.Count = 0) and (Self.auth_remaining.Count = 0)) then Self.flistening := false;
 
  if ((Self.auth_errors.Count = 0) and (Self.Showing)) then
   begin
