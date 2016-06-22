@@ -13,16 +13,10 @@ const
   _MAX_NAV      = 256;
   _MAX_POM      = 256;
   _MAX_VYH      = 256;
-  _MAX_TRT      = 16;
-  _MAX_SPR      = 8;
   _MAX_SYMBOLS  = 256;
-  _MAX_JCCLICK  = 16;
-  _MAX_KPOPISEK = 16;
   _MAX_POPISKY  = 64;
-  _MAX_JC       = 16;
   _MAX_PRJ      = 16;
   _MAX_PRJ_LEN  = 10;
-  _MAX_UV_SPR   = 16;
   _MAX_UVAZKY   = 256;
   _MAX_UVAZKY_SPR = 256;
   _MAX_ZAMKY    = 256;
@@ -890,7 +884,7 @@ implementation
 
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
-     fNastaveni_casu, LokoRuc, Sounds, fRegReq;
+     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
