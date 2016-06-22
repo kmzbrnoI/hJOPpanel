@@ -102,6 +102,7 @@ end;//dtor
 procedure TF_Messages.MsgReceive(msg:string; sender:string);
 var i:Integer;
     form:TF_Message;
+    id:string;
 begin
  if (not Self.Showing) then Self.Show();
  SoundsPlay.Play(_SND_ZPRAVA);
@@ -114,10 +115,10 @@ begin
     end;
 
  //okynko se zpravou neexituje -> otevreme ho
- for i := 0 to ORDb.cnt-1 do
-   if (ORDb.data[i].id = sender) then
+ for id in ORDb.db.Keys do
+   if (id = sender) then
     begin
-     form := Self.OpenTab(ORDb.data[i].name, sender);
+     form := Self.OpenTab(ORDb.db[id], sender);
      if (form <> nil) then form.ReceiveMsg(msg);
      Exit();
     end;
@@ -275,15 +276,15 @@ begin
 end;
 
 procedure TF_Messages.FormShow(Sender: TObject);
-var i:Integer;
-    LI:TListItem;
+var LI:TListItem;
+    id:string;
 begin
  Self.LV_ORs.Clear();
- for i := 0 to ORDb.cnt-1 do
+ for id in ORDb.db.Keys do
   begin
    LI := Self.LV_ORs.Items.Add;
-   LI.Caption := ORDb.data[i].name;
-   LI.SubItems.Add(ORDb.data[i].id);
+   LI.Caption := ORDb.db[id];
+   LI.SubItems.Add(id);
   end;
 
  Self.Caption := Self.name + ' - zprávy';

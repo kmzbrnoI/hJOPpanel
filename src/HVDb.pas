@@ -28,24 +28,25 @@ type
      procedure DefaultData();
 
    public
-     Nazev:string;                                       // nazev HV
-     Majitel:string;                                     // majitel HV
-     Oznaceni:string;                                    // oznaceni HV
-     Poznamka:String;                                    // poznamka k HV
-     Adresa:Word;
-     Trida:THVClass;                                     // trida hnaciho vozidla - parni, diesel, motor, elektro
-     Souprava:string;
-     StanovisteA:THVStanoviste;                          //0 = lichy; 1 = sudy
-     funkce:TFunkce;                                     // stav funkci
-     rychlost_stupne:Word;
-     rychlost_kmph:Word;
-     smer:Integer;
+     Nazev:string;                                                              // nazev HV
+     Majitel:string;                                                            // majitel HV
+     Oznaceni:string;                                                           // oznaceni HV
+     Poznamka:String;                                                           // poznamka k HV
+     Adresa:Word;                                                               // digitalni adresa HW (0..9999)
+     Trida:THVClass;                                                            // trida hnaciho vozidla - parni, diesel, motor, elektro
+     Souprava:string;                                                           // cislo soupravy, na ktere je HV
+     StanovisteA:THVStanoviste;                                                 // orientace stanoviste A
+     funkce:TFunkce;                                                            // stav funkci
+     rychlost_stupne:Word;                                                      // aktualni rychlost ve stupnich
+     rychlost_kmph:Word;                                                        // aktualni rychlost v km/h
+     smer:Integer;                                                              // aktualni smer
      token:string;
+     orid:string;                                                               // id oblasti rizeni, ve ktere se nachazi loko
 
-     POMtake : TList<THVPomCV>;                          // seznam POM pri prevzeti do automatu
-     POMrelease : TList<THVPomCV>;                       // seznam POM pri uvolneni to rucniho rizeni
+     POMtake : TList<THVPomCV>;                                                 // seznam POM pri prevzeti do automatu
+     POMrelease : TList<THVPomCV>;                                              // seznam POM pri uvolneni to rucniho rizeni
 
-     funcVyznam:array [0.._MAX_FUNC] of string;                         // seznam popisu funkci hnaciho vozidla
+     funcVyznam:array[0.._MAX_FUNC] of string;                                  // seznam popisu funkci hnaciho vozidla
 
      procedure ParseFromToken(data:string);
      procedure ParseData(data:string);
@@ -211,7 +212,7 @@ var str, str2, str3:TStrings;
     tmp:string;
 begin
  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|
- //   rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ //   rychlost_kmph|smer|or_id{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
  //   {vyznam-F0;vyznam-F1;...}|
 
  // souprava je bud cislo soupravy, nebo znak '-'
@@ -244,11 +245,12 @@ begin
    Self.rychlost_stupne := StrToInt(str[9]);
    Self.rychlost_kmph   := StrToInt(str[10]);
    Self.smer            := StrToInt(str[11]);
+   Self.orid            := str[12];
 
-   if (str.Count > 12) then
+   if (str.Count > 13) then
     begin
      // pom-take
-     ExtractStringsEx([']'] , ['['], str[12], str2);
+     ExtractStringsEx([']'] , ['['], str[13], str2);
      for tmp in str2 do
       begin
        str3.Clear();
@@ -260,7 +262,7 @@ begin
 
      // pom-release
      str2.Clear();
-     ExtractStringsEx([']'] , ['['], str[13], str2);
+     ExtractStringsEx([']'] , ['['], str[14], str2);
      for tmp in str2 do
       begin
        str3.Clear();
@@ -272,10 +274,10 @@ begin
     end;//if str.Count > 11
 
    // func-vyznam
-   if (str.Count > 14) then
+   if (str.Count > 15) then
     begin
      str2.Clear();
-     ExtractStringsEx([';'], [], str[14], str2);
+     ExtractStringsEx([';'], [], str[15], str2);
      for i := 0 to _MAX_FUNC do
        if (i < str2.Count) then
         Self.funcVyznam[i] := str2[i]
@@ -337,7 +339,7 @@ var i:Integer;
     pomCV:THVPomCv;
 begin
  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|-|stanovisteA|funkce|rychlost_stupne|
- //   rychlost_kmph|smer|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
+ //   rychlost_kmph|smer|or_id|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
  //   {vyznam-F0;vyznam-F1;...}|
  // souprava je bud cislo soupravy, nebo znak '-'
  Result := Self.Nazev + '|' + Self.Majitel + '|' + Self.Oznaceni + '|{' + Self.Poznamka + '}|' +
@@ -352,7 +354,7 @@ begin
      Result := Result + '0';
   end;
 
- Result := Result + '||||';
+ Result := Result + '||||'+Self.orid+'|';
 
  if (mode = full) then
   begin

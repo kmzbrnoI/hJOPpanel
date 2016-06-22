@@ -48,7 +48,7 @@ begin
    Exit();
   end;
 
- PanelTCPClient.PanelLokMove(Self.sender_id, hv_indexes[Self.CB_HV.ItemIndex], ORDb.data[Self.CB_Stanice.ItemIndex].id);
+ PanelTCPClient.PanelLokMove(Self.sender_id, hv_indexes[Self.CB_HV.ItemIndex], ORDb.db_reverse[Self.CB_Stanice.Items[Self.CB_Stanice.ItemIndex]]);
 
  Self.Close();
 end;//procedure
@@ -59,7 +59,7 @@ begin
 end;
 
 procedure TF_HV_Move.Open(sender:string; HVs:THVDb);
-var i:Integer;
+var name:string;
 begin
  Self.sender_id := sender;
 
@@ -69,8 +69,8 @@ begin
    HVs.FillHVs(Self.CB_HV, Self.hv_indexes);
 
  Self.CB_Stanice.Clear();
- for i := 0 to ORDb.cnt-1 do
-   Self.CB_Stanice.Items.Add(ORDb.data[i].name);
+ for name in ORDb.db.Values do
+   Self.CB_Stanice.Items.Add(name);
 
  Self.ActiveControl := Self.CB_HV;
  Self.Show();

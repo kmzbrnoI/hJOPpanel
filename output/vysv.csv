@@ -70,6 +70,7 @@ NOVÁ loko;Vytvořit novou lokomotivu
 EDIT loko;Editovat lokomotivu
 SMAZAT loko;Smazat lokomotivu
 PŘEDAT loko;Předat lokomotivu do stanice
+HLEDAT loko;Vyhledat lokomotivu v databázi serveru
 RUČ loko;Převzít loko do ručního ovladače
 
 UK;Uvolnění klíče

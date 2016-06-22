@@ -135,6 +135,8 @@ implementation
   -;LOK;addr;STOP;                                                              nouzove zastaveni
   -;LOK;addr;TOTAL;[0,1]                                                        nastaveni totalniho rizeni hnaciho vozidla
 
+  -;LOK;addr:ASK                                                                tazani se na existenci HV s adresou \addr; pokud existuje, chci o nem vedet data
+
   -;MTBd;                                                                       MTB debugger, viz MTBdebugger.pas
 
   or;NUZ;stav                                                                   1 = zapnout NUZ, 0 = vypnout NUZ
@@ -241,6 +243,9 @@ implementation
   -;LOK;addr;RESP;[ok, err];info;speed_kmph                                     odpoved na prikaz;  speed_kmph je nepovinny argument; info zpravidla obsahuje rozepsani chyby, pokud je odpoved "ok", info je prazdne
   -;LOK;addr;TOTAL;[0,1]                                                        zmena rucniho rizeni lokomotivy
 
+  -;LOK;addr:FOUND;lok-string                                                   odpoved na existenci hnaciho vozidla s adresou addr
+  -;LOK;addr;NOT-FOUND
+
   -;MTBd;                                                                       MTB debugger, viz MTBdebugger.pas
 
   -;F-VYZN-LIST;vyznam1;vyznam2;...                                             odeslani seznamu vyznamu funkci
@@ -297,7 +302,7 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
-      Resuscitation, GlobalCOnfig, HVDb, fRegReq, fHVEdit;
+      Resuscitation, GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -596,7 +601,14 @@ begin
   F_SprList.ParseLoko(parsed[2])
 
  else if ((parsed[1] = 'F-VYZN-LIST') and (parsed.Count > 2)) then
-  F_HVEdit.ParseVyznamy(parsed[2]);
+  F_HVEdit.ParseVyznamy(parsed[2])
+
+ else if ((parsed[1] = 'LOK') and (parsed[3] = 'FOUND')) then
+  F_HVSearch.LokoFound(THV.Create(parsed[4]))
+
+ else if ((parsed[1] = 'LOK') and (parsed[3] = 'NOT-FOUND')) then
+  F_HVSearch.LokoNotFound();
+
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

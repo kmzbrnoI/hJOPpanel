@@ -37,6 +37,7 @@ type
     LV_Pom_Release: TListView;
     LV_Funkce: TListView;
     Label10: TLabel;
+    B_Search: TButton;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
@@ -54,6 +55,7 @@ type
     procedure LV_Pom_ReleaseDblClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure B_SearchClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -193,6 +195,17 @@ end;//procedure
 procedure TF_HVEdit.B_CancelClick(Sender: TObject);
 begin
  Self.Close();
+end;
+
+procedure TF_HVEdit.B_SearchClick(Sender: TObject);
+begin
+ if (Self.E_Adresa.Text = '') then
+  begin
+   Application.MessageBox('Vyplòte adresu hnacího vozidla!', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
+
+ PanelTCPClient.SendLn('-;LOK;'+Self.E_Adresa.Text+';ASK');
 end;
 
 procedure TF_HVEdit.CB_HVChange(Sender: TObject);
@@ -351,6 +364,8 @@ begin
  for i := 0 to _MAX_FUNC do
    Self.CB_funkce[i].Text := '';
 
+ Self.B_Search.Visible := true;
+
  Self.Caption := 'Nové hnací vozidlo';
  Self.Show();
  Self.ActiveControl := Self.E_Name;
@@ -365,6 +380,8 @@ begin
  Self.CB_HV.Enabled := true;
  HVs.FillHVs(Self.CB_HV, Self.HVIndexes, -1, nil, true);
  Self.CB_HVChange(Self.CB_HV);
+
+ Self.B_Search.Visible := false;
 
  Self.Caption := 'Editovat hnací vozidlo';
  Self.Show();

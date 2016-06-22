@@ -3174,7 +3174,7 @@ begin
  // nejdøív aktualizuji seznam LOKO
  PanelTCPClient.PanelLokList(Self.myORs[Sender].id);
 
- menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PØEDAT loko,RUÈ loko';
+ menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PØEDAT loko,HLEDAT loko,RUÈ loko';
 
  Self.special_menu := loko;
  aPos := Self.Menu.ShowMenu(menu_str, Sender);
@@ -3316,6 +3316,7 @@ begin
  else if (item = 'EDIT loko')   then F_HVEdit.HVEdit(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'SMAZAT loko') then F_HVDelete.OpenForm(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'PØEDAT loko') then F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+ else if (item = 'HLEDAT loko') then F_HVSearch.Show()
  else if (item = 'RUÈ loko')    then
    F_RegReq.Open(
       Self.myORs[obl_r].HVs,

@@ -43,7 +43,8 @@ uses
   Verze in 'Verze.pas',
   fRegReq in 'fRegReq.pas' {F_RegReq},
   fHVPomEdit in 'fHVPomEdit.pas' {F_HV_Pom},
-  Hash in 'Hash.pas';
+  Hash in 'Hash.pas',
+  fHVSearch in 'fHVSearch.pas' {F_HVSearch};
 
 {$R *.res}
 
@@ -69,6 +70,7 @@ begin
   Application.CreateForm(TF_SprList, F_SprList);
   Application.CreateForm(TF_RegReq, F_RegReq);
   Application.CreateForm(TF_HV_Pom, F_HV_Pom);
+  Application.CreateForm(TF_HVSearch, F_HVSearch);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))
   else

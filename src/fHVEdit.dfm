@@ -31,7 +31,7 @@ object F_HVEdit: TF_HVEdit
     Width = 641
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 0
     OnChange = CB_HVChange
   end
@@ -406,6 +406,15 @@ object F_HVEdit: TF_HVEdit
       ParentFont = False
       TabOrder = 9
       ViewStyle = vsReport
+    end
+    object B_Search: TButton
+      Left = 112
+      Top = 132
+      Width = 121
+      Height = 25
+      Caption = 'Existuje lokomotiva?'
+      TabOrder = 10
+      OnClick = B_SearchClick
     end
   end
   object B_Apply: TButton
