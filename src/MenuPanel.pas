@@ -57,7 +57,7 @@ type
       constructor Create(Graphics:TPanelGraphics);
       destructor Destroy(); override;
 
-      function ShowMenu(items:string; obl_r:Integer):TPoint;   // vraci pozici, na kterou ma jit kurzor
+      procedure ShowMenu(items:string; obl_r:Integer; absoluteLeftTop:TPoint);   // vraci pozici, na kterou ma jit kurzor
       procedure PaintMenu(Canvas:TCanvas; mouse_pos:TPoint);
       procedure Click();
       procedure KeyPress(key:Integer; var handled:boolean);
@@ -105,11 +105,10 @@ end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPanelMenu.ShowMenu(items:string; obl_r:Integer):TPoint;
+procedure TPanelMenu.ShowMenu(items:string; obl_r:Integer; absoluteLeftTop:TPoint);
 var i:Integer;
 begin
  Self.ParseMenuItems(items);
- Self.fshowing  := true;
  Self.fselected := -1;
 
  for i := 0 to Self.Items.cnt-1 do
@@ -118,7 +117,10 @@ begin
 
  Self.fobl_r := obl_r;
 
- Result := Point((SymbolSet._Symbol_Sirka*3), (SymbolSet._Symbol_Vyska*(i+1))+SymbolSet._Symbol_Vyska+(SymbolSet._Symbol_Vyska div 2));
+ SetCursorPos(absoluteLeftTop.X + (SymbolSet._Symbol_Sirka*3),
+              absoluteLeftTop.Y + (SymbolSet._Symbol_Vyska*(i+1))+SymbolSet._Symbol_Vyska+(SymbolSet._Symbol_Vyska div 2));
+
+ Self.fshowing  := true;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

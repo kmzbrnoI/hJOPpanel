@@ -3021,16 +3021,10 @@ end;//procedure
 
 //technologie posle nejake menu a my ho zobrazime:
 procedure TRelief.ORShowMenu(items:string);
-var aPos, bPos:TPoint;
 begin
  Self.menu_lastpos := Self.CursorDraw.Pos;
  Self.special_menu := TSpecialMenu.none;
-
- // show vraci pozici, na kterou je potreba dat kurzor
- aPos := Self.Menu.ShowMenu(items, -1);
- bPos := Self.DrawObject.ClientToScreen(Point(0,0));
- aPos := Point(aPos.X + bPos.X, aPos.Y + bPos.Y);
- SetCursorPos(aPos.X, aPos.Y);
+ Self.Menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0,0)));
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3049,7 +3043,6 @@ end;//procedure
 
 procedure TRelief.ShowDKMenu(obl_rizeni:Integer);
 var menu_str:string;
-    aPos,bPos:TPoint;
 begin
  if (PanelTCPClient.status <> TPanelConnectionStatus.opened) then Exit();
 
@@ -3103,12 +3096,7 @@ begin
  Self.special_menu := dk;
  Self.menu_lastpos := Self.CursorDraw.Pos;
 
- aPos := Self.Menu.ShowMenu(menu_str, obl_rizeni);
- bPos := Self.DrawObject.ClientToScreen(Point(0,0));
- aPos := Point(aPos.X + bPos.X, aPos.Y + bPos.Y);
- SetCursorPos(aPos.X, aPos.Y);
-
- Self.Show();
+ Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3148,7 +3136,6 @@ end;//procedure
 procedure TRelief.DKMenuClickOSV(Sender:Integer; item:string);
 var menu_str:string;
     i:Integer;
-    aPos,bPos:TPoint;
 begin
  menu_str := '$'+Self.myORs[Sender].Name+',$Osvìtlení,-,';
 
@@ -3161,15 +3148,11 @@ begin
   end;
 
  Self.special_menu := osv;
- aPos := Self.Menu.ShowMenu(menu_str, Sender);
- bPos := Self.DrawObject.ClientToScreen(Point(0,0));
- aPos := Point(aPos.X + bPos.X, aPos.Y + bPos.Y);
- SetCursorPos(aPos.X, aPos.Y);
+ Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
 end;//procedure
 
 procedure TRelief.DKMenuClickLOKO(Sender:Integer; item:string);
 var menu_str:string;
-    aPos,bPos:TPoint;
 begin
  // nejdøív aktualizuji seznam LOKO
  PanelTCPClient.PanelLokList(Self.myORs[Sender].id);
@@ -3177,10 +3160,7 @@ begin
  menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PØEDAT loko,HLEDAT loko,RUÈ loko';
 
  Self.special_menu := loko;
- aPos := Self.Menu.ShowMenu(menu_str, Sender);
- bPos := Self.DrawObject.ClientToScreen(Point(0,0));
- aPos := Point(aPos.X + bPos.X, aPos.Y + bPos.Y);
- SetCursorPos(aPos.X, aPos.Y);
+ Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
 end;//procedure
 
 procedure TRelief.DKMenuClickSUPERUSER(Sender:Integer; item:string);
@@ -3256,7 +3236,6 @@ end;//procedure
 
 procedure TRelief.ShowRegMenu(obl_rizeni:Integer);
 var menu_str:string;
-    aPos,bPos:TPoint;
 begin
  if ((PanelTCPClient.status <> TPanelConnectionStatus.opened) or
      (Self.myORs[obl_rizeni].RegPlease.status = TORRegPleaseStatus.null)) then Exit();
@@ -3268,14 +3247,9 @@ begin
  Self.special_menu := reg_please;
  Self.menu_lastpos := Self.CursorDraw.Pos;
 
- aPos := Self.Menu.ShowMenu(menu_str, obl_rizeni);
- bPos := Self.DrawObject.ClientToScreen(Point(0,0));
- aPos := Point(aPos.X + bPos.X, aPos.Y + bPos.Y);
- SetCursorPos(aPos.X, aPos.Y);
+ Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
 
  PanelTCPClient.PanelLokList(Self.myORs[obl_rizeni].id);
-
- Self.Show();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
