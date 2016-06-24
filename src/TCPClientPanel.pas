@@ -419,7 +419,8 @@ begin
  if (F_StitVyl.Showing) then F_StitVyl.Close();
  if (F_SoupravaEdit.Showing) then F_SoupravaEdit.Close();
  if (F_PotvrSekv.Showing) then F_PotvrSekv.Close();
- if (F_SprList.Showing) then F_SprList.Close(); 
+ if (F_SprList.Showing) then F_SprList.Close();
+ if (F_HVSearch.Showing) then F_HVSearch.Close();
 
  SoundsPlay.DeleteAll();
  ModCas.Reset();
