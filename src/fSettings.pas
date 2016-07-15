@@ -188,7 +188,10 @@ begin
     GlobConfig.data.guest.password := '';
   end;
 
- GlobConfig.data.uLI.path := Self.E_uLI_Path.Text;
+ if (Self.CHB_uLI_Run.Checked) then
+   GlobConfig.data.uLI.path := Self.E_uLI_Path.Text
+ else
+   GlobConfig.data.uLI.path := '';
  GlobConfig.data.uLI.use  := Self.CHB_uLI_Login.Checked;
 
  if (Self.LB_Timer.ItemIndex > -1) then
