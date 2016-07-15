@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DXDraws, ComCtrls, ExtCtrls, ImgList, Panel, AppEvnts, ActnList,
-  Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation;
+  Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation, ShellApi;
 
 const
   _open_file_errors: array [1..3] of string =
@@ -249,6 +249,7 @@ end;
 
 procedure TF_Main.Init(const config_fn:string);
 var return:Integer;
+    f:string;
 begin
  F_splash.AddStav('Naèítám konfiguraci...');
 
@@ -312,6 +313,15 @@ begin
   begin
    Self.Left := GlobConfig.data.frmPos.X;
    Self.Top := GlobConfig.data.frmPos.Y;
+  end;
+
+ if (GlobConfig.data.uLI.path <> '') then
+  begin
+   F_splash.AddStav('Spouštím uLI-daemon...');
+   f := ExpandFileName(GlobConfig.data.uLI.path);
+   return := ShellExecute(Self.Handle, 'open', PChar(f), '', PChar(ExtractFilePath(GlobConfig.data.uLI.path)), SW_SHOWNOACTIVATE);
+   if (return < 32) then
+     Application.MessageBox(PChar('Nelze spustit uLI-daemon, chyba'+IntToStr(return)+#13#10+f), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
   end;
 
  F_splash.AddStav('Hotovo');
