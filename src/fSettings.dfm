@@ -49,7 +49,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_Guest
+    ActivePage = TS_uLIdaemon
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -680,6 +680,76 @@ object F_Settings: TF_Settings
         TabOrder = 3
       end
     end
+    object TS_uLIdaemon: TTabSheet
+      Caption = 'uLI-daemon'
+      ImageIndex = 10
+      object GB_uLI_Run: TGroupBox
+        Left = 123
+        Top = 15
+        Width = 374
+        Height = 122
+        TabOrder = 0
+        object Label19: TLabel
+          Left = 12
+          Top = 41
+          Width = 157
+          Height = 13
+          Caption = 'Cesta ke spustiteln'#233'mu souboru:'
+        end
+        object CHB_uLI_Run: TCheckBox
+          Left = 12
+          Top = 10
+          Width = 233
+          Height = 17
+          Caption = 'Spustit uLI-daemon se startem hJOPpanelu'
+          TabOrder = 0
+          OnClick = CHB_uLI_RunClick
+        end
+        object E_uLI_Path: TEdit
+          Left = 12
+          Top = 60
+          Width = 349
+          Height = 21
+          TabOrder = 1
+          Text = '[E_Panel]'
+        end
+        object B_uLI_Search: TButton
+          Tag = 1
+          Left = 287
+          Top = 87
+          Width = 75
+          Height = 21
+          Caption = 'Proch'#225'zet'
+          TabOrder = 2
+          OnClick = B_uLI_SearchClick
+        end
+        object CHB_uLI_Rel: TCheckBox
+          Left = 12
+          Top = 87
+          Width = 97
+          Height = 17
+          Caption = 'Relativn'#237' cesty'
+          Checked = True
+          State = cbChecked
+          TabOrder = 3
+        end
+      end
+      object GB_uLI_Connect: TGroupBox
+        Left = 123
+        Top = 151
+        Width = 374
+        Height = 80
+        TabOrder = 1
+        object CHB_uLI_Login: TCheckBox
+          Left = 112
+          Top = 32
+          Width = 153
+          Height = 17
+          Caption = 'Pou'#382#237'vat lok'#225'ln'#237' uLI-daemon'
+          TabOrder = 0
+        end
+      end
+    end
   end
   object OD_Snd: TOpenDialog
     Filter = 'Zvuk (*.wav)|*.wav'
@@ -699,6 +769,11 @@ object F_Settings: TF_Settings
   object OD_Reg: TOpenDialog
     Filter = 'Exe soubor (*.exe)|*.exe'
     Left = 240
+    Top = 272
+  end
+  object OD_uLI: TOpenDialog
+    Filter = 'Exe soubor (*.exe)|*.exe'
+    Left = 312
     Top = 272
   end
 end

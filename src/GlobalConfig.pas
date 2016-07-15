@@ -39,6 +39,11 @@ type
     reg_user:boolean;
   end;
 
+  TuLIConfig = record
+    path:string;
+    use:boolean;
+  end;
+
   TGlobConfigData = record
     panel_fn:string;
     panel_mouse:Integer;
@@ -51,6 +56,7 @@ type
     vysv_fn:string;
     frmPos:TPoint;
     resuscitation:boolean;
+    uLI:TuLIConfig;
   end;
 
   TGlobConfig = class
@@ -155,6 +161,9 @@ begin
  Self.data.guest.username     := ini.ReadString('guest', 'username', '');
  Self.data.guest.password     := ini.ReadString('guest', 'password', '');
 
+ Self.data.uLI.path           := ini.ReadString('uLI-daemon', 'path', '');
+ Self.data.uLI.use            := ini.ReadBool('uli-daemon', 'connect', false);
+
  Self.data.frmPos.X := ini.ReadInteger('F_Main', 'X', 0);
  Self.data.frmPos.Y := ini.ReadInteger('F_Main', 'Y', 0);
 
@@ -209,6 +218,9 @@ begin
  ini.WriteBool('guest', 'allow', Self.data.guest.allow);
  ini.WriteString('guest', 'username', Self.data.guest.username);
  ini.WriteString('guest', 'password', Self.data.guest.password);
+
+ ini.WriteString('uLI-daemon', 'path', Self.data.uLI.path);
+ ini.WriteBool('uli-daemon', 'connect', Self.data.uLI.use);
 
  ini.WriteInteger('F_Main', 'X', Self.data.frmPos.X);
  ini.WriteInteger('F_Main', 'Y', Self.data.frmPos.Y);

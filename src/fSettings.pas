@@ -90,6 +90,16 @@ type
     Label18: TLabel;
     E_Guest_Password: TEdit;
     CHB_Guest_Enable: TCheckBox;
+    TS_uLIdaemon: TTabSheet;
+    GB_uLI_Run: TGroupBox;
+    CHB_uLI_Run: TCheckBox;
+    Label19: TLabel;
+    E_uLI_Path: TEdit;
+    B_uLI_Search: TButton;
+    CHB_uLI_Rel: TCheckBox;
+    GB_uLI_Connect: TGroupBox;
+    CHB_uLI_Login: TCheckBox;
+    OD_uLI: TOpenDialog;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -109,6 +119,8 @@ type
     procedure LB_TimerDblClick(Sender: TObject);
     procedure E_Guest_PasswordChange(Sender: TObject);
     procedure CHB_Guest_EnableClick(Sender: TObject);
+    procedure B_uLI_SearchClick(Sender: TObject);
+    procedure CHB_uLI_RunClick(Sender: TObject);
   private
     passwdChanged: boolean;
     guestPasswdChanged: boolean;
@@ -176,6 +188,8 @@ begin
     GlobConfig.data.guest.password := '';
   end;
 
+ GlobConfig.data.uLI.path := Self.E_uLI_Path.Text;
+ GlobConfig.data.uLI.use  := Self.CHB_uLI_Login.Checked;
 
  if (Self.LB_Timer.ItemIndex > -1) then
    F_Main.T_Main.Interval       := StrToInt(Self.LB_Timer.Items.Strings[Self.LB_Timer.ItemIndex]);
@@ -299,6 +313,21 @@ begin
  Self.Close();
 end;
 
+procedure TF_Settings.B_uLI_SearchClick(Sender: TObject);
+var fn:string;
+begin
+ Self.OD_uLI.InitialDir := ExtractFileDir(ExpandFileName(Self.E_uLI_Path.Text));
+ if (Self.OD_uLI.Execute(Self.Handle)) then
+  begin
+   if (Self.CHB_uLI_Rel.Checked) then
+    fn := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_uLI.FileName)
+   else
+    fn := Self.OD_uLI.FileName;
+
+   Self.E_uLI_Path.Text := fn;
+  end;
+end;
+
 procedure TF_Settings.CB_ORRightsChange(Sender: TObject);
 var i:Integer;
 begin
@@ -345,6 +374,13 @@ begin
   Self.E_Password.PasswordChar := #0
  else
   Self.E_Password.PasswordChar := '*';
+end;
+
+procedure TF_Settings.CHB_uLI_RunClick(Sender: TObject);
+begin
+ Self.E_uLI_Path.Enabled   := Self.CHB_uLI_Run.Checked;
+ Self.B_uLI_Search.Enabled := Self.CHB_uLI_Run.Checked;
+ Self.CHB_uLI_Rel.Enabled  := Self.CHB_uLI_Run.Checked;
 end;
 
 procedure TF_Settings.E_Guest_PasswordChange(Sender: TObject);
@@ -474,6 +510,11 @@ begin
 
  Self.CHB_Guest_Enable.Checked := data.guest.allow;
  Self.CHB_Guest_EnableClick(Self.CHB_Guest_Enable);
+
+ Self.E_uLI_Path.Text       := data.uLI.path;
+ Self.CHB_uLI_Run.Checked   := (data.uLI.path <> '');
+ Self.CHB_uLI_Run.OnClick(Self);
+ Self.CHB_uLI_Login.Checked := data.uLI.use;
 
  Self.CB_ORRights.Enabled := false;
  Self.LB_AutoAuthOR.Clear();
