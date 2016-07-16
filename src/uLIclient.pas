@@ -3,10 +3,11 @@ unit uLIClient;
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
-     Classes, StrUtils, RPConst;
+     Classes, StrUtils, RPConst, Resuscitation, Windows;
 
 const
   _BRIDGE_DEFAULT_PORT = 5733;                                                  // default port, na ktere bezi bridge server
+  _BRIDGE_DEFAULT_SERVER = '127.0.0.1';
 
 type
   TBridgeClient = class
@@ -19,11 +20,14 @@ type
     parsed: TStrings;
     data:string;
     control_disconnect:boolean;       // je true, pokud disconnect plyne ode me
+    resusc_destroy:boolean;
+    resusc:TResuscitation;
 
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
      procedure DataReceived(const data: string);
      procedure Timeout();   // timeout from socket = broken pipe
+     procedure ConnectionResusced(Sender:TObject);
 
      // data se predavaji v Self.Parsed
      procedure Parse();
@@ -39,6 +43,7 @@ type
      function Disconnect():Integer;
 
      procedure SendLn(str:string);
+     procedure Update();
 
      property opened : boolean read GetOpened;
   end;//TPanelTCPClient
@@ -99,10 +104,32 @@ begin
  Self.tcpClient.OnConnected := Self.OnTcpClientConnected;
  Self.tcpClient.OnDisconnected := Self.OnTcpClientDisconnected;
  Self.tcpClient.ConnectTimeout := 1500;
+
+ Self.resusc_destroy := false;
+ Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
+ Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
+ Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
+ Self.resusc.Resume();
 end;//ctor
 
 destructor TBridgeClient.Destroy();
 begin
+ Self.control_disconnect := true;
+
+ // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
+ if (Assigned(Self.resusc)) then
+  begin
+   try
+     TerminateThread(Self.resusc.Handle, 0);
+   finally
+     if Assigned(Self.resusc) then
+     begin
+       Resusc.WaitFor;
+       FreeAndNil(Self.resusc);
+     end;
+   end;
+  end;
+
  if (Assigned(Self.tcpClient)) then
    FreeAndNil(Self.tcpClient);
 
@@ -181,6 +208,15 @@ end;//procedure
 procedure TBridgeClient.OnTcpClientDisconnected(Sender: TObject);
 begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
+
+ // resuscitace spojeni se serverem
+ if (not Self.control_disconnect) then
+  begin
+   Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
+   Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
+   Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
+   Self.resusc.Resume();
+  end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +279,30 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+procedure TBridgeClient.Update();
+begin
+ if (Self.resusc_destroy) then
+  begin
+   Self.resusc_destroy := false;
+   try
+     Self.resusc.Terminate();
+   finally
+     if Assigned(Self.resusc) then
+     begin
+       Self.resusc.WaitFor;
+       FreeAndNil(Self.resusc);
+     end;
+   end;
+  end;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
+
+procedure TBridgeClient.ConnectionResusced(Sender:TObject);
+begin
+ Self.Connect(_BRIDGE_DEFAULT_SERVER, _BRIDGE_DEFAULT_PORT);
+ Self.resusc_destroy := true;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

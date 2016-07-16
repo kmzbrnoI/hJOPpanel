@@ -95,7 +95,7 @@ var
 implementation
 
 uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds,
-  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, RPConst;
+  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, RPConst, uLIclient;
 
 {$R *.dfm}
 
@@ -371,12 +371,13 @@ end;
 
 procedure TF_Main.T_MainTimer(Sender: TObject);
 begin
- Relief.Show();
+ if (Assigned(Relief)) then Relief.Show();
 
  Self.P_Time.Caption := FormatDateTime('hh:mm:ss', Now);
  Self.P_Date.Caption := FormatDateTime('d.m.yyyy', Now);
 
  PanelTCPClient.Update();
+ BridgeClient.Update();
 
  if ((SoundsPlay.muted) and (Self.mute_time + EncodeTime(0, _MUTE_MIN, 0, 0) <= Now)) then
   begin

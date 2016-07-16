@@ -331,6 +331,8 @@ end;//ctor
 
 destructor TPanelTCPClient.Destroy();
 begin
+ Self.control_disconnect := true;
+
  // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
  if (Assigned(Self.resusct)) then
   begin
