@@ -73,8 +73,8 @@ SLOTS?                                   - pozadavek na vraceni seznamu slotu a 
 /////////////////////////// SERVER -> KLIENT ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LOKO;addr;ok                             - loko uspesne prevzato
-LOKO;err_code;error message              - loko se nepodarilo prevzit
+LOKO;ok                                  - loko uspesne prevzato
+LOKO;err;err_code;error message          - loko se nepodarilo prevzit
 SLOTS;[F/-/#];[F/-/#];...                  - sloty, ktere ma daemon k dispozici
                                            '-' je prazdny slot
                                            '#' je nefunkcni slot
@@ -193,6 +193,9 @@ begin
 
  Self.data := data;
 
+ if (parsed.Count < 0) then Exit();
+ parsed[0] := UpperCase(parsed[0]);
+
  try
    Self.Parse()
  except
@@ -211,7 +214,11 @@ end;//procedure
 
 procedure TBridgeClient.Parse();
 begin
-{ if (Self.parsed[0] = 'HELLO') then }
+ if (parsed[0] = 'SLOTS') then begin
+
+ end else if (parsed[0] = 'LOKO') then begin
+
+ end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

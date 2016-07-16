@@ -4,7 +4,7 @@ interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
      Classes, StrUtils, RPConst, Graphics, Windows, fPotvrSekv, Forms, Controls,
-     Generics.Collections;
+     Generics.Collections, Resuscitation;
 
 const
   _DEFAULT_PORT = 5896;
@@ -29,6 +29,7 @@ type
     parsed: TStrings;
     data:string;
     control_disconnect:boolean;       // je true, pokud disconnect plyne ode me
+    recusc_destroy:boolean;
 
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
@@ -52,7 +53,11 @@ type
 
      procedure OsvListParse(oblr:string; data:string);
 
+     procedure ConnetionResusced(Sender:TObject);
+
    public
+
+    resusct : TResuscitation;
 
      constructor Create();
      destructor Destroy(); override;
@@ -63,6 +68,8 @@ type
      function Disconnect():Integer;
 
      procedure SendLn(str:string);
+
+     procedure Update();
 
      // udalosti z panelu:
       procedure PanelAuthorise(Sender:string; rights:TORControlRights; username,password:string);
@@ -302,13 +309,13 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
-      Resuscitation, GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch;
+      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor TPanelTCPClient.Create();
 begin
- inherited Create();
+ inherited;
 
  Self.parsed := TStringList.Create;
 
@@ -318,10 +325,26 @@ begin
  Self.tcpClient.ConnectTimeout := 1500;
 
  Self.fstatus := TPanelConnectionStatus.closed;
+ Self.resusct := nil;
+ self.recusc_destroy := false;
 end;//ctor
 
 destructor TPanelTCPClient.Destroy();
 begin
+ // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
+ if (Assigned(Self.resusct)) then
+  begin
+   try
+     TerminateThread(Self.resusct.Handle, 0);
+   finally
+     if Assigned(Self.resusct) then
+     begin
+       Resusct.WaitFor;
+       FreeAndNil(Self.resusct);
+     end;
+   end;
+  end;
+
  if (Assigned(Self.tcpClient)) then
    FreeAndNil(Self.tcpClient);
 
@@ -449,7 +472,7 @@ begin
  // Resuscitaci povolime, pokud jsme od serveru byli odpojeni jinak, nez vlastni vuli.
  if ((not Self.control_disconnect) and (GlobConfig.data.resuscitation)) then
   begin
-   Resusct := TResuscitation.Create(true);
+   Resusct := TResuscitation.Create(true, Self.ConnetionResusced);
    Resusct.server_ip   := GlobConfig.data.server.host;
    Resusct.server_port := GlobConfig.data.server.port;
    Resusct.Resume();
@@ -1034,6 +1057,34 @@ procedure TPanelTCPClient.PanelHVEdit(Sender:string; data:string);
 begin
  Self.SendLn(Sender+';HV;EDIT;'+data);
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelTCPClient.ConnetionResusced(Sender:TObject);
+begin
+ Self.Connect(GlobConfig.data.server.host, GlobConfig.data.server.port);
+ while (Errors.Count > 0) do Errors.removeerror();
+ Self.recusc_destroy := true;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelTCPClient.Update();
+begin
+ if (Self.recusc_destroy) then
+  begin
+   Self.recusc_destroy := false;
+   try
+     Self.resusct.Terminate();
+   finally
+     if Assigned(Self.resusct) then
+     begin
+       Self.resusct.WaitFor;
+       FreeAndNil(Self.resusct);
+     end;
+   end;
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

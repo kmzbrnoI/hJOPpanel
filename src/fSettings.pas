@@ -133,7 +133,7 @@ var
 
 implementation
 
-uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth;
+uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth, TCPClientPanel;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -211,10 +211,10 @@ begin
    F_Main.DXD_Main.Cursor := crDefault;
   end;
 
- if (Assigned(Resusct)) then
+ if (Assigned(PanelTCPClient.resusct)) then
   begin
-   Resusct.server_ip   := GlobConfig.data.server.host;
-   Resusct.server_port := GlobConfig.data.server.port;
+   PanelTCPClient.Resusct.server_ip   := GlobConfig.data.server.host;
+   PanelTCPClient.Resusct.server_port := GlobConfig.data.server.port;
   end;
 
  if (oldss <> GlobConfig.data.symbolSet) then

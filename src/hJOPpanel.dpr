@@ -44,7 +44,8 @@ uses
   fRegReq in 'fRegReq.pas' {F_RegReq},
   fHVPomEdit in 'fHVPomEdit.pas' {F_HV_Pom},
   Hash in 'Hash.pas',
-  fHVSearch in 'fHVSearch.pas' {F_HVSearch};
+  fHVSearch in 'fHVSearch.pas' {F_HVSearch},
+  uLIclient in 'uLIclient.pas';
 
 {$R *.res}
 

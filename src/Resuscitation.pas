@@ -13,21 +13,24 @@ type
   TResuscitation = class(TThread)
   private
     frunning:boolean;
+    fOnActivate:TNotifyEvent;
 
   protected
 
     procedure Execute; override;
+    procedure Activate();
 
   public
     server_ip:string;
     server_port:Word;
 
+    constructor Create(CreateSuspended:boolean; activateCallback:TNotifyEvent = nil);
+
     property running:boolean read frunning;
 
-  end;
+    property OnActivate : TNotifyEvent read fOnActivate write fOnActivate;
 
-var
-  Resusct : TResuscitation;
+  end;
 
 implementation
 
@@ -45,17 +48,23 @@ implementation
 
 { TResuscitation }
 
+constructor TResuscitation.Create(CreateSuspended:boolean; activateCallback:TNotifyEvent = nil);
+begin
+ inherited Create(CreateSuspended);
+ Self.fOnActivate := activateCallback;
+ Self.frunning    := false;
+end;
+
+procedure TResuscitation.Activate();
+begin
+ if (Assigned(Self.fOnActivate)) then Self.fOnActivate(Self);
+end;
+
 procedure TResuscitation.Execute;
 var IdTCPClient : TIdTCPClient;
-//    TmpIdIOHandlerSocket : TIdIOHandlerSocket;
     i:Integer;
 begin
- Self.frunning := false;
-
  IdTCPClient := TIdTCPClient.Create(nil);
-// TmpIdIOHandlerSocket := TIdIOHandlerSocket.Create;
-// TmpIdIOHandlerSocket.ConnectTimeout := 200;
-// IdTCPClient.IOHandler := TmpIdIOHandlerSocket;
 
  while (not Terminated) do
   begin
@@ -66,6 +75,7 @@ begin
 
       Self.frunning := true;
       Self.Terminate();
+      if (Assigned(Self.fOnActivate)) then Synchronize(Activate);
     except
       Self.frunning := false;
     end;
@@ -81,10 +91,5 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-
-initialization
-
-finalization
-  if (Assigned(Resusct)) then Resusct.Free();
 
 end.//unit

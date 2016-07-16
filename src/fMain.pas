@@ -198,20 +198,6 @@ var data:TGlobConfigData;
 begin
  Screen.Cursor := crHourGlass;
 
- // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
- if (Assigned(Resusct)) then
-  begin
-   try
-     TerminateThread(Resusct.Handle, 0);
-   finally
-     if Assigned(Resusct) then
-     begin
-       Resusct.WaitFor;
-       FreeAndNil(Resusct);
-     end;
-   end;
-  end;
-
  if (Assigned(GlobConfig)) then
   begin
    data := GlobConfig.data;
@@ -390,31 +376,14 @@ begin
  Self.P_Time.Caption := FormatDateTime('hh:mm:ss', Now);
  Self.P_Date.Caption := FormatDateTime('d.m.yyyy', Now);
 
+ PanelTCPClient.Update();
+
  if ((SoundsPlay.muted) and (Self.mute_time + EncodeTime(0, _MUTE_MIN, 0, 0) <= Now)) then
   begin
    Self.SB_Mute.AllowAllUp := not Self.SB_Mute.AllowAllUp;
    Self.SB_Mute.Down := not Self.SB_Mute.Down;
    SoundsPlay.muted := false;
   end;
-
- // kontrola resusctitace spojeni
- if ((Assigned(Resusct)) and (Resusct.running)) then
-  begin
-    try
-     Resusct.Terminate();
-    finally
-     if Assigned(Resusct) then
-     begin
-       Resusct.WaitFor;
-       FreeAndNil(Resusct);
-     end;
-    end;
-
-   PanelTCPClient.Connect(GlobConfig.data.server.host, GlobConfig.data.server.port);
-
-   while (Errors.Count > 0) do Errors.removeerror();
-  end;
-
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
