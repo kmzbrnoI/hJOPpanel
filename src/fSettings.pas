@@ -133,7 +133,8 @@ var
 
 implementation
 
-uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth, TCPClientPanel;
+uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth, TCPClientPanel,
+     uLIclient;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -193,6 +194,8 @@ begin
  else
    GlobConfig.data.uLI.path := '';
  GlobConfig.data.uLI.use  := Self.CHB_uLI_Login.Checked;
+
+ BridgeClient.enabled := GlobConfig.data.uLI.use;
 
  if (Self.LB_Timer.ItemIndex > -1) then
    F_Main.T_Main.Interval       := StrToInt(Self.LB_Timer.Items.Strings[Self.LB_Timer.ItemIndex]);

@@ -4,7 +4,7 @@ object F_Auth: TF_Auth
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Server vy'#382'aduje autentizaci'
-  ClientHeight = 377
+  ClientHeight = 401
   ClientWidth = 305
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -62,7 +62,7 @@ object F_Auth: TF_Auth
     Left = 8
     Top = 8
     Width = 289
-    Height = 361
+    Height = 385
     BevelOuter = bvNone
     Caption = 'P_Body'
     ParentColor = True
@@ -93,7 +93,7 @@ object F_Auth: TF_Auth
     end
     object B_Apply: TButton
       Left = 216
-      Top = 327
+      Top = 354
       Width = 57
       Height = 25
       Caption = 'OK'
@@ -104,7 +104,7 @@ object F_Auth: TF_Auth
     end
     object B_Cancel: TButton
       Left = 154
-      Top = 327
+      Top = 354
       Width = 56
       Height = 25
       Caption = 'Zru'#353'it'
@@ -203,12 +203,20 @@ object F_Auth: TF_Auth
     end
     object B_Guest: TButton
       Left = 16
-      Top = 327
+      Top = 354
       Width = 113
       Height = 25
       Caption = 'P'#345'ihl'#225'sit se jako host'
       TabOrder = 6
       OnClick = B_ApplyClick
+    end
+    object CHB_uLI_Daemon: TCheckBox
+      Left = 16
+      Top = 327
+      Width = 257
+      Height = 17
+      Caption = 'Autorizovat uLI-daemon'
+      TabOrder = 7
     end
   end
 end

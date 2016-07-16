@@ -309,7 +309,7 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
-      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch;
+      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -542,6 +542,8 @@ begin
    Self.fstatus := TPanelConnectionStatus.opened;
    Self.SendLn('-;OR-LIST;');
    PanelTCPClient.SendLn('-;F-VYZN-GET;');
+   BridgeClient.toLogin.server := Self.tcpClient.Host;
+   BridgeClient.toLogin.port   := Self.tcpClient.Port;
    Relief.ORConnectionOpenned();
    F_Main.SB_Soupravy.Enabled := true;
   end

@@ -884,7 +884,7 @@ implementation
 
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
-     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch;
+     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -1019,7 +1019,7 @@ begin
           NotSymbol.Add(Point(sprpaintpos.Data[j].X+k,sprpaintpos.Data[j].Y));
 
        //vykresleni cisla koleje
-       if (Self.Useky[i].PanelProp.KonecJC = no) then
+       if (Self.Useky[i].PanelProp.KonecJC = TJCType.no) then
          Self.Graphics.TextOutput(sprpaintpos.Data[j],Self.Useky[i].KpopisekStr, Self.Useky[i].PanelProp.Symbol,Self.Useky[i].PanelProp.Pozadi) else
           Self.Graphics.TextOutput(sprpaintpos.Data[j],Self.Useky[i].KpopisekStr, Self.Useky[i].PanelProp.Symbol, _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)]);
 
@@ -2647,6 +2647,9 @@ begin
  if ((Rights > TORControlRights.null) and (tmp = TORControlRights.null)) then
    Self.myORs[orindex].stack.enabled := true;
 
+ if ((Rights >= TORControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and (BridgeClient.toLogin.password <> '')) then
+   BridgeClient.Auth();
+
  // zobrazovani chybove hlasky loginu
  if (F_Auth.listening) then
   begin
@@ -2708,6 +2711,13 @@ begin
   begin
    F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.ORConnectionOpenned_AuthCallback, ors, true);
    Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
+
+   if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLiAuthStatus.no)) then
+    begin
+     BridgeClient.toLogin.username := GlobConfig.data.auth.username;
+     BridgeClient.toLogin.password := GlobConfig.data.auth.password;
+    end;
+
   end else begin
    F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, ors, true);
   end;

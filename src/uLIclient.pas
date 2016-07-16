@@ -10,6 +10,8 @@ const
   _BRIDGE_DEFAULT_SERVER = '127.0.0.1';
 
 type
+  TuLIAuthStatus = (no, yes, cannot);
+
   TBridgeClient = class
    private const
     _PROTOCOL_VERSION = '1.0';
@@ -22,6 +24,10 @@ type
     control_disconnect:boolean;       // je true, pokud disconnect plyne ode me
     resusc_destroy:boolean;
     resusc:TResuscitation;
+    fAuthStatus:TuLIAuthStatus;
+
+     function Connect(host:string; port:Word):Integer;
+     function Disconnect():Integer;
 
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
@@ -34,24 +40,35 @@ type
 
      function GetOpened():boolean;
 
+     function GetEnabled():boolean;
+     procedure SetEnabled(enabled:boolean);
+     procedure DestroyResusc();
+
    public
+
+    toLogin : record
+      server, username, password: string;
+      port: Word;
+    end;
 
      constructor Create();
      destructor Destroy(); override;
 
-     function Connect(host:string; port:Word):Integer;
-     function Disconnect():Integer;
-
      procedure SendLn(str:string);
      procedure Update();
+     procedure Auth();
 
      property opened : boolean read GetOpened;
+     property authStatus : TuLIAuthStatus read fAuthStatus;
+     property enabled : boolean read GetEnabled write SetEnabled;
   end;//TPanelTCPClient
 
 var
   BridgeClient : TBridgeClient;
 
 implementation
+
+uses fAuth;
 
 {
  Jak funguje komunikace ze strany serveru:
@@ -73,6 +90,7 @@ implementation
 LOGIN;server;port;username;password      - pozadavek k pripojeni k serveru a autorizaci regulatoru
 LOKO;slot;[addr;token];[addr;token];...  - pozadavek k umisteni lokomotiv do slotu \slot
 SLOTS?                                   - pozadavek na vraceni seznamu slotu a jejich obsahu
+AUTH?                                    - pozadavek na vraceni stavu autorizace vuci hJOPserveru
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// SERVER -> KLIENT ///////////////////////////////////
@@ -85,6 +103,7 @@ SLOTS;[F/-/#];[F/-/#];...                  - sloty, ktere ma daemon k dispozici
                                            '#' je nefunkcni slot
                                            'F' je plny slot
                                            pocet slotu je variabilni
+AUTH;[yes/no/cannot]                     - jestli je uLI-daemon autorizovan vuci hJOPserveru
 
 }
 
@@ -98,37 +117,19 @@ constructor TBridgeClient.Create();
 begin
  inherited Create();
 
+ Self.fAuthStatus := TuLIAuthStatus.cannot;
  Self.parsed := TStringList.Create;
 
  Self.tcpClient := TIdTCPClient.Create(nil);
  Self.tcpClient.OnConnected := Self.OnTcpClientConnected;
  Self.tcpClient.OnDisconnected := Self.OnTcpClientDisconnected;
  Self.tcpClient.ConnectTimeout := 1500;
-
- Self.resusc_destroy := false;
- Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
- Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
- Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
- Self.resusc.Resume();
 end;//ctor
 
 destructor TBridgeClient.Destroy();
 begin
  Self.control_disconnect := true;
-
- // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
- if (Assigned(Self.resusc)) then
-  begin
-   try
-     TerminateThread(Self.resusc.Handle, 0);
-   finally
-     if Assigned(Self.resusc) then
-     begin
-       Resusc.WaitFor;
-       FreeAndNil(Self.resusc);
-     end;
-   end;
-  end;
+ Self.DestroyResusc();
 
  if (Assigned(Self.tcpClient)) then
    FreeAndNil(Self.tcpClient);
@@ -199,6 +200,8 @@ begin
   Self.rthread.OnData := DataReceived;
   Self.rthread.OnTimeout := Timeout;
   Self.rthread.Resume;
+
+  Self.SendLn('AUTH?');
  except
   (Sender as TIdTCPClient).Disconnect;
   raise;
@@ -208,6 +211,8 @@ end;//procedure
 procedure TBridgeClient.OnTcpClientDisconnected(Sender: TObject);
 begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
+
+ if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
 
  // resuscitace spojeni se serverem
  if (not Self.control_disconnect) then
@@ -252,6 +257,13 @@ procedure TBridgeClient.Parse();
 begin
  if (parsed[0] = 'SLOTS') then begin
 
+ end else if (parsed[0] = 'AUTH') then begin
+   if (parsed[1] = 'no') then Self.fAuthStatus := tuLiAuthStatus.no
+   else if (parsed[1] = 'yes') then Self.fAuthStatus := tuLiAuthStatus.yes
+   else if (parsed[1] = 'cannot') then Self.fAuthStatus := tuLiAuthStatus.cannot;
+
+   if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
+
  end else if (parsed[0] = 'LOKO') then begin
 
  end;
@@ -284,15 +296,7 @@ begin
  if (Self.resusc_destroy) then
   begin
    Self.resusc_destroy := false;
-   try
-     Self.resusc.Terminate();
-   finally
-     if Assigned(Self.resusc) then
-     begin
-       Self.resusc.WaitFor;
-       FreeAndNil(Self.resusc);
-     end;
-   end;
+   Self.DestroyResusc();
   end;
 end;
 
@@ -305,6 +309,58 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+function TBridgeClient.GetEnabled():boolean;
+begin
+ Result := (Assigned(Self.resusc) or (Self.opened));
+end;
+
+procedure TBridgeClient.SetEnabled(enabled:boolean);
+begin
+ if (enabled) then
+  begin
+   // zapnout resusc
+   Self.resusc_destroy := false;
+   if (not Assigned(Self.resusc)) then
+    begin
+     Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
+     Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
+     Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
+     Self.resusc.Resume();
+    end;
+  end else begin
+    if (Self.opened) then Self.Disconnect();
+    if (Assigned(Self.resusc)) then Self.DestroyResusc();
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TBridgeClient.DestroyResusc();
+begin
+ // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
+ if (Assigned(Self.resusc)) then
+  begin
+   try
+     TerminateThread(Self.resusc.Handle, 0);
+   finally
+     if Assigned(Self.resusc) then
+     begin
+       Resusc.WaitFor;
+       FreeAndNil(Self.resusc);
+     end;
+   end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TBridgeClient.Auth();
+begin
+ Self.SendLn('LOGIN;{'+Self.toLogin.server+'};'+IntToStr(Self.toLogin.port)+';{'+
+             Self.toLogin.username+'};{'+Self.toLogin.password+'}');
+ Self.toLogin.password := '';
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

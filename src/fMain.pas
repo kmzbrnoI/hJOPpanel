@@ -310,6 +310,12 @@ begin
      Application.MessageBox(PChar('Nelze spustit uLI-daemon, chyba'+IntToStr(return)+#13#10+f), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
   end;
 
+ if (GlobConfig.data.uLI.use) then
+  begin
+   F_splash.AddStav('Aktivuji spojení s uLI-daemon...');
+   BridgeClient.enabled := true;
+  end;
+
  F_splash.AddStav('Hotovo');
 
  F_splash.Close();

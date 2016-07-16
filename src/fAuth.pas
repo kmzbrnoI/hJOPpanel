@@ -58,6 +58,7 @@ type
     Label14: TLabel;
     ST_Error: TStaticText;
     B_Guest: TButton;
+    CHB_uLI_Daemon: TCheckBox;
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -89,6 +90,8 @@ type
     procedure AuthError(or_index:Integer; error:string);                        // zavolat pri prichodu chyby autorizace
     procedure AuthOK(or_index:Integer);                                         // zavolat pri uspesne autorizaci
 
+    procedure UpdateULIcheckbox();
+
     property listening:boolean read flistening;                                 // jestli poslouchame na odpovedi o autorizaci
 
   end;
@@ -98,12 +101,13 @@ var
 
 implementation
 
-uses GlobalConfig, fMain, TCPClientPanel;
+uses GlobalConfig, fMain, TCPClientPanel, uLIclient;
 
 {$R *.dfm}
 
 procedure TF_Auth.B_ApplyClick(Sender: TObject);
 var i:Integer;
+    hashed:string;
 begin
  Self.auth_remaining.Clear();
  for i := 0 to Length(Self.auth_ors)-1 do Self.auth_remaining.Add(Self.auth_ors[i]);
@@ -119,16 +123,24 @@ begin
  Self.HideErrorMessage();
  Self.ShowLogging();
 
+ hashed := GenerateHash(AnsiString(Self.E_Password.Text));
+
  if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply)) then
   begin
    GlobConfig.data.auth.autoauth := true;
    GlobConfig.data.auth.username := Self.E_username.Text;
-   GlobConfig.data.auth.password := GenerateHash(AnsiString(Self.E_Password.Text));
+   GlobConfig.data.auth.password := hashed;
    GlobConfig.data.auth.forgot   := (Self.TB_Remeber.Position = 1);
   end;
 
+ if ((Self.CHB_uLI_Daemon.Visible) and (Self.CHB_uLI_Daemon.Enabled) and (Self.CHB_uLI_Daemon.Checked)) then
+  begin
+   BridgeClient.toLogin.username := Self.E_username.Text;
+   BridgeClient.toLogin.password := hashed;
+  end;
+
  if (Sender = Self.B_Apply) then
-   Self.callback(Self, Self.E_username.Text, GenerateHash(AnsiString(Self.E_Password.Text)), Self.auth_ors, false)
+   Self.callback(Self, Self.E_username.Text, hashed, Self.auth_ors, false)
  else
    Self.callback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, Self.auth_ors, true);
 end;
@@ -197,6 +209,9 @@ begin
 
  Self.B_Guest.Visible := allow_guest and GlobConfig.data.guest.allow;
 
+ Self.UpdateULIcheckbox();
+ Self.CHB_uLI_Daemon.Checked := Self.CHB_uLI_Daemon.Visible and Self.CHB_uLI_Daemon.Enabled;
+
  Self.Show();
 end;
 
@@ -217,6 +232,9 @@ begin
  Self.TB_Remeber.Position := remember_level;
  Self.Caption := caption;
  Self.B_Guest.Visible := allow_guest and GlobConfig.data.guest.allow;
+
+ Self.UpdateULIcheckbox();
+ Self.CHB_uLI_Daemon.Checked := Self.CHB_uLI_Daemon.Visible and Self.CHB_uLI_Daemon.Enabled;
 end;
 
 procedure TF_Auth.TB_RemeberChange(Sender: TObject);
@@ -310,7 +328,7 @@ procedure TF_Auth.ShowErrorMessage();
 begin
  Self.P_Message.Visible := true;
  Self.P_Body.Top := 110;
- Self.Height := 500;
+ Self.Height := P_Body.Top + P_Body.Height + 30;
 
  Self.ST_Error.Visible      := true;
  Self.P_Message.Color       := $DEDEF2;
@@ -319,7 +337,7 @@ end;
 
 procedure TF_Auth.HideErrorMessage();
 begin
- Self.Height := 400;
+ Self.Height := P_Body.Top + P_Body.Height + 30;
  Self.P_Message.Visible := false;
  Self.P_Body.Top := 8;
 end;
@@ -353,6 +371,32 @@ begin
  Self.ShowEnter();
  Self.E_Password.Text := '';
  Self.E_username.SetFocus();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.UpdateULIcheckbox();
+begin
+ Self.CHB_uLI_Daemon.Visible := (BridgeClient.opened) and
+  ((BridgeClient.authStatus = no) or (BridgeClient.authStatus = cannot));
+
+ if (Self.CHB_uLI_Daemon.Visible) then
+  begin
+   Self.CHB_uLI_Daemon.Enabled := (BridgeClient.authStatus = no);
+   if (not Self.CHB_uLI_Daemon.Enabled) then Self.CHB_uLI_Daemon.Checked := false;
+
+   B_Apply.Top    := 354;
+   B_Cancel.Top   := 354;
+   B_Guest.Top    := 354;
+   P_Body.Height  := 385;
+  end else begin
+   B_Apply.Top    := 327;
+   B_Cancel.Top   := 327;
+   B_Guest.Top    := 327;
+   P_Body.Height  := 361;
+  end;
+
+ Self.Height := P_Body.Top + P_Body.Height + 30;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
