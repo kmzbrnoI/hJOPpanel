@@ -3168,6 +3168,7 @@ begin
  PanelTCPClient.PanelLokList(Self.myORs[Sender].id);
 
  menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PØEDAT loko,HLEDAT loko,RUÈ loko';
+ if (BridgeClient.authStatus = TuLIAuthStatus.yes) then menu_str := menu_str + ',MAUS loko';
 
  Self.special_menu := loko;
  Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
@@ -3301,7 +3302,7 @@ begin
  else if (item = 'SMAZAT loko') then F_HVDelete.OpenForm(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'PØEDAT loko') then F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'HLEDAT loko') then F_HVSearch.Show()
- else if (item = 'RUÈ loko')    then
+ else if ((item = 'RUÈ loko') or (item = 'MAUS loko')) then
    F_RegReq.Open(
       Self.myORs[obl_r].HVs,
       Self.myORs[obl_r].id,
@@ -3310,7 +3311,7 @@ begin
       Self.myORs[obl_r].RegPlease.lastname,
       Self.myORs[obl_r].RegPlease.comment,
       (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.null),
-      false, false);
+      false, false, (item = 'MAUS loko'));
 end;//procedure
 
 procedure TRelief.ParseRegMenuClick(item:string; obl_r:Integer);
@@ -3325,7 +3326,7 @@ begin
       Self.myORs[obl_r].RegPlease.firstname,
       Self.myORs[obl_r].RegPlease.lastname,
       Self.myORs[obl_r].RegPlease.comment,
-      true, false, false);
+      true, false, false, false);
   end;
 end;//procedure
 
@@ -3676,7 +3677,7 @@ begin
       OblR.RegPlease.firstname,
       OblR.RegPlease.lastname,
       OblR.RegPlease.comment,
-      true, true, true);
+      true, true, true, false);
   end
 
  else if (parsed[2] = 'U-ERR') then

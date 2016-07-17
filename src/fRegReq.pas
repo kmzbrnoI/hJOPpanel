@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, HVDb;
+  Dialogs, StdCtrls, ComCtrls, HVDb, ExtCtrls, uLIClient;
 
 type
   TF_RegReq = class(TForm)
@@ -20,25 +20,34 @@ type
     B_Remote: TButton;
     B_Local: TButton;
     L_Stav: TLabel;
+    P_MausSlot: TPanel;
+    L_Slot: TLabel;
     procedure B_RemoteClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure B_LocalClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     or_id:string;
     HVDb:THVDb;
     destroy_hvdb:boolean;
+    maus:boolean;
+    B_Slots: array [1..TBridgeClient._SLOTS_CNT] of TButton;
 
     procedure FillHVs(HVDb:THVDb; all_selected:boolean);
+    procedure CreateSlotsButtons();
 
   public
 
    token_req_sent:boolean;
 
 
-    procedure Open(HVDb:THVDb;or_id:string;username,firstname,lastname,comment:string; remote:boolean; destroy_hvdb, all_selected:boolean);
+    procedure Open(HVDb:THVDb; or_id:string; username,firstname,lastname,comment:string; remote:boolean; destroy_hvdb, all_selected, maus:boolean);
     procedure ServerResponseOK();
     procedure ServerResponseErr(err:string);
     procedure ServerCanceled();
+
+    procedure RepaintSlots();
+
   end;
 
 var
@@ -48,15 +57,16 @@ implementation
 
 {$R *.dfm}
 
-uses ORList, TCPClientPanel;
+uses ORList, TCPClientPanel, LokTokens;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TF_RegReq.Open(HVDb:THVDb;or_id:string;username,firstname,lastname,comment:string; remote:boolean; destroy_hvdb, all_selected:boolean);
+procedure TF_RegReq.Open(HVDb:THVDb;or_id:string;username,firstname,lastname,comment:string; remote:boolean; destroy_hvdb, all_selected, maus:boolean);
 begin
  Self.or_id := or_id;
  Self.HVDb  := HVDb;
  Self.destroy_hvdb := destroy_hvdb;
+ Self.maus := maus;
 
  Self.L_Username.Caption := username;
  Self.L_Name.Caption     := firstname + ' ' + lastname;
@@ -71,6 +81,18 @@ begin
 
  Self.L_Stav.Caption    := 'Vyberte lokomotivy';
  Self.L_Stav.Font.Color := clBlack;
+
+ Self.P_MausSlot.Visible := maus;
+ Self.B_Remote.Visible   := not maus;
+ Self.B_Local.Visible    := not maus;
+ if (maus) then
+  begin
+   Self.L_Stav.Top := Self.P_MausSlot.Top + Self.P_MausSlot.Height + 5;
+   Self.RepaintSlots();
+  end else begin
+   Self.L_Stav.Top := Self.B_Remote.Top + Self.B_Remote.Height + 5;
+  end;
+ Self.ClientHeight := Self.L_Stav.Top + Self.L_Stav.Height + 5;
 
  Self.Show();
  Self.LV_Lokos.SetFocus();
@@ -97,33 +119,45 @@ begin
  if ((Self.HVDb <> nil) and (Self.destroy_hvdb)) then Self.HVDb.Free();
  Self.HVDb := nil;
  Self.token_req_sent := false;
-end;//procedure
+end;
+
+procedure TF_RegReq.FormCreate(Sender: TObject);
+begin
+ Self.CreateSlotsButtons();
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_RegReq.B_LocalClick(Sender: TObject);
-var str:string;
+var lokos:array of Word;
     LI:TListItem;
-    one:boolean;
+    cnt, j:Integer;
 begin
- str := '';
- one := false;
-
+ cnt := 0;
  for LI in Self.LV_Lokos.Items do
-   if (LI.Checked) then
-   if (LI.Checked) then
-    begin
-     str := str + LI.Caption + '|';
-     one := true;
-    end;
+   if (LI.Checked) then inc(cnt);
 
- if (not one) then
+ if (cnt = 0) then
   begin
    Application.MessageBox('Vyberte alespoò jedno hnací vozidlo', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
- PanelTCPClient.SendLn(Self.or_id+';LOK-REQ;PLEASE;'+str);
+ SetLength(lokos, cnt);
+ j := 0;
+ for LI in Self.LV_Lokos.Items do
+  begin
+   if (LI.Checked) then
+    begin
+     lokos[j] := StrToInt(LI.Caption);
+     Inc(j);
+    end;
+  end;
+
+ if (Self.maus) then
+   tokens.LokosToMaus(Self.or_id, lokos, TButton(Sender).Tag)
+ else
+   tokens.LokosToReg(Self.or_id, lokos);
 
  Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenù...';
  Self.token_req_sent := true;
@@ -179,6 +213,60 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
+procedure TF_RegReq.CreateSlotsButtons();
+var i:Integer;
+begin
+ for i := 1 to TBridgeClient._SLOTS_CNT do
+  begin
+   Self.B_Slots[i] := TButton.Create(Self.P_MausSlot);
+   with (Self.B_Slots[i]) do
+    begin
+     Parent := Self.P_MausSlot;
+     Top := 25;
+     Tag := i;
+     Width := 70;
+     OnClick := Self.B_LocalClick;
+     Caption := IntToStr(i);
+    end;
+  end;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 
-end.//procedure
+procedure TF_RegReq.RepaintSlots();
+var cnt, i, j:Integer;
+    partWidth:Integer;
+begin
+ cnt := BridgeClient.activeSlotsCount;
+
+ if (cnt = 0) then
+   Self.L_Slot.Caption := 'Do slotu: (žádný slot není k dispozici)'
+ else
+   Self.L_Slot.Caption := 'Do slotu:';
+
+ j := 0;
+ if (cnt > 0) then
+   partWidth := ((P_MausSlot.Width-20) div cnt)
+ else
+   partWidth := 0;
+
+ for i := 1 to TBridgeClient._SLOTS_CNT do
+  begin
+   with (Self.B_Slots[i]) do
+    begin
+     Visible := ((BridgeClient.sloty[i] = ssAvailable) or (BridgeClient.sloty[i] = ssFull));
+     Enabled := (BridgeClient.sloty[i] = ssAvailable);
+
+     if (Visible) then
+      begin
+       Self.B_Slots[i].Left := (partWidth*j + (partWidth div 2) - (Self.B_Slots[i].Width div 2)) + 10;
+       Inc(j);
+      end;
+
+    end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+end.

@@ -40,7 +40,6 @@ type
      procedure ParseGlobal();
      procedure ParseOR();
      procedure ParseORChange();
-     procedure ParseLokToken();
 
      // parsovani Change jednotlivych typu bloku:
      procedure ParseORChangeVyh();
@@ -309,7 +308,7 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
-      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient;
+      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -704,37 +703,13 @@ begin
 
  // token
  end else if (parsed[1] = 'LOK-TOKEN') then
-  Self.ParseLokToken()
+  tokens.ParseData(Self.parsed)
 
  else if ((parsed[1] = 'RUC') or (parsed[1] = 'RUC-RM')) then
   RucList.ParseCommand(parsed)
 
  else if (parsed[1] = 'LOK-REQ') then
   Relief.ORLokReq(parsed[0], parsed);
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TPanelTCPClient.ParseLokToken();
-var HVs:THVDb;
-begin
- if (parsed[2] = 'OK') then
-  begin
-   if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseOK();
-
-   HVs := THVDb.Create();
-   HVs.ParseHVsFromToken(parsed[3]);
-   try
-     HVs.OpenJerry();
-   except
-     on E:Exception do
-       Errors.writeerror(E.Message, 'Jerry', '');
-   end;
-   HVs.Free();
-  end
-
- else if (parsed[2] = 'ERR') then
-   if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseErr(parsed[3]);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

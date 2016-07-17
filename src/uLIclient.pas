@@ -3,7 +3,7 @@ unit uLIClient;
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
-     Classes, StrUtils, RPConst, Resuscitation, Windows;
+     Classes, StrUtils, RPConst, Resuscitation, Windows, HVDb, Forms;
 
 const
   _BRIDGE_DEFAULT_PORT = 5733;                                                  // default port, na ktere bezi bridge server
@@ -11,10 +11,11 @@ const
 
 type
   TuLIAuthStatus = (no, yes, cannot);
+  TuLISlotStatus = (ssFull, ssAvailable, ssNotAvailable);
 
   TBridgeClient = class
-   private const
-    _PROTOCOL_VERSION = '1.0';
+   public const
+     _SLOTS_CNT = 6;
 
    private
     rthread: TReadingThread;
@@ -43,6 +44,7 @@ type
      function GetEnabled():boolean;
      procedure SetEnabled(enabled:boolean);
      procedure DestroyResusc();
+     function GetActiveSlotsCount():Integer;
 
    public
 
@@ -51,16 +53,21 @@ type
       port: Word;
     end;
 
+    sloty:array [1.._SLOTS_CNT] of TuLISlotStatus;
+
      constructor Create();
      destructor Destroy(); override;
 
      procedure SendLn(str:string);
      procedure Update();
      procedure Auth();
+     procedure LoksToSlot(HVs:THVDb; slot:Integer);
+     procedure GetSlotsStatus();
 
      property opened : boolean read GetOpened;
      property authStatus : TuLIAuthStatus read fAuthStatus;
      property enabled : boolean read GetEnabled write SetEnabled;
+     property activeSlotsCount : Integer read GetActiveSlotsCount;
   end;//TPanelTCPClient
 
 var
@@ -68,7 +75,7 @@ var
 
 implementation
 
-uses fAuth;
+uses fAuth, fRegReq;
 
 {
  Jak funguje komunikace ze strany serveru:
@@ -114,11 +121,14 @@ AUTH;[yes/no/cannot]                     - jestli je uLI-daemon autorizovan vuci
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor TBridgeClient.Create();
+var i:Integer;
 begin
- inherited Create();
+ inherited;
 
  Self.fAuthStatus := TuLIAuthStatus.cannot;
  Self.parsed := TStringList.Create;
+
+ for i := 1 to _SLOTS_CNT do Self.sloty[i] := ssNotAvailable;   
 
  Self.tcpClient := TIdTCPClient.Create(nil);
  Self.tcpClient.OnConnected := Self.OnTcpClientConnected;
@@ -137,7 +147,7 @@ begin
  if (Assigned(Self.parsed)) then
    FreeAndNil(Self.parsed);
 
- inherited Destroy();
+ inherited;
 end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +212,7 @@ begin
   Self.rthread.Resume;
 
   Self.SendLn('AUTH?');
+  Self.SendLn('SLOTS?');
  except
   (Sender as TIdTCPClient).Disconnect;
   raise;
@@ -254,8 +265,24 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TBridgeClient.Parse();
+var i:Integer;
 begin
  if (parsed[0] = 'SLOTS') then begin
+   for i := 1 to _SLOTS_CNT do
+    begin
+     if (i < parsed.Count) then
+      begin
+       case (parsed[i][1]) of
+        'F' : Self.sloty[i] := ssFull;
+        '-' : Self.sloty[i] := ssAvailable;
+        '#' : Self.sloty[i] := ssNotAvailable;
+       end;
+      end else begin
+       Self.sloty[i] := ssNotAvailable;
+      end;
+    end;
+
+   if (F_RegReq.Showing) then F_RegReq.RepaintSlots();
 
  end else if (parsed[0] = 'AUTH') then begin
    if (parsed[1] = 'no') then Self.fAuthStatus := tuLiAuthStatus.no
@@ -265,7 +292,13 @@ begin
    if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
 
  end else if (parsed[0] = 'LOKO') then begin
-
+   if (parsed[1] = 'ok') then
+     asm nop; end
+     // TODO
+   else if (parsed[1] = 'err') then begin
+     if (StrToInt(parsed[2]) <= 6) then
+       Application.MessageBox(PChar(parsed[3]), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
+   end;
  end;
 end;//procedure
 
@@ -360,6 +393,35 @@ begin
  Self.SendLn('LOGIN;{'+Self.toLogin.server+'};'+IntToStr(Self.toLogin.port)+';{'+
              Self.toLogin.username+'};{'+Self.toLogin.password+'}');
  Self.toLogin.password := '';
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TBridgeClient.LoksToSlot(HVs:THVDb; slot:Integer);
+var str:string;
+    i:Integer;
+begin
+ str := '';
+ for i := 0 to HVs.count-1 do
+   str := str + '{' + IntToStr(HVs.HVs[i].Adresa) + ';' + HVs.HVs[i].token + '};';
+ Self.SendLn('LOKO;'+IntToStr(slot)+';'+str);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TBridgeClient.GetSlotsStatus();
+begin
+ Self.SendLn('SLOTS?');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TBridgeClient.GetActiveSlotsCount():Integer;
+var i:Integer;
+begin
+ Result := 0;
+ for i := 1 to _SLOTS_CNT do
+   if ((Self.sloty[i] = ssAvailable) or (Self.sloty[i] = ssFull)) then Inc(Result);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

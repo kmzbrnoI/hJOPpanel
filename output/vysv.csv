@@ -72,6 +72,7 @@ SMAZAT loko;Smazat lokomotivu
 PŘEDAT loko;Předat lokomotivu do stanice
 HLEDAT loko;Vyhledat lokomotivu v databázi serveru
 RUČ loko;Převzít loko do ručního ovladače
+MAUS loko;Převzít loko na multiMaus (uLI-master)
 
 UK;Uvolnění klíče
 ZUK;Zrušení uvolnění klíče

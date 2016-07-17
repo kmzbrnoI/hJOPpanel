@@ -3,7 +3,7 @@ object F_RegReq: TF_RegReq
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'P'#345'edat hanc'#237' vozidlo na ru'#269'n'#237' '#345#237'zen'#237
-  ClientHeight = 385
+  ClientHeight = 393
   ClientWidth = 433
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -14,11 +14,12 @@ object F_RegReq: TF_RegReq
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object L_Stav: TLabel
     Left = 8
-    Top = 363
+    Top = 366
     Width = 417
     Height = 16
     Align = alCustom
@@ -32,6 +33,22 @@ object F_RegReq: TF_RegReq
     Font.Style = [fsBold]
     ParentFont = False
     Transparent = False
+  end
+  object P_MausSlot: TPanel
+    Left = 8
+    Top = 335
+    Width = 417
+    Height = 50
+    BevelOuter = bvNone
+    TabOrder = 4
+    Visible = False
+    object L_Slot: TLabel
+      Left = 8
+      Top = 8
+      Width = 43
+      Height = 13
+      Caption = 'Do slotu:'
+    end
   end
   object GB_User: TGroupBox
     Left = 8

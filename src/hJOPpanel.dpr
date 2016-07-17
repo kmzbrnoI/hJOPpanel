@@ -45,7 +45,8 @@ uses
   fHVPomEdit in 'fHVPomEdit.pas' {F_HV_Pom},
   Hash in 'Hash.pas',
   fHVSearch in 'fHVSearch.pas' {F_HVSearch},
-  uLIclient in 'uLIclient.pas';
+  uLIclient in 'uLIclient.pas',
+  LokTokens in 'LokTokens.pas';
 
 {$R *.res}
 
