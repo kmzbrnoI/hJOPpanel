@@ -457,6 +457,7 @@ begin
  F_Main.SB_Soupravy.Enabled := false;
  RucList.Clear();
  F_RegReq.Close();
+ F_SprToSlot.Close();
 
  Self.fstatus := TPanelConnectionStatus.closed;
 
