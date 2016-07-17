@@ -62,6 +62,7 @@ uses ORList, TCPClientPanel, LokTokens;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_RegReq.Open(HVDb:THVDb;or_id:string;username,firstname,lastname,comment:string; remote:boolean; destroy_hvdb, all_selected, maus:boolean);
+var i:Integer;
 begin
  Self.or_id := or_id;
  Self.HVDb  := HVDb;
@@ -89,6 +90,15 @@ begin
   begin
    Self.L_Stav.Top := Self.P_MausSlot.Top + Self.P_MausSlot.Height + 5;
    Self.RepaintSlots();
+
+   for i := 1 to TBridgeClient._SLOTS_CNT do
+    begin
+     if ((self.B_Slots[i].Visible) and (Self.B_Slots[i].Enabled)) then
+      begin
+       Self.B_Slots[i].Default := true;
+       break;
+      end;
+    end;
   end else begin
    Self.L_Stav.Top := Self.B_Remote.Top + Self.B_Remote.Height + 5;
   end;

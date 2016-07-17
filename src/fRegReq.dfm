@@ -2,7 +2,7 @@ object F_RegReq: TF_RegReq
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
-  Caption = 'P'#345'edat hanc'#237' vozidlo na ru'#269'n'#237' '#345#237'zen'#237
+  Caption = 'P'#345'edat hnac'#237' vozidlo na ru'#269'n'#237' '#345#237'zen'#237
   ClientHeight = 393
   ClientWidth = 433
   Color = clBtnFace

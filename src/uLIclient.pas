@@ -75,7 +75,7 @@ var
 
 implementation
 
-uses fAuth, fRegReq;
+uses fAuth, fRegReq, TCPClientPanel, fSprToSlot;
 
 {
  Jak funguje komunikace ze strany serveru:
@@ -224,6 +224,7 @@ begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
 
  if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
+ PanelTCPClient.SendLn('-;MAUS;0');
 
  // resuscitace spojeni se serverem
  if (not Self.control_disconnect) then
@@ -283,6 +284,7 @@ begin
     end;
 
    if (F_RegReq.Showing) then F_RegReq.RepaintSlots();
+   if (F_SprToSlot.Showing) then F_SprToSlot.RepaintSlots();
 
  end else if (parsed[0] = 'AUTH') then begin
    if (parsed[1] = 'no') then Self.fAuthStatus := tuLiAuthStatus.no
@@ -290,6 +292,7 @@ begin
    else if (parsed[1] = 'cannot') then Self.fAuthStatus := tuLiAuthStatus.cannot;
 
    if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
+   PanelTCPClient.SendLn('-;MAUS;'+IntToStr(Integer(Self.fAuthStatus = tuLiAuthStatus.yes)));
 
  end else if (parsed[0] = 'LOKO') then begin
    if (parsed[1] = 'ok') then

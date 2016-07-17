@@ -28,7 +28,7 @@ var
 
 implementation
 
-uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient;
+uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,6 +54,7 @@ begin
  if (parsed[2] = 'OK') then
   begin
    if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseOK();
+   if (F_SprToSlot.token_req_sent) then F_SprToSlot.ServerResponseOK();
 
    HVs := THVDb.Create();
    HVs.ParseHVsFromToken(parsed[3]);
@@ -91,8 +92,10 @@ begin
    HVs.Free();
   end
 
- else if (parsed[2] = 'ERR') then
+ else if (parsed[2] = 'ERR') then begin
    if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseErr(parsed[3]);
+   if (F_SprToSlot.token_req_sent) then F_SprToSlot.ServerResponseErr(parsed[3]);
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

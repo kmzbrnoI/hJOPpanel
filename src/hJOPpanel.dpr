@@ -46,7 +46,8 @@ uses
   Hash in 'Hash.pas',
   fHVSearch in 'fHVSearch.pas' {F_HVSearch},
   uLIclient in 'uLIclient.pas',
-  LokTokens in 'LokTokens.pas';
+  LokTokens in 'LokTokens.pas',
+  fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot};
 
 {$R *.res}
 
@@ -73,6 +74,7 @@ begin
   Application.CreateForm(TF_RegReq, F_RegReq);
   Application.CreateForm(TF_HV_Pom, F_HV_Pom);
   Application.CreateForm(TF_HVSearch, F_HVSearch);
+  Application.CreateForm(TF_SprToSlot, F_SprToSlot);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))
   else

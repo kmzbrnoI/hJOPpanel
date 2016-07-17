@@ -178,6 +178,8 @@ implementation
   -;F-VYZN-ADD;vyznam1;vyznam2;...                                              pridani novych vyznamu funkci
   -;F-VYZN-GET;                                                                 pozadavek na ziskani vyznamu funkci (odpoved F-VYZN-LIST)
 
+  -;MAUS;[0/1]                                                                  k panelu je/neni pripojen uLI-daemon pripraveny prijimat adresy
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// SERVER -> KLIENT ///////////////////////////////////
@@ -282,6 +284,8 @@ implementation
   or;LOK-REQ;OK                                                                 seznam loko na rucni rizeni schvalen serverem
   or;LOK-REQ;ERR;comment                                                        seznam loko na rucni rizeni odmitnut serverem
   or;LOK-REQ;CANCEL;                                                            zruseni pozadavku na prevzeti loko na rucni rizeni
+
+  or;MAUS;[addr1|addr2|...]                                                     pozadavek na prevzeti lokomotiv addr1..addrn do rucniho rizeni multiMaus (uLI-daemon)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +312,7 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
-      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens;
+      GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -541,6 +545,7 @@ begin
    Self.fstatus := TPanelConnectionStatus.opened;
    Self.SendLn('-;OR-LIST;');
    PanelTCPClient.SendLn('-;F-VYZN-GET;');
+   PanelTCPClient.SendLn('-;MAUS;'+IntToStr(Integer(BridgeClient.authStatus = tuLiAuthStatus.yes)));
    BridgeClient.toLogin.server := Self.tcpClient.Host;
    BridgeClient.toLogin.port   := Self.tcpClient.Port;
    Relief.ORConnectionOpenned();
@@ -641,6 +646,9 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelTCPClient.ParseOR();
+var data:TStrings;
+    ar:TWordAr;
+    i:Integer;
 begin
  if (parsed[1] = 'CHANGE') then
   Self.ParseORChange()
@@ -709,7 +717,18 @@ begin
   RucList.ParseCommand(parsed)
 
  else if (parsed[1] = 'LOK-REQ') then
-  Relief.ORLokReq(parsed[0], parsed);
+  Relief.ORLokReq(parsed[0], parsed)
+
+ else if (parsed[1] = 'MAUS') then
+  begin
+   data := TStringList.Create();
+   ExtractStringsEx(['|'], [], parsed[2], data);
+   SetLength(ar, data.Count);
+   for i := 0 to data.Count-1 do ar[i] := StrToInt(data[i]);
+   F_SprToSlot.Open(parsed[0], ar);
+   data.Free();
+  end;
+
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
