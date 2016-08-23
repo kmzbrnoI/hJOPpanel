@@ -131,8 +131,9 @@ begin
  Self.HVs  := HVs;
 
  Self.L_Addrs.Caption := '';
- for i := 0 to Length(HVs)-1 do
-   Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[i]);
+ for i := 0 to Length(HVs)-2 do
+   Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[i]) + ', ';
+ Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[Length(HVs)-1]);
 
  Self.L_Stav.Caption    := 'Vyberte slot';
  Self.L_Stav.Font.Color := clBlack;
