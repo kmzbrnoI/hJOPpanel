@@ -390,8 +390,8 @@ var i:Integer;
     res:Integer;
     f:string;
 begin
- // predame server a port
- args := '-s "' + GlobConfig.data.server.host + '" -pt ' + IntToStr(GlobConfig.data.server.port) + ' ';
+ // predame autoconnect, server a port
+ args := '-a -s "' + GlobConfig.data.server.host + '" -pt ' + IntToStr(GlobConfig.data.server.port) + ' ';
 
  // predat uzivatele ?
  if ((GlobConfig.data.reg.reg_user) and (GlobConfig.data.auth.username <> '')) then
