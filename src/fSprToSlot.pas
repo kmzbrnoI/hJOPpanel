@@ -156,11 +156,13 @@ end;
 
 procedure TF_SprToSlot.ServerResponseOK();
 begin
+ Self.token_req_sent := false;
  Self.Close();
 end;//procedure
 
 procedure TF_SprToSlot.ServerResponseErr(err:string);
 begin
+ Self.token_req_sent := false;
  Self.L_Stav.Font.Color := clRed;
  Self.L_Stav.Caption := err;
 end;//procedure

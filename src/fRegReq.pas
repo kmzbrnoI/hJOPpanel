@@ -203,11 +203,13 @@ end;
 
 procedure TF_RegReq.ServerResponseOK();
 begin
+ Self.token_req_sent := false;
  Self.Close();
 end;//procedure
 
 procedure TF_RegReq.ServerResponseErr(err:string);
 begin
+ Self.token_req_sent := false;
  Self.L_Stav.Font.Color := clRed;
  Self.L_Stav.Caption := err;
 end;//procedure

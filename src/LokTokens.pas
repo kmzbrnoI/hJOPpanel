@@ -28,7 +28,7 @@ var
 
 implementation
 
-uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot;
+uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot, RPConst;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +50,7 @@ procedure TTokens.ParseData(var parsed:TStrings);
 var HVs:THVDb;
     i:Integer;
     slot, gslot: Integer;
+    splitted:TStrings;
 begin
  if (parsed[2] = 'OK') then
   begin
@@ -93,8 +94,23 @@ begin
   end
 
  else if (parsed[2] = 'ERR') then begin
-   if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseErr(parsed[3]);
-   if (F_SprToSlot.token_req_sent) then F_SprToSlot.ServerResponseErr(parsed[3]);
+   if (F_RegReq.token_req_sent) then F_RegReq.ServerResponseErr(parsed[4]);
+   if (F_SprToSlot.token_req_sent) then F_SprToSlot.ServerResponseErr(parsed[4]);
+
+   try
+     splitted := TStringList.Create();
+     ExtractStringsEx(['|'], [], parsed[3], splitted);
+     for i := 0 to splitted.Count-1 do
+      begin
+       try
+        Self.tokenPurpose.Remove(StrToInt(splitted[i]));
+       finally
+
+       end;
+      end;
+   finally
+     splitted.Free();
+   end;
  end;
 end;
 
