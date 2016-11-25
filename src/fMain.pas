@@ -52,9 +52,6 @@ type
     A_ReAuth: TAction;
     SB_Logout: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
-    procedure SB_MainMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
-    procedure FormMouseLeave(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure A_ConnectExecute(Sender: TObject);
@@ -110,7 +107,13 @@ begin
      VK_F4 : F_Debug.Show();
      VK_F1 : Self.ShowAboutDialog();
    end;//case
-  end;//WM_KeyDown
+  end else if (msg.message = WM_MOUSELEAVE) then begin
+    if (msg.hwnd = Self.DXD_Main.Handle) then
+     begin
+      Relief.HideCursor();
+      Self.SB_Main.Panels.Items[0].Text := '---;---';
+     end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,11 +213,6 @@ begin
   FreeAndNil(Relief);
  if (Assigned(Self.DXD_Main)) then
   FreeAndNil(Self.DXD_Main);
-end;
-
-procedure TF_Main.FormMouseLeave(Sender: TObject);
-begin
- Relief.HideCursor();
 end;
 
 procedure TF_Main.FormResize(Sender: TObject);
@@ -338,13 +336,6 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-
-procedure TF_Main.SB_MainMouseMove(Sender: TObject; Shift: TShiftState; X,
-  Y: Integer);
-begin
- Relief.HideCursor();
- Self.SB_Main.Panels.Items[0].Text := '---;---';
-end;
 
 procedure TF_Main.SB_MuteClick(Sender: TObject);
 begin
