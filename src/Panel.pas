@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash, PngImage;
+     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX;
 
 const
   //limity poli
@@ -1622,8 +1622,8 @@ procedure TRelief.Show();
 begin
  try
    if (not Assigned(Self.DrawObject)) then Exit;
-
-   Self.DrawObject.Surface.Canvas.Release();
+   if (not Self.DrawObject.CanDraw) then Exit;
+   Self.DrawObject.Surface.Canvas.Lock();
 
    Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
@@ -1657,7 +1657,8 @@ begin
     end;
 
    Self.DrawObject.Surface.Canvas.Release();
-   Self.DrawObject.Flip;
+   Self.DrawObject.Flip();
+   Self.DrawObject.Surface.Canvas.UnLock();
  except
    Exit();
  end;
