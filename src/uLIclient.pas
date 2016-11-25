@@ -225,6 +225,8 @@ procedure TBridgeClient.OnTcpClientDisconnected(Sender: TObject);
 begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
 
+ Self.fAuthStatus := TuLIAuthStatus.cannot;
+
  if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
  if (Assigned(PanelTCPClient)) then
    PanelTCPClient.SendLn('-;MAUS;0');
