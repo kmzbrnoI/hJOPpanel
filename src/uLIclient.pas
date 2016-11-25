@@ -138,7 +138,9 @@ end;//ctor
 
 destructor TBridgeClient.Destroy();
 begin
- Self.control_disconnect := true;
+ if (Self.tcpClient.Connected) then
+   Self.tcpClient.Disconnect();
+
  Self.DestroyResusc();
 
  if (Assigned(Self.tcpClient)) then
@@ -224,7 +226,8 @@ begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
 
  if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
- PanelTCPClient.SendLn('-;MAUS;0');
+ if (Assigned(PanelTCPClient)) then
+   PanelTCPClient.SendLn('-;MAUS;0');
 
  // resuscitace spojeni se serverem
  if (not Self.control_disconnect) then
