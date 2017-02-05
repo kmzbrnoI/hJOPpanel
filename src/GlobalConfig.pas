@@ -109,7 +109,7 @@ var ini:TMemIniFile;
     i:Integer;
 begin
  try
-   ini := TMemIniFile.Create(filename);
+   ini := TMemIniFile.Create(filename, TEncoding.UTF8);
  except
    Exit(1);
  end;
@@ -179,7 +179,7 @@ var ini:TMemIniFile;
     rights:TORControlRights;
 begin
  try
-   ini := TMemIniFile.Create(filename);
+   ini := TMemIniFile.Create(filename, TEncoding.UTF8);
  except
    Exit(1);
  end;

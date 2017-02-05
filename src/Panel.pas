@@ -2012,7 +2012,7 @@ begin
 
  //samotne nacitani dat
  try
-   inifile := TMemIniFile.Create(aFile);
+   inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
  except
   Exit(3);
  end;
