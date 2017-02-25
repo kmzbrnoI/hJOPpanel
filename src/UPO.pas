@@ -85,13 +85,13 @@ begin
  for i := 0 to 2 do
   begin
    if (Length(Self.items[Self.current].lines[i].str) > _UPO_WIDTH) then
-     str := LeftStr(Self.items[Self.current].lines[i].str, _UPO_WIDTH)
-   else begin
-    case (Self.items[Self.current].lines[i].align) of
+     str := LeftStr(Self.items[Self.current].lines[i].str, _UPO_WIDTH);
+
+   case (Self.items[Self.current].lines[i].align) of
       taCenter: begin
             str := '';
             for j := 0 to ((_UPO_WIDTH-length(Self.items[Self.current].lines[i].str)) div 2)-1 do
-             str := str + ' ';
+              str := str + ' ';
             str := str + Self.items[Self.current].lines[i].str;
             while (Length(str) < _UPO_WIDTH) do
              str := str + ' ';
@@ -108,10 +108,9 @@ begin
              str := str + ' ';
             str := str + Self.items[Self.current].lines[i].str;
       end;//taRightJustify
-    end;//case
+   end;//case
 
-    Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-_UPO_HEIGHT+i), str, Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg);
-   end;//else ... > _UPO_WIDTH
+   Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-_UPO_HEIGHT+i), str, Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg);
   end;//for i
 
  // vykresleni informaceo pokracovani
