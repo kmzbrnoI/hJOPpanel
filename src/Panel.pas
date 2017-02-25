@@ -570,7 +570,9 @@ end;
     _Vyhybka_End     = 3;
     _SCom_Start      = 24;
     _SCom_End        = 29;
+    _Plny_Symbol     = 37;
     _Prj_Start       = 40;
+    _Hvezdicka       = 41;
     _Kolecko         = 42;
     _Uvazka_Start    = 43;
     _Spr_Sipka_Start = 46;
@@ -578,8 +580,6 @@ end;
     _Vykol_Start     = 49;
     _Vykol_End       = 54;
     _Rozp_Start      = 55;
-
-    _Hvezdicka = 417;
 
     _msg_width = 30;
 
@@ -632,7 +632,11 @@ end;
         );
 
     //zde je definovano, jaky specialni symbol se ma vykreslovat jakou barvou (mimo separatoru)
-    _SpecS_DrawColors:array [0..35] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1);
+    _SpecS_DrawColors:array [0..35] of TColor =
+      ($A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,clBlue,clBlue,clBlue,$A0A0A0);
 
   private
    DrawObject:TDXDraw;
@@ -748,6 +752,8 @@ end;
    procedure ShowZamky;
    procedure ShowRozp;
    procedure ShowVykol;
+
+   procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
 
    procedure ResetData;
 
@@ -995,6 +1001,23 @@ end;//destructor
 
 ////////////////////////////////////////////////////////////////////////////////
 
+procedure TRelief.Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
+begin
+ if (transparent) then
+   IL.DrawingStyle := TDrawingStyle.dsTransparent
+ else begin
+   IL.DrawingStyle := TDrawingStyle.dsNormal;
+   IL.BkColor := bg;
+ end;
+
+ IL.Draw(Self.DrawObject.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka,
+         pos.Y * SymbolSet._Symbol_Vyska, Self.Graphics.GetSymbolIndex(symbol, fg));
+
+ IL.DrawingStyle := TDrawingStyle.dsNormal;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
 procedure TRelief.ShowUseky();
 var i,j,k:integer;
     sprpaintpos:TPointArray;
@@ -1080,19 +1103,11 @@ begin
         end;
 
        if (sipkaLeft) then
-        begin
-         SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsTransparent;
-         SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, sprpaintpos.Data[j].X*SymbolSet._Symbol_Sirka, (sprpaintpos.Data[j].Y-1)*SymbolSet._Symbol_Vyska,
-            ((_Spr_Sipka_Start+1)*10)+Self.Graphics.GetColorIndex(Self.Useky[i].PanelProp.SprC));
-         SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsNormal;
-        end;
+         Self.Draw(SymbolSet.IL_Symbols, Point(sprpaintpos.Data[j].X, sprpaintpos.Data[j].Y-1), _Spr_Sipka_Start+1,
+                   Self.Useky[i].PanelProp.SprC, clNone, true);
        if (sipkaRight) then
-        begin
-         SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsTransparent;
-         SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (sprpaintpos.Data[j].X+Length(Self.Useky[i].PanelProp.spr)-1)*SymbolSet._Symbol_Sirka, (sprpaintpos.Data[j].Y-1)*SymbolSet._Symbol_Vyska,
-            ((_Spr_Sipka_Start)*10)+Self.Graphics.GetColorIndex(Self.Useky[i].PanelProp.SprC));
-         SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsNormal;
-        end;
+         Self.Draw(SymbolSet.IL_Symbols, Point(sprpaintpos.Data[j].X+Length(Self.Useky[i].PanelProp.spr)-1, sprpaintpos.Data[j].Y-1),
+                   _Spr_Sipka_Start, Self.Useky[i].PanelProp.SprC, clNone, true);
 
        if ((sipkaLeft) or (sipkaRight)) then
         begin
@@ -1118,17 +1133,18 @@ begin
       begin
        if (NotSymbol.Contains(Self.Useky[i].Symbols[j].Position)) then continue;
 
-       SymbolSet.IL_Symbols.BkColor := Self.Useky[i].PanelProp.Pozadi;
+       col := Self.Useky[i].PanelProp.Pozadi;
 
        for k := 0 to Self.StartJC.count-1 do
         if ((Self.StartJC.Data[k].Pos.X = Self.Useky[i].Symbols[j].Position.X) and (Self.StartJC.Data[k].Pos.Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         SymbolSet.IL_Symbols.BkColor := Self.StartJC.Data[k].Color;
+         col := Self.StartJC.Data[k].Color;
 
        for k := 0 to Self.Useky[i].JCClick.Count-1 do
         if ((Self.Useky[i].JCClick[k].X = Self.Useky[i].Symbols[j].Position.X) and (Self.Useky[i].JCClick[k].Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         if (Integer(Self.Useky[i].PanelProp.KonecJC) > 0) then SymbolSet.IL_Symbols.BkColor := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)];
+         if (Integer(Self.Useky[i].PanelProp.KonecJC) > 0) then col := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)];
 
-       SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Useky[i].Symbols[j].Position.X*SymbolSet._Symbol_Sirka,Self.Useky[i].Symbols[j].Position.Y*SymbolSet._Symbol_Vyska,(Self.Useky[i].Symbols[j].SymbolID*10)+Self.Graphics.GetColorIndex(Self.Useky[i].PanelProp.Symbol));
+       Self.Draw(SymbolSet.IL_Symbols, Self.Useky[i].Symbols[j].Position, Self.Useky[i].Symbols[j].SymbolID,
+                 Self.Useky[i].PanelProp.Symbol, col);
       end;//for j
 
     end else begin
@@ -1144,7 +1160,7 @@ end;//procedure
 // tato funkce rekurzivne kresli vetve
 procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetev:TVetev; var NotSymbol:TList<TPoint>; visible:boolean);
 var i,k:Integer;
-    fg:TColor;
+    fg, bg:TColor;
 begin
  vetev.visible := visible;
 
@@ -1158,24 +1174,21 @@ begin
      if ((vetev.Symbols[i].SymbolID < _Usek_Start) and (vetev.Symbols[i].SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
 
      if (visible) then
-       fg := (vetev.Symbols[i].SymbolID*10)+Self.Graphics.GetColorIndex(usek.PanelProp.Symbol)
+       fg := usek.PanelProp.Symbol
       else
-       fg := (vetev.Symbols[i].SymbolID*10)+1;
+       fg := $A0A0A0;
 
-     SymbolSet.IL_Symbols.BkColor := usek.PanelProp.Pozadi;
+     bg := usek.PanelProp.Pozadi;
 
      for k := 0 to Self.StartJC.count-1 do
       if ((Self.StartJC.Data[k].Pos.X = vetev.Symbols[i].Position.X) and (Self.StartJC.Data[k].Pos.Y = vetev.Symbols[i].Position.Y)) then
-       SymbolSet.IL_Symbols.BkColor := Self.StartJC.Data[k].Color;
+       bg := Self.StartJC.Data[k].Color;
 
      for k := 0 to usek.JCClick.Count-1 do
       if ((usek.JCClick[k].X = vetev.Symbols[i].Position.X) and (usek.JCClick[k].Y = vetev.Symbols[i].Position.Y)) then
-       if (Integer(usek.PanelProp.KonecJC) > 0) then SymbolSet.IL_Symbols.BkColor := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
+       if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,
-                               vetev.Symbols[i].Position.X*SymbolSet._Symbol_Sirka,
-                               vetev.Symbols[i].Position.Y*SymbolSet._Symbol_Vyska,
-                               fg);
+     Self.Draw(SymbolSet.IL_Symbols, vetev.Symbols[i].Position, vetev.Symbols[i].SymbolID, fg, bg);
     end;//for i
   end;//if not blikani
 
@@ -1236,12 +1249,13 @@ begin
   begin
    if ((Self.Navestidla.Data[i].PanelProp.blikani) and (Self.Graphics.blik)) then continue;
 
-   SymbolSet.IL_Symbols.BkColor := Self.Navestidla.Data[i].PanelProp.Pozadi;
    if (Self.Navestidla.Data[i].PanelProp.AB) then
     begin
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Navestidla.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Navestidla.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((_SCom_Start+Self.Navestidla.Data[i].SymbolID)*10)+Self.Graphics.GetColorIndex(Self.Navestidla.Data[i].PanelProp.Symbol)+20);
+     Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID+2,
+               Self.Navestidla.Data[i].PanelProp.Symbol, Self.Navestidla.Data[i].PanelProp.Pozadi);
     end else begin
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Navestidla.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Navestidla.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((_SCom_Start+Self.Navestidla.Data[i].SymbolID)*10)+Self.Graphics.GetColorIndex(Self.Navestidla.Data[i].PanelProp.Symbol));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID,
+               Self.Navestidla.Data[i].PanelProp.Symbol, Self.Navestidla.Data[i].PanelProp.Pozadi);
     end;
 
    if ((Self.Navestidla.Data[i].PanelProp.Pozadi = clGreen) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clWhite) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clTeal)) then
@@ -1262,10 +1276,9 @@ procedure TRelief.ShowPomocneSymboly();
 var i,j:Integer;
 begin
  //pomocne symboly
- SymbolSet.IL_Symbols.BkColor := clBlack;
  for i := 0 to Self.PomocneObj.Count-1 do
    for j := 0 to Self.PomocneObj.Data[i].Positions.Count-1 do
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.PomocneObj.Data[i].Positions.Data[j].X*SymbolSet._Symbol_Sirka,Self.PomocneObj.Data[i].Positions.Data[j].Y*SymbolSet._Symbol_Vyska,(Self.PomocneObj.Data[i].Symbol*10)+_SpecS_DrawColors[Self.PomocneObj.Data[i].Symbol]);
+     Self.Draw(SymbolSet.IL_Symbols, Self.PomocneObj.Data[i].Positions.Data[j], Self.PomocneObj.Data[i].Symbol, _SpecS_DrawColors[Self.PomocneObj.Data[i].Symbol], clBlack);
 end;//procedure
 
 procedure TRelief.ShowPopisky();
@@ -1304,6 +1317,7 @@ end;//procedure
 procedure TRelief.ShowVyhybky();
 var i:Integer;
     col:Integer;
+    bkcol:TColor;
 begin
  //vyhybky
  for i := 0 to Self.Vyhybky.Count-1 do
@@ -1315,32 +1329,33 @@ begin
    else
     col := $A0A0A0;
 
+   if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
+     bkcol := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi
+   else
+     bkcol := Self.Vyhybky.Data[i].PanelProp.Pozadi;
+
    case (Self.Vyhybky.Data[i].PanelProp.Poloha) of
     TVyhPoloha.disabled:begin
-     SymbolSet.IL_Symbols.BkColor := clFuchsia;
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Vyhybky.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Vyhybky.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((Self.Vyhybky.Data[i].SymbolID)*10)+Self.Graphics.GetColorIndex(clBlack));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+               Self.Vyhybky.Data[i].SymbolID, Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi, clFuchsia);
     end;
     TVyhPoloha.none:begin
-     SymbolSet.IL_Symbols.BkColor := col;
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Vyhybky.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Vyhybky.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((Self.Vyhybky.Data[i].SymbolID)*10)+Self.Graphics.GetColorIndex(clBlack));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+               bkcol, col);
     end;
     TVyhPoloha.plus:begin
-     if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
-       SymbolSet.IL_Symbols.BkColor := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi
-     else
-       SymbolSet.IL_Symbols.BkColor := Self.Vyhybky.Data[i].PanelProp.Pozadi;
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Vyhybky.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Vyhybky.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((Self.Vyhybky.Data[i].SymbolID)*10)+40+(40*(Self.Vyhybky.Data[i].PolohaPlus xor 0))+Self.Graphics.GetColorIndex(col));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+               (Self.Vyhybky.Data[i].SymbolID)+4+(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+               col, bkcol);
     end;
     TVyhPoloha.minus:begin
-     if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
-       SymbolSet.IL_Symbols.BkColor := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi
-     else
-       SymbolSet.IL_Symbols.BkColor := Self.Vyhybky.Data[i].PanelProp.Pozadi;
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Vyhybky.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Vyhybky.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((Self.Vyhybky.Data[i].SymbolID)*10)+80-(40*(Self.Vyhybky.Data[i].PolohaPlus xor 0))+Self.Graphics.GetColorIndex(col));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+               (Self.Vyhybky.Data[i].SymbolID)+8-(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+               col, bkcol);
     end;
     TVyhPoloha.both:begin
-     SymbolSet.IL_Symbols.BkColor := clYellow;
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Self.Vyhybky.Data[i].Position.X*SymbolSet._Symbol_Sirka,Self.Vyhybky.Data[i].Position.Y*SymbolSet._Symbol_Vyska,((Self.Vyhybky.Data[i].SymbolID)*10)+Self.Graphics.GetColorIndex(clBlack));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+               bkcol, clYellow);
     end;
    end;//case
   end;//for i
@@ -1367,16 +1382,15 @@ begin
    if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
      Color := clYellow;
 
-   SymbolSet.IL_DK.BkColor := clBlack;
-   SymbolSet.IL_DK.Draw(Self.DrawObject.Surface.Canvas,OblR.Poss.DK.X*SymbolSet._Symbol_Sirka,OblR.Poss.DK.Y*SymbolSet._Symbol_Vyska,(OblR.Poss.DKOr*10)+Self.Graphics.GetColorIndex(Color));
+   Self.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, Color, clBlack);
 
    // symbol osvetleni se vykresluje vlevo
    if (OblR.dk_osv) then
-    SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(OblR.Poss.DK.X*SymbolSet._Symbol_Sirka)-(SymbolSet._Symbol_Sirka*2),(OblR.Poss.DK.Y*SymbolSet._Symbol_Vyska)+SymbolSet._Symbol_Vyska, _Hvezdicka);
+     Self.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X-2, OblR.Poss.DK.Y+1), _Hvezdicka, clYellow, clBlack);
 
    // symbol zadosti o loko se vykresluje vpravo
    if (((OblR.RegPlease.status = TORRegPleaseStatus.request) or (OblR.RegPlease.status = TORRegPleaseStatus.selected)) and (not Self.Graphics.blik)) then
-    SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,((OblR.Poss.DK.X+6)*SymbolSet._Symbol_Sirka),((OblR.Poss.DK.Y+1)*SymbolSet._Symbol_Vyska), (_Kolecko*10)+7);
+     Self.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X+6, OblR.Poss.DK.Y+1), _Kolecko, clYellow, clBlack);
 
   end;//for i
 end;//procedure
@@ -1388,35 +1402,24 @@ begin
  Pos.X := 1;
  Pos.Y := Self.Graphics.PanelHeight-3;
 
- //37, 38, 39
  if (Self.SystemOK.Poloha) then
   begin
-   //tady ty silene finty s pozadim uz nikdy nikdo nepochopi...
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
 
-   SymbolSet.IL_Symbols.BkColor := clPurple;
-
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Pos.X*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,389);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+1)*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,389);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+2)*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,389);
-
-   SymbolSet.IL_Symbols.BkColor := clPurple;
-
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Pos.X*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,380);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+1)*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,380);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+2)*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,380);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
   end else begin
-   SymbolSet.IL_Symbols.BkColor := clPurple;
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol, clPurple, clPurple);
 
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Pos.X*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,378);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,Pos.X*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,389);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+2, clFuchsia, clBlack);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol, clFuchsia, clBlack);
 
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+2)*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,378);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+2)*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,389);
-
-   SymbolSet.IL_Symbols.BkColor := clBlack;
-
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+1)*SymbolSet._Symbol_Sirka,(Pos.Y+1)*SymbolSet._Symbol_Vyska,370);
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Pos.X+1)*SymbolSet._Symbol_Sirka,(Pos.Y)*SymbolSet._Symbol_Vyska,390);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol, clPurple, clPurple);
   end;
 
  case (PanelTCPClient.status) of
@@ -1435,9 +1438,8 @@ begin
  for i := 0 to Self.Prejezdy.count-1 do
   begin
    // vykreslit staticke pozice:
-   SymbolSet.IL_Symbols.BkColor := Self.Prejezdy.Data[i].PanelProp.Pozadi;
    for j := 0 to Self.Prejezdy.Data[i].StaticPositions.Count-1 do
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, Self.Prejezdy.Data[i].StaticPositions.data[j].X*SymbolSet._Symbol_Sirka, Self.Prejezdy.Data[i].StaticPositions.data[j].Y*SymbolSet._Symbol_Vyska, (_Prj_Start*10)+Self.Graphics.GetColorIndex(Self.Prejezdy.Data[i].PanelProp.Symbol));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Prejezdy.Data[i].StaticPositions.data[j], _Prj_Start, Self.Prejezdy.Data[i].PanelProp.Symbol, Self.Prejezdy.Data[i].PanelProp.Pozadi);
 
    // vykreslit blikajici pozice podle stavu prejezdu:
    if ((Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.otevreno) or
@@ -1462,8 +1464,7 @@ begin
             end;
           end;
 
-         SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.X*SymbolSet._Symbol_Sirka, Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.Y*SymbolSet._Symbol_Vyska, (_Prj_Start*10)+Self.Graphics.GetColorIndex(Self.Prejezdy.Data[i].PanelProp.Symbol));
-
+         Self.Draw(SymbolSet.IL_Symbols, Self.Prejezdy.Data[i].BlikPositions.data[j].Pos, _Prj_Start, Self.Prejezdy.Data[i].PanelProp.Symbol, Self.Prejezdy.Data[i].PanelProp.Pozadi);
         end;
     end else begin
 
@@ -1502,12 +1503,12 @@ begin
    if ((Self.Uvazky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then
      continue;
 
-   SymbolSet.IL_Symbols.BkColor := Self.Uvazky.Data[i].PanelProp.Pozadi;
-
    case (Self.Uvazky.Data[i].PanelProp.smer) of
     TUvazkaSmer.disabled, TUvazkaSmer.zadny:begin
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, Self.Uvazky.Data[i].Pos.X*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, (_Uvazka_Start*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
-     SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.Uvazky.Data[i].Pos.X+1)*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, ((_Uvazka_Start+1)*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
+     Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
+               _Uvazka_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+     Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
+               _Uvazka_Start+1, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
     end;
 
     TUvazkaSmer.zakladni, TUvazkaSmer.opacny:begin
@@ -1515,12 +1516,16 @@ begin
         ((Self.Uvazky.Data[i].PanelProp.smer = opacny) and (Self.Uvazky.Data[i].defalt_dir = 1))) then
       begin
        // sipka zleva doprava
-       SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, Self.Uvazky.Data[i].Pos.X*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, (12*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
-       SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.Uvazky.Data[i].Pos.X+1)*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, ((_Uvazka_Start+1)*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
+       Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
+                 _Usek_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+       Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
+                 _Uvazka_Start+1, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
       end else begin
        // sipka zprava doleva
-       SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, Self.Uvazky.Data[i].Pos.X*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, ((_Uvazka_Start)*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
-       SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.Uvazky.Data[i].Pos.X+1)*SymbolSet._Symbol_Sirka, Self.Uvazky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska, (12*10)+Self.Graphics.GetColorIndex(Self.Uvazky.Data[i].PanelProp.Symbol));
+       Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
+                 _Uvazka_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+       Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
+                 _Usek_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
       end;
     end;
    end;
@@ -1589,14 +1594,16 @@ begin
      DateTimeToString(Time2, 'ss', Self.myORs[j].MereniCasu[k].Length);
 
      for i := 0 to (Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2)-1 do
-      SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.myORs[j].Poss.Time.X+8+i)*SymbolSet._Symbol_Sirka,(Self.myORs[j].Poss.Time.Y+k)*SymbolSet._Symbol_Vyska,372);
+      Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol, clRed, clBlack);
 
      for i := (Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2) to (_delka div 2)-1 do
-      SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Self.myORs[j].Poss.Time.X+8+i)*SymbolSet._Symbol_Sirka,(Self.myORs[j].Poss.Time.Y+k)*SymbolSet._Symbol_Vyska,374);
+      Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol, clWhite, clBlack);
 
      //vykresleni poloviny symbolu
      SymbolSet.IL_Symbols.BkColor := clWhite;
-     if ((Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) mod 2) = 1) then SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,(Self.myORs[j].Poss.Time.X+8+(Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2))*SymbolSet._Symbol_Sirka,(Self.myORs[j].Poss.Time.Y+k)*SymbolSet._Symbol_Vyska,382);
+     if ((Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) mod 2) = 1) then
+       Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+(Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2),
+                 Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol+1, clRed, clWhite);
 
     end;//for i
 
@@ -3486,11 +3493,8 @@ begin
   begin
    if ((Self.Zamky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then continue;
 
-   SymbolSet.IL_Symbols.BkColor := Self.Zamky.Data[i].PanelProp.Pozadi;
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas,
-                            Self.Zamky.Data[i].Pos.X*SymbolSet._Symbol_Sirka,
-                            Self.Zamky.Data[i].Pos.Y*SymbolSet._Symbol_Vyska,
-                            (_Zamek*10)+Self.Graphics.GetColorIndex(Self.Zamky.Data[i].PanelProp.Symbol));
+   Self.Draw(SymbolSet.IL_Symbols, Self.Zamky.Data[i].Pos, _Zamek,
+             Self.Zamky.Data[i].PanelProp.Symbol,Self.Zamky.Data[i].PanelProp.Pozadi);
   end;//for i
 end;//procedure
 
@@ -3500,14 +3504,8 @@ end;//procedure
 procedure TRelief.ShowRozp;
 var i:Integer;
 begin
- SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsTransparent;
- SymbolSet.IL_Symbols.BkColor      := clBlack;
-
  for i := 0 to Self.Rozp.Count-1 do
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.Rozp[i].Pos.X)*SymbolSet._Symbol_Sirka, (Self.Rozp[i].Pos.Y)*SymbolSet._Symbol_Vyska,
-      ((_Rozp_Start+1)*10)+Self.Graphics.GetColorIndex(Self.Rozp[i].PanelProp.Symbol));
-
- SymbolSet.IL_Symbols.DrawingStyle := TDrawingStyle.dsNormal;
+   Self.Draw(SymbolSet.IL_Symbols, Self.Rozp[i].Pos, _Rozp_Start+1, Self.Rozp[i].PanelProp.Symbol, clBlack, true);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3537,9 +3535,7 @@ begin
      end;
     end;
 
-   SymbolSet.IL_Symbols.BkColor := Self.Vykol[i].PanelProp.Pozadi;
-   SymbolSet.IL_Symbols.Draw(Self.DrawObject.Surface.Canvas, (Self.Vykol[i].Pos.X)*SymbolSet._Symbol_Sirka, (Self.Vykol[i].Pos.Y)*SymbolSet._Symbol_Vyska,
-      ((_Vykol_Start+symindex)*10)+Self.Graphics.GetColorIndex(col));
+   Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos, _Vykol_Start+symindex, col, Self.Vykol[i].PanelProp.Pozadi);
   end;//for i
 end;//procedure
 

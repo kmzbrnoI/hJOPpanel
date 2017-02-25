@@ -24,6 +24,7 @@ type
 
       procedure TextOutput(Pos:TPoint;Text:string;Popredi,Pozadi:TColor; underline:boolean = false);
       function GetColorIndex(Color:TColor):integer;
+      function GetSymbolIndex(SymbolID:Integer; Color:TColor):integer;
   end;
 
 implementation
@@ -88,13 +89,15 @@ begin
    end;
 
    SymbolSet.IL_Text.BkColor := Pozadi;
-   SymbolSet.IL_Text.Draw(Self.DrawObject.Surface.Canvas,Pos.X*SymbolSet._Symbol_Sirka+(j*SymbolSet._Symbol_Sirka),Pos.Y*SymbolSet._Symbol_Vyska,(TextIndex*10)+Self.GetColorIndex(Popredi));
+   SymbolSet.IL_Text.Draw(Self.DrawObject.Surface.Canvas, Pos.X*SymbolSet._Symbol_Sirka+(j*SymbolSet._Symbol_Sirka),
+                          Pos.Y*SymbolSet._Symbol_Vyska,(TextIndex*_Symbol_ColorsCount)+Self.GetColorIndex(Popredi));
   end;//for j
 
  if (underline) then
   begin
    Self.DrawObject.Surface.Canvas.Pen.Color := Popredi;
-   Self.DrawObject.Surface.Canvas.Rectangle(Pos.X*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska-1, (Pos.X+Length(Text))*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska);
+   Self.DrawObject.Surface.Canvas.Rectangle(Pos.X*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska-1,
+                                            (Pos.X+Length(Text))*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska);
   end;
 end;//procedure
 
@@ -114,6 +117,13 @@ begin
     end;
   end;//for i
 end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPanelGraphics.GetSymbolIndex(SymbolID:Integer; Color:TColor):integer;
+begin
+ Result := (SymbolID * _Symbol_ColorsCount) + Self.GetColorIndex(Color);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
