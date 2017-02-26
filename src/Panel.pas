@@ -1685,24 +1685,18 @@ end;//procedure
 
 //vykresluje kurzor
 procedure TRelief.PaintKurzor();
-var  BlendFunc: TBlendFunction;
 begin
  if ((Self.CursorDraw.Pos.X < 0) or (Self.CursorDraw.Pos.Y < 0)) then Exit;
+ if (GlobConfig.data.panel_mouse <> _MOUSE_PANEL) then Exit();
 
  // zkopirujeme si obrazek pod kurzorem jeste pred tim, nez se pres nej prekresli mys
- if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
-   Self.CursorDraw.Pozadi.Canvas.CopyRect(
-      Rect(0, 0, SymbolSet._Symbol_Sirka+2, SymbolSet._Symbol_Vyska+2),
-      Self.DrawObject.Surface.Canvas,
-      Rect( Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka - 1,
-            Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska - 1,
-            (Self.CursorDraw.Pos.X+1) * SymbolSet._Symbol_Sirka + 1,
-            (Self.CursorDraw.Pos.Y+1) * SymbolSet._Symbol_Vyska + 1));
-
- // nastavime pruhlednost kurzoru
- BlendFunc.BlendOp := AC_SRC_OVER;
- BlendFunc.BlendFlags := 0;
- BlendFunc.SourceConstantAlpha := 100;
+ Self.CursorDraw.Pozadi.Canvas.CopyRect(
+    Rect(0, 0, SymbolSet._Symbol_Sirka+2, SymbolSet._Symbol_Vyska+2),
+    Self.DrawObject.Surface.Canvas,
+    Rect( Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka - 1,
+          Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska - 1,
+          (Self.CursorDraw.Pos.X+1) * SymbolSet._Symbol_Sirka + 1,
+          (Self.CursorDraw.Pos.Y+1) * SymbolSet._Symbol_Vyska + 1));
 
  //vykresleni kurzoru
  Self.DrawObject.Surface.Canvas.Pen.Color   := Self.CursorDraw.KurzorRamecek;
