@@ -1023,7 +1023,7 @@ var i,j,k:integer;
     sprpaintpos:TPointArray;
     NotSymbol:TList<TPoint>; //symboly na techto pozicich nebudou zobrazovany, protoze je prekryje text (cislo koleje, souprava)
     sipkaLeft,sipkaRight:boolean;
-    col:TColor;
+    fg, bg:TColor;
 begin
  NotSymbol := TList<TPoint>.Create();
 
@@ -1073,14 +1073,14 @@ begin
        // urceni barvy
        if (Self.myORs[Self.Useky[i].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) then
         begin
-         col := clYellow;
+         bg := clYellow;
          if (Self.Graphics.blik) then continue;
         end else if (Self.Useky[i].PanelProp.KonecJC > TJCType.no) then
-         col := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)]
+         bg := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)]
         else
-         col := Self.Useky[i].PanelProp.sprPozadi;
+         bg := Self.Useky[i].PanelProp.sprPozadi;
 
-       Self.Graphics.TextOutput(sprpaintpos.Data[j], Self.Useky[i].PanelProp.spr, Self.Useky[i].PanelProp.SprC, col, true);
+       Self.Graphics.TextOutput(sprpaintpos.Data[j], Self.Useky[i].PanelProp.spr, Self.Useky[i].PanelProp.SprC, bg, true);
 
        // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
        sipkaLeft := (((Self.Useky[i].PanelProp.sipkaL) and (Self.myORs[Self.Useky[i].OblRizeni].Lichy = 1)) or
@@ -1127,24 +1127,27 @@ begin
      // pokud nejsou vetve, nebo je usek disabled, vykresim ho cely (bez ohledu na vetve)
      if (((Self.Useky[i].PanelProp.blikani) or ((Self.Useky[i].PanelProp.spr <> '') and
         (Self.myORs[Self.Useky[i].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
-         and (Self.Graphics.blik)) then continue;
+         and (Self.Graphics.blik)) then
+       fg := clBlack
+     else
+       fg := Self.Useky[i].PanelProp.Symbol;
 
      for j := 0 to Self.Useky[i].Symbols.Count-1 do
       begin
        if (NotSymbol.Contains(Self.Useky[i].Symbols[j].Position)) then continue;
 
-       col := Self.Useky[i].PanelProp.Pozadi;
+       bg := Self.Useky[i].PanelProp.Pozadi;
 
        for k := 0 to Self.StartJC.count-1 do
         if ((Self.StartJC.Data[k].Pos.X = Self.Useky[i].Symbols[j].Position.X) and (Self.StartJC.Data[k].Pos.Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         col := Self.StartJC.Data[k].Color;
+         bg := Self.StartJC.Data[k].Color;
 
        for k := 0 to Self.Useky[i].JCClick.Count-1 do
         if ((Self.Useky[i].JCClick[k].X = Self.Useky[i].Symbols[j].Position.X) and (Self.Useky[i].JCClick[k].Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         if (Integer(Self.Useky[i].PanelProp.KonecJC) > 0) then col := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)];
+         if (Integer(Self.Useky[i].PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)];
 
        Self.Draw(SymbolSet.IL_Symbols, Self.Useky[i].Symbols[j].Position, Self.Useky[i].Symbols[j].SymbolID,
-                 Self.Useky[i].PanelProp.Symbol, col);
+                 fg, bg);
       end;//for j
 
     end else begin
@@ -1164,33 +1167,34 @@ var i,k:Integer;
 begin
  vetev.visible := visible;
 
- if (((not usek.PanelProp.blikani) and ((usek.PanelProp.spr = '') or
-    (Self.myORs[usek.OblRizeni].RegPlease.status <> TORRegPleaseStatus.selected)))
-    or (not Self.Graphics.blik) or (not visible)) then
+ if (((usek.PanelProp.blikani) or ((usek.PanelProp.spr <> '') and
+    (Self.myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
+    and (Self.Graphics.blik) and (visible)) then
+   fg := clBlack
+  else begin
+   if (visible) then
+     fg := usek.PanelProp.Symbol
+    else
+     fg := $A0A0A0;
+  end;
+
+ for i := 0 to Length(vetev.Symbols)-1 do
   begin
-   for i := 0 to Length(vetev.Symbols)-1 do
-    begin
-     if (NotSymbol.Contains(vetev.Symbols[i].Position)) then continue;
-     if ((vetev.Symbols[i].SymbolID < _Usek_Start) and (vetev.Symbols[i].SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
+   if (NotSymbol.Contains(vetev.Symbols[i].Position)) then continue;
+   if ((vetev.Symbols[i].SymbolID < _Usek_Start) and (vetev.Symbols[i].SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
 
-     if (visible) then
-       fg := usek.PanelProp.Symbol
-      else
-       fg := $A0A0A0;
+   bg := usek.PanelProp.Pozadi;
 
-     bg := usek.PanelProp.Pozadi;
+   for k := 0 to Self.StartJC.count-1 do
+    if ((Self.StartJC.Data[k].Pos.X = vetev.Symbols[i].Position.X) and (Self.StartJC.Data[k].Pos.Y = vetev.Symbols[i].Position.Y)) then
+     bg := Self.StartJC.Data[k].Color;
 
-     for k := 0 to Self.StartJC.count-1 do
-      if ((Self.StartJC.Data[k].Pos.X = vetev.Symbols[i].Position.X) and (Self.StartJC.Data[k].Pos.Y = vetev.Symbols[i].Position.Y)) then
-       bg := Self.StartJC.Data[k].Color;
+   for k := 0 to usek.JCClick.Count-1 do
+    if ((usek.JCClick[k].X = vetev.Symbols[i].Position.X) and (usek.JCClick[k].Y = vetev.Symbols[i].Position.Y)) then
+     if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
-     for k := 0 to usek.JCClick.Count-1 do
-      if ((usek.JCClick[k].X = vetev.Symbols[i].Position.X) and (usek.JCClick[k].Y = vetev.Symbols[i].Position.Y)) then
-       if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
-
-     Self.Draw(SymbolSet.IL_Symbols, vetev.Symbols[i].Position, vetev.Symbols[i].SymbolID, fg, bg);
-    end;//for i
-  end;//if not blikani
+   Self.Draw(SymbolSet.IL_Symbols, vetev.Symbols[i].Position, vetev.Symbols[i].SymbolID, fg, bg);
+  end;//for i
 
 
  if (vetev.node1.vyh > -1) then
@@ -1242,20 +1246,24 @@ end;//procedure
 
 procedure TRelief.ShowNavestidla();
 var i:Integer;
+    fg:TColor;
 begin
  Self.StartJC.count := 0;
 
  for i := 0 to Self.Navestidla.Count-1 do
   begin
-   if ((Self.Navestidla.Data[i].PanelProp.blikani) and (Self.Graphics.blik)) then continue;
+   if ((Self.Navestidla.Data[i].PanelProp.blikani) and (Self.Graphics.blik)) then
+     fg := clBlack
+   else
+     fg := Self.Navestidla.Data[i].PanelProp.Symbol;
 
    if (Self.Navestidla.Data[i].PanelProp.AB) then
     begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID+2,
-               Self.Navestidla.Data[i].PanelProp.Symbol, Self.Navestidla.Data[i].PanelProp.Pozadi);
+               fg, Self.Navestidla.Data[i].PanelProp.Pozadi);
     end else begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID,
-               Self.Navestidla.Data[i].PanelProp.Symbol, Self.Navestidla.Data[i].PanelProp.Pozadi);
+               fg, Self.Navestidla.Data[i].PanelProp.Pozadi);
     end;
 
    if ((Self.Navestidla.Data[i].PanelProp.Pozadi = clGreen) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clWhite) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clTeal)) then
@@ -1316,18 +1324,20 @@ end;//procedure
 
 procedure TRelief.ShowVyhybky();
 var i:Integer;
-    col:Integer;
+    fg:Integer;
     bkcol:TColor;
 begin
  //vyhybky
  for i := 0 to Self.Vyhybky.Count-1 do
   begin
-   if ((Self.Vyhybky.Data[i].PanelProp.blikani) and (Self.Graphics.blik) and (Self.Vyhybky.Data[i].visible)) then continue;
-
-   if ((Self.Vyhybky.Data[i].visible) or (Self.Vyhybky.Data[i].PanelProp.Symbol = clAqua)) then
-    col := Self.Vyhybky.Data[i].PanelProp.Symbol
-   else
-    col := $A0A0A0;
+   if ((Self.Vyhybky.Data[i].PanelProp.blikani) and (Self.Graphics.blik) and (Self.Vyhybky.Data[i].visible)) then
+     fg := clBlack
+   else begin
+     if ((Self.Vyhybky.Data[i].visible) or (Self.Vyhybky.Data[i].PanelProp.Symbol = clAqua)) then
+      fg := Self.Vyhybky.Data[i].PanelProp.Symbol
+     else
+      fg := $A0A0A0;
+   end;
 
    if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
      bkcol := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi
@@ -1341,17 +1351,17 @@ begin
     end;
     TVyhPoloha.none:begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
-               bkcol, col);
+               bkcol, fg);
     end;
     TVyhPoloha.plus:begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
                (Self.Vyhybky.Data[i].SymbolID)+4+(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
-               col, bkcol);
+               fg, bkcol);
     end;
     TVyhPoloha.minus:begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
                (Self.Vyhybky.Data[i].SymbolID)+8-(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
-               col, bkcol);
+               fg, bkcol);
     end;
     TVyhPoloha.both:begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
