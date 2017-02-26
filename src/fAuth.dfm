@@ -98,7 +98,7 @@ object F_Auth: TF_Auth
       Height = 25
       Caption = 'OK'
       Default = True
-      TabOrder = 3
+      TabOrder = 4
       OnClick = B_ApplyClick
       OnKeyPress = FormKeyPress
     end
@@ -108,7 +108,7 @@ object F_Auth: TF_Auth
       Width = 56
       Height = 25
       Caption = 'Zru'#353'it'
-      TabOrder = 4
+      TabOrder = 5
       OnClick = B_CancelClick
       OnKeyPress = FormKeyPress
     end
@@ -130,7 +130,7 @@ object F_Auth: TF_Auth
       Top = 129
       Width = 204
       Height = 192
-      TabOrder = 5
+      TabOrder = 6
       object ST_Rem2: TStaticText
         Left = 8
         Top = 26
@@ -207,7 +207,7 @@ object F_Auth: TF_Auth
       Width = 113
       Height = 25
       Caption = 'P'#345'ihl'#225'sit se jako host'
-      TabOrder = 6
+      TabOrder = 7
       OnClick = B_ApplyClick
     end
     object CHB_uLI_Daemon: TCheckBox
@@ -216,7 +216,7 @@ object F_Auth: TF_Auth
       Width = 257
       Height = 17
       Caption = 'Autorizovat uLI-daemon'
-      TabOrder = 7
+      TabOrder = 3
     end
   end
 end

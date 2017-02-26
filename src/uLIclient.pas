@@ -26,6 +26,7 @@ type
     resusc_destroy:boolean;
     resusc:TResuscitation;
     fAuthStatus:TuLIAuthStatus;
+    fAuthStatusChanged:TNotifyEvent;
 
      function Connect(host:string; port:Word):Integer;
      function Disconnect():Integer;
@@ -68,6 +69,8 @@ type
      property authStatus : TuLIAuthStatus read fAuthStatus;
      property enabled : boolean read GetEnabled write SetEnabled;
      property activeSlotsCount : Integer read GetActiveSlotsCount;
+
+     property OnAuthStatushanged: TNotifyEvent read fAuthStatusChanged write fAuthStatusChanged;
   end;//TPanelTCPClient
 
 var
@@ -75,7 +78,7 @@ var
 
 implementation
 
-uses fAuth, fRegReq, TCPClientPanel, fSprToSlot;
+uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, fMain;
 
 {
  Jak funguje komunikace ze strany serveru:
@@ -126,6 +129,7 @@ begin
  inherited;
 
  Self.fAuthStatus := TuLIAuthStatus.cannot;
+ Self.fAuthStatusChanged := nil;
  Self.parsed := TStringList.Create;
 
  for i := 1 to _SLOTS_CNT do Self.sloty[i] := ssNotAvailable;   
@@ -239,6 +243,8 @@ begin
    Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
    Self.resusc.Resume();
   end;
+
+ if (Assigned(Self.OnAuthStatushanged)) then Self.OnAuthStatushanged(Self);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,6 +304,12 @@ begin
 
    if ((Assigned(F_Auth)) and ((F_Auth.Showing) or (F_Auth.listening))) then F_Auth.UpdateULIcheckbox();
    PanelTCPClient.SendLn('-;MAUS;'+IntToStr(Integer(Self.fAuthStatus = tuLiAuthStatus.yes)));
+
+   if (Assigned(Self.OnAuthStatushanged)) then Self.OnAuthStatushanged(Self);
+
+   if ((Self.authStatus = tuLiAuthStatus.no) and (Self.toLogin.server <> '') and
+       (Self.toLogin.username <> '') and (Self.toLogin.password <> '')) then
+     Self.Auth();
 
  end else if (parsed[0] = 'LOKO') then begin
    if (parsed[1] = 'ok') then

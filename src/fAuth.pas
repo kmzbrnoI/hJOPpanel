@@ -125,7 +125,7 @@ begin
 
  hashed := GenerateHash(AnsiString(Self.E_Password.Text));
 
- if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply)) then
+ if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply) and (PanelTCPClient.status = TPanelConnectionStatus.opened)) then
   begin
    GlobConfig.data.auth.autoauth := true;
    GlobConfig.data.auth.username := Self.E_username.Text;
@@ -280,7 +280,12 @@ begin
    // zobrazime chybu pro kazdou oblast rizeni
    Self.ST_Error.Caption := '';
    for Item in Self.auth_errors do
-     Self.ST_Error.Caption := Self.ST_Error.Caption + relief.ORs[Item.Key].Name + ': ' + Item.Value + #13#10;
+    begin
+     if (Assigned(Self.auth_ors)) then
+       Self.ST_Error.Caption := Self.ST_Error.Caption + relief.ORs[Item.Key].Name + ': ' + Item.Value + #13#10
+     else
+       Self.ST_Error.Caption := Self.ST_Error.Caption + Item.Value + #13#10;
+    end;
   end;
 
  Self.ShowErrorMessage();
@@ -305,6 +310,12 @@ end;
 
 procedure TF_Auth.AuthOK(or_index:Integer);
 begin
+ if (not Assigned(Self.auth_ors)) then
+  begin
+   Self.Close();
+   Exit();
+  end;
+
  if (not Self.auth_remaining.Contains(or_index) or (not Self.listening)) then Exit();
 
  Self.auth_remaining.Remove(or_index);

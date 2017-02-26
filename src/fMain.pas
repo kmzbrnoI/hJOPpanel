@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DXDraws, ComCtrls, ExtCtrls, ImgList, Panel, AppEvnts, ActnList,
-  Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation, ShellApi;
+  Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation, ShellApi, RPConst;
 
 const
   _open_file_errors: array [1..3] of string =
@@ -14,6 +14,7 @@ const
      'Soubor panelu se nepodaøilo otevøít');
 
   _MUTE_MIN = 3;    // ztisit zvuky je mozne maximalne na 3 minuty, pak se znovu zapnou
+  _ULIAUTH_TIMEOUT_SEC = 5;
 
 type
   TF_Main = class(TForm)
@@ -34,8 +35,6 @@ type
     SB_Settings: TSpeedButton;
     P_Time: TPanel;
     P_Date: TPanel;
-    Panel1: TPanel;
-    SB_PrintScreen: TSpeedButton;
     A_Print: TAction;
     SD_Image: TSaveDialog;
     P_Time_modelovy: TPanel;
@@ -51,6 +50,8 @@ type
     L_Login: TLabel;
     A_ReAuth: TAction;
     SB_Logout: TSpeedButton;
+    SB_PrintScreen: TSpeedButton;
+    SB_uLIdaemon: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -68,12 +69,18 @@ type
     procedure A_MuteExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure A_ReAuthExecute(Sender: TObject);
+    procedure SB_uLIdaemonClick(Sender: TObject);
   private
 
    mute_time:TDateTime;
+   uliauth_time:TDateTime;
+   uliauth_enabled:boolean;
 
     procedure OnReliefMove(Sender:TObject; Position:TPoint);
     procedure ShowAboutDialog();
+    procedure RunuLIDaemon();
+    procedure OnuLIAuthStatusChanged(Sender:TObject);
+    procedure uLILoginFilled(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
   public
     DXD_Main:TDXDraw;
@@ -83,6 +90,8 @@ type
 
      procedure Init(const config_fn:string = TGlobConfig._DEFAULT_FN);          // konfiguracni soubor se cte z argumentu programu
      procedure SetPanelSize(width,height:Integer);
+     procedure UpdateuLIIcon();
+     procedure uLIAuthUpdate();
   end;
 
 var
@@ -91,8 +100,8 @@ var
 
 implementation
 
-uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds,
-  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, RPConst, uLIclient;
+uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
+  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient;
 
 {$R *.dfm}
 
@@ -191,6 +200,9 @@ end;
 procedure TF_Main.FormCreate(Sender: TObject);
 begin
  Self.close_app := false;
+ Self.uliauth_enabled := false;
+
+ BridgeClient.OnAuthStatushanged := Self.OnuLIAuthStatusChanged;
 
  ModCas.Reset();
  DCC := TDCC.Create();
@@ -199,6 +211,8 @@ end;
 procedure TF_Main.FormDestroy(Sender: TObject);
 var data:TGlobConfigData;
 begin
+ BridgeClient.OnAuthStatushanged := nil;
+
  Screen.Cursor := crHourGlass;
 
  if (Assigned(GlobConfig)) then
@@ -233,7 +247,6 @@ end;
 
 procedure TF_Main.Init(const config_fn:string);
 var return:Integer;
-    f:string;
 begin
  F_splash.AddStav('Naèítám konfiguraci...');
 
@@ -299,13 +312,14 @@ begin
    Self.Top := GlobConfig.data.frmPos.Y;
   end;
 
+ // do prvniho pripojeni jsou tu default hodnoty
+ BridgeClient.toLogin.server := GlobConfig.data.server.host;
+ BridgeClient.toLogin.port := GlobConfig.data.server.port;
+
  if (GlobConfig.data.uLI.path <> '') then
   begin
    F_splash.AddStav('Spouštím uLI-daemon...');
-   f := ExpandFileName(GlobConfig.data.uLI.path);
-   return := ShellExecute(Self.Handle, 'open', PChar(f), '', PChar(ExtractFilePath(GlobConfig.data.uLI.path)), SW_SHOWNOACTIVATE);
-   if (return < 32) then
-     Application.MessageBox(PChar('Nelze spustit uLI-daemon, chyba'+IntToStr(return)+#13#10+f), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
+   Self.RunuLIDaemon();
   end;
 
  if (GlobConfig.data.uLI.use) then
@@ -316,6 +330,7 @@ begin
 
  F_splash.AddStav('Hotovo');
 
+ Self.UpdateuLIIcon();
  F_splash.Close();
  Self.Show();
 
@@ -360,6 +375,26 @@ begin
  F_SprList.Show();
 end;
 
+procedure TF_Main.SB_uLIdaemonClick(Sender: TObject);
+begin
+ BridgeClient.toLogin.username := GlobConfig.data.auth.username;
+ BridgeClient.toLogin.password := GlobConfig.data.auth.password;
+
+ Self.uliauth_time := Now + EncodeTime(0, 0, _ULIAUTH_TIMEOUT_SEC, 0);
+ Self.uliauth_enabled := true;
+
+ if (not BridgeClient.opened) then
+   Self.RunuLIDaemon()
+ else begin
+   if (GlobConfig.data.auth.password = '') then
+     F_Auth.OpenForm('uLI-daemon vyžaduje autentizaci', Self.uLILoginFilled, nil, false)
+   else
+     BridgeClient.Auth();
+ end;
+
+ Self.UpdateuLIIcon();
+end;
+
 procedure TF_Main.SetPanelSize(width,height:Integer);
 begin
  Self.ClientWidth  := width;
@@ -375,6 +410,7 @@ begin
 
  PanelTCPClient.Update();
  BridgeClient.Update();
+ Self.uLIAuthUpdate();
 
  if ((SoundsPlay.muted) and (Self.mute_time + EncodeTime(0, _MUTE_MIN, 0, 0) <= Now)) then
   begin
@@ -405,6 +441,70 @@ end;//procedure
 procedure TF_Main.OnReliefLoginChange(Sender:TObject; user:string);
 begin
  Self.L_Login.Caption := user;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.RunuLIDaemon();
+var f:string;
+    return:Cardinal;
+begin
+ f := ExpandFileName(GlobConfig.data.uLI.path);
+ return := ShellExecute(Self.Handle, 'open', PChar(f), '', PChar(ExtractFilePath(GlobConfig.data.uLI.path)), SW_SHOWNOACTIVATE);
+ if (return < 32) then
+   Application.MessageBox(PChar('Nelze spustit uLI-daemon, chyba'+IntToStr(return)+#13#10+f), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.UpdateuLIIcon();
+begin
+ Self.SB_uLIdaemon.Enabled := (GlobConfig.data.uLI.path <> '') and
+    (BridgeClient.authStatus <> TuLIAuthStatus.yes) and (not Self.uliauth_enabled);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.uLIAuthUpdate();
+begin
+ if (not Self.uliauth_enabled) then Exit();
+
+ if (Now > Self.uliauth_time) then
+  begin
+   BridgeClient.toLogin.username := '';
+   BridgeClient.toLogin.password := '';
+   Self.uliauth_enabled := false;
+   Self.UpdateuLIIcon();
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.OnuLIAuthStatusChanged(Sender:TObject);
+begin
+ if (BridgeClient.authStatus = TuLIAuthStatus.yes) then
+   Self.uliauth_enabled := false;
+
+ if ((BridgeClient.authStatus = TuLIAuthStatus.no) and (Self.uliauth_enabled)) then
+  begin
+   Self.uliauth_enabled := false;
+   if (GlobConfig.data.auth.password = '') then
+     F_Auth.OpenForm('uLI-daemon vyžaduje autentizaci', Self.uLILoginFilled, nil, false);
+  end;
+
+ F_Main.UpdateuLIIcon();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.uLILoginFilled(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
+begin
+ if (BridgeClient.toLogin.password = '') then
+   F_Auth.AuthError(0, 'Je tøeba povolit autorizaci uLI-daemon!')
+ else begin
+   F_Auth.AuthOK(0);
+   BridgeClient.Auth();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

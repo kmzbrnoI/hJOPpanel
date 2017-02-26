@@ -194,6 +194,7 @@ begin
  else
    GlobConfig.data.uLI.path := '';
  GlobConfig.data.uLI.use  := Self.CHB_uLI_Login.Checked;
+ F_Main.UpdateuLIIcon();
 
  BridgeClient.enabled := GlobConfig.data.uLI.use;
 
