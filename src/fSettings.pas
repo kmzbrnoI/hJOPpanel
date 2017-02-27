@@ -100,6 +100,9 @@ type
     GB_uLI_Connect: TGroupBox;
     CHB_uLI_Login: TCheckBox;
     OD_uLI: TOpenDialog;
+    TS_IPC: TTabSheet;
+    CHB_IPC_Send: TCheckBox;
+    CHB_IPC_Receive: TCheckBox;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -172,6 +175,9 @@ begin
   end;//if Self.passwdChanged
  GlobConfig.data.auth.forgot               := Self.CHB_Forgot.Checked;
  GlobConfig.data.auth.auth_default_level   := Self.TB_Remeber.Position;
+
+ GlobConfig.data.auth.ipc_send             := Self.CHB_IPC_Send.Checked;
+ GlobConfig.data.auth.ipc_receive          := Self.CHB_IPC_Receive.Checked;
 
  GlobConfig.data.sounds.sndTratSouhlas     := Self.E_Snd_Trat.Text;
  GlobConfig.data.sounds.sndChyba           := Self.E_Snd_Error.Text;
@@ -508,6 +514,9 @@ begin
  Self.CHB_ShowPassword.Enabled := (data.auth.password = '');
  Self.TB_Remeber.Position      := GlobConfig.data.auth.auth_default_level;
  Self.TB_RemeberChange(Self.TB_Remeber);
+
+ Self.CHB_IPC_Send.Checked    := data.auth.ipc_send;
+ Self.CHB_IPC_Receive.Checked := data.auth.ipc_receive;
 
  Self.E_Snd_Trat.Text       := data.sounds.sndTratSouhlas;
  Self.E_Snd_Error.Text      := data.sounds.sndChyba;

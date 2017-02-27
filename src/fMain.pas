@@ -82,6 +82,9 @@ type
     procedure OnuLIAuthStatusChanged(Sender:TObject);
     procedure uLILoginFilled(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
+  protected
+    procedure WndProc(var Message: TMessage); override;
+
   public
     DXD_Main:TDXDraw;
     close_app: boolean;
@@ -101,7 +104,8 @@ var
 implementation
 
 uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
-  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient;
+  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient,
+  InterProcessCom, JclAppInst;
 
 {$R *.dfm}
 
@@ -122,6 +126,15 @@ begin
       Relief.HideCursor();
       Self.SB_Main.Panels.Items[0].Text := '---;---';
      end;
+  end;
+
+ if (msg.hwnd = 0) and (msg.message = JclAppInstances.MessageID) then
+  begin
+   case msg.wParam of
+     AI_INSTANCECREATED, AI_INSTANCEDESTROYED:
+      if ((Assigned(F_Auth)) and (F_Auth.Showing)) then F_Auth.UpdateIPCcheckbox();
+   end;
+   Handled := True;
   end;
 end;
 
@@ -185,6 +198,11 @@ end;
 procedure TF_Main.A_SettingsExecute(Sender: TObject);
 begin
  Self.SB_SettingsClick(Self.SB_Settings);
+
+// IPC.se
+// JclAppInstances.SendString(ClassName, _IPC_MYID, 'testi', Handle);
+// Self.SB_Main.Panels[2].Text := IntToStr(JclAppInstances.MessageID);
+// SendMessage(Handle, WM_COPYDATA, Integer(Handle), 4855);
 end;
 
 procedure TF_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -206,6 +224,8 @@ begin
 
  ModCas.Reset();
  DCC := TDCC.Create();
+
+ JclAppInstances.CheckInstance(0);
 end;
 
 procedure TF_Main.FormDestroy(Sender: TObject);
@@ -411,6 +431,7 @@ begin
  PanelTCPClient.Update();
  BridgeClient.Update();
  Self.uLIAuthUpdate();
+ IPC.Update();
 
  if ((SoundsPlay.muted) and (Self.mute_time + EncodeTime(0, _MUTE_MIN, 0, 0) <= Now)) then
   begin
@@ -459,8 +480,8 @@ end;
 
 procedure TF_Main.UpdateuLIIcon();
 begin
- Self.SB_uLIdaemon.Enabled := (GlobConfig.data.uLI.path <> '') and
-    (BridgeClient.authStatus <> TuLIAuthStatus.yes) and (not Self.uliauth_enabled);
+ Self.SB_uLIdaemon.Enabled := (((GlobConfig.data.uLI.path <> '') and (not BridgeClient.opened))
+    or (BridgeClient.authStatus = TuLIAuthStatus.no)) and (not Self.uliauth_enabled);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -505,6 +526,38 @@ begin
    F_Auth.AuthOK(0);
    BridgeClient.Auth();
  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.WndProc(var Message: TMessage);
+var received:string;
+begin
+  // Interprocess communication handler.
+
+  // First check whether we can safely read TForm.Handle property ...
+  if HandleAllocated and not (csDestroying in ComponentState) then
+  begin
+    // ... then whether it is our message. The last paramter tells to ignore the
+    // message sent from window of this instance
+
+    case ReadMessageCheck(Message, Handle) of
+      _IPC_MYID: // It is our data
+        begin
+          try
+            // Read String from the message
+            ReadMessageString(Message, received);
+            IPC.ParseData(received);
+          finally
+
+          end;
+        end;
+     else
+       inherited;
+     end;
+  end
+  else
+    inherited;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

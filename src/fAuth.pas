@@ -43,8 +43,6 @@ type
   TF_Auth = class(TForm)
     P_Message: TPanel;
     P_Body: TPanel;
-    B_Apply: TButton;
-    B_Cancel: TButton;
     TB_Remeber: TTrackBar;
     GB_RemberDesc: TGroupBox;
     ST_Rem2: TStaticText;
@@ -57,8 +55,12 @@ type
     E_username: TEdit;
     Label14: TLabel;
     ST_Error: TStaticText;
-    B_Guest: TButton;
     CHB_uLI_Daemon: TCheckBox;
+    CHB_IPC_auth: TCheckBox;
+    P_Buttons: TPanel;
+    B_Guest: TButton;
+    B_Cancel: TButton;
+    B_Apply: TButton;
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -83,6 +85,8 @@ type
     procedure ShowEnter();
     procedure ShowRelogin();
 
+    procedure UpdateCheckboxLayout();
+
   public
     procedure OpenForm(caption:string; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean; username:string = '');
     procedure Listen(caption:string; username:string; remember_level:Integer; callback:TAuthFilledCallback; or_ids:TIntAr; allow_guest:boolean); // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
@@ -91,6 +95,7 @@ type
     procedure AuthOK(or_index:Integer);                                         // zavolat pri uspesne autorizaci
 
     procedure UpdateULIcheckbox();
+    procedure UpdateIPCcheckbox();
 
     property listening:boolean read flistening;                                 // jestli poslouchame na odpovedi o autorizaci
 
@@ -101,7 +106,7 @@ var
 
 implementation
 
-uses GlobalConfig, fMain, TCPClientPanel, uLIclient;
+uses GlobalConfig, fMain, TCPClientPanel, uLIclient, InterProcessCom;
 
 {$R *.dfm}
 
@@ -137,6 +142,12 @@ begin
   begin
    BridgeClient.toLogin.username := Self.E_username.Text;
    BridgeClient.toLogin.password := hashed;
+  end;
+
+ if ((Self.CHB_IPC_auth.Checked) and (Self.CHB_IPC_auth.Visible)) then
+  begin
+   IPC.username := Self.E_username.Text;
+   IPC.password := hashed;
   end;
 
  if (Sender = Self.B_Apply) then
@@ -211,6 +222,8 @@ begin
 
  Self.UpdateULIcheckbox();
  Self.CHB_uLI_Daemon.Checked := Self.CHB_uLI_Daemon.Visible and Self.CHB_uLI_Daemon.Enabled;
+ Self.UpdateIPCcheckbox();
+ Self.CHB_IPC_auth.Checked := true;
 
  Self.Show();
 end;
@@ -235,6 +248,8 @@ begin
 
  Self.UpdateULIcheckbox();
  Self.CHB_uLI_Daemon.Checked := Self.CHB_uLI_Daemon.Visible and Self.CHB_uLI_Daemon.Enabled;
+ Self.UpdateIPCcheckbox();
+ Self.CHB_IPC_auth.Checked := true;
 end;
 
 procedure TF_Auth.TB_RemeberChange(Sender: TObject);
@@ -395,18 +410,39 @@ begin
   begin
    Self.CHB_uLI_Daemon.Enabled := (BridgeClient.authStatus = no);
    if (not Self.CHB_uLI_Daemon.Enabled) then Self.CHB_uLI_Daemon.Checked := false;
-
-   B_Apply.Top    := 354;
-   B_Cancel.Top   := 354;
-   B_Guest.Top    := 354;
-   P_Body.Height  := 385;
-  end else begin
-   B_Apply.Top    := 327;
-   B_Cancel.Top   := 327;
-   B_Guest.Top    := 327;
-   P_Body.Height  := 361;
   end;
 
+ Self.UpdateCheckboxLayout();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.UpdateIPCcheckbox();
+begin
+ Self.CHB_IPC_auth.Visible := (IPC.InstanceCnt > 1) and (GlobConfig.data.auth.ipc_send) and (Self.auth_ors <> nil);
+ Self.UpdateCheckboxLayout();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Auth.UpdateCheckboxLayout();
+var top:Integer;
+begin
+ top := 327;
+
+ if (Self.CHB_IPC_auth.Visible) then
+  begin
+   Self.CHB_IPC_auth.Top := top;
+   top := top + 20;
+  end;
+
+ if (Self.CHB_uLI_Daemon.Visible) then
+  begin
+   Self.CHB_uLI_Daemon.Top := top;
+   top := top + 20;
+  end;
+
+ Self.P_Body.Height := top + P_Buttons.Height;
  Self.Height := P_Body.Top + P_Body.Height + 30;
 end;
 

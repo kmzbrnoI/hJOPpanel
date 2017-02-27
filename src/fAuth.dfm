@@ -4,7 +4,7 @@ object F_Auth: TF_Auth
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Server vy'#382'aduje autentizaci'
-  ClientHeight = 401
+  ClientHeight = 425
   ClientWidth = 305
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -62,7 +62,7 @@ object F_Auth: TF_Auth
     Left = 8
     Top = 8
     Width = 289
-    Height = 385
+    Height = 409
     BevelOuter = bvNone
     Caption = 'P_Body'
     ParentColor = True
@@ -90,27 +90,6 @@ object F_Auth: TF_Auth
       Width = 90
       Height = 13
       Caption = 'U'#382'ivatelsk'#233' jm'#233'no:'
-    end
-    object B_Apply: TButton
-      Left = 216
-      Top = 354
-      Width = 57
-      Height = 25
-      Caption = 'OK'
-      Default = True
-      TabOrder = 4
-      OnClick = B_ApplyClick
-      OnKeyPress = FormKeyPress
-    end
-    object B_Cancel: TButton
-      Left = 154
-      Top = 354
-      Width = 56
-      Height = 25
-      Caption = 'Zru'#353'it'
-      TabOrder = 5
-      OnClick = B_CancelClick
-      OnKeyPress = FormKeyPress
     end
     object TB_Remeber: TTrackBar
       Left = 16
@@ -201,22 +180,61 @@ object F_Auth: TF_Auth
       Text = 'E_username'
       OnKeyPress = FormKeyPress
     end
-    object B_Guest: TButton
-      Left = 16
-      Top = 354
-      Width = 113
-      Height = 25
-      Caption = 'P'#345'ihl'#225'sit se jako host'
-      TabOrder = 7
-      OnClick = B_ApplyClick
-    end
     object CHB_uLI_Daemon: TCheckBox
+      Left = 16
+      Top = 350
+      Width = 257
+      Height = 17
+      Caption = 'Autorizovat uLI-daemon'
+      TabOrder = 4
+    end
+    object CHB_IPC_auth: TCheckBox
       Left = 16
       Top = 327
       Width = 257
       Height = 17
-      Caption = 'Autorizovat uLI-daemon'
+      Caption = 'Autorizovat dal'#353#237' spu'#353't'#283'n'#233' panely'
       TabOrder = 3
+    end
+    object P_Buttons: TPanel
+      Left = 0
+      Top = 369
+      Width = 289
+      Height = 40
+      Align = alBottom
+      BevelOuter = bvNone
+      TabOrder = 5
+      ExplicitTop = 373
+      object B_Guest: TButton
+        Left = 16
+        Top = 7
+        Width = 113
+        Height = 25
+        Caption = 'P'#345'ihl'#225'sit se jako host'
+        TabOrder = 2
+        OnClick = B_ApplyClick
+      end
+      object B_Cancel: TButton
+        Left = 154
+        Top = 7
+        Width = 56
+        Height = 25
+        Caption = 'Zru'#353'it'
+        TabOrder = 1
+        OnClick = B_CancelClick
+        OnKeyPress = FormKeyPress
+      end
+      object B_Apply: TButton
+        Left = 216
+        Top = 7
+        Width = 57
+        Height = 25
+        Caption = 'OK'
+        Default = True
+        TabOrder = 0
+        OnClick = B_ApplyClick
+        OnKeyPress = FormKeyPress
+      end
     end
   end
 end

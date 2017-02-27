@@ -49,14 +49,10 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_uLIdaemon
+    ActivePage = TS_IPC
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label1: TLabel
         Left = 168
         Top = 75
@@ -109,10 +105,6 @@ object F_Settings: TF_Settings
     object TS_Sounds: TTabSheet
       Caption = 'Zvuky'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label3: TLabel
         Left = 16
         Top = 14
@@ -252,10 +244,6 @@ object F_Settings: TF_Settings
     object TS_Symbols: TTabSheet
       Caption = 'Symboly'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label9: TLabel
         Left = 248
         Top = 16
@@ -279,10 +267,6 @@ object F_Settings: TF_Settings
     object TS_Vysvetlivky: TTabSheet
       Caption = 'Vysv'#283'tlivky'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label11: TLabel
         Left = 96
         Top = 21
@@ -322,10 +306,6 @@ object F_Settings: TF_Settings
     object TS_Panel: TTabSheet
       Caption = 'Panel'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label12: TLabel
         Left = 96
         Top = 21
@@ -387,10 +367,6 @@ object F_Settings: TF_Settings
     object TS_Timer: TTabSheet
       Caption = 'Prim'#225'rn'#237' smy'#269'ka'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label13: TLabel
         Left = 248
         Top = 16
@@ -419,10 +395,6 @@ object F_Settings: TF_Settings
     object TS_Rights: TTabSheet
       Caption = 'Login'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GB_Auth: TGroupBox
         Left = 41
         Top = 16
@@ -491,7 +463,7 @@ object F_Settings: TF_Settings
           Left = 16
           Top = 173
           Width = 217
-          Height = 17
+          Height = 20
           Caption = 'Zapomenout login po odpojen'#237' od serveru'
           TabOrder = 4
         end
@@ -565,13 +537,29 @@ object F_Settings: TF_Settings
         end
       end
     end
+    object TS_IPC: TTabSheet
+      Caption = 'Meziprocesov'#253' login'
+      ImageIndex = 11
+      object CHB_IPC_Send: TCheckBox
+        Left = 176
+        Top = 49
+        Width = 265
+        Height = 17
+        Caption = 'Povolit odes'#237'l'#225'n'#237' po'#382'adavk'#367' na meziprocesov'#253' login'
+        TabOrder = 0
+      end
+      object CHB_IPC_Receive: TCheckBox
+        Left = 176
+        Top = 72
+        Width = 265
+        Height = 17
+        Caption = 'Akceptovat meziprocesov'#253' login od dal'#353#237'ch panel'#367
+        TabOrder = 1
+      end
+    end
     object TS_ORAuth: TTabSheet
       Caption = 'Autorizace O'#344
       ImageIndex = 8
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 176
         Top = 16
@@ -616,10 +604,6 @@ object F_Settings: TF_Settings
     object TS_Guest: TTabSheet
       Caption = #218#269'et hosta'
       ImageIndex = 9
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label10: TLabel
         Left = 200
         Top = 72
@@ -672,10 +656,6 @@ object F_Settings: TF_Settings
     object TS_Regulator: TTabSheet
       Caption = 'Regul'#225'tor'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label17: TLabel
         Left = 96
         Top = 21
@@ -723,10 +703,6 @@ object F_Settings: TF_Settings
     object TS_uLIdaemon: TTabSheet
       Caption = 'uLI-daemon'
       ImageIndex = 10
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GB_uLI_Run: TGroupBox
         Left = 123
         Top = 15

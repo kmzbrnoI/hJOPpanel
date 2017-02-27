@@ -841,6 +841,7 @@ end;
    procedure UpdateSymbolSet();
 
    procedure ReAuthorize();
+   procedure IPAAuth();
 
    property PozadiColor:TColor read Colors.Pozadi write Colors.Pozadi;
    property KurzorRamecek:TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
@@ -890,7 +891,7 @@ implementation
 
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
-     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient;
+     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -2662,7 +2663,9 @@ begin
  if ((Rights >= TORControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and (BridgeClient.toLogin.password <> '')) then
    BridgeClient.Auth();
 
- // zobrazovani chybove hlasky loginu
+ if (Rights >= TORControlRights.read) then
+   IPC.CheckAuth();
+
  if (F_Auth.listening) then
   begin
    if (Rights = TORControlRights.null) then
@@ -2724,7 +2727,7 @@ begin
    F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.auth.username, 2, Self.ORConnectionOpenned_AuthCallback, ors, true);
    Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
 
-   if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLiAuthStatus.no)) then
+   if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLiAuthStatus.no) and (not PanelTCPClient.openned_by_ipc)) then
     begin
      BridgeClient.toLogin.username := GlobConfig.data.auth.username;
      BridgeClient.toLogin.password := GlobConfig.data.auth.password;
@@ -3798,6 +3801,13 @@ begin
    // na OR v seznamu 'Self.reAuth.old_ors' prihlasime hosta
    F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, fors, true);
    Self.AuthReadCallback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, fors, false);
+
+   // v pripade povolene IPC odhlasime i zbyle panely
+   if (GlobConfig.data.auth.ipc_send) then
+    begin
+     IPC.username := GlobConfig.data.guest.username;
+     IPC.password := GlobConfig.data.guest.password;
+    end;
   end else begin
 
    if (Self.reAuth.old_ors.Count = 0) then
@@ -3819,6 +3829,46 @@ begin
      Self.reAuth.old_login := '';
      Self.reAuth.old_ors.Clear();
     end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.IPAAuth();
+var i, j, cnt:Integer;
+    ors:TIntAr;
+    rights:TOrControlRights;
+begin
+ if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
+  begin
+   // existujici spojeni -> autorizovat
+
+   // zjistime pocet OR s (zadanym opravnenim > null) nebo (prave autorizovanych)
+   cnt := 0;
+   for i := 0 to Self.ORs.Count-1 do
+     if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null) or
+         (Self.ORs[i].tech_rights > TORControlRights.null)) then Inc(cnt);
+
+   // do \ors si priradime vsechna or s (zadanym opravennim > null) nebo (prave autorizovanych)
+   SetLength(ors, cnt);
+   j := 0;
+   for i := 0 to Self.ORs.Count-1 do
+     if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null) or
+         (Self.ORs[i].tech_rights > TORControlRights.null)) then
+      begin
+       ors[j] := i;
+       Inc(j);
+      end;
+
+   Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
+  end else begin
+   // nove spojeni -> pripojit
+   try
+    PanelTCPClient.Connect(GlobConfig.data.server.host, GlobConfig.data.server.port);
+    PanelTCPClient.openned_by_ipc := true;
+   except
+
+   end;
   end;
 end;
 

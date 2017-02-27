@@ -57,6 +57,7 @@ type
    public
 
     resusct : TResuscitation;
+    openned_by_ipc: boolean;
 
      constructor Create();
      destructor Destroy(); override;
@@ -376,6 +377,8 @@ begin
 
  Self.tcpClient.Host := host;
  Self.tcpClient.Port := port;
+
+ Self.openned_by_ipc := false;
 
  Self.fstatus := TPanelConnectionStatus.opening;
  F_Main.T_MainTimer(nil);

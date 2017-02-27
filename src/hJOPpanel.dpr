@@ -47,11 +47,14 @@ uses
   fHVSearch in 'fHVSearch.pas' {F_HVSearch},
   uLIclient in 'uLIclient.pas',
   LokTokens in 'LokTokens.pas',
-  fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot};
+  fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot},
+  InterProcessCom in 'InterProcessCom.pas';
 
 {$R *.res}
 
 begin
+  Randomize();
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.Title := 'hJOPpanel';

@@ -27,6 +27,8 @@ type
     ORs:TDictionary<string, TORControlRights>;
     forgot:boolean;     // smazat autorizacni udaje po odpojeni ze serveru
     auth_default_level:Integer;
+
+    ipc_send, ipc_receive: boolean;
   end;
 
   TGuestConfig = record
@@ -142,6 +144,9 @@ begin
  Self.data.auth.forgot        := false;
  Self.data.auth.auth_default_level := ini.ReadInteger('auth', 'auth_default_level', 1);
 
+ Self.data.auth.ipc_send      := ini.ReadBool('auth', 'ipc_send', true);
+ Self.data.auth.ipc_receive   := ini.ReadBool('auth', 'ipc_received', true);
+
  str := TStringList.Create();
  ExtractStrings(['(', ')', ',', ';'], [], PChar(ini.ReadString('auth', 'ORs', '')), str);
 
@@ -208,6 +213,9 @@ begin
  ini.WriteString('auth', 'username', Self.data.auth.username);
  ini.WriteString('auth', 'password', Self.data.auth.password);
  ini.WriteInteger('auth', 'auth_default_level', Self.data.auth.auth_default_level);
+
+ ini.WriteBool('auth', 'ipc_send', Self.data.auth.ipc_send);
+ ini.WriteBool('auth', 'ipc_received', Self.data.auth.ipc_receive);
 
  str := '';
  for i := 0 to Relief.ORs.Count-1 do
