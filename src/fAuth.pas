@@ -418,8 +418,15 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Auth.UpdateIPCcheckbox();
+var old:boolean;
 begin
+ old := Self.CHB_IPC_auth.Visible;
  Self.CHB_IPC_auth.Visible := (IPC.InstanceCnt > 1) and (GlobConfig.data.auth.ipc_send) and (Self.auth_ors <> nil);
+
+ // pokud je okno otevrene, nezaskrtavame (aby uzivatel omylem nepotrvdit neco, co nechce)
+ if ((not old) and (Self.CHB_IPC_auth.Visible)) then
+   Self.CHB_IPC_auth.Checked := false;
+
  Self.UpdateCheckboxLayout();
 end;
 
