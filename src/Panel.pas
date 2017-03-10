@@ -735,7 +735,7 @@ end;
    function FLoad(aFile:string):Byte;
 
    procedure ShowUseky;
-   procedure ShowUsekVetve(usek:TPReliefUsk; vetev:TVetev; var NotSymbol:TList<TPoint>; visible:boolean);
+   procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>; visible:boolean; var showed:array of boolean);
    procedure ShowNavestidla;
    procedure ShowPomocneSymboly;
    procedure ShowPopisky;
@@ -1023,6 +1023,7 @@ procedure TRelief.ShowUseky();
 var i,j,k:integer;
     sprpaintpos:TPointArray;
     NotSymbol:TList<TPoint>; //symboly na techto pozicich nebudou zobrazovany, protoze je prekryje text (cislo koleje, souprava)
+    showed:array of boolean;
     sipkaLeft,sipkaRight:boolean;
     fg, bg:TColor;
 begin
@@ -1153,19 +1154,28 @@ begin
 
     end else begin
 
+     SetLength(showed, Self.Useky[i].Vetve.Count);
+     for j := 0 to Self.Useky[i].Vetve.Count-1 do
+       showed[j] := false;
+
      // pokud jsou vetve a usek neni disabled, kreslim vetve
-     Self.ShowUsekVetve(Self.Useky[i], Self.Useky[i].Vetve[0], NotSymbol, true);
+     Self.ShowUsekVetve(Self.Useky[i], 0, NotSymbol, true, showed);
     end;
   end;//for i
-
  NotSymbol.Free();
 end;//procedure
 
 // tato funkce rekurzivne kresli vetve
-procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetev:TVetev; var NotSymbol:TList<TPoint>; visible:boolean);
+procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>; visible:boolean; var showed:array of boolean);
 var i,k:Integer;
     fg, bg:TColor;
+    vetev:TVetev;
 begin
+ if (vetevI < 0) then Exit(); 
+ if (showed[vetevI]) then Exit();
+ showed[vetevI] := true;
+ vetev := usek.Vetve[vetevI];
+
  vetev.visible := visible;
 
  if (((usek.PanelProp.blikani) or ((usek.PanelProp.spr <> '') and
@@ -1204,18 +1214,18 @@ begin
 
    case (Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
-       Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_plus], NotSymbol, visible);
-       Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_minus], NotSymbol, visible);
+       Self.ShowUsekVetve(usek, vetev.node1.ref_plus, NotSymbol, visible, showed);
+       Self.ShowUsekVetve(usek, vetev.node1.ref_minus, NotSymbol, visible, showed);
      end;//case disable, both, none
 
     TVyhPoloha.plus, TVyhPoloha.minus:begin
        if ((Integer(Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Poloha) xor Self.Vyhybky.Data[vetev.node1.vyh].PolohaPlus) = 0) then
         begin
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_plus], NotSymbol, visible);
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_minus], NotSymbol, false);
+         Self.ShowUsekVetve(usek, vetev.node1.ref_plus, NotSymbol, visible, showed);
+         Self.ShowUsekVetve(usek, vetev.node1.ref_minus, NotSymbol, false, showed);
         end else begin
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_plus], NotSymbol, false);
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node1.ref_minus], NotSymbol, visible);
+         Self.ShowUsekVetve(usek, vetev.node1.ref_plus, NotSymbol, false, showed);
+         Self.ShowUsekVetve(usek, vetev.node1.ref_minus, NotSymbol, visible, showed);
         end;
      end;//case disable, both, none
    end;//case
@@ -1227,18 +1237,18 @@ begin
 
    case (Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
-       Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_plus], NotSymbol, visible);
-       Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_minus], NotSymbol, visible);
+       Self.ShowUsekVetve(usek, vetev.node2.ref_plus, NotSymbol, visible, showed);
+       Self.ShowUsekVetve(usek, vetev.node2.ref_minus, NotSymbol, visible, showed);
      end;//case disable, both, none
 
     TVyhPoloha.plus, TVyhPoloha.minus:begin
        if ((Integer(Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Poloha) xor Self.Vyhybky.Data[vetev.node2.vyh].PolohaPlus) = 0) then
         begin
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_plus], NotSymbol, visible);
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_minus], NotSymbol, false);
+         Self.ShowUsekVetve(usek, vetev.node2.ref_plus, NotSymbol, visible, showed);
+         Self.ShowUsekVetve(usek, vetev.node2.ref_minus, NotSymbol, false, showed);
         end else begin
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_plus], NotSymbol, false);
-         Self.ShowUsekVetve(usek, usek.Vetve[vetev.node2.ref_minus], NotSymbol, visible);
+         Self.ShowUsekVetve(usek, vetev.node2.ref_plus, NotSymbol, false, showed);
+         Self.ShowUsekVetve(usek, vetev.node2.ref_minus, NotSymbol, visible, showed);
         end;
      end;//case disable, both, none
    end;//case
@@ -1676,9 +1686,12 @@ begin
 
    Self.DrawObject.Surface.Canvas.Release();
    Self.DrawObject.Flip();
-   Self.DrawObject.Surface.Canvas.UnLock();
- except
-   Exit();
+ finally
+   try
+     Self.DrawObject.Surface.Canvas.UnLock();
+   except
+
+   end;
  end;
 end;//procedure
 
@@ -1764,19 +1777,28 @@ begin
   begin
    // neprekreslujeme cely panel, ale pouze policko, na kterem byla mys v minule pozici
    //  obsah tohoto policka je ulozen v Self.CursorDraw.History
-   if (Self.Menu.showing) then
-     Self.Menu.PaintMenu(Self.DrawObject.Surface.Canvas, Self.CursorDraw.Pos)
-   else begin
-     Self.PaintKurzorBg(old);
-     Self.PaintKurzor();
-   end;
-
-   // prekreslime si platno
    try
+     Self.DrawObject.Surface.Canvas.Lock();
+     if (not Assigned(Self.DrawObject)) then Exit;
+     if (not Self.DrawObject.CanDraw) then Exit;
+
+     if (Self.Menu.showing) then
+       Self.Menu.PaintMenu(Self.DrawObject.Surface.Canvas, Self.CursorDraw.Pos)
+     else begin
+       Self.PaintKurzorBg(old);
+       Self.PaintKurzor();
+     end;
+
+     // prekreslime si platno
      Self.DrawObject.Surface.Canvas.Release();
      Self.DrawObject.Flip();
-   except
+   finally
+     try
+       if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
+         Self.DrawObject.Surface.Canvas.UnLock();
+     except
 
+     end;
    end;
   end;
 end;//procedure
