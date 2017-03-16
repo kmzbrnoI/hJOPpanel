@@ -142,8 +142,12 @@ end;//ctor
 
 destructor TBridgeClient.Destroy();
 begin
- if (Self.tcpClient.Connected) then
-   Self.tcpClient.Disconnect();
+ try
+   if (Self.tcpClient.Connected) then
+     Self.tcpClient.Disconnect();
+ except
+
+ end;
 
  Self.DestroyResusc();
 
@@ -189,7 +193,11 @@ end;//function
 
 function TBridgeClient.Disconnect():Integer;
 begin
- if (not Self.tcpClient.Connected) then Exit(1);
+ try
+   if (not Self.tcpClient.Connected) then Exit(1);
+ except
+
+ end;
 
  Self.control_disconnect := true;
  if Assigned(Self.rthread) then Self.rthread.Terminate;
@@ -326,7 +334,11 @@ end;//procedure
 
 procedure TBridgeClient.SendLn(str:string);
 begin
- if (not Self.tcpClient.Connected) then Exit;
+ try
+   if (not Self.tcpClient.Connected) then Exit;
+ except
+
+ end;
 
  try
    Self.tcpClient.Socket.WriteLn(str);
@@ -339,7 +351,11 @@ end;//procedure
 
 function TBridgeClient.GetOpened():boolean;
 begin
- Result := Self.tcpClient.Connected;
+ try
+   Result := Self.tcpClient.Connected;
+ except
+   Result := false;
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

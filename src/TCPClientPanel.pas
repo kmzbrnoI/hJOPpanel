@@ -335,8 +335,12 @@ end;//ctor
 
 destructor TPanelTCPClient.Destroy();
 begin
- if (Self.tcpClient.Connected) then
-   Self.tcpClient.Disconnect();
+ try
+   if (Self.tcpClient.Connected) then
+     Self.tcpClient.Disconnect();
+ except
+
+ end;
 
  // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
  if (Assigned(Self.resusct)) then
@@ -352,11 +356,19 @@ begin
    end;
   end;
 
- if (Assigned(Self.tcpClient)) then
-   FreeAndNil(Self.tcpClient);
+ try
+   if (Assigned(Self.tcpClient)) then
+     FreeAndNil(Self.tcpClient);
+ except
 
- if (Assigned(Self.parsed)) then
-   FreeAndNil(Self.parsed);
+ end;
+
+ try
+   if (Assigned(Self.parsed)) then
+     FreeAndNil(Self.parsed);
+ except
+
+ end;
 
  inherited Destroy();
 end;//dtor
@@ -400,7 +412,11 @@ end;//function
 
 function TPanelTCPClient.Disconnect():Integer;
 begin
- if (not Self.tcpClient.Connected) then Exit(1);
+ try
+   if (not Self.tcpClient.Connected) then Exit(1);
+ except
+
+ end;
 
  Self.control_disconnect := true;
  if Assigned(Self.rthread) then Self.rthread.Terminate;
@@ -999,7 +1015,11 @@ end;//function
 
 procedure TPanelTCPClient.SendLn(str:string);
 begin
- if (not Self.tcpClient.Connected) then Exit; 
+ try
+   if (not Self.tcpClient.Connected) then Exit;
+ except
+
+ end;
 
  try
    Self.tcpClient.Socket.WriteLn(str);
