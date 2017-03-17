@@ -15,7 +15,7 @@ uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal, ExtCtrls
 
 const
   _DEFAULT_PORT = 5896;
-  _PING_TIMER_PERIOD_MS = 5000;
+  _PING_TIMER_PERIOD_MS = 20000;
 
   // tady jsou vyjmenovane vsechny verze protokoluk pripojeni k serveru, ktere klient podporuje
   protocol_version_accept : array[0..0] of string =
@@ -62,6 +62,7 @@ type
      procedure OsvListParse(oblr:string; data:string);
 
      procedure ConnetionResusced(Sender:TObject);
+     procedure SendPing(Sedner:TObject);
 
    public
 
@@ -122,6 +123,11 @@ begin
 
  Self.parsed := TStringList.Create;
 
+ Self.pingTimer := TTimer.Create(nil);
+ Self.pingTimer.Enabled := false;
+ Self.pingTimer.Interval := _PING_TIMER_PERIOD_MS;
+ Self.pingTimer.OnTimer := Self.SendPing;
+
  Self.tcpClient := TIdTCPClient.Create(nil);
  Self.tcpClient.OnConnected := Self.OnTcpClientConnected;
  Self.tcpClient.OnDisconnected := Self.OnTcpClientDisconnected;
@@ -158,18 +164,14 @@ begin
  try
    if (Assigned(Self.tcpClient)) then
      FreeAndNil(Self.tcpClient);
- except
 
- end;
-
- try
    if (Assigned(Self.parsed)) then
      FreeAndNil(Self.parsed);
- except
 
+   Self.pingTimer.Free();
+ finally
+   inherited;
  end;
-
- inherited Destroy();
 end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -252,6 +254,7 @@ begin
  F_Main.A_Disconnect.Enabled := true;
 
  Self.fstatus := TPanelConnectionStatus.handshake;
+ Self.pingTimer.Enabled := true;
 
  // send handshake
  Self.SendLn('-;HELLO;'+Self._PROTOCOL_VERSION+';');
@@ -279,6 +282,7 @@ begin
  F_SprToSlot.Close();
 
  Self.fstatus := TPanelConnectionStatus.closed;
+ Self.pingTimer.Enabled := false;
 
  F_Main.A_Connect.Enabled    := true;
  F_Main.A_ReAuth.Enabled     := false;
@@ -906,6 +910,18 @@ begin
      end;
    end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelTCPClient.SendPing(Sedner:TObject);
+begin
+ try
+   if (Self.tcpClient.Connected) then
+     Self.SendLn('-;PING');
+ except
+
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
