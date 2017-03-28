@@ -62,7 +62,7 @@ type
      procedure SendLn(str:string);
      procedure Update();
      procedure Auth();
-     procedure LoksToSlot(HVs:THVDb; slot:Integer);
+     procedure LoksToSlot(HVs:THVDb; slot:Integer; ruc:boolean);
      procedure GetSlotsStatus();
 
      property opened : boolean read GetOpened;
@@ -97,10 +97,11 @@ uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, fMain;
 /////////////////////////// KLIENT -> SERVER ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-LOGIN;server;port;username;password      - pozadavek k pripojeni k serveru a autorizaci regulatoru
-LOKO;slot;[addr;token];[addr;token];...  - pozadavek k umisteni lokomotiv do slotu \slot
-SLOTS?                                   - pozadavek na vraceni seznamu slotu a jejich obsahu
-AUTH?                                    - pozadavek na vraceni stavu autorizace vuci hJOPserveru
+LOGIN;server;port;username;password         - pozadavek k pripojeni k serveru a autorizaci regulatoru
+LOKO;slot;[addr;token];[addr;token];...     - pozadavek k umisteni lokomotiv do slotu \slot
+LOKO-RUC;slot;[addr;token];[addr;token];... - pozadavek k umisteni lokomotiv do slotu \slot a autorizaci do totalniho rizeni
+SLOTS?                                      - pozadavek na vraceni seznamu slotu a jejich obsahu
+AUTH?                                       - pozadavek na vraceni stavu autorizace vuci hJOPserveru
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// SERVER -> KLIENT ///////////////////////////////////
@@ -433,14 +434,18 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TBridgeClient.LoksToSlot(HVs:THVDb; slot:Integer);
+procedure TBridgeClient.LoksToSlot(HVs:THVDb; slot:Integer; ruc:boolean);
 var str:string;
     i:Integer;
 begin
  str := '';
  for i := 0 to HVs.count-1 do
    str := str + '{' + IntToStr(HVs.HVs[i].Adresa) + ';' + HVs.HVs[i].token + '};';
- Self.SendLn('LOKO;'+IntToStr(slot)+';'+str);
+
+ if (ruc) then
+   Self.SendLn('LOKO-RUC;'+IntToStr(slot)+';'+str)
+ else
+   Self.SendLn('LOKO;'+IntToStr(slot)+';'+str);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -17,11 +17,14 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     B_Slots: array [1..TBridgeClient._SLOTS_CNT] of TButton;
+    B_Slots_Ruc: array [1..TBridgeClient._SLOTS_CNT] of TButton;
+
     HVs:TWordAr;
     orId:string;
 
      procedure CreateSlotsButtons();
      procedure ButtonSlotClick(Sender:TObject);
+     procedure ButtonSlotRucClick(Sender:TObject);
 
   public
 
@@ -60,6 +63,19 @@ begin
      Width := 70;
      OnClick := Self.ButtonSlotClick;
      Caption := IntToStr(i);
+     TabOrder := 2*i;
+    end;
+
+   Self.B_Slots_Ruc[i] := TButton.Create(Self.P_Buttons);
+   with (Self.B_Slots_Ruc[i]) do
+    begin
+     Parent := Self.P_Buttons;
+     Top := 35;
+     Tag := i;
+     Width := 70;
+     OnClick := Self.ButtonSlotRucClick;
+     Caption := IntToStr(i) + ' ruè.';
+     TabOrder := 2*i + 1;
     end;
   end;
 end;
@@ -103,11 +119,19 @@ begin
      Enabled := (BridgeClient.sloty[i] = ssAvailable);
 
      if (Visible) then
+       Left := (partWidth*j + (partWidth div 2) - (Self.B_Slots[i].Width div 2)) + 10;
+    end;
+
+   with (Self.B_Slots_Ruc[i]) do
+    begin
+     Visible := Self.B_Slots[i].Visible;
+     Enabled := Self.B_Slots[i].Enabled;
+
+     if (Visible) then
       begin
-       Self.B_Slots[i].Left := (partWidth*j + (partWidth div 2) - (Self.B_Slots[i].Width div 2)) + 10;
+       Left := (partWidth*j + (partWidth div 2) - (Self.B_Slots[i].Width div 2)) + 10;
        Inc(j);
       end;
-
     end;
   end;
 end;
@@ -116,7 +140,15 @@ end;
 
 procedure TF_SprToSlot.ButtonSlotClick(Sender:TObject);
 begin
- tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag);
+ tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, false);
+
+ Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenù...';
+ Self.token_req_sent := true;
+end;
+
+procedure TF_SprToSlot.ButtonSlotRucClick(Sender:TObject);
+begin
+ tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, true);
 
  Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenù...';
  Self.token_req_sent := true;
@@ -145,6 +177,7 @@ begin
    if ((self.B_Slots[i].Visible) and (Self.B_Slots[i].Enabled)) then
     begin
      Self.B_Slots[i].Default := true;
+     Self.ActiveControl := Self.B_Slots[i];
      break;
     end;
   end;

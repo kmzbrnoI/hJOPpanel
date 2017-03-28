@@ -3,7 +3,7 @@ object F_SprToSlot: TF_SprToSlot
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'Souprava do slotu'
-  ClientHeight = 133
+  ClientHeight = 155
   ClientWidth = 447
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -54,7 +54,7 @@ object F_SprToSlot: TF_SprToSlot
   end
   object L_Stav: TLabel
     Left = 8
-    Top = 109
+    Top = 131
     Width = 417
     Height = 16
     Align = alCustom
@@ -73,7 +73,7 @@ object F_SprToSlot: TF_SprToSlot
     Left = 8
     Top = 56
     Width = 431
-    Height = 41
+    Height = 69
     BevelOuter = bvNone
     TabOrder = 0
   end

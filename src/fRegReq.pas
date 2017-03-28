@@ -165,7 +165,7 @@ begin
   end;
 
  if (Self.maus) then
-   tokens.LokosToMaus(Self.or_id, lokos, TButton(Sender).Tag)
+   tokens.LokosToMaus(Self.or_id, lokos, TButton(Sender).Tag, false)
  else
    tokens.LokosToReg(Self.or_id, lokos);
 

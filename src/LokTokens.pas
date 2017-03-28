@@ -5,11 +5,16 @@ interface
 uses SysUtils, Generics.Collections, Classes;
 
 type
-  TTokenPurpose = (tpReg, tpMaus);
+  TTokenPurpose = record
+    slot: Integer;
+    ruc: boolean;
+  end;
 
   TTokens = class
     private
-      tokenPurpose:TDictionary<Word, Integer>;                                  // mapa adresa -> maus slot
+      tokenPurpose:TDictionary<Word, TTokenPurpose>;                                  // mapa adresa -> maus slot
+
+      class function Purpose(slot: Integer; ruc: boolean):TTokenPurpose;
 
     public
 
@@ -18,7 +23,7 @@ type
 
        procedure ParseData(var parsed:TStrings);
        procedure LokosToReg(orId:string; lokos:array of Word);                         // lokos: 1234|1235| ....
-       procedure LokosToMaus(orId:string; lokos:array of Word; slot:Integer);
+       procedure LokosToMaus(orId:string; lokos:array of Word; slot:Integer; ruc:boolean);
        procedure ResetMausTokens();
 
   end;
@@ -35,7 +40,7 @@ uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot, RPConst
 constructor TTokens.Create();
 begin
  inherited;
- tokenPurpose := TDictionary<Word, Integer>.Create();
+ tokenPurpose := TDictionary<Word, TTokenPurpose>.Create();
 end;
 
 destructor TTokens.Destroy();
@@ -49,7 +54,7 @@ end;
 procedure TTokens.ParseData(var parsed:TStrings);
 var HVs:THVDb;
     i:Integer;
-    slot, gslot: Integer;
+    purpose, gpurpose:TTokenPurpose;
     splitted:TStrings;
 begin
  if (parsed[2] = 'OK') then
@@ -60,18 +65,18 @@ begin
    HVs := THVDb.Create();
    HVs.ParseHVsFromToken(parsed[3]);
 
-   gslot := 0;
+   gpurpose.slot := 0;
    for i := 0 to HVs.count-1 do
     begin
-     if ((gslot = 0) and (Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, slot))) then gslot := slot
-     else if ((gslot > 0) and ((not Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, slot)) or (slot <> gslot))) then
+     if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, purpose))) then gpurpose := purpose
+     else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, purpose)) or (purpose.slot <> gpurpose.slot))) then
       begin
-       gslot := 0;
+       gpurpose.slot := 0;
        break;
       end;
     end;
 
-   case (gslot) of
+   case (gpurpose.slot) of
      0: begin
          try
            HVs.OpenJerry();
@@ -82,7 +87,7 @@ begin
      end;
 
      1..TBridgeClient._SLOTS_CNT: begin
-         if (BridgeClient.opened) then BridgeClient.LoksToSlot(HVs, gslot);
+         if (BridgeClient.opened) then BridgeClient.LoksToSlot(HVs, gpurpose.slot, gpurpose.ruc);
      end;
 
    end;//case
@@ -130,7 +135,7 @@ begin
  PanelTCPClient.SendLn(orId+';LOK-REQ;PLEASE;'+str);
 end;
 
-procedure TTokens.LokosToMaus(orId:string; lokos:array of Word; slot:Integer);
+procedure TTokens.LokosToMaus(orId:string; lokos:array of Word; slot:Integer; ruc:boolean);
 var i:Integer;
     str:string;
 begin
@@ -138,7 +143,7 @@ begin
  for i := 0 to Length(lokos)-1 do
   begin
    str := str + IntToStr(lokos[i]) + '|';
-   Self.tokenPurpose.AddOrSetValue(lokos[i], slot);
+   Self.tokenPurpose.AddOrSetValue(lokos[i], Purpose(slot, ruc));
   end;
 
  PanelTCPClient.SendLn(orId+';LOK-REQ;PLEASE;'+str);
@@ -149,6 +154,14 @@ end;
 procedure TTokens.ResetMausTokens();
 begin
  Self.tokenPurpose.Clear();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TTokens.Purpose(slot: Integer; ruc: boolean):TTokenPurpose;
+begin
+ Result.slot := slot;
+ Result.ruc := ruc;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
