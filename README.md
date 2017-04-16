@@ -10,6 +10,7 @@ Panel for hJOP.
 ## Special components & libraries
 
 - [DelphiX](http://www.micrel.cz/Dx/) 1.12.x
+- [JEDI Code Library](http://wiki.delphi-jedi.org/index.php?title=JEDI_Code_Library)
 
 ## Resource file
 
