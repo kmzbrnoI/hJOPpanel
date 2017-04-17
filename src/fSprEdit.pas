@@ -33,6 +33,11 @@ type
     Label3: TLabel;
     M_Poznamka: TMemo;
     Label4: TLabel;
+    Label5: TLabel;
+    CB_Vychozi: TComboBox;
+    Label6: TLabel;
+    CB_Cilova: TComboBox;
+    SB_st_change: TSpeedButton;
     procedure E_SprDelkaKeyPress(Sender: TObject; var Key: Char);
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
@@ -52,6 +57,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PageControlCloseButtonMouseUp(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure SB_st_changeClick(Sender: TObject);
   private
     OblR:string;
     HVs:array [0..3] of TF_SprHVEdit;
@@ -62,6 +68,7 @@ type
     FCloseButtonShowPushed: Boolean;
 
     procedure OnTabClose(Sender:TObject);
+    procedure FillORs(vychoziId:string; cilovaId:string);
 
   public
 
@@ -78,9 +85,9 @@ var
 
 implementation
 
-uses fSprHelp, fMain, TCPClientPanel;
+uses fSprHelp, fMain, TCPClientPanel, ORList;
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla
+// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 
 {$R *.dfm}
 
@@ -157,6 +164,9 @@ begin
  Self.CB_Typ.Text     := '';
  Self.M_Poznamka.Text := '';
 
+ Self.FillORs(sender, '');
+ Self.CB_Cilova.ItemIndex := 0;
+
  Self.PC_HVs.ActivePageIndex := 0;
  Self.HVs[0].FillHV(HVs, nil);
 
@@ -167,7 +177,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla
+// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.EditSpr(parsed:TStrings; HVs:THVDb; sender_id:string; owner:string);
 var i:Integer;
 begin
@@ -191,6 +201,14 @@ begin
 
    Self.SE_Delka.Value := StrToInt(parsed[6]);
    Self.CB_Typ.Text    := parsed[7];
+
+   if (parsed.Count > 10) then
+     Self.FillORs(parsed[9], parsed[10])
+   else begin
+     Self.FillORs('', '');
+     Self.CB_Vychozi.ItemIndex := 0;
+     Self.CB_Cilova.ItemIndex := 0;
+   end;
 
    Self.sprHVs.ParseHVs(parsed[8]);
  except
@@ -221,7 +239,7 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla
+// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.B_SaveClick(Sender: TObject);
 var sprstr:string;
     i, j, k:Integer;
@@ -285,7 +303,16 @@ begin
    sprstr := sprstr + Self.HVs[i].GetHVString();
   end;
 
- sprstr := sprstr + '}';
+ sprstr := sprstr + '};';
+
+ if (Self.CB_Vychozi.ItemIndex > 0) then
+   sprstr := sprstr + ORDb.db_reverse[CB_Vychozi.Items[CB_Vychozi.ItemIndex]];
+ sprstr := sprstr + ';';
+
+ if (Self.CB_Cilova.ItemIndex > 0) then
+   sprstr := sprstr + ORDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
+ sprstr := sprstr + ';';
+
  PanelTCPClient.PanelSprChange(Self.OblR, sprstr);
 
  Screen.Cursor := crHourGlass;
@@ -516,6 +543,14 @@ begin
   end;
 end;
 
+procedure TF_SoupravaEdit.SB_st_changeClick(Sender: TObject);
+var tmp:Integer;
+begin
+ tmp := Self.CB_Cilova.ItemIndex;
+ Self.CB_Cilova.ItemIndex := Self.CB_Vychozi.ItemIndex;
+ Self.CB_Vychozi.ItemIndex := tmp;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.OnTabClose(Sender:TObject);
@@ -536,6 +571,35 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-end.//unit
+procedure TF_SoupravaEdit.FillORs(vychoziId:string; cilovaId:string);
+var id:string;
+begin
+ Self.CB_Vychozi.Clear();
+ Self.CB_Cilova.Clear();
 
+ Self.CB_Vychozi.Items.Add('Nevyplnìno');
+ Self.CB_Cilova.Items.Add('Nevyplnìno');
+
+ for id in ORDb.db.Keys do
+  begin
+   Self.CB_Vychozi.Items.Add(ORDb.db[id]);
+   Self.CB_Cilova.Items.Add(ORDb.db[id]);
+
+   if (id = vychoziId) then
+     Self.CB_Vychozi.ItemIndex := Self.CB_Vychozi.Items.Count - 1;
+
+   if (id = cilovaId) then
+     Self.CB_Cilova.ItemIndex := Self.CB_Cilova.Items.Count - 1;
+  end;
+
+ if (Self.CB_Vychozi.ItemIndex < 0) then
+   Self.CB_Vychozi.ItemIndex := 0;
+
+ if (Self.CB_Cilova.ItemIndex < 0) then
+   Self.CB_Cilova.ItemIndex := 0;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+end.//unit
 
