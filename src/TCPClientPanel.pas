@@ -112,7 +112,7 @@ var
 implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
-      ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc,
+      ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -271,6 +271,7 @@ begin
  if (F_PotvrSekv.Showing) then F_PotvrSekv.Close();
  if (F_SprList.Showing) then F_SprList.Close();
  if (F_HVSearch.Showing) then F_HVSearch.Close();
+ if (F_Auth.showing) then F_Auth.Close();
 
  SoundsPlay.DeleteAll();
  ModCas.Reset();
