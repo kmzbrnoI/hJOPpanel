@@ -33,7 +33,7 @@ var
 
 implementation
 
-uses RPConst, TCPClientPanel;
+uses RPConst, TCPClientPanel, ORList;
 
 {$R *.dfm}
 
@@ -64,7 +64,7 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla
+// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SprList.AddSpr(str:string);
 var sl,slhv:TStrings;
     LI:TListItem;
@@ -96,6 +96,16 @@ begin
    LI.SubItems.Add(sl[1]);
    LI.SubItems.Add(sl[4]);
    LI.SubItems.Add(sl[5]);
+
+   if ((sl.Count > 7) and (ORdb.db.ContainsKey(sl[7]))) then
+     LI.SubItems.Add(ORDb.db[sl[7]])
+   else
+     LI.SubItems.Add('Nevyplnìno');
+
+   if ((sl.Count > 8) and (ORdb.db.ContainsKey(sl[8]))) then
+     LI.SubItems.Add(ORDb.db[sl[8]])
+   else
+     LI.SubItems.Add('Nevyplnìno');
  except
 
  end;

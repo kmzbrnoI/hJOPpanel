@@ -3,8 +3,8 @@ object F_SprList: TF_SprList
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Soupravy'
-  ClientHeight = 448
-  ClientWidth = 780
+  ClientHeight = 477
+  ClientWidth = 983
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,11 +18,12 @@ object F_SprList: TF_SprList
   object P_Top: TPanel
     Left = 0
     Top = 0
-    Width = 780
+    Width = 983
     Height = 41
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 780
     object B_Refresh: TButton
       Left = 8
       Top = 8
@@ -46,8 +47,8 @@ object F_SprList: TF_SprList
   object LV_Soupravy: TListView
     Left = 0
     Top = 41
-    Width = 780
-    Height = 407
+    Width = 983
+    Height = 436
     Hint = 'Tabulka definovan'#253'ch souprav'
     Margins.Left = 2
     Margins.Top = 2
@@ -80,6 +81,14 @@ object F_SprList: TF_SprList
       end
       item
         Caption = 'Typ'
+      end
+      item
+        Caption = 'V'#253'choz'#237' stanice'
+        Width = 100
+      end
+      item
+        Caption = 'C'#237'lov'#225' stanice'
+        Width = 100
       end>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -95,5 +104,7 @@ object F_SprList: TF_SprList
     TabOrder = 1
     ViewStyle = vsReport
     OnChange = LV_SoupravyChange
+    ExplicitWidth = 929
+    ExplicitHeight = 521
   end
 end
