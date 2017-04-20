@@ -1419,35 +1419,51 @@ end;//procedure
 //zobrazeni SystemOK + opravneni
 procedure TRelief.ShowOpravneni();
 var Pos:TPoint;
+    c1, c2, c3: TColor;
 begin
  Pos.X := 1;
  Pos.Y := Self.Graphics.PanelHeight-3;
 
+ if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
+  begin
+   c1 := clLime;
+   c2 := clRed;
+   c3 := clBlue;
+  end else begin
+   c1 := clPurple;
+   c2 := clFuchsia;
+   c3 := clPurple;
+  end;
+
  if (Self.SystemOK.Poloha) then
   begin
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
+   // vodorovne
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol+1, clFuchsia, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+1, clBlack, c1);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c1);
+
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol+1, c2, c3);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol+1, c2, c3);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol+1, c2, c3);
   end else begin
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol, clPurple, clPurple);
+   // svisle
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+2, clFuchsia, clBlack);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol, clFuchsia, clBlack);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol, c1, c1);
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, clPurple);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol, clPurple, clPurple);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+2, c2, clBlack);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol, c2, clBlack);
+
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c3);
+   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol, c3, c3);
   end;
 
  case (PanelTCPClient.status) of
   TPanelConnectionStatus.closed    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Odpojeno od serveru', clFuchsia, clBlack);
   TPanelConnectionStatus.opening   : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Otevírám spojení...', clFuchsia, clBlack);
   TPanelConnectionStatus.handshake : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Probíhá handshake...', clFuchsia, clBlack);
-  TPanelConnectionStatus.opened    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', clFuchsia, clBlack);
+  TPanelConnectionStatus.opened    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', $A0A0A0, clBlack);
  end;
 end;//procedure
 
