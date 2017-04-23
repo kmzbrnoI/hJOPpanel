@@ -552,8 +552,8 @@ begin
    for i := 0 to data.Count-1 do ar[i] := StrToInt(data[i]);
    F_SprToSlot.Open(parsed[0], ar);
    data.Free();
-  end;
-
+ end else if (parsed[1] = 'SHP') then
+   Relief.ORHlaseniMsg(parsed[0], parsed);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
