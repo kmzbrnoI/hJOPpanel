@@ -130,7 +130,8 @@ begin
 
  hashed := GenerateHash(AnsiString(Self.E_Password.Text));
 
- if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply) and (PanelTCPClient.status = TPanelConnectionStatus.opened)) then
+ if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply) and
+     (PanelTCPClient.status = TPanelConnectionStatus.opened)) then
   begin
    GlobConfig.data.auth.autoauth := true;
    GlobConfig.data.auth.username := Self.E_username.Text;
@@ -138,7 +139,8 @@ begin
    GlobConfig.data.auth.forgot   := (Self.TB_Remeber.Position = 1);
   end;
 
- if ((Self.CHB_uLI_Daemon.Visible) and (Self.CHB_uLI_Daemon.Enabled) and (Self.CHB_uLI_Daemon.Checked)) then
+ if ((Self.CHB_uLI_Daemon.Visible) and (Sender = Self.B_Apply) and
+     (Self.CHB_uLI_Daemon.Enabled) and (Self.CHB_uLI_Daemon.Checked)) then
   begin
    BridgeClient.toLogin.username := Self.E_username.Text;
    BridgeClient.toLogin.password := hashed;
@@ -146,8 +148,14 @@ begin
 
  if ((Self.CHB_IPC_auth.Checked) and (Self.CHB_IPC_auth.Visible)) then
   begin
-   IPC.username := Self.E_username.Text;
-   IPC.password := hashed;
+   if (Sender = Self.B_Guest) then
+    begin
+     IPC.username := GlobConfig.data.guest.username;
+     IPC.password := GlobConfig.data.guest.password;
+    end else begin
+     IPC.username := Self.E_username.Text;
+     IPC.password := hashed;
+    end;
   end;
 
  if (Sender = Self.B_Apply) then
