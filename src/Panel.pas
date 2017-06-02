@@ -2751,15 +2751,14 @@ var i, j, cnt:Integer;
     rights:TOrControlRights;
 begin
  // zjistime pocet OR s zadanym opravnenim > null
- cnt := 0;
- for i := 0 to Self.ORs.Count-1 do
-   if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null)) then Inc(cnt);
+ cnt := GlobConfig.GetAuthNonNullORSCnt();
+ if (cnt = 0) then Exit();
 
- // do \ors si priradime vsechna or s zadanym opravennim > null
+ // do \ors si priradime vsechna or s zadanym opravnenim > null
  SetLength(ors, cnt);
  j := 0;
  for i := 0 to Self.ORs.Count-1 do
-   if ((not GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) or (rights > TORControlRights.null)) then
+   if ((GlobConfig.data.auth.ORs.TryGetValue(Self.myORs[i].id, rights)) and (rights > TORControlRights.null)) then
     begin
      ors[j] := i;
      Inc(j);
@@ -3804,7 +3803,8 @@ end;
 
 procedure TRelief.ReAuthorize();
 var fors:TIntAr;
-    i:Integer;
+    i, j, cnt:Integer;
+    rights:TORControlRights;
 begin
  // pokud je alespon jedno OR pro zapis, odhlasujeme vsechny OR, na kterych je prihlsen uzivatel z prvni OR
  // ciste teoreticky tedy muzeme postupne odhlasovat ruzne uzivatele z jednotlivych OR
@@ -3874,8 +3874,19 @@ begin
    if (Self.reAuth.old_ors.Count = 0) then
     begin
      // zadne OR nezapamatovany -> prihlasujeme uzivatele na vsechny OR
-     SetLength(fors, Self.ORs.Count);
-     for i := 0 to Self.ORs.Count-1 do fors[i] := i;
+     cnt := GlobConfig.GetAuthNonNullORSCnt();
+     if (cnt = 0) then Exit();
+
+     // do \ors si priradime vsechna or s zadanym opravnenim > null
+     SetLength(fors, cnt);
+     j := 0;
+     for i := 0 to Self.ORs.Count-1 do
+       if ((GlobConfig.data.auth.ORs.TryGetValue(Self.ORs[i].id, rights)) and (rights > TORControlRights.null)) then
+        begin
+         fors[j] := i;
+         Inc(j);
+        end;
+
      F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true)
     end else begin
      // OR zapamatovany -> prihlasujeme uzivatele jen na tyto OR

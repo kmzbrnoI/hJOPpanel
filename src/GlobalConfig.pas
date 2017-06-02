@@ -79,6 +79,8 @@ type
       function SaveFile(const filename:string):Integer; overload;
       function SaveFile():Integer; overload;
 
+      function GetAuthNonNullORSCnt():Cardinal;
+
       property fn:string read filename;
   end;
 
@@ -244,6 +246,17 @@ function TGlobConfig.SaveFile():Integer;
 begin
  Result := Self.SaveFile(Self.filename);
 end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TGlobConfig.GetAuthNonNullORSCnt():Cardinal;
+var item: TPair<string, TORControlRights>;
+begin
+ Result := 0;
+ for item in Self.data.auth.ORs do
+   if (item.Value > TORControlRights.null) then
+     Inc(Result);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
