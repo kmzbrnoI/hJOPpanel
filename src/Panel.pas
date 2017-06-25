@@ -594,15 +594,37 @@ end;
         spr: '';
         KonecJC: no);
 
+    _UA_Usek_Prop:TUsekPanelProp = (
+        blikani: false;
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
+        SprC: clFuchsia;
+        spr: '';
+        KonecJC: no);
+
+
     _Def_Vyh_Prop:TVyhPanelProp = (
         blikani: false;
         Symbol: clBlack;
         Pozadi: clFuchsia;
         Poloha: TVyhPoloha.disabled);
 
+    _UA_Vyh_Prop:TVyhPanelProp = (
+        blikani: false;
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
+        Poloha: TVyhPoloha.both);
+
+
     _Def_Nav_Prop:TNavPanelProp = (
         Symbol: clBlack;
         Pozadi: clFuchsia;
+        AB: false;
+        blikani: false);
+
+    _UA_Nav_Prop:TNavPanelProp = (
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
         AB: false;
         blikani: false);
 
@@ -611,6 +633,12 @@ end;
         Pozadi: clFuchsia;
         stav: otevreno);
 
+    _UA_Prj_Prop:TPrjPanelProp = (
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
+        stav: otevreno);
+
+
     _Def_Uvazka_Prop:TUvazkaPanelProp = (
         Symbol: clBlack;
         Pozadi: clFuchsia;
@@ -618,8 +646,17 @@ end;
         smer: disabled;
         );
 
+    _UA_Uvazka_Prop:TUvazkaPanelProp = (
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
+        blik: false;
+        smer: zadny;
+        );
+
+
     _Def_UvazkaSpr_Prop:TUvazkaSprPanelProp = (
         );
+
 
     _Def_Zamek_Prop:TZamekPanelProp = (
         Symbol: clBlack;
@@ -627,8 +664,21 @@ end;
         blik: false;
         );
 
+    _UA_Zamek_Prop:TZamekPanelProp = (
+        Symbol: $A0A0A0;
+        Pozadi: clBlack;
+        blik: false;
+        );
+
+
     _Def_Rozp_Prop:TRozpPanelProp = (
         Symbol: clFuchsia;
+        Pozadi: clBlack;
+        blik: false;
+        );
+
+    _UA_Rozp_Prop:TRozpPanelProp = (
+        Symbol: $A0A0A0;
         Pozadi: clBlack;
         blik: false;
         );
@@ -1194,6 +1244,8 @@ begin
      fg := $A0A0A0;
   end;
 
+ bg := usek.PanelProp.Pozadi;
+
  for i := 0 to Length(vetev.Symbols)-1 do
   begin
    if (NotSymbol.Contains(vetev.Symbols[i].Position)) then continue;
@@ -1217,6 +1269,13 @@ begin
   begin
    Self.Vyhybky.Data[vetev.node1.vyh].visible := visible;
 
+   // nastaveni barvy neprirazene vyhybky
+   if (Self.Vyhybky.Data[vetev.node1.vyh].Blok = -2) then
+    begin
+     Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Symbol := fg;
+     Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Pozadi := bg;
+    end;
+
    case (Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
        Self.ShowUsekVetve(usek, vetev.node1.ref_plus, NotSymbol, visible, showed);
@@ -1239,6 +1298,13 @@ begin
  if (vetev.node2.vyh > -1) then
   begin
    Self.Vyhybky.Data[vetev.node2.vyh].visible := visible;
+
+   // nastaveni barvy neprirazene vyhybky
+   if (Self.Vyhybky.Data[vetev.node2.vyh].Blok = -2) then
+    begin
+     Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Symbol := fg;
+     Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Pozadi := bg;
+    end;
 
    case (Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
@@ -1360,30 +1426,37 @@ begin
    else
      bkcol := Self.Vyhybky.Data[i].PanelProp.Pozadi;
 
-   case (Self.Vyhybky.Data[i].PanelProp.Poloha) of
-    TVyhPoloha.disabled:begin
+   if (Self.Vyhybky.Data[i].Blok = -2) then
+    begin
+     // blok zamerne neprirazen
      Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-               Self.Vyhybky.Data[i].SymbolID, Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi, clFuchsia);
-    end;
-    TVyhPoloha.none:begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
-               bkcol, fg);
-    end;
-    TVyhPoloha.plus:begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-               (Self.Vyhybky.Data[i].SymbolID)+4+(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
-               fg, bkcol);
-    end;
-    TVyhPoloha.minus:begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-               (Self.Vyhybky.Data[i].SymbolID)+8-(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
-               fg, bkcol);
-    end;
-    TVyhPoloha.both:begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
-               bkcol, clYellow);
-    end;
-   end;//case
+               Self.Vyhybky.Data[i].SymbolID, fg, bkcol);
+    end else begin
+     case (Self.Vyhybky.Data[i].PanelProp.Poloha) of
+      TVyhPoloha.disabled:begin
+       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+                 Self.Vyhybky.Data[i].SymbolID, Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi, clFuchsia);
+      end;
+      TVyhPoloha.none:begin
+       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+                 bkcol, fg);
+      end;
+      TVyhPoloha.plus:begin
+       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+                 (Self.Vyhybky.Data[i].SymbolID)+4+(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+                 fg, bkcol);
+      end;
+      TVyhPoloha.minus:begin
+       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
+                 (Self.Vyhybky.Data[i].SymbolID)+8-(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+                 fg, bkcol);
+      end;
+      TVyhPoloha.both:begin
+       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+                 bkcol, clYellow);
+      end;
+     end;//case
+    end;//else blok zamerne neprirazn
   end;//for i
 end;//procedure
 
@@ -1971,6 +2044,7 @@ begin
  index := Self.GetPrj(Position);
  if (index <> -1) then
   begin
+   if (Self.Prejezdy.Data[index].Blok < 0) then Exit();   
    PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Self.Prejezdy.Data[index].Blok, Button);
    Exit;
   end;
@@ -1979,6 +2053,7 @@ begin
  index := Self.GetRozp(Position);
  if (index <> -1) then
   begin
+   if (Self.Rozp[index].Blok < 0) then Exit();   
    PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Self.Rozp[index].Blok, Button);
    Exit;
   end;
@@ -1987,6 +2062,8 @@ begin
  index := Self.GetUsek(Position);
  if (index <> -1) then
   begin
+   if (Self.Useky[index].Blok < 0) then Exit();
+
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
    if ((Self.myORs[Self.Useky[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = left)) then
      //  or;LOK-REQ;U-PLEASE;blk_id              - zadost o vydani seznamu hnacich vozidel na danem useku
@@ -2000,6 +2077,7 @@ begin
  index := Self.GetNav(Position);
  if (index <> -1) then
   begin
+   if (Self.Navestidla.Data[index].Blok < 0) then Exit();
    PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla.Data[index].OblRizeni].id, Self.Navestidla.Data[index].Blok, Button);
    Exit;
   end;
@@ -2008,6 +2086,7 @@ begin
  index := Self.GetVyh(Position);
  if (index <> -1) then
   begin
+   if (Self.Vyhybky.Data[index].Blok < 0) then Exit();
    PanelTCPClient.PanelClick(Self.myORs[Self.Vyhybky.Data[index].OblRizeni].id, Self.Vyhybky.Data[index].Blok, Button);
    Exit;
   end;
@@ -2028,6 +2107,7 @@ begin
  index := Self.GetUvazka(Position);
  if (index <> -1) then
   begin
+   if (Self.Uvazky.Data[index].Blok < 0) then Exit();
    PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Self.Uvazky.Data[index].Blok, Button);
    Exit;
   end;
@@ -2036,6 +2116,7 @@ begin
  index := Self.GetZamek(Position);
  if (index <> -1) then
   begin
+   if (Self.Zamky.Data[index].Blok < 0) then Exit();
    PanelTCPClient.PanelClick(Self.myORs[Self.Zamky.Data[index].OblRizeni].id, Self.Zamky.Data[index].Blok, Button);
    Exit;
   end;
@@ -2199,7 +2280,10 @@ begin
     end;//for j
 
    //default settings:
-   usek.PanelProp := _Def_Usek_Prop;
+   if (usek.Blok = -2) then
+     usek.PanelProp := _UA_Usek_Prop
+   else
+     usek.PanelProp := _Def_Usek_Prop;
 
    Self.Useky.Add(usek);
    Self.AddToTechBlk(_BLK_USEK, usek.Blok, Self.Useky.Count-1);
@@ -2217,7 +2301,10 @@ begin
    Self.Navestidla.Data[i].OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
 
    //default settings:
-   Self.Navestidla.Data[i].PanelProp := _Def_Nav_Prop;
+   if (usek.Blok = -2) then
+     Self.Navestidla.Data[i].PanelProp := _UA_Nav_Prop
+   else
+     Self.Navestidla.Data[i].PanelProp := _Def_Nav_Prop;
 
    Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.Data[i].Blok, i);
   end;//for i
@@ -2251,13 +2338,16 @@ begin
 
    //default settings:
    Self.Vyhybky.Data[i].visible   := true;
-   Self.Vyhybky.Data[i].PanelProp := _Def_Vyh_Prop;
+   if (Self.Vyhybky.Data[i].Blok = -2) then
+     Self.Vyhybky.Data[i].PanelProp := _UA_Vyh_Prop
+   else
+     Self.Vyhybky.Data[i].PanelProp := _Def_Vyh_Prop;
 
    Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.Data[i].Blok, i);
   end;
 
  //prejezdy
- for i := 0 to Self.Vyhybky.count-1 do
+ for i := 0 to Self.Prejezdy.count-1 do
   begin
    Self.Prejezdy.Data[i].Blok        := inifile.ReadInteger('PRJ'+IntToStr(i), 'B', -1);
    Self.Prejezdy.Data[i].OblRizeni   := inifile.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
@@ -2280,7 +2370,10 @@ begin
     end;//for j
 
    //default settings:
-   Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
+   if (Self.Prejezdy.Data[i].Blok = -2) then
+     Self.Prejezdy.Data[i].PanelProp := _UA_Prj_Prop
+   else
+     Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
 
    Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.Data[i].Blok, i);
   end;
@@ -2303,7 +2396,12 @@ begin
    Self.Uvazky.Data[i].Pos.X       := inifile.ReadInteger('Uv'+IntToStr(i), 'X', 0);
    Self.Uvazky.Data[i].Pos.Y       := inifile.ReadInteger('Uv'+IntToStr(i), 'Y', 0);
    Self.Uvazky.Data[i].defalt_dir  := inifile.ReadInteger('Uv'+IntToStr(i), 'D', 0);
-   Self.Uvazky.Data[i].PanelProp   := Self._Def_Uvazka_Prop;
+
+   //default settings:
+   if (Self.Uvazky.Data[i].Blok = -2) then
+     Self.Uvazky.Data[i].PanelProp := _UA_Uvazka_Prop
+   else
+     Self.Uvazky.Data[i].PanelProp := _Def_Uvazka_Prop;
 
    Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.Data[i].Blok, i);
   end;//for i
@@ -2330,7 +2428,12 @@ begin
    Self.Zamky.Data[i].OblRizeni    := inifile.ReadInteger('Z'+IntToStr(i), 'OR', -1);
    Self.Zamky.Data[i].Pos.X        := inifile.ReadInteger('Z'+IntToStr(i), 'X', 0);
    Self.Zamky.Data[i].Pos.Y        := inifile.ReadInteger('Z'+IntToStr(i), 'Y', 0);
-   Self.Zamky.Data[i].PanelProp    := Self._Def_Zamek_Prop;
+
+   //default settings:
+   if (Self.Zamky.Data[i].Blok = -2) then
+     Self.Zamky.Data[i].PanelProp := _UA_Zamek_Prop
+   else
+     Self.Zamky.Data[i].PanelProp := _Def_Zamek_Prop;
 
    Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.Data[i].Blok, i);
   end;//for i
@@ -2347,7 +2450,13 @@ begin
    vykol.usek                      := inifile.ReadInteger('Vyk'+IntToStr(i), 'O', -1);
    vykol.vetev                     := inifile.ReadInteger('Vyk'+IntToStr(i), 'V', -1);
    vykol.symbol                    := inifile.ReadInteger('Vyk'+IntToStr(i), 'T', 0);
-   vykol.PanelProp                 := Self._Def_Vyh_Prop;
+
+   //default settings:
+   if (vykol.Blok = -2) then
+     vykol.PanelProp := Self._UA_Vyh_Prop
+   else
+     vykol.PanelProp := Self._Def_Vyh_Prop;
+
    Self.Vykol.Add(vykol);
 
    Self.AddToTechBlk(_BLK_VYKOL, vykol.Blok, i);
@@ -2362,7 +2471,13 @@ begin
    rozp.OblRizeni                 := inifile.ReadInteger('R'+IntToStr(i), 'OR', -1);
    rozp.Pos.X                     := inifile.ReadInteger('R'+IntToStr(i), 'X', 0);
    rozp.Pos.Y                     := inifile.ReadInteger('R'+IntToStr(i), 'Y', 0);
-   rozp.PanelProp                 := Self._Def_Rozp_Prop;
+
+   //default settings:
+   if (rozp.Blok = -2) then
+     rozp.PanelProp := Self._UA_Rozp_Prop
+   else
+     rozp.PanelProp := Self._Def_Rozp_Prop;
+
    Self.Rozp.Add(rozp);
 
    Self.AddToTechBlk(_BLK_ROZP, rozp.Blok, i);
@@ -3421,24 +3536,34 @@ begin
   end;
 
  for i := 0 to Self.Useky.Count-1 do
-  if ((orindex < 0) or (Self.Useky[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Useky[i].OblRizeni = orindex)) and
+      (Self.Useky[i].Blok > -2)) then
    begin
     usk := Self.Useky[i];
     usk.PanelProp := _Def_Usek_Prop;
     Self.Useky[i] := usk;
    end;
+
  for i := 0 to Self.Vyhybky.Count-1 do
-  if ((orindex < 0) or (Self.Vyhybky.Data[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Vyhybky.Data[i].OblRizeni = orindex)) and
+      (Self.Vyhybky.Data[i].Blok > -2)) then
     Self.Vyhybky.Data[i].PanelProp := _Def_Vyh_Prop;
+
  for i := 0 to Self.Navestidla.Count-1 do
-  if ((orindex < 0) or (Self.Navestidla.Data[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Navestidla.Data[i].OblRizeni = orindex)) and
+      (Self.Navestidla.Data[i].Blok > -2)) then
     Self.Navestidla.Data[i].PanelProp := _Def_Nav_Prop;
+
  for i := 0 to Self.Prejezdy.Count-1 do
-  if ((orindex < 0) or (Self.Prejezdy.Data[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Prejezdy.Data[i].OblRizeni = orindex)) and
+      (Self.Prejezdy.Data[i].Blok > -2)) then
     Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
+
  for i := 0 to Self.Uvazky.Count-1 do
-  if ((orindex < 0) or (Self.Uvazky.Data[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Uvazky.Data[i].OblRizeni = orindex)) and
+      (Self.Uvazky.Data[i].Blok > -2)) then
     Self.Uvazky.Data[i].PanelProp := _Def_Uvazka_Prop;
+
  for i := 0 to Self.UvazkySpr.Count-1 do
   if ((orindex < 0) or (Self.UvazkySpr.Data[i].OblRizeni = orindex)) then
    begin
@@ -3449,18 +3574,24 @@ begin
     Self.UvazkySpr.Data[i].PanelProp     := _Def_UvazkaSpr_Prop;
     Self.UvazkySpr.Data[i].PanelProp.spr := TList<TUvazkaSpr>.Create();
    end;
+
  for i := 0 to Self.Zamky.Count-1 do
-  if ((orindex < 0) or (Self.Zamky.Data[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Zamky.Data[i].OblRizeni = orindex)) and
+      (Self.Zamky.Data[i].Blok > -2)) then
     Self.Zamky.Data[i].PanelProp := _Def_Zamek_Prop;
+
  for i := 0 to Self.Vykol.Count-1 do
-  if ((orindex < 0) or (Self.Vykol[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Vykol[i].OblRizeni = orindex)) and
+      (Self.Vykol[i].Blok > -2)) then
    begin
     vykol := Self.Vykol[i];
     vykol.PanelProp := _Def_Vyh_Prop;
     Self.Vykol[i] := vykol;
    end;
+
  for i := 0 to Self.Rozp.Count-1 do
-  if ((orindex < 0) or (Self.Rozp[i].OblRizeni = orindex)) then
+  if (((orindex < 0) or (Self.Rozp[i].OblRizeni = orindex)) and
+      (Self.Rozp[i].Blok > -2)) then
    begin
     rozp := Self.Rozp[i];
     rozp.PanelProp := _Def_Rozp_Prop;
@@ -3480,7 +3611,6 @@ begin
      Self.myORs[i].hlaseni          := false;
     end;
   end;
-
 
  Self.Show();
 end;//procedure
