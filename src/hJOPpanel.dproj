@@ -132,6 +132,7 @@
 				<Form>F_SprToSlot</Form>
 			</DCCReference>
 			<DCCReference Include="InterProcessCom.pas"/>
+			<DCCReference Include="parseHelper.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -160,13 +161,13 @@
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-						<Parameters Name="RunParams">panely/Klobouky.ini</Parameters>
+						<Parameters Name="RunParams">panely/dks.ini</Parameters>
 					</Parameters>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">True</VersionInfo>
 						<VersionInfo Name="MajorVer">1</VersionInfo>
-						<VersionInfo Name="MinorVer">5</VersionInfo>
+						<VersionInfo Name="MinorVer">6</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
@@ -180,7 +181,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription">Panel stanice hJOP</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">1.5.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.6.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">hJOPpanel.exe</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Jan Horáček</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Jan Horáček</VersionInfoKeys>

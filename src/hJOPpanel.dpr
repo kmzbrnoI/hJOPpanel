@@ -48,7 +48,8 @@ uses
   uLIclient in 'uLIclient.pas',
   LokTokens in 'LokTokens.pas',
   fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot},
-  InterProcessCom in 'InterProcessCom.pas';
+  InterProcessCom in 'InterProcessCom.pas',
+  parseHelper in 'parseHelper.pas';
 
 {$R *.res}
 

@@ -153,31 +153,33 @@ type
   sprPozadi:TColor;
  end;
 
-// useku rozdeleny na vetve je reprezentovan takto:
+ // useku rozdeleny na vetve je reprezentovan takto:
 
-// ukoncovaci element vetve = vyhybka
-TVetevEnd = record
+ // ukoncovaci element vetve = vyhybka
+ TVetevEnd = record
   vyh:Integer;                     // pokud usek nema vyhybky -> vyh1 = -1, vyh2 = -1 (nastava u useku bez vyhybky a u koncovych vetvi)
                                    // referuje na index v poli vyhybek (nikoliv na technologicke ID vyhybky!)
                                    // kazda vetev je ukoncena maximalne 2-ma vyhybkama - koren muze byt ukoncen 2-ma vyhybkama, pak jen jedna
   ref_plus,ref_minus:Integer;      // reference  na vetev, kterou se pokracuje, pokud je vyh v poloze + resp. poloze -
                                    // posledni vetev resp. usek bez vyhybky ma obe reference = -1
-end;
+ end;
 
-//vetev useku
-TVetev=record             //vetev useku
+ //vetev useku
+ TVetev=record             //vetev useku
 
- node1:TVetevEnd;           // reference na 1. vyhybku, ktera ukoncuje tuto vetev
- node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
- visible:boolean;           // pokud je vetve viditelna, je zde true; jinak false
+  node1:TVetevEnd;           // reference na 1. vyhybku, ktera ukoncuje tuto vetev
+  node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
+  visible:boolean;           // pokud je vetve viditelna, je zde true; jinak false
 
 
 
- Symbols:array of TReliefSym;
+  Symbols:array of TReliefSym;
                             // s timto dynamicky alokovanym polem je potreba zachazet opradu opatrne
                             // realokace trva strasne dlouho !
                             // presto si myslim, ze se jedna o vyhodne reseni: pole se bude plnit jen jednou
-end;
+ end;
+
+ TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
 
  // 1 usek na reliefu
  TPReliefUsk=record
@@ -185,6 +187,8 @@ end;
 
   OblRizeni:Integer;
   PanelProp:TUsekPanelProp;
+  root:TPoint;
+  DKStype:TDKSType;
 
   Symbols:TList<TReliefSym>;
   JCClick:TList<TPoint>;
@@ -458,6 +462,8 @@ end;
     _Vykol_Start     = 49;
     _Vykol_End       = 54;
     _Rozp_Start      = 55;
+    _DKS_Top         = 58;
+    _DKS_Bot         = 59;
 
     _msg_width = 30;
 
@@ -560,11 +566,14 @@ end;
         );
 
     //zde je definovano, jaky specialni symbol se ma vykreslovat jakou barvou (mimo separatoru)
-    _SpecS_DrawColors:array [0..35] of TColor =
+    _SpecS_DrawColors:array [0..60] of TColor =
       ($A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
       $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
       $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
-      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,clBlue,clBlue,clBlue,$A0A0A0);
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,clBlue,clBlue,clBlue,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
+      $A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0);
 
   private
    DrawObject:TDXDraw;
@@ -663,7 +672,10 @@ end;
    function FLoad(aFile:string):Byte;
 
    procedure ShowUseky;
-   procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>; visible:boolean; var showed:array of boolean);
+   procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>;
+                visible:boolean; var showed:array of boolean);
+   procedure ShowDKSVetve(usek:TPReliefUsk; var NotSymbol:TList<TPoint>;
+                visible:boolean; var showed:array of boolean);
    procedure ShowNavestidla;
    procedure ShowPomocneSymboly;
    procedure ShowPopisky;
@@ -822,7 +834,8 @@ implementation
 
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
-     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom;
+     fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
+     parseHelper;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -1090,14 +1103,18 @@ begin
        showed[j] := false;
 
      // pokud jsou vetve a usek neni disabled, kreslim vetve
-     Self.ShowUsekVetve(Self.Useky[i], 0, NotSymbol, true, showed);
+     if (Self.Useky[i].DKStype <> dksNone) then
+       Self.ShowDKSVetve(Self.Useky[i], NotSymbol, true, showed)
+     else
+       Self.ShowUsekVetve(Self.Useky[i], 0, NotSymbol, true, showed);
     end;
   end;//for i
  NotSymbol.Free();
 end;//procedure
 
-// tato funkce rekurzivne kresli vetve
-procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>; visible:boolean; var showed:array of boolean);
+// Rekurzivne kresli vetve bezneho bloku
+procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; var NotSymbol:TList<TPoint>;
+            visible:boolean; var showed:array of boolean);
 var i,k:Integer;
     fg, bg:TColor;
     vetev:TVetev;
@@ -1201,6 +1218,74 @@ begin
    end;//case
   end;
 end;//procedure
+
+// Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
+procedure TRelief.ShowDKSVetve(usek:TPReliefUsk; var NotSymbol:TList<TPoint>;
+                visible:boolean; var showed:array of boolean);
+var polLeft, polRight: TVyhPoloha;
+    leftHidden, rightHidden: boolean;
+    leftCross, rightCross: boolean;
+    fg: TColor;
+begin
+ if (usek.Vetve.Count < 3) then Exit();
+ if (usek.Vetve[0].node1.vyh < 0) then Exit();
+ if (usek.Vetve[1].node1.vyh < 0) then Exit();
+
+ // 1) zjistime si polohy vyhybek
+ polLeft := Self.Vyhybky.Data[usek.Vetve[0].node1.vyh].PanelProp.Poloha;
+ polRight := Self.Vyhybky.Data[usek.Vetve[1].node1.vyh].PanelProp.Poloha;
+
+ // 2) rozhodneme o tom co barvit
+ leftHidden := ((polLeft = TVyhPoloha.plus) and (polRight = TVyhPoloha.minus));
+ rightHidden := ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.plus));
+
+ leftCross := (polLeft <> TVyhPoloha.plus) and (not leftHidden);
+ rightCross := (polRight <> TVyhPoloha.plus) and (not rightHidden);
+
+ Self.ShowUsekVetve(usek, 0, NotSymbol, leftCross, showed);
+ Self.ShowUsekVetve(usek, 1, NotSymbol, rightCross, showed);
+ Self.ShowUsekVetve(usek, 2, NotSymbol,
+    not (leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.minus))), showed);
+ if (usek.Vetve.Count > 3) then Self.ShowUsekVetve(usek, 3, NotSymbol, not leftHidden, showed);
+ if (usek.Vetve.Count > 4) then Self.ShowUsekVetve(usek, 4, NotSymbol, not rightHidden, showed);
+
+ Self.Vyhybky.Data[usek.Vetve[0].node1.vyh].visible := not leftHidden;
+ Self.Vyhybky.Data[usek.Vetve[1].node1.vyh].visible := not rightHidden;
+
+ // 3) vykreslime stredovy kriz
+ if (((usek.PanelProp.blikani) or ((usek.PanelProp.spr <> '') and
+    (Self.myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
+    and (Self.Graphics.blik) and (visible)) then
+   fg := clBlack
+  else begin
+   if (visible) then
+     fg := usek.PanelProp.Symbol
+    else
+     fg := $A0A0A0;
+  end;
+
+ if (usek.DKStype = dksTop) then
+  begin
+   if ((leftCross) and (rightCross)) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, fg, usek.PanelProp.Pozadi)
+   else if (leftCross) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 4, fg, usek.PanelProp.Pozadi)
+   else if (rightCross) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 2, fg, usek.PanelProp.Pozadi)
+   else
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, $A0A0A0, usek.PanelProp.Pozadi)
+  end else begin
+   if ((leftCross) and (rightCross)) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, fg, usek.PanelProp.Pozadi)
+   else if (leftCross) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 3, fg, usek.PanelProp.Pozadi)
+   else if (rightCross) then
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 5, fg, usek.PanelProp.Pozadi)
+   else
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, $A0A0A0, usek.PanelProp.Pozadi)
+  end;
+
+end;
 
 procedure TRelief.ShowNavestidla();
 var i:Integer;
@@ -2079,6 +2164,8 @@ begin
   begin
    usek.Blok      := inifile.ReadInteger('U'+IntToStr(i),'B',-1);
    usek.OblRizeni := inifile.ReadInteger('U'+IntToStr(i),'OR',-1);
+   usek.root      := GetPos(inifile.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
+   usek.DKStype := TDKSType(inifile.ReadInteger('U'+IntToStr(i), 'DKS', Integer(dksNone)));
 
    //Symbols
    usek.Symbols := TList<TReliefSym>.Create();
