@@ -777,7 +777,7 @@ type
    procedure HideCursor();
    procedure HideMenu();
 
-   procedure DisableElements(orindex:Integer = -1);
+   procedure ORDisconnect(orindex:Integer = -1);
    procedure Escape();
 
    procedure UpdateSymbolSet();
@@ -2773,10 +2773,7 @@ begin
    PanelTCPClient.PanelFirstGet(Sender);
 
  if (Rights = TORControlRights.null) then
-  begin
-   Self.DisableElements(orindex);
-   Self.myORs[orindex].login := '';
-  end;
+   Self.OrDisconnect(orindex);
 
  if ((Rights > TORControlRights.null) and (tmp = TORControlRights.null)) then
    Self.myORs[orindex].stack.enabled := true;
@@ -3484,7 +3481,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.DisableElements(orindex:Integer = -1);
+procedure TRelief.OrDisconnect(orindex:Integer = -1);
 var i, j:Integer;
     usk:TPreliefUsk;
     vykol:TPVykol;
@@ -3572,10 +3569,13 @@ begin
      Self.myORs[i].dk_click_server  := false;
      Self.myORs[i].RegPlease.status := TORRegPleaseStatus.null;
      Self.myORs[i].hlaseni          := false;
+     Self.myORs[i].login            := '';
+     Self.myORs[i].username         := '';
     end;
   end;
 
  Self.Show();
+ Self.UpdateLoginString();
 end;//procedure
 
 procedure TRelief.OROsvChange(Sender:string; code:string; state:boolean);
@@ -3869,7 +3869,7 @@ begin
  if (Self.myORs.Count = 0) then Exit('-');
 
  if (Self.myORs[0].username = '') then
-  res := '-'
+  res := ''
  else
   res := Self.myORs[0].username;
 
@@ -3878,6 +3878,9 @@ begin
      res := Self.myORs[i].username
    else
      if (Self.myORs[i].username <> res) then Exit('více uživatelù');
+
+ if (res = '') then
+   res := '-';
 
  Result := res;
 end;

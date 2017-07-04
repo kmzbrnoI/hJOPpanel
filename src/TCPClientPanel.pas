@@ -264,7 +264,7 @@ procedure TPanelTCPClient.OnTcpClientDisconnected(Sender: TObject);
 begin
  if Assigned(Self.rthread) then Self.rthread.Terminate;
 
- Relief.DisableElements();
+ Relief.OrDisconnect();
  TF_Messages.CloseForms();
  if (F_StitVyl.Showing) then F_StitVyl.Close();
  if (F_SoupravaEdit.Showing) then F_SoupravaEdit.Close();
