@@ -166,6 +166,9 @@ end;//dtor
 function TBridgeClient.Connect(host:string; port:Word):Integer;
 begin
  try
+   // without .Clear() .Connected() sometimes returns true when actually not connected
+   if (Self.tcpClient.IOHandler <> nil) then
+     Self.tcpClient.IOHandler.InputBuffer.Clear();
    if (Self.tcpClient.Connected) then Exit(1);
  except
    try
