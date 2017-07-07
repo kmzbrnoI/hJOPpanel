@@ -23,7 +23,6 @@ object F_SprList: TF_SprList
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 780
     object B_Refresh: TButton
       Left = 8
       Top = 8
@@ -104,7 +103,5 @@ object F_SprList: TF_SprList
     TabOrder = 1
     ViewStyle = vsReport
     OnChange = LV_SoupravyChange
-    ExplicitWidth = 929
-    ExplicitHeight = 521
   end
 end

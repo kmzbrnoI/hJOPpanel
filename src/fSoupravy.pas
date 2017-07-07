@@ -22,6 +22,7 @@ type
 
     procedure AddSpr(str:string);
     function ParseHV(str:string):string;
+    function FindIndexForNewSpr(cislo:Integer):Integer;
 
   public
 
@@ -74,7 +75,12 @@ begin
  ExtractStringsEx([';'], [], str, sl);
 
  try
-   LI := Self.LV_Soupravy.Items.Add;
+   try
+     LI := Self.LV_Soupravy.Items.Insert(Self.FindIndexForNewSpr(StrToInt(sl[0])));
+   except
+     LI := Self.LV_Soupravy.Items.Add;
+   end;
+
    LI.Caption := sl[0];
 
    if (sl.Count > 6) then
@@ -164,6 +170,21 @@ begin
  else
   Self.B_RemoveSpr.Enabled := true;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TF_SprList.FindIndexForNewSpr(cislo:Integer):Integer;
+var i:Integer;
+begin
+ try
+   i := Self.LV_Soupravy.Items.Count-1;
+   while ((i >= 0) and (StrToInt(Self.LV_Soupravy.Items[i].Caption) > cislo)) do
+     i := i - 1;
+   Result := i+1;
+ except
+   Result := Self.LV_Soupravy.Items.Count;
+ end;
+end;//function
 
 ////////////////////////////////////////////////////////////////////////////////
 
