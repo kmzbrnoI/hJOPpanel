@@ -145,7 +145,7 @@ type
  // data o useku pro spravne vykreslovani
  TUsekPanelProp=record
   blikani:boolean;
-  Symbol,Pozadi,SprC:TColor;
+  Symbol,Pozadi,SprC,nebarVetve:TColor;
   spr:string;
   KonecJC:TJCType;
   sipkaL,sipkaS:boolean;
@@ -473,6 +473,7 @@ type
         Symbol: clFuchsia;
         Pozadi: clBlack;
         SprC: clFuchsia;
+        nebarVetve: $A0A0A0;
         spr: '';
         KonecJC: no);
 
@@ -481,6 +482,7 @@ type
         Symbol: $A0A0A0;
         Pozadi: clBlack;
         SprC: clFuchsia;
+        nebarVetve: $A0A0A0;
         spr: '';
         KonecJC: no);
 
@@ -1134,7 +1136,7 @@ begin
    if (visible) then
      fg := usek.PanelProp.Symbol
     else
-     fg := $A0A0A0;
+     fg := usek.PanelProp.nebarVetve;
   end;
 
  bg := usek.PanelProp.Pozadi;
@@ -1261,7 +1263,7 @@ begin
    if (visible) then
      fg := usek.PanelProp.Symbol
     else
-     fg := $A0A0A0;
+     fg := usek.PanelProp.nebarVetve;
   end;
 
  if (usek.DKStype = dksTop) then
@@ -1273,7 +1275,7 @@ begin
    else if (rightCross) then
      Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 2, fg, usek.PanelProp.Pozadi)
    else
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, $A0A0A0, usek.PanelProp.Pozadi)
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi)
   end else begin
    if ((leftCross) and (rightCross)) then
      Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, fg, usek.PanelProp.Pozadi)
@@ -1282,7 +1284,7 @@ begin
    else if (rightCross) then
      Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 5, fg, usek.PanelProp.Pozadi)
    else
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, $A0A0A0, usek.PanelProp.Pozadi)
+     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi)
   end;
 
 end;
@@ -1379,7 +1381,7 @@ begin
      if ((Self.Vyhybky.Data[i].visible) or (Self.Vyhybky.Data[i].PanelProp.Symbol = clAqua)) then
       fg := Self.Vyhybky.Data[i].PanelProp.Symbol
      else
-      fg := $A0A0A0;
+      fg := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.nebarVetve;
    end;
 
    if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
@@ -3680,7 +3682,7 @@ begin
    if ((Self.Useky[Self.Vykol[i].usek].Vetve[Self.Vykol[i].vetev].visible) or (Self.Vykol[i].PanelProp.Symbol = clAqua)) then
     col := Self.Vykol[i].PanelProp.Symbol
    else
-    col := $A0A0A0;
+    col := Self.Useky[Self.Vykol[i].usek].PanelProp.nebarVetve;
 
    if (Self.Vykol[i].PanelProp.Poloha = TVyhPoloha.disabled) then
     begin

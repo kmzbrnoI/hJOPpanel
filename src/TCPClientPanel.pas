@@ -619,18 +619,15 @@ begin
 
   if (parsed.Count > 9) then
    begin
-    UsekPanelProp.spr     := parsed[9];
-    UsekPanelProp.SprC    := StrToColor(parsed[10]);
-    if (parsed[11][1] = '1') then
-      UsekPanelProp.sipkaL := true
-    else
-      UsekPanelProp.sipkaL := false;
-    if (parsed[11][2] = '1') then
-      UsekPanelProp.sipkaS := true
-    else
-      UsekPanelProp.sipkaS := false;
+    if (parsed[9] <> '') then
+      UsekPanelProp.spr := parsed[9];
+    if (parsed[10] <> '') then
+      UsekPanelProp.SprC := StrToColor(parsed[10]);
 
-    if (parsed.Count > 12) then
+    UsekPanelProp.sipkaL := ((parsed[11] <> '') and (parsed[11][1] = '1'));
+    UsekPanelProp.sipkaS := ((parsed[11] <> '') and (parsed[11][2] = '1'));
+
+    if ((parsed.Count > 12) and (parsed[12] <> '')) then
      UsekPanelProp.sprPozadi := StrToColor(parsed[12])
     else
      UsekPanelProp.sprPozadi := clBlack;
@@ -638,6 +635,11 @@ begin
     UsekPanelProp.spr     := '';
     UsekPanelProp.SprC    := clBlack;
    end;
+
+  if (parsed.Count > 13) then
+   UsekPanelProp.nebarVetve := StrToColor(parsed[13])
+  else
+   UsekPanelProp.nebarVetve := $A0A0A0;
 
   Relief.ORUsekChange(parsed[0], StrToInt(parsed[3]), UsekPanelProp);
 end;
