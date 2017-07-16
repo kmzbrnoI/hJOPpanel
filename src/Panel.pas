@@ -1416,7 +1416,7 @@ begin
       end;
       TVyhPoloha.both:begin
        Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
-                 bkcol, clYellow);
+                 bkcol, clBlue);
       end;
      end;//case
     end;//else blok zamerne neprirazn
