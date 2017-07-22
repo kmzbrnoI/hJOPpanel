@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fSprHVEdit, Buttons,
-  CloseTabSheet, Themes;
+  CloseTabSheet, Themes, Generics.Collections;
 
 const
   _MAX_HV_CNT = 4;
@@ -60,7 +60,7 @@ type
     procedure SB_st_changeClick(Sender: TObject);
   private
     OblR:string;
-    HVs:array [0..3] of TF_SprHVEdit;
+    HVs:TList<TF_SprHVEdit>;
     HVDb:THVDb;
     sprHVs:THVDb;
 
@@ -117,24 +117,31 @@ procedure TF_SoupravaEdit.E_SprDelkaKeyPress(Sender: TObject;
  end;//procedure
 
 procedure TF_SoupravaEdit.BB_HV_AddClick(Sender: TObject);
-var i:Integer;
+var ts:TCloseTabSheet;
+    form:TF_SprHVEdit;
 begin
- for i := 0 to Self.PC_HVs.PageCount-1 do
-  if (not Self.PC_HVs.Pages[i].TabVisible) then
-   begin
-    Self.PC_HVs.Pages[i].TabVisible := true;
-    Self.PC_HVs.ActivePageIndex     := i;
+ if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
+  begin
+   Application.MessageBox('Více HV nelze pøidat', 'Nelze pøidat další HV', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
 
-    Self.HVs[i].FillHV(Self.HVDb, nil);
+ ts := TCloseTabSheet.Create(Self.PC_HVs);
+ ts.Caption := 'HV ' + IntToStr(Self.PC_HVs.PageCount+1);
 
-    if (i = _MAX_HV_CNT-1) then
-     Self.BB_HV_Add.Enabled := false;
+ ts.PageControl := Self.PC_HVs;
+ ts.OnClose     := Self.OnTabClose;
+ Self.PC_HVs.ActivePage := ts;
 
-    Exit;
-   end;
+ form := TF_SprHVEdit.Create(TS);
+ form.Parent := TS;
+ form.Show();
+ Self.HVs.Add(form);
 
- // vsechny jsou jiz viditelne -> nelze pridat dalsi
- Application.MessageBox('Více HV nelze pøidat', 'Nelze pøidat další HV', MB_OK OR MB_ICONWARNING);
+ form.FillHV(Self.HVDb, nil);
+
+ if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
+   Self.BB_HV_Add.Enabled := false;
 end;
 
 procedure TF_SoupravaEdit.B_HelpClick(Sender: TObject);
@@ -146,6 +153,8 @@ procedure TF_SoupravaEdit.B_HelpClick(Sender: TObject);
 
 procedure TF_SoupravaEdit.NewSpr(HVs:THVDb; sender:string);
 var i:Integer;
+    ts:TCloseTabSheet;
+    form:TF_SprHVEdit;
 begin
  Self.HVDb := HVs;
  Self.OblR := sender;
@@ -155,10 +164,7 @@ begin
  Self.CHB_Sipka_L.Checked := false;
  Self.CHB_Sipka_S.Checked := false;
 
- Self.PC_HVs.Pages[0].TabVisible := true;
  Self.BB_HV_Add.Enabled := true;
- for i := 1 to _MAX_HV_CNT-1 do
-   Self.PC_HVs.Pages[i].TabVisible := false;
 
  Self.SE_Delka.Value  := 0;
  Self.CB_Typ.Text     := '';
@@ -167,8 +173,26 @@ begin
  Self.FillORs(sender, '');
  Self.CB_Cilova.ItemIndex := 0;
 
- Self.PC_HVs.ActivePageIndex := 0;
- Self.HVs[0].FillHV(HVs, nil);
+ // smazat vsechny zalozky
+ for i := 0 to Self.HVs.Count-1 do
+   Self.HVs[i].Free();
+ Self.HVs.Clear();
+
+ for i := Self.PC_HVs.PageCount-1 downto 0 do
+   Self.PC_HVs.Pages[i].Free();
+
+ // vytvorit 1 zalozku
+ ts := TCloseTabSheet.Create(Self.PC_HVs);
+ ts.PageControl := Self.PC_HVs;
+ ts.Caption := 'HV 1';
+ ts.OnClose := OnTabClose;
+
+ form := TF_SprHVEdit.Create(TS);
+ form.Parent := TS;
+ form.Show();
+ Self.HVs.Add(form);
+
+ form.FillHV(HVs, nil);
 
  Self.ActiveControl := Self.E_Nazev;
  Self.Caption := 'Nová souprava';
@@ -180,6 +204,8 @@ end;
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.EditSpr(parsed:TStrings; HVs:THVDb; sender_id:string; owner:string);
 var i:Integer;
+    ts:TCloseTabSheet;
+    form:TF_SprHVEdit;
 begin
  Self.HVDb  := HVs;
  Self.OblR  := sender_id;
@@ -216,21 +242,31 @@ begin
   Exit();
  end;
 
- // nejdrive vsechny zalozky skryjeme
- for i := 0 to _MAX_HV_CNT-1 do
-   Self.PC_HVs.Pages[i].TabVisible := false;
+ // smazat vsechny zalozky
+ for i := 0 to Self.HVs.Count-1 do
+   Self.HVs[i].Free();
+ Self.HVs.Clear();
 
- // pak jich odkryjeme jen tolik, kolik mame souprav
+ for i := Self.PC_HVs.PageCount-1 downto 0 do
+   Self.PC_HVs.Pages[i].Free();
+
+ // vytvorit zalozky podle poctu HV
  for i := 0 to sprHVs.count-1 do
   begin
-   Self.HVs[i].FillHV(HVs, sprHVs.HVs[i]);
-   Self.PC_HVs.Pages[i].TabVisible := true;
+   ts := TCloseTabSheet.Create(Self.PC_HVs);
+   ts.PageControl := Self.PC_HVs;
+   ts.Caption := 'HV '+IntToStr(i+1);
+   ts.OnClose := OnTabClose;
+
+   form := TF_SprHVEdit.Create(TS);
+   form.Parent := TS;
+   form.Show();
+   Self.HVs.Add(form);
+
+   form.FillHV(HVs, sprHVs.HVs[i]);
   end;//for i
 
- if (Self.sprHVs.count >= _MAX_HV_CNT) then
-   Self.BB_HV_Add.Enabled := false
- else
-   Self.BB_HV_Add.Enabled := true;
+ Self.BB_HV_Add.Enabled := (Self.sprHVs.count < _MAX_HV_CNT);
 
  Self.ActiveControl := Self.E_Nazev;
  Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' – ' + owner;
@@ -276,10 +312,8 @@ begin
 
  sprstr := sprstr + '{';
 
- for i := 0 to _MAX_HV_CNT-1 do
+ for i := 0 to Self.PC_HVs.PageCount-1 do
   begin
-   if (not Self.PC_HVs.Pages[i].TabVisible) then continue;
-
    if (Self.HVs[i].CB_HV1_HV.ItemIndex < 0) then
     begin
      Application.MessageBox(PChar('Vyberte hnací vozidlo soupravy na záložce '+Self.PC_HVs.Pages[i].Caption), 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
@@ -330,39 +364,32 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.FormClose(Sender: TObject; var Action: TCloseAction);
+var i:Integer;
 begin
  Self.HVDb := nil;
+
+ Self.HVs.Clear();
+ for i := Self.PC_HVs.PageCount-1 downto 0 do
+   Self.PC_HVs.Pages[i].Free();
 end;
 
 procedure TF_SoupravaEdit.FormCreate(Sender: TObject);
-var i:Integer;
-    TS:TCloseTabSheet;
 begin
+ Self.HVs := TList<TF_SprHVEdit>.Create();
+
  Self.PC_HVs.TabWidth := 60;
  Self.PC_HVs.OwnerDraw := True;
 
  Self.sprHVs := THVDb.Create();
-
- // vytvorime zalozky pro hanci vozidla
- for i := 0 to _MAX_HV_CNT-1 do
-  begin
-   TS := TCloseTabSheet.Create(Self.PC_HVs);
-   TS.PageControl := Self.PC_HVs;
-   TS.Caption := 'HV '+IntToStr(i+1);
-   TS.OnClose := OnTabClose;
-
-   Self.HVs[i] := TF_SprHVEdit.Create(TS);
-   Self.HVs[i].Parent := TS;
-   Self.HVs[i].Show();
-  end;//for i
 end;//procedure
 
 procedure TF_SoupravaEdit.FormDestroy(Sender: TObject);
 var i:Integer;
 begin
  // smazeme zalozky pro hnaci vozidla
- for i := 0 to _MAX_HV_CNT-1 do
-  if (Assigned(Self.HVs[i])) then FreeAndNIl(Self.HVs[i]);
+ for i := 0 to Self.HVs.Count-1 do
+   Self.HVs[i].Free();
+ Self.HVs.Free();
 
  for i := Self.PC_HVs.PageCount-1 downto 0 do
   Self.PC_HVs.Pages[i].Free();
@@ -406,7 +433,6 @@ var
   CloseBtnRect: TRect;
   CloseBtnDrawState: Cardinal;
   CloseBtnDrawDetails: TThemedElementDetails;
-  maxindex, i:Integer;
 begin
   PageControl := Control as TPageControl;
   TabCaption.Y := Rect.Top + 3;
@@ -424,12 +450,7 @@ begin
     TabCaption.X := Rect.Left + 3;
   end;
 
-  maxindex := -1;
-  for i := 0 to PageControl.PageCount-1 do
-   if (PageControl.Pages[i].TabVisible) then
-    maxindex := i;
-
-  if ((PageControl.Pages[TabIndex] is TCloseTabSheet) and (TabIndex = maxindex) and (maxindex <> 0)) then
+  if (PageControl.Pages[TabIndex] is TCloseTabSheet) then
   begin
     TabSheet:=PageControl.Pages[TabIndex] as TCloseTabSheet;
     CloseBtnSize := 14;
@@ -554,18 +575,39 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.OnTabClose(Sender:TObject);
-var i, maxindex:Integer;
+var i:Integer;
+    HV:THV;
 begin
- maxindex := -1;
  for i := 0 to Self.PC_HVs.PageCount-1 do
-  if (Self.PC_HVs.Pages[i].TabVisible) then
-   maxindex := i;
-
- if (((Sender as TTabSheet) = Self.PC_HVs.Pages[maxindex]) and (maxindex <> -1)) then
   begin
-   (Sender as TTabSheet).TabVisible := false;
-   Self.BB_HV_Add.Enabled := true;
-   Self.PC_HVs.Repaint();
+   if (Self.PC_HVs.Pages[i] = Sender) then
+    begin
+     Self.HVs[i].Free();
+     Self.HVs.Delete(i);
+
+     // preradime HV ze soupravy do obecneho seznamu HV
+     if (i < Self.sprHVs.count) then
+      begin
+       HV := Self.sprHVs.HVs[i];
+       HV.Souprava := '-';
+       Self.HVDb.Add(HV);
+       Self.sprHVs.Delete(i);
+      end;
+
+     break;
+    end;
+  end;
+
+ (Sender as TTabSheet).Free();
+ Self.BB_HV_Add.Enabled := true;
+
+ for i := 0 to Self.PC_HVs.PageCount-1 do
+  begin
+   Self.PC_HVs.Pages[i].Caption := 'HV ' + IntToStr(i+1);
+   if (i < Self.sprHVs.count) then
+     Self.HVs[i].FillHV(Self.HVDb, Self.sprHVs.HVs[i])
+   else
+     Self.HVs[i].FillHV(Self.HVDb, nil);
   end;
 end;//procedure
 

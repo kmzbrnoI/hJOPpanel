@@ -69,6 +69,8 @@ type
     procedure ParseHVs(data:string);
     procedure ParseHVsFromToken(data:string);
     procedure ClearList();
+    procedure Add(HV:THV);
+    procedure Delete(index:Integer);
 
     procedure FillHVs(var CB:TComboBox; var Indexes:TWordAr; addr:Integer = -1; special:THV = nil; with_spr:boolean = false);
     procedure OpenJerry();
@@ -413,6 +415,42 @@ begin
    raise Exception.Create('Nelze spustit regulator - chyba '+IntToStr(res));
 
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure THVDb.Add(HV:THV);
+var i:Integer;
+begin
+ if (Self.count >=  _MAX_HV) then
+   raise Exception.Create('Maximum number of HVs reached!');
+
+ for i := Self.count-1 downto 0 do
+  begin
+   if (HV.Adresa > Self.HVs[i].Adresa) then
+    begin
+     Self.HVs[i+1] := HV;
+     break;
+    end;
+
+   Self.HVs[i+1] := Self.HVs[i];
+  end;
+
+ Inc(Self.count);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure THVDb.Delete(index:Integer);
+var i:Integer;
+begin
+ if ((index < 0) or (index >= Self.count)) then
+   raise Exception.Create('Invalid index!');
+
+ for i := index to Self.count-2 do
+   Self.HVs[i] := Self.HVs[i+1];
+
+ Dec(Self.count);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
