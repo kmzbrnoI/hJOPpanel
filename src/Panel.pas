@@ -742,7 +742,7 @@ type
    procedure ParseRegMenuClick(item:string; obl_r:Integer);
    procedure ParseHlaseniMenuClick(item:string; obl_r:Integer);
 
-   procedure MenuOnClick(Sender:TObject; item:string; obl_r:Integer);
+   procedure MenuOnClick(Sender:TObject; item:string; obl_r:Integer; itemindex:Integer);
 
    function GetPanelWidth():SmallInt;
    function GetPanelHeight():SmallInt;
@@ -3411,14 +3411,14 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.MenuOnClick(Sender:TObject; item:string; obl_r:Integer);
+procedure TRelief.MenuOnClick(Sender:TObject; item:string; obl_r:Integer; itemindex:Integer);
 var sp_menu:TSpecialMenu;
 begin
  sp_menu := Self.special_menu;
  Self.HideMenu();
 
  case (sp_menu) of
-  none       : PanelTCPClient.PanelMenuClick(item);
+  none       : PanelTCPClient.PanelMenuClick(item, itemindex);
   dk         : Self.ParseDKMenuClick(item, obl_r);
   osv        : Self.OSVMenuClick(obl_r, item);
   loko       : Self.ParseLOKOMenuClick(item, obl_r);

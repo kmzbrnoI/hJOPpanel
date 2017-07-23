@@ -85,7 +85,7 @@ type
       procedure PanelAuthorise(Sender:string; rights:TORControlRights; username,password:string);
       procedure PanelFirstGet(Sender:string);
       procedure PanelClick(Sender:string; blokid:Integer; Button:TPanelButton);
-      procedure PanelMenuClick(item_hint:string);
+      procedure PanelMenuClick(item_hint:string; item_index:Integer);
       procedure PanelSetStitVyl(typ:Integer; stitvyl:string);
       procedure PanelEscape();
       procedure PanelPotvrSekv(reason:TPSEnd);
@@ -750,9 +750,9 @@ begin
  Self.SendLn(Sender+';CLICK;'+IntToStr(blokid)+';'+IntToStr(Integer(Button))+';');
 end;//procedure
 
-procedure TPanelTCPClient.PanelMenuClick(item_hint:string);
+procedure TPanelTCPClient.PanelMenuClick(item_hint:string; item_index:Integer);
 begin
- Self.SendLn('-;MENUCLICK;'+item_hint+';');
+ Self.SendLn('-;MENUCLICK;'+item_hint+';'+IntToStr(item_index));
 end;//procedure
 
 procedure TPanelTCPClient.PanelSetStitVyl(typ:Integer; stitvyl:string);

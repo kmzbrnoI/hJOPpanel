@@ -14,7 +14,7 @@ const
   _HINT_WIDTH = 40;
 
 type
-  TPanelMenuClickEvent = procedure (Sender:TObject; item:string; obl_r:Integer) of object;
+  TPanelMenuClickEvent = procedure (Sender:TObject; item:string; obl_r:Integer; itemindex:Integer) of object;
 
   TPanelMenuItem = record
    plain_text:string;     // tento text je puvodni od serveru
@@ -279,7 +279,7 @@ begin
 
  Self.showing := false;
  if (Assigned(Self.OnClick)) then
-  Self.OnClick(Self, Self.Items.data[Self.fselected].plain_text, Self.fobl_r);
+  Self.OnClick(Self, Self.Items.data[Self.fselected].plain_text, Self.fobl_r, Self.fselected);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
