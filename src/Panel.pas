@@ -711,6 +711,7 @@ type
    function GetDK(Pos:TPoint):Integer;
    function GetUvazka(Pos:TPoint):integer;
    function GetZamek(Pos:TPoint):Integer;
+   function GetVykol(Pos:TPoint):Integer;
 
    function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
    function GetPrj(tech_id:Integer):Integer; overload;
@@ -1127,6 +1128,7 @@ begin
  vetev := usek.Vetve[vetevI];
 
  vetev.visible := visible;
+ usek.Vetve[vetevI] := vetev;
 
  if (((usek.PanelProp.blikani) or ((usek.PanelProp.spr <> '') and
     (Self.myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
@@ -1959,6 +1961,15 @@ begin
  Result := -1;
 end;//function
 
+function TRelief.GetVykol(Pos:TPoint):Integer;
+var i:Integer;
+begin
+ for i := 0 to Self.Vykol.Count-1 do
+   if ((pos.X = Self.Vykol[i].Pos.X) and (pos.Y = Self.Vykol[i].Pos.Y)) then
+     Exit(i);
+ Result := -1;
+end;//function
+
 ////////////////////////////////////////////////////////////////////////////////
 
 //vyvolano pri kliku na relief
@@ -2018,6 +2029,15 @@ begin
   begin
    if (Self.Rozp[index].Blok < 0) then Exit();   
    PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Self.Rozp[index].Blok, Button);
+   Exit;
+  end;
+
+ //vykolejka
+ index := Self.GetVykol(Position);
+ if (index <> -1) then
+  begin
+   if (Self.Vykol[index].Blok < 0) then Exit();
+   PanelTCPClient.PanelClick(Self.myORs[Self.Vykol[index].OblRizeni].id, Self.Vykol[index].Blok, Button);
    Exit;
   end;
 
@@ -3674,30 +3694,42 @@ end;//procedure
 
 // vykreslit vykolejky
 procedure TRelief.ShowVykol;
-var i, symindex:Integer;
-    col:TColor;
+var i:Integer;
+    fg, bkcol:TColor;
+    visible:boolean;
 begin
  for i := 0 to Self.Vykol.Count-1 do
   begin
-   if ((Self.Useky[Self.Vykol[i].usek].Vetve[Self.Vykol[i].vetev].visible) or (Self.Vykol[i].PanelProp.Symbol = clAqua)) then
-    col := Self.Vykol[i].PanelProp.Symbol
+   visible := ((Self.Vykol[i].PanelProp.Poloha = TVyhPoloha.disabled) or (Self.Vykol[i].vetev < 0) or
+     (Self.Vykol[i].vetev >= Self.Useky[Self.Vykol[i].usek].Vetve.Count) or
+     (Self.Useky[Self.Vykol[i].usek].Vetve[Self.Vykol[i].vetev].visible));
+
+   if ((Self.Vykol[i].PanelProp.blikani) and (Self.Graphics.blik) and (visible)) then
+     fg := clBlack
+   else begin
+     if ((visible) or (Self.Vykol[i].PanelProp.Symbol = clAqua)) then
+      fg := Self.Vykol[i].PanelProp.Symbol
+     else
+      fg := Self.Useky[Self.Vykol[i].usek].PanelProp.nebarVetve;
+   end;
+
+   if (Self.Vykol[i].PanelProp.Pozadi = clBlack) then
+     bkcol := Self.Useky[Self.Vykol[i].usek].PanelProp.Pozadi
    else
-    col := Self.Useky[Self.Vykol[i].usek].PanelProp.nebarVetve;
+     bkcol := Self.Vykol[i].PanelProp.Pozadi;
 
-   if (Self.Vykol[i].PanelProp.Poloha = TVyhPoloha.disabled) then
-    begin
-     symindex := 4 + Self.Vykol[i].symbol;
-    end else begin
-     case (Self.Vykol[i].PanelProp.Poloha) of
-        TVYhPoloha.plus  : symindex := Self.Vykol[i].symbol;
-        TVYhPoloha.minus : symindex := 2 + Self.Vykol[i].symbol;
-        TVYhPoloha.both  : symindex := 4 + Self.Vykol[i].symbol;
-      else
-       symindex := 4 + Self.Vykol[i].symbol;
-     end;
-    end;
-
-   Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos, _Vykol_Start+symindex, col, Self.Vykol[i].PanelProp.Pozadi);
+   case (Self.Vykol[i].PanelProp.Poloha) of
+    TVyhPoloha.disabled : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
+        _Vykol_Start+Self.Vykol[i].symbol, Self.Useky[Self.Vykol[i].usek].PanelProp.Pozadi, clFuchsia);
+    TVyhPoloha.none     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
+        _Vykol_Start+Self.Vykol[i].symbol, bkcol, fg);
+    TVyhPoloha.plus     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
+        _Vykol_Start+Self.Vykol[i].symbol, fg, bkcol);
+    TVyhPoloha.minus    : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
+        _Vykol_Start+Self.Vykol[i].symbol+2, fg, bkcol);
+    TVyhPoloha.both     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
+        _Vykol_Start+Self.Vykol[i].symbol, bkcol, clBlue);
+   end;
   end;//for i
 end;//procedure
 
