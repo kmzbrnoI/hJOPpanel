@@ -467,7 +467,7 @@ type
 
     _msg_width = 30;
 
-    _DblClick_Timeout_Ms = 200;
+    _DblClick_Timeout_Ms = 250;
 
     //defaultni chovani bloku:
     _Def_Usek_Prop:TUsekPanelProp = (
