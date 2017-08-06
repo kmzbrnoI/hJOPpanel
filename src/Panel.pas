@@ -1427,26 +1427,28 @@ end;//procedure
 
 //zobrazi vsechny dopravni kancelare
 procedure TRelief.ShowDK();
-var Color:TColor;
-   OblR:TORPanel;
+var fg:TColor;
+    OblR:TORPanel;
 begin
  //projedeme vsechny OR
  for OblR in Self.myORs do
   begin
-   if (((OblR.dk_blik) or (OblR.RegPlease.status = TORRegPleaseStatus.selected)) and (Self.Graphics.blik)) then continue;
+   if (((OblR.dk_blik) or (OblR.RegPlease.status = TORRegPleaseStatus.selected)) and (Self.Graphics.blik)) then
+     fg := clBlack
+   else begin
+     case (OblR.tech_rights) of
+      read      : fg := clWhite;
+      write     : fg := $A0A0A0;
+      superuser : fg := clYellow;
+     else//case rights
+       fg := clFuchsia;
+     end;
 
-   case (OblR.tech_rights) of
-    read      : Color := clWhite;
-    write     : Color := $A0A0A0;
-    superuser : Color := clYellow;
-   else//case rights
-     Color := clFuchsia;
+     if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
+       fg := clYellow;
    end;
 
-   if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
-     Color := clYellow;
-
-   Self.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, Color, clBlack);
+   Self.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack);
 
    // symbol osvetleni se vykresluje vlevo
    if (OblR.dk_osv) then
@@ -1577,18 +1579,21 @@ end;//procedure
 
 procedure TRelief.ShowUvazky;
 var i:Integer;
+    fg:TColor;
 begin
  for i := 0 to Self.Uvazky.count-1 do
   begin
    if ((Self.Uvazky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then
-     continue;
+     fg := clBlack
+   else
+     fg := Self.Uvazky.Data[i].PanelProp.Symbol;
 
    case (Self.Uvazky.Data[i].PanelProp.smer) of
     TUvazkaSmer.disabled, TUvazkaSmer.zadny:begin
      Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-               _Uvazka_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+               _Uvazka_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
      Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-               _Uvazka_Start+1, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+               _Uvazka_Start+1, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
     end;
 
     TUvazkaSmer.zakladni, TUvazkaSmer.opacny:begin
@@ -1597,15 +1602,15 @@ begin
       begin
        // sipka zleva doprava
        Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-                 _Usek_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+                 _Usek_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
        Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-                 _Uvazka_Start+1, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+                 _Uvazka_Start+1, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
       end else begin
        // sipka zprava doleva
        Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-                 _Uvazka_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+                 _Uvazka_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
        Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-                 _Usek_Start, Self.Uvazky.Data[i].PanelProp.Symbol, Self.Uvazky.Data[i].PanelProp.Pozadi);
+                 _Usek_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
       end;
     end;
    end;
@@ -3670,13 +3675,17 @@ end;//procedure
 
 procedure TRelief.ShowZamky();
 var i:Integer;
+    fg:TColor;
 begin
  for i := 0 to Self.Zamky.Count-1 do
   begin
-   if ((Self.Zamky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then continue;
+   if ((Self.Zamky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then
+     fg := clBlack
+   else
+     fg := Self.Zamky.Data[i].PanelProp.Symbol;
 
    Self.Draw(SymbolSet.IL_Symbols, Self.Zamky.Data[i].Pos, _Zamek,
-             Self.Zamky.Data[i].PanelProp.Symbol,Self.Zamky.Data[i].PanelProp.Pozadi);
+             fg, Self.Zamky.Data[i].PanelProp.Pozadi);
   end;//for i
 end;//procedure
 
