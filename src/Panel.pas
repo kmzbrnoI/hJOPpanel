@@ -790,7 +790,7 @@ type
    procedure HideMenu();
 
    procedure ORDisconnect(orindex:Integer = -1);
-   procedure Escape();
+   procedure Escape(send:boolean = true);
 
    procedure UpdateSymbolSet();
 
@@ -2017,6 +2017,8 @@ end;//function
 procedure TRelief.ObjectMouseUp(Position:TPoint; Button:TPanelButton);
 var i, index:Integer;
     handled:boolean;
+label
+    EscCheck;
 begin
  if (Self.Menu.showing) then
   begin
@@ -2032,17 +2034,17 @@ begin
    if (Self.myORs[i].tech_rights < TORControlRights.write) then continue;
    if ((Self.myORs[i].RegPlease.status > TORRegPleaseStatus.null) and (Position.X = Self.myORs[i].Poss.DK.X+6) and (Position.Y = Self.myORs[i].Poss.DK.Y+1)) then
     begin
-     if (Button = F2) then
+     if (Button = ENTER) then
       begin
        case (Self.myORs[i].RegPlease.status) of
          TORRegPleaseStatus.request  : Self.myORs[i].RegPlease.status := TORRegPleaseStatus.selected;
          TORRegPleaseStatus.selected : Self.myORs[i].RegPlease.status := TORRegPleaseStatus.request;
        end;//case
      end else
-       if (Button = ENTER) then
+       if (Button = F2) then
          Self.ShowRegMenu(i);
 
-     Exit();
+     goto EscCheck;
     end;
   end;//for OblR
 
@@ -2052,41 +2054,41 @@ begin
   begin
    if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
    Self.myORs[i].stack.MouseClick(Position, Button, handled);
-   if (handled) then Exit();
+   if (handled) then goto EscCheck;
   end;
 
  //prejezd
  index := Self.GetPrj(Position);
  if (index <> -1) then
   begin
-   if (Self.Prejezdy.Data[index].Blok < 0) then Exit();   
+   if (Self.Prejezdy.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Button, Self.Prejezdy.Data[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //rozpojovac
  index := Self.GetRozp(Position);
  if (index <> -1) then
   begin
-   if (Self.Rozp[index].Blok < 0) then Exit();   
+   if (Self.Rozp[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Button, Self.Rozp[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //vykolejka
  index := Self.GetVykol(Position);
  if (index <> -1) then
   begin
-   if (Self.Vykol[index].Blok < 0) then Exit();
+   if (Self.Vykol[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Vykol[index].OblRizeni].id, Button, Self.Vykol[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //usek
  index := Self.GetUsek(Position);
  if (index <> -1) then
   begin
-   if (Self.Useky[index].Blok < 0) then Exit();
+   if (Self.Useky[index].Blok < 0) then goto EscCheck;
 
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
    if ((Self.myORs[Self.Useky[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = ENTER)) then
@@ -2094,25 +2096,25 @@ begin
      PanelTCPClient.SendLn(Self.myORs[Self.Useky[index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[index].Blok))
    else
      PanelTCPClient.PanelClick(Self.myORs[Self.Useky[index].OblRizeni].id, Button, Self.Useky[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //navestidlo
  index := Self.GetNav(Position);
  if (index <> -1) then
   begin
-   if (Self.Navestidla.Data[index].Blok < 0) then Exit();
+   if (Self.Navestidla.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla.Data[index].OblRizeni].id, Button, Self.Navestidla.Data[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //vyhybka
  index := Self.GetVyh(Position);
  if (index <> -1) then
   begin
-   if (Self.Vyhybky.Data[index].Blok < 0) then Exit();
+   if (Self.Vyhybky.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Vyhybky.Data[index].OblRizeni].id, Button, Self.Vyhybky.Data[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //DK
@@ -2122,31 +2124,40 @@ begin
    if (Self.myORs[index].dk_click_server) then
     begin
      PanelTCPClient.SendLn(Self.myORs[index].id+';DK-CLICK;'+IntToStr(Integer(Button)));
-    end else
+    end else if (Button <> TPanelButton.ESCAPE) then
      Self.ShowDKMenu(index);
-   Exit();
+   goto EscCheck;
   end;
 
  //uvazka
  index := Self.GetUvazka(Position);
  if (index <> -1) then
   begin
-   if (Self.Uvazky.Data[index].Blok < 0) then Exit();
+   if (Self.Uvazky.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Button, Self.Uvazky.Data[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  //zamek
  index := Self.GetZamek(Position);
  if (index <> -1) then
   begin
-   if (Self.Zamky.Data[index].Blok < 0) then Exit();
+   if (Self.Zamky.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Zamky.Data[index].OblRizeni].id, Button, Self.Zamky.Data[index].Blok);
-   Exit;
+   goto EscCheck;
   end;
 
  if (Button = TPanelButton.ESCAPE) then
-  Self.Escape();
+  begin
+   Self.Escape();
+   Exit();
+  end;
+
+EscCheck:
+ // Na bloku byl zavolan escape -> volame interni escape, ale neposilame jej
+ // ne server (uz byl poslan).
+ if (Button = TPanelButton.ESCAPE) then
+  Self.Escape(false);
 end;//procedure
 
 function TRelief.FLoad(aFile:string):Byte;
@@ -2652,7 +2663,7 @@ begin
  Self.Graphics.blik   := not Self.Graphics.blik;
 end;//procedure
 
-procedure TRelief.Escape();
+procedure TRelief.Escape(send:boolean = true);
 var OblR:TORPanel;
 begin
  if (Self.Menu.showing) then Self.HideMenu();
@@ -2665,7 +2676,8 @@ begin
    if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
       OblR.RegPlease.status := TORRegPleaseStatus.request;
 
- PanelTCPClient.PanelClick('-', TPanelButton.ESCAPE);
+ if (send) then
+   PanelTCPClient.PanelClick('-', TPanelButton.ESCAPE);
 end;//procedure
 
 //ziskani vyhybke, ktere jsou navazany na usek v parametru
