@@ -467,6 +467,8 @@ type
 
     _msg_width = 30;
 
+    _DblClick_Timeout_Ms = 200;
+
     //defaultni chovani bloku:
     _Def_Usek_Prop:TUsekPanelProp = (
         blikani: false;
@@ -585,6 +587,11 @@ type
    T_SystemOK:TTimer; //timer na SystemOK na 500ms - nevykresluje
    Graphics:TPanelGraphics;
 
+
+   mouseClick:TDateTime;
+   mouseTimer:TTimer;
+   mouseLastBtn:TMouseButton;
+
    Colors:record
     Pozadi:TColor;
    end;
@@ -669,7 +676,7 @@ type
 
    procedure T_SystemOKOnTimer(Sender:TObject);
 
-   procedure ObjectMouseUp(Position:TPoint;Button:TPanelButton);
+   procedure ObjectMouseUp(Position:TPoint; Button:TPanelButton);
 
    function FLoad(aFile:string):Byte;
 
@@ -758,6 +765,8 @@ type
    function AnyORWritable():boolean;
    procedure AuthReadCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
    procedure AuthWriteCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
+
+   procedure OnMouseTimer(Sender:TObject);
 
   public
 
@@ -850,6 +859,11 @@ begin
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
  Self.reAuth.old_ors := TList<Integer>.Create();
+
+ Self.mouseTimer := TTimer.Create(nil);
+ Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
+ Self.mouseTimer.OnTimer := Self.OnMouseTimer;
+ Self.mouseTimer.Enabled := false;
 end;//contructor
 
 function TRelief.Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string):Byte;
@@ -908,6 +922,8 @@ end;//function
 destructor TRelief.Destroy();
 var i:Integer;
 begin
+ Self.mouseTimer.Free();
+
  for i := Self.myORs.Count-1 downto 0 do
   begin
    Self.myORs[i].stack.Free();
@@ -1807,13 +1823,33 @@ begin
  Self.CursorDraw.Pos.Y := Y div SymbolSet._Symbol_Vyska;
 
  case (Button) of
-  mbLeft   : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.left);
-  mbMiddle : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.middle);
-  mbRight  : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.right);
+  mbLeft   : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ENTER);
+  mbRight  : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+  mbMiddle : begin
+    if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick < EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
+     begin
+      Self.mouseTimer.Enabled := false;
+      Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F2);
+     end else
+      Self.mouseTimer.Enabled := true;
+  end;
  end;
+
+ Self.mouseClick := Now;
+ Self.mouseLastBtn := Button;
 
  Self.Show();
 end;//procedure
+
+procedure TRelief.OnMouseTimer(Sender:TObject);
+begin
+ if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick > EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
+  begin
+   Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F1);
+   Self.mouseTimer.Enabled := false;
+   Self.Show();
+  end;
+end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var old:TPoint;
@@ -1984,8 +2020,8 @@ var i, index:Integer;
 begin
  if (Self.Menu.showing) then
   begin
-   if (Button = TPanelButton.left) then Self.Menu.Click()
-     else if (Button = TPanelButton.right) then Self.Escape();
+   if (button = TPanelButton.ENTER) then Self.Menu.Click()
+     else if (Button = TPanelButton.ESCAPE) then Self.Escape();
    Exit;
   end;
 
@@ -1996,14 +2032,14 @@ begin
    if (Self.myORs[i].tech_rights < TORControlRights.write) then continue;
    if ((Self.myORs[i].RegPlease.status > TORRegPleaseStatus.null) and (Position.X = Self.myORs[i].Poss.DK.X+6) and (Position.Y = Self.myORs[i].Poss.DK.Y+1)) then
     begin
-     if ((Button = F2) or (Button = left)) then
+     if (Button = F2) then
       begin
        case (Self.myORs[i].RegPlease.status) of
          TORRegPleaseStatus.request  : Self.myORs[i].RegPlease.status := TORRegPleaseStatus.selected;
          TORRegPleaseStatus.selected : Self.myORs[i].RegPlease.status := TORRegPleaseStatus.request;
        end;//case
      end else
-       if (Button = right) then
+       if (Button = ENTER) then
          Self.ShowRegMenu(i);
 
      Exit();
@@ -2024,7 +2060,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Prejezdy.Data[index].Blok < 0) then Exit();   
-   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Self.Prejezdy.Data[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Button, Self.Prejezdy.Data[index].Blok);
    Exit;
   end;
 
@@ -2033,7 +2069,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Rozp[index].Blok < 0) then Exit();   
-   PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Self.Rozp[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Button, Self.Rozp[index].Blok);
    Exit;
   end;
 
@@ -2042,7 +2078,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Vykol[index].Blok < 0) then Exit();
-   PanelTCPClient.PanelClick(Self.myORs[Self.Vykol[index].OblRizeni].id, Self.Vykol[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Vykol[index].OblRizeni].id, Button, Self.Vykol[index].Blok);
    Exit;
   end;
 
@@ -2053,11 +2089,11 @@ begin
    if (Self.Useky[index].Blok < 0) then Exit();
 
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
-   if ((Self.myORs[Self.Useky[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = left)) then
+   if ((Self.myORs[Self.Useky[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = ENTER)) then
      //  or;LOK-REQ;U-PLEASE;blk_id              - zadost o vydani seznamu hnacich vozidel na danem useku
      PanelTCPClient.SendLn(Self.myORs[Self.Useky[index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[index].Blok))
    else
-     PanelTCPClient.PanelClick(Self.myORs[Self.Useky[index].OblRizeni].id, Self.Useky[index].Blok, Button);
+     PanelTCPClient.PanelClick(Self.myORs[Self.Useky[index].OblRizeni].id, Button, Self.Useky[index].Blok);
    Exit;
   end;
 
@@ -2066,7 +2102,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Navestidla.Data[index].Blok < 0) then Exit();
-   PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla.Data[index].OblRizeni].id, Self.Navestidla.Data[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla.Data[index].OblRizeni].id, Button, Self.Navestidla.Data[index].Blok);
    Exit;
   end;
 
@@ -2075,7 +2111,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Vyhybky.Data[index].Blok < 0) then Exit();
-   PanelTCPClient.PanelClick(Self.myORs[Self.Vyhybky.Data[index].OblRizeni].id, Self.Vyhybky.Data[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Vyhybky.Data[index].OblRizeni].id, Button, Self.Vyhybky.Data[index].Blok);
    Exit;
   end;
 
@@ -2096,7 +2132,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Uvazky.Data[index].Blok < 0) then Exit();
-   PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Self.Uvazky.Data[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Button, Self.Uvazky.Data[index].Blok);
    Exit;
   end;
 
@@ -2105,11 +2141,11 @@ begin
  if (index <> -1) then
   begin
    if (Self.Zamky.Data[index].Blok < 0) then Exit();
-   PanelTCPClient.PanelClick(Self.myORs[Self.Zamky.Data[index].OblRizeni].id, Self.Zamky.Data[index].Blok, Button);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Zamky.Data[index].OblRizeni].id, Button, Self.Zamky.Data[index].Blok);
    Exit;
   end;
 
- if (Button = right) then
+ if (Button = TPanelButton.ESCAPE) then
   Self.Escape();
 end;//procedure
 
@@ -2582,17 +2618,11 @@ begin
     end;//for i
 
    case  (msg.wParam) of                                     //case moznosti stisknutych klaves
+     VK_F1 : Self.ObjectMouseUp(Self.CursorDraw.Pos, F1);
      VK_F2 : Self.ObjectMouseUp(Self.CursorDraw.Pos, F2);
-     VK_F3 : Self.ObjectMouseUp(Self.CursorDraw.Pos, F3);
-     VK_ESCAPE:begin
-      Self.Escape();
-     end;
-
+     VK_ESCAPE: Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+     VK_RETURN: Self.ObjectMouseUp(Self.CursorDraw.Pos, ENTER);
      VK_BACK: Errors.removeerror();
-
-     VK_RETURN:begin
-       Self.DXDMouseUp(Self.DrawObject, mbLeft, [], Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka, Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska);
-     end;
 
      VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:begin
       GetCursorPos(mouse);
@@ -2635,7 +2665,7 @@ begin
    if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
       OblR.RegPlease.status := TORRegPleaseStatus.request;
 
- PanelTCPClient.PanelEscape();
+ PanelTCPClient.PanelClick('-', TPanelButton.ESCAPE);
 end;//procedure
 
 //ziskani vyhybke, ktere jsou navazany na usek v parametru

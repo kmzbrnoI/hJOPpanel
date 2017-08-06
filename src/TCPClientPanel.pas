@@ -28,7 +28,7 @@ type
 
   TPanelTCPClient = class
    private const
-    _PROTOCOL_VERSION = '1.0';
+    _PROTOCOL_VERSION = '1.1';
 
    private
     rthread: TReadingThread;
@@ -84,10 +84,9 @@ type
      // udalosti z panelu:
       procedure PanelAuthorise(Sender:string; rights:TORControlRights; username,password:string);
       procedure PanelFirstGet(Sender:string);
-      procedure PanelClick(Sender:string; blokid:Integer; Button:TPanelButton);
+      procedure PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1);
       procedure PanelMenuClick(item_hint:string; item_index:Integer);
       procedure PanelSetStitVyl(typ:Integer; stitvyl:string);
-      procedure PanelEscape();
       procedure PanelPotvrSekv(reason:TPSEnd);
       procedure PanelNUZ(Sender:string);
       procedure PanelNUZCancel(Sender:string);
@@ -745,9 +744,12 @@ begin
  Self.SendLn(Sender+';GET-ALL;');
 end;//procedure
 
-procedure TPanelTCPClient.PanelClick(Sender:string;blokid:Integer;Button:TPanelButton);
+procedure TPanelTCPClient.PanelClick(Sender:string; Button:TPanelButton; blokid:Integer);
 begin
- Self.SendLn(Sender+';CLICK;'+IntToStr(blokid)+';'+IntToStr(Integer(Button))+';');
+ if (blokid > -1) then
+   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button)+';'+IntToStr(blokid))
+ else
+   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button));
 end;//procedure
 
 procedure TPanelTCPClient.PanelMenuClick(item_hint:string; item_index:Integer);
@@ -761,11 +763,6 @@ begin
   _STITEK: Self.SendLn('-;STIT;{'+stitvyl+'}');
   _VYLUKA: Self.SendLn('-;VYL;{'+stitvyl+'}');
  end;
-end;//procedure
-
-procedure TPanelTCPClient.PanelEscape();
-begin
- Self.SendLn('-;ESCAPE;');
 end;//procedure
 
 procedure TPanelTCPClient.PanelPotvrSekv(reason:TPSEnd);

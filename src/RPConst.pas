@@ -40,7 +40,7 @@ const
 
 type
   TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
-  TPanelButton = (left = 0, middle = 1, right = 2, F2 = 3, F3 = 4);
+  TPanelButton = (F1, F2, ENTER, ESCAPE);
   TJCType = (undefinned = -1, no = 0, vlak = 1, posun = 2, nouz = 3, staveni = 4);
   TVyhPoloha  = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
   TNUZstatus = (no_nuz = 0, blk_in_nuz = 1, nuzing = 2);
@@ -51,6 +51,7 @@ type
 
   procedure ExtractStringsEx(Separators: TSysCharSet; Ignore: TSysCharSet; Content: string; var Strings: TStrings);
   function GetForbidderChars():string;
+  function PanelButtonToString(button:TPanelButton):string;
 
 implementation
 
@@ -114,5 +115,21 @@ begin
    Result := Result + _forbidden_chars[i] + ' ';
  Result := Result + _forbidden_chars[Length(_forbidden_chars)-1];
 end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+function PanelButtonToString(button:TPanelButton):string;
+begin
+ case (button) of
+   TPanelButton.F1 : Result := 'F1';
+   TPanelButton.F2 : Result := 'F2';
+   TPanelButton.ENTER : Result := 'ENTER';
+   TPanelButton.ESCAPE : Result := 'ESCAPE';
+ else
+   Result := '';
+ end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.//unit

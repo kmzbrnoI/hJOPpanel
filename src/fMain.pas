@@ -118,7 +118,7 @@ begin
   begin
    case  msg.wParam of
      VK_F4 : F_Debug.Show();
-     VK_F1 : Self.ShowAboutDialog();
+     VK_F3 : Self.ShowAboutDialog();
    end;//case
   end else if (msg.message = WM_MOUSELEAVE) then begin
     if (msg.hwnd = Self.DXD_Main.Handle) then
