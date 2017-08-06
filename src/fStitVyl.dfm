@@ -43,7 +43,7 @@ object F_StitVyl: TF_StitVyl
     Font.Height = -11
     Font.Name = 'Fixedsys'
     Font.Style = []
-    MaxLength = 64
+    MaxLength = 50
     ParentFont = False
     TabOrder = 0
     OnChange = E_PopisekChange
