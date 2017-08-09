@@ -1057,7 +1057,7 @@ begin
    Self.PaintSouprava(Self.Useky[useki].Soupravy[i], useki, i);
 
  // posledni souprava
- if (Self.Useky[useki].PanelProp.soupravy.Count >= 1) then
+ if ((Self.Useky[useki].PanelProp.soupravy.Count >= 1) and (Self.Useky[useki].Soupravy.Count > 0)) then
    Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count-1],
       useki, Self.Useky[useki].PanelProp.Soupravy.Count-1);
 end;
