@@ -1050,16 +1050,27 @@ end;
 // zobrazi soupravy na celem useku
 
 procedure TRelief.ShowUsekSoupravy(useki:Integer);
-var i:Integer;
+var i, step, index:Integer;
 begin
- // vsechny soupravy, ktere se vejdou, krome posledni
- for i := 0 to Min(Self.Useky[useki].Soupravy.Count, Self.Useky[useki].PanelProp.soupravy.Count)-2 do
-   Self.PaintSouprava(Self.Useky[useki].Soupravy[i], useki, i);
+ if (Self.Useky[useki].PanelProp.soupravy.Count = 0) then
+   Exit()
+ else if (Self.Useky[useki].PanelProp.soupravy.Count = 1) then begin
+   Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count div 2], useki, 0);
+ end else begin
+   // vsechny soupravy, ktere se vejdou, krome posledni
+   index := 0;
+   step := Max(Self.Useky[useki].Soupravy.Count div Self.Useky[useki].PanelProp.soupravy.Count, 1);
+   for i := 0 to Min(Self.Useky[useki].Soupravy.Count, Self.Useky[useki].PanelProp.soupravy.Count)-2 do
+    begin
+     Self.PaintSouprava(Self.Useky[useki].Soupravy[index], useki, i);
+     index := index + step;
+    end;
 
- // posledni souprava
- if ((Self.Useky[useki].PanelProp.soupravy.Count >= 1) and (Self.Useky[useki].Soupravy.Count > 0)) then
-   Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count-1],
-      useki, Self.Useky[useki].PanelProp.Soupravy.Count-1);
+   // posledni souprava na posledni pozici
+   if (Self.Useky[useki].Soupravy.Count > 0) then
+     Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count-1],
+        useki, Self.Useky[useki].PanelProp.Soupravy.Count-1);
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
