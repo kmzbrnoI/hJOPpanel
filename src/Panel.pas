@@ -592,6 +592,7 @@ type
    mouseClick:TDateTime;
    mouseTimer:TTimer;
    mouseLastBtn:TMouseButton;
+   mouseClickPos:TPoint;
 
    Colors:record
     Pozadi:TColor;
@@ -1833,9 +1834,11 @@ begin
     if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick < EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
      begin
       Self.mouseTimer.Enabled := false;
-      Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F2);
-     end else
+      Self.ObjectMouseUp(Self.mouseClickPos, TPanelButton.F2);
+     end else begin
       Self.mouseTimer.Enabled := true;
+      Self.mouseClickPos := Self.CursorDraw.Pos;
+     end;
   end;
  end;
 
@@ -1849,7 +1852,7 @@ procedure TRelief.OnMouseTimer(Sender:TObject);
 begin
  if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick > EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
   begin
-   Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F1);
+   Self.ObjectMouseUp(Self.mouseClickPos, TPanelButton.F1);
    Self.mouseTimer.Enabled := false;
    Self.Show();
   end;
