@@ -315,12 +315,15 @@ begin
    Self.Graphics.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d', [Self.stack.Count]), $A0A0A0, clBlack);
 
    if ((Self.hint <> '') or (Self.UPOenabled)) then
-     if (Self.UPOenabled) then
-       Self.Graphics.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', clYellow, clBlack)
-     else
+    begin
+     if (Self.UPOenabled) then begin
+       Self.Graphics.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', clYellow, clBlack);
+       Self.Graphics.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, clYellow, clBlack);
+     end else begin
        Self.Graphics.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', $A0A0A0, clBlack);
-
-   Self.Graphics.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, $A0A0A0, clBlack);
+       Self.Graphics.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, $A0A0A0, clBlack);
+     end;
+    end;
   end;
 end;//procedure
 
@@ -359,10 +362,8 @@ begin
     end;
 
    //UPO
-   if ((Position.X >= Self.pos.X+15) and (Position.X <= Self.pos.X+17) and (Self.UPOenabled)) then
-    begin
+   if ((Position.X >= Self.pos.X+15) and (Position.X <= Self.pos.X+17+1+Length(Self.hint)) and (Self.UPOenabled)) then
      PanelTCPClient.SendLn(Self.parent+';ZAS;UPO;');
-    end;
    
   end;//if Position.Y = Self.pos.Y
 
