@@ -103,13 +103,12 @@ type
     TS_IPC: TTabSheet;
     CHB_IPC_Send: TCheckBox;
     CHB_IPC_Receive: TCheckBox;
-    Label20: TLabel;
     E_Snd_Privolavacka: TEdit;
     B_Proch6: TButton;
-    Label21: TLabel;
     B_Proch7: TButton;
     E_Snd_Timeout: TEdit;
-    Label22: TLabel;
+    Label20: TLabel;
+    Label21: TLabel;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);

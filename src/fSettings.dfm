@@ -49,7 +49,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_IPC
+    ActivePage = TS_Sounds
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -105,6 +105,8 @@ object F_Settings: TF_Settings
     object TS_Sounds: TTabSheet
       Caption = 'Zvuky'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 28
       object Label3: TLabel
         Left = 16
         Top = 14
@@ -128,17 +130,31 @@ object F_Settings: TF_Settings
       end
       object Label7: TLabel
         Left = 16
-        Top = 95
+        Top = 97
         Width = 45
         Height = 13
         Caption = 'P'#345'et'#237#382'en'#237':'
       end
       object Label8: TLabel
         Left = 16
-        Top = 122
+        Top = 124
         Width = 38
         Height = 13
         Caption = 'Zpr'#225'va:'
+      end
+      object Label20: TLabel
+        Left = 16
+        Top = 151
+        Width = 91
+        Height = 13
+        Caption = 'P'#345'ivol'#225'vac'#237' n'#225'v'#283'st:'
+      end
+      object Label21: TLabel
+        Left = 16
+        Top = 178
+        Width = 42
+        Height = 13
+        Caption = 'Timeout:'
       end
       object E_Snd_Trat: TEdit
         Left = 160
@@ -238,6 +254,42 @@ object F_Settings: TF_Settings
         Height = 21
         Caption = 'Proch'#225'zet'
         TabOrder = 9
+        OnClick = B_Proch1Click
+      end
+      object E_Snd_Privolavacka: TEdit
+        Left = 160
+        Top = 151
+        Width = 361
+        Height = 21
+        TabOrder = 11
+        Text = '[E_Snd_Privolavacka]'
+      end
+      object B_Proch6: TButton
+        Tag = 6
+        Left = 533
+        Top = 151
+        Width = 75
+        Height = 21
+        Caption = 'Proch'#225'zet'
+        TabOrder = 12
+        OnClick = B_Proch1Click
+      end
+      object E_Snd_Timeout: TEdit
+        Left = 160
+        Top = 178
+        Width = 361
+        Height = 21
+        TabOrder = 13
+        Text = '[E_Snd_Timeout]'
+      end
+      object B_Proch7: TButton
+        Tag = 7
+        Left = 533
+        Top = 178
+        Width = 75
+        Height = 21
+        Caption = 'Proch'#225'zet'
+        TabOrder = 14
         OnClick = B_Proch1Click
       end
     end
