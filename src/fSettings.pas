@@ -103,6 +103,13 @@ type
     TS_IPC: TTabSheet;
     CHB_IPC_Send: TCheckBox;
     CHB_IPC_Receive: TCheckBox;
+    Label20: TLabel;
+    E_Snd_Privolavacka: TEdit;
+    B_Proch6: TButton;
+    Label21: TLabel;
+    B_Proch7: TButton;
+    E_Snd_Timeout: TEdit;
+    Label22: TLabel;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -184,6 +191,8 @@ begin
  GlobConfig.data.sounds.sndRizikovaFce     := Self.E_Snd_PS.Text;
  GlobConfig.data.sounds.sndPretizeni       := Self.E_Snd_Pretizeni.Text;
  GlobConfig.data.sounds.sndPrichoziZprava  := Self.E_Snd_Zprava.Text;
+ GlobConfig.data.sounds.sndPrivolavacka    := Self.E_Snd_Privolavacka.Text;
+ GlobConfig.data.sounds.sndTimeout         := Self.E_Snd_Timeout.Text;
 
  GlobConfig.data.guest.allow := Self.CHB_Guest_Enable.Checked;
  if (Self.CHB_Guest_Enable.Checked) then
@@ -272,6 +281,8 @@ begin
   3: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_PS.Text));
   4: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Pretizeni.Text));
   5: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Zprava.Text));
+  6: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Privolavacka.Text));
+  7: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Timeout.Text));
  end;
 
  if (Self.OD_Snd.Execute(Self.Handle)) then
@@ -282,11 +293,13 @@ begin
     fn := Self.OD_Snd.FileName;
 
    case (Sender as TButton).Tag of
-    1: Self.E_Snd_Trat.Text       := fn;
-    2: Self.E_Snd_Error.Text      := fn;
-    3: Self.E_Snd_PS.Text         := fn;
-    4: Self.E_Snd_Pretizeni.Text  := fn;
-    5: Self.E_Snd_Zprava.Text     := fn;
+    1: Self.E_Snd_Trat.Text         := fn;
+    2: Self.E_Snd_Error.Text        := fn;
+    3: Self.E_Snd_PS.Text           := fn;
+    4: Self.E_Snd_Pretizeni.Text    := fn;
+    5: Self.E_Snd_Zprava.Text       := fn;
+    6: Self.E_Snd_Privolavacka.Text := fn;
+    7: Self.E_Snd_Timeout.Text := fn;
    end;
   end;
 end;
@@ -518,11 +531,13 @@ begin
  Self.CHB_IPC_Send.Checked    := data.auth.ipc_send;
  Self.CHB_IPC_Receive.Checked := data.auth.ipc_receive;
 
- Self.E_Snd_Trat.Text       := data.sounds.sndTratSouhlas;
- Self.E_Snd_Error.Text      := data.sounds.sndChyba;
- Self.E_Snd_PS.Text         := data.sounds.sndRizikovaFce;
- Self.E_Snd_Pretizeni.Text  := data.sounds.sndPretizeni;
- Self.E_Snd_Zprava.Text     := data.sounds.sndPrichoziZprava;
+ Self.E_Snd_Trat.Text         := data.sounds.sndTratSouhlas;
+ Self.E_Snd_Error.Text        := data.sounds.sndChyba;
+ Self.E_Snd_PS.Text           := data.sounds.sndRizikovaFce;
+ Self.E_Snd_Pretizeni.Text    := data.sounds.sndPretizeni;
+ Self.E_Snd_Zprava.Text       := data.sounds.sndPrichoziZprava;
+ Self.E_Snd_Privolavacka.Text := data.sounds.sndPrivolavacka;
+ Self.E_Snd_Timeout.Text      := data.sounds.sndTimeout;
 
  Self.CHB_Guest_Enable.Checked := data.guest.allow;
  Self.CHB_Guest_EnableClick(Self.CHB_Guest_Enable);

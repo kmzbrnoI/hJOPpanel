@@ -6,18 +6,19 @@ uses SysUtils, SoundsThread, Classes, mmsystem;
 
 // vyssi cislo zvuku ma vzdy vetsi prioritu na prehrani
 const
-  _SND_TRAT_ZADOST = 4;
-  _SND_POTVR_SEKV  = 8;
-  _SND_CHYBA       = 10;
-  _SND_PRETIZENI   = 7;
-  _SND_ZPRAVA      = 9;
+  _SND_TRAT_ZADOST  = 4;
+  _SND_PRIVOLAVACKA = 5;
+  _SND_TIMEOUT      = 6;
+  _SND_PRETIZENI    = 7;
+  _SND_POTVR_SEKV   = 8;
+  _SND_ZPRAVA       = 9;
+  _SND_CHYBA        = 10;
 
   _SND_BUF_LEN     = 8;
 
 type
  TSound = record
    code:Integer;
-   repeat_delay:Integer;    // cekani po dokonceni zvuku - v ms
  end;
 
  TSoundsPlay=class                                  // prehravani zvuku
@@ -37,7 +38,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Play(code:integer; repeat_delay:Integer = -1);
+    procedure Play(code:integer; loop:boolean = false);
     procedure DeleteSound(code:Integer);
     procedure DeleteAll();
     function IsPlaying(code:integer):boolean;
@@ -58,10 +59,9 @@ uses GlobalConfig, fMain;
 constructor TSoundsPlay.Create();
 var i:Integer;
 begin
- inherited Create();
+ inherited;
 
  thread := TSndThread.Create(true);
- thread.code := -1;
  thread.Suspended := false;
 
  for i := 0 to _SND_BUF_LEN-1 do
@@ -73,46 +73,39 @@ begin
  thread.Terminate();
  FreeAndNil(thread);
 
- inherited Destroy();
+ inherited;
 end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TSoundsPlay.Play(code:integer; repeat_delay:Integer = -1);
+procedure TSoundsPlay.Play(code:integer; loop:boolean = false);
 var i, highest:integer;
  begin
-  if (repeat_delay = -1) then
+  if (not loop) then
    begin
     // neopakujici se zvuky pustime hned
     if (not muted) then
-      sndPlaySound(PChar(Self.ResolveSndFilename(code)), SND_ASYNC);
+      Self.thread.PriorityPlay(Self.ResolveSndFilename(code));
    end else begin
     // opakujici se zvuky pustime v smostatnem vlakne, kde hledime na prioritu
     for i := 0 to _SND_BUF_LEN-1 do
      if (Self.buffer[i].code < 0) then
       begin
-       Self.buffer[i].code         := code;
-       Self.buffer[i].repeat_delay := repeat_delay;
+       Self.buffer[i].code := code;
        break;
       end;
 
     if (Self.muted) then Exit();
 
-    if (Self.thread.code = -1) then
+    if (Self.thread.filename = '') then
      begin
       // no sounds playing
-      Self.thread.repeat_delay := repeat_delay;
-      Self.thread.filename     := Self.ResolveSndFilename(code);
-      Self.thread.code         := code;
+      Self.thread.filename := Self.ResolveSndFilename(code);
      end else begin
       // sound already playing
       highest := Self.GetHighestSound();
-      if (Self.thread.code <> Self.buffer[highest].code) then
-       begin
-        Self.thread.repeat_delay := repeat_delay;
-        Self.thread.filename     := Self.ResolveSndFilename(code);
-        Self.thread.code         := code;
-       end;
+      if (Self.thread.filename <> Self.ResolveSndFilename(Self.buffer[highest].code)) then
+        Self.thread.filename := Self.ResolveSndFilename(code);
      end;
    end;// else repeat_delay = -1
  end;//procedure
@@ -129,16 +122,12 @@ begin
     Break;
    end;
 
- if (Self.thread.code = code) then
-  Self.thread.code := -1;
+ if (Self.thread.filename = Self.ResolveSndFilename(code)) then
+   Self.thread.filename := '';
 
  i := Self.GetHighestSound();
  if (i > -1) then
-  begin
-   Self.thread.filename     := Self.ResolveSndFilename(Self.buffer[i].code);
-   Self.thread.repeat_delay := Self.buffer[i].repeat_delay;
-   Self.thread.code         := Self.buffer[i].code;
-  end;
+   Self.thread.filename := Self.ResolveSndFilename(Self.buffer[i].code);
 end;//procedure
 
 procedure TSoundsPlay.DeleteAll();
@@ -148,8 +137,8 @@ begin
   if (Self.buffer[i].code > -1) then
     Self.buffer[i].code := -1;
 
- if (Self.thread.code > -1) then
-  Self.thread.code := -1;
+ if (Self.thread.filename <> '') then
+   Self.thread.filename := '';
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,11 +146,13 @@ end;//procedure
 function TSoundsPlay.ResolveSndFilename(code:Integer):string;
 begin
  case (code) of
-  _SND_TRAT_ZADOST: Result := GlobConfig.data.sounds.sndTratSouhlas;
-  _SND_POTVR_SEKV : Result := GlobConfig.data.sounds.sndRizikovaFce;
-  _SND_CHYBA      : Result := GlobConfig.data.sounds.sndChyba;
-  _SND_PRETIZENI  : Result := GlobConfig.data.sounds.sndPretizeni;
-  _SND_ZPRAVA     : Result := GlobConfig.data.sounds.sndPrichoziZprava;
+  _SND_TRAT_ZADOST  : Result := GlobConfig.data.sounds.sndTratSouhlas;
+  _SND_POTVR_SEKV   : Result := GlobConfig.data.sounds.sndRizikovaFce;
+  _SND_CHYBA        : Result := GlobConfig.data.sounds.sndChyba;
+  _SND_PRETIZENI    : Result := GlobConfig.data.sounds.sndPretizeni;
+  _SND_ZPRAVA       : Result := GlobConfig.data.sounds.sndPrichoziZprava;
+  _SND_PRIVOLAVACKA : Result := GlobConfig.data.sounds.sndPrivolavacka;
+  _SND_TIMEOUT      : Result := GlobConfig.data.sounds.sndTimeout;
  else
   Result := '';
  end;
@@ -190,18 +181,14 @@ end;//fuctnion
 procedure TSoundsPlay.SetMute(state:boolean);
 var highest:Integer;
 begin
- if ((not Self.fmuted) and (state) and (Self.thread.code > -1)) then
-   Self.thread.code := -1;
+ if ((not Self.fmuted) and (state) and (Self.thread.filename <> '')) then
+   Self.thread.filename := '';
 
  if ((Self.muted) and (not state)) then
   begin
    highest := Self.GetHighestSound();
    if (highest > -1) then
-    begin
-     Self.thread.repeat_delay := Self.buffer[highest].repeat_delay;
-     Self.thread.filename     := Self.ResolveSndFilename(Self.buffer[highest].code);
-     Self.thread.code         := Self.buffer[highest].code;
-    end;
+     Self.thread.filename := Self.ResolveSndFilename(Self.buffer[highest].code);
   end;
 
  Self.fmuted := state;

@@ -167,7 +167,7 @@ begin
  Timer.Enabled := true;
 
  if (not SoundsPlay.IsPlaying(_SND_POTVR_SEKV)) then
-   SoundsPlay.Play(_SND_POTVR_SEKV, 1000);
+   SoundsPlay.Play(_SND_POTVR_SEKV, true);
 
  str.Free();
  str2.Free();

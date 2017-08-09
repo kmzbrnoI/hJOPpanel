@@ -422,12 +422,7 @@ begin
  else if (parsed[1] = 'SND') then
   begin
    if (parsed[2] = 'PLAY') then
-    begin
-     if (parsed.Count > 4) then
-       SoundsPlay.Play(StrToInt(parsed[3]), StrToInt(parsed[4]))
-     else
-       SoundsPlay.Play(StrToInt(parsed[3]));
-    end;
+     SoundsPlay.Play(StrToInt(parsed[3]), (parsed.Count > 4) and (parsed[4] = 'L'));
 
    if (parsed[2] = 'STOP') then
      SoundsPlay.DeleteSound(StrToInt(parsed[3]));

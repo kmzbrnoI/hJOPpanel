@@ -13,16 +13,22 @@ type
   TSndThread = class(TThread)
   private
 
+   ffilename:string;
+   priority:string;
+   changed:boolean;
+
+   procedure SetFN(new:string);
+
   protected
    FinishedEvent: TFinishedEvent;
 
    procedure Execute; override;
 
   public
-    code:Integer;
-    filename:string;
-    repeat_delay:Integer;
-    next:TDateTime;
+
+   property filename:string read ffilename write SetFN;
+   procedure PriorityPlay(fn:string);
+
   end;
 
 implementation
@@ -33,16 +39,36 @@ procedure TSndThread.Execute;
  begin
    while (not Terminated) do
     begin
-     if (Self.code > -1) then
+     if (Self.changed) then
       begin
-       PlaySound(PChar(Self.filename), 0, SND_ASYNC);
+       if (Self.priority <> '') then
+        begin
+         sndPlaySound(PChar(Self.priority), 0);
+         Self.priority := '';
+        end else begin
+         if (Self.filename <> '') then
+           sndPlaySound(PChar(Self.filename), SND_ASYNC or SND_LOOP)
+         else
+           sndPlaySound(nil, 0);
 
-       next := Now + EncodeTime(0, 0, Self.repeat_delay div 1000, Self.repeat_delay mod 1000);
-       while ((Now < next) and (not Terminated)) do
-         Sleep(1);
-      end else
-       Sleep(10);
+         Self.changed := false;
+        end;
+      end;
+
+     Sleep(1);
     end;//while
  end;//procedure
+
+procedure TSndThread.SetFN(new:string);
+begin
+ Self.ffilename := new;
+ Self.changed := true;
+end;
+
+procedure TSndThread.PriorityPlay(fn:string);
+begin
+ Self.priority := fn;
+ Self.changed := true;
+end;
 
 end.//unit
