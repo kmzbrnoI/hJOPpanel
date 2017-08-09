@@ -605,40 +605,50 @@ end;
 
 procedure TPanelTCPClient.ParseORChangeUsek();
 var UsekPanelProp:TUsekPanelProp;
+    soupravy, souprava:TStrings;
+    i: Integer;
+    us:TUsekSouprava;
 begin
   UsekPanelProp.Symbol  := StrToColor(parsed[4]);
   UsekPanelProp.Pozadi  := StrToColor(parsed[5]);
   UsekPanelProp.blikani := StrToBool(parsed[6]);
   UsekPanelProp.KonecJC := TJCType(StrToInt(parsed[7]));
+  UsekPanelProp.nebarVetve := strToColor(parsed[8]);
 
-  if (parsed[8] = '-') then
-    UsekPanelProp.ramecekColor := clBlack
-  else
-    UsekPanelProp.ramecekColor := strToColor(parsed[8]);
+  UsekPanelProp.soupravy := TList<TUsekSouprava>.Create();
 
   if (parsed.Count > 9) then
    begin
-    if (parsed[9] <> '') then
-      UsekPanelProp.spr := parsed[9];
-    if (parsed[10] <> '') then
-      UsekPanelProp.SprC := StrToColor(parsed[10]);
+    soupravy := TStringList.Create();
+    souprava := TStringList.Create();
 
-    UsekPanelProp.sipkaL := ((parsed[11] <> '') and (parsed[11][1] = '1'));
-    UsekPanelProp.sipkaS := ((parsed[11] <> '') and (parsed[11][2] = '1'));
+    try
+      ExtractStringsEx([')'], ['('], parsed[9], soupravy);
 
-    if ((parsed.Count > 12) and (parsed[12] <> '')) then
-     UsekPanelProp.sprPozadi := StrToColor(parsed[12])
-    else
-     UsekPanelProp.sprPozadi := clBlack;
-   end else begin
-    UsekPanelProp.spr     := '';
-    UsekPanelProp.SprC    := clBlack;
+      for i := 0 to soupravy.Count-1 do
+       begin
+        souprava.Clear();
+        ExtractStringsEx([';'], [], soupravy[i], souprava);
+
+        us.nazev := souprava[0];
+        us.sipkaL := ((souprava[1] <> '') and (souprava[1][1] = '1'));
+        us.sipkaS := ((souprava[1] <> '') and (souprava[1][2] = '1'));
+        us.fg := strToColor(souprava[2]);
+        us.bg := strToColor(souprava[3]);
+
+        if (souprava.Count > 4) then
+          us.ramecek := strToColor(souprava[4])
+        else
+          us.ramecek := clBlack;
+
+        UsekPanelProp.soupravy.Add(us);
+       end;
+
+    finally
+      soupravy.Free();
+      souprava.Free();
+    end;
    end;
-
-  if (parsed.Count > 13) then
-   UsekPanelProp.nebarVetve := StrToColor(parsed[13])
-  else
-   UsekPanelProp.nebarVetve := $A0A0A0;
 
   Relief.ORUsekChange(parsed[0], StrToInt(parsed[3]), UsekPanelProp);
 end;
