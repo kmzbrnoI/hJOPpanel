@@ -1052,7 +1052,7 @@ end;
 procedure TRelief.ShowUsekSoupravy(useki:Integer);
 var i, step, index:Integer;
 begin
- if (Self.Useky[useki].PanelProp.soupravy.Count = 0) then
+ if ((Self.Useky[useki].PanelProp.soupravy.Count = 0) or (Self.Useky[useki].Soupravy.Count = 0)) then
    Exit()
  else if (Self.Useky[useki].PanelProp.soupravy.Count = 1) then begin
    Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count div 2], useki, 0);
