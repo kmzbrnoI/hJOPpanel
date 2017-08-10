@@ -6,7 +6,7 @@ unit MenuPanel;
 interface
 
 uses SysUtils, Classes, StrUtils, Graphics, Types, PGraphics,
-      Generics.Collections, Windows;
+      Generics.Collections, Windows, DXDraws;
 
 const
   _PNL_MENU_ITEMS_MAX = 32;
@@ -58,7 +58,7 @@ type
       destructor Destroy(); override;
 
       procedure ShowMenu(items:string; obl_r:Integer; absoluteLeftTop:TPoint);   // vraci pozici, na kterou ma jit kurzor
-      procedure PaintMenu(Canvas:TCanvas; mouse_pos:TPoint);
+      procedure PaintMenu(obj:TDXDraw; mouse_pos:TPoint);
       procedure Click();
       procedure KeyPress(key:Integer; var handled:boolean);
       function CheckCursorPos(Pos:TPoint):boolean;
@@ -79,7 +79,7 @@ type
 
 implementation
 
-uses Panel, Symbols, RPConst;
+uses Panel, Symbols, RPConst, PanelPainter;
 
 // format souboru hintu:
 //  csv soubor, kde na kazdem radku je jeden hint
@@ -125,13 +125,16 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelMenu.PaintMenu(Canvas:TCanvas; mouse_pos:TPoint);
+procedure TPanelMenu.PaintMenu(obj:TDXDraw; mouse_pos:TPoint);
 var i:Integer;
     Pos:TPoint;
     foreground,background:TColor;
     str:string;
+    Canvas:TCanvas;
 begin
  if (not showing) then Exit();
+
+ canvas := obj.Surface.Canvas;
 
  // pozadi menu
  Canvas.Brush.Color := Self._MENU_BACKGROUND;
@@ -208,7 +211,7 @@ begin
       (Pos.Y * SymbolSet._Symbol_Vyska)+Round(SymbolSet._Symbol_Vyska/2)
      );
     end else
-     Self.Graphics.TextOutput(Pos, str, foreground, background);
+     PanelPainter.TextOutput(Pos, str, foreground, background, obj);
 
    Pos.Y := Pos.Y + 1;
   end;//for i
@@ -218,7 +221,7 @@ begin
  if (Self.fselected > -1) and (Self.Hints.TryGetValue(Self.Items.data[Self.fselected].show_text, str)) then
   begin
    str := Format(' %-'+IntToStr(_HINT_WIDTH)+'s', [str]);
-   Self.Graphics.TextOutput(Point(1, 0), str, clYellow, clTeal);
+   PanelPainter.TextOutput(Point(1, 0), str, clYellow, clTeal, obj);
   end;
 end;//procedure
 

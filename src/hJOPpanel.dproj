@@ -133,6 +133,7 @@
 			</DCCReference>
 			<DCCReference Include="InterProcessCom.pas"/>
 			<DCCReference Include="parseHelper.pas"/>
+			<DCCReference Include="PanelPainterUsek.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

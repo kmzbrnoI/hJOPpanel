@@ -16,6 +16,24 @@ const
   _Symbol_Colors: array [0..(_Symbol_ColorsCount-1)] of TColor =
     ($FF00FF,$A0A0A0,$0000FF,$00FF00,$FFFFFF,$FFFF00,$FF0000,$00FFFF,$000000,$808000,$008080,clPurple,clMaroon);
 
+  _Usek_Start      = 12;
+  _Usek_End        = 23;
+  _Vyhybka_End     = 3;
+  _SCom_Start      = 24;
+  _SCom_End        = 29;
+  _Plny_Symbol     = 37;
+  _Prj_Start       = 40;
+  _Hvezdicka       = 41;
+  _Kolecko         = 42;
+  _Uvazka_Start    = 43;
+  _Spr_Sipka_Start = 46;
+  _Zamek           = 48;
+  _Vykol_Start     = 49;
+  _Vykol_End       = 54;
+  _Rozp_Start      = 55;
+  _DKS_Top         = 58;
+  _DKS_Bot         = 59;
+
 
 type
   TOneSymbolSet = record
@@ -76,6 +94,9 @@ type
 
       procedure LoadSet(typ:TSymbolSetType);
   end;
+
+function GetColorIndex(Color:TColor):integer;
+function GetSymbolIndex(SymbolID:Integer; Color:TColor):integer;
 
 var
   SymbolSet:TSymbolSet;
@@ -239,6 +260,32 @@ begin
         Move(TargetColor, Pixels[(X * Size)], TripleSize);
     end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+//                           GLOBALNI FUNKCE                                  //
+////////////////////////////////////////////////////////////////////////////////
+
+//TColor -> color index
+function GetColorIndex(Color:TColor):integer;
+var i:Integer;
+begin
+ Result := 0;
+ for i := 0 to _Symbol_ColorsCount-1 do
+  begin
+   if (_Symbol_Colors[i] = Color) then
+    begin
+     Result := i;
+     Break;
+    end;
+  end;//for i
+end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+function GetSymbolIndex(SymbolID:Integer; Color:TColor):integer;
+begin
+ Result := (SymbolID * _Symbol_ColorsCount) + GetColorIndex(Color);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

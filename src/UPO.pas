@@ -5,7 +5,8 @@ unit UPO;
 
 interface
 
-uses PGraphics, Classes, Graphics, Generics.Collections, StrUtils, Windows;
+uses PGraphics, Classes, Graphics, Generics.Collections, StrUtils, Windows,
+     DXDraws;
 
 const
   _UPO_WIDTH  = 36;
@@ -38,7 +39,7 @@ type
       constructor Create(Graphics:TPanelGraphics);
       destructor Destroy(); override;
 
-      procedure Show();
+      procedure Show(obj:TDXDraw);
       procedure ParseCommand(data:string; critical:boolean);
       procedure KeyPress(key:Integer; var handled:boolean);
 
@@ -48,7 +49,7 @@ type
 
 implementation
 
-uses TCPClientPanel, fMain, RPConst;
+uses TCPClientPanel, fMain, RPConst, PanelPainter;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +70,7 @@ end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelUPO.Show();
+procedure TPanelUPO.Show(obj:TDXDraw);
 var i, j:Integer;
     str:string;
 begin
@@ -110,14 +111,17 @@ begin
       end;//taRightJustify
    end;//case
 
-   Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-_UPO_HEIGHT+i), str, Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg);
+   PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-_UPO_HEIGHT+i),
+     str, Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg, obj);
   end;//for i
 
  // vykresleni informaceo pokracovani
  if ((Self.critical) and (Self.current = Self.items.Count-1)) then
-   Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-1), '          Ukonèení: ESCAPE          ', clBlack, clTeal)
+   PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1),
+     '          Ukonèení: ESCAPE          ', clBlack, clTeal, obj)
  else
-   Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-1), '  Pokraèovat: ENTER, konec: ESCAPE  ', clBlack, clTeal);
+   PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1),
+     '  Pokraèovat: ENTER, konec: ESCAPE  ', clBlack, clTeal, obj);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

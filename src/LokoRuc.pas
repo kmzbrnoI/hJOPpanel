@@ -5,7 +5,7 @@ unit LokoRuc;
 interface
 
 uses Generics.Collections, Types, Classes, SysUtils, PGraphics, Graphics,
-      StrUtils, RPConst, Windows, IBUtils;
+      StrUtils, RPConst, Windows, IBUtils, DXDraws;
 
 type
   TORStackVolba = (PV = 0, VZ = 1);
@@ -32,7 +32,7 @@ type
       constructor Create(Graphics:TPanelGraphics);
       destructor Destroy(); override;
 
-      procedure Show();
+      procedure Show(obj:TDXDraw);
       procedure ParseCommand(data:TStrings);
       procedure Clear();
 
@@ -43,7 +43,7 @@ var
 
 implementation
 
-uses TCPCLientPanel, Symbols;
+uses TCPCLientPanel, Symbols, PanelPainter;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,7 +106,7 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TRucList.Show();
+procedure TRucList.Show(obj:TDXDraw);
 var i:Integer;
     left, top:Integer;
 begin
@@ -115,7 +115,7 @@ begin
 
  for i := 0 to Min(Self.lokos.Count, 2)-1 do
   begin
-   Self.Graphics.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite);
+   PanelPainter.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
    Dec(top);
   end;//for i
 end;//procedure

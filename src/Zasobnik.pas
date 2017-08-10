@@ -5,7 +5,7 @@ unit Zasobnik;
 interface
 
 uses Generics.Collections, Types, Classes, SysUtils, PGraphics, Graphics,
-      StrUtils, RPConst, Windows;
+      StrUtils, RPConst, Windows, DXDraws;
 
 type
   TORStackVolba = (PV = 0, VZ = 1);
@@ -47,7 +47,7 @@ type
       constructor Create(Graphics:TPanelGraphics; parent:string; pos:TPoint);
       destructor Destroy(); override;
 
-      procedure Show();
+      procedure Show(obj:TDXDraw);
 
       procedure ParseCommand(data:TStrings);
 
@@ -61,7 +61,7 @@ type
 
 implementation
 
-uses TCPCLientPanel, Symbols;
+uses TCPCLientPanel, Symbols, PanelPainter;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -238,7 +238,7 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TORStack.Show();
+procedure TORStack.Show(obj:TDXDraw);
 var i, j:Integer;
     bk:TColor;
     txt:string;
@@ -246,26 +246,26 @@ begin
  // zasobnik Disabled
  if (not Self.fenabled) then
   begin
-   Self.Graphics.TextOutput(Self.pos, Format('%.2d',[Self.index]), clFuchsia, clBlack);
-   Self.Graphics.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', clFuchsia, clBlack);
-   Self.Graphics.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', clFuchsia, clBlack);
-   Self.Graphics.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clFuchsia, clBlack);
-   Self.Graphics.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d',[Self.stack.Count]), clFuchsia, clBlack);
+   PanelPainter.TextOutput(Self.pos, Format('%.2d',[Self.index]), clFuchsia, clBlack, obj);
+   PanelPainter.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', clFuchsia, clBlack, obj);
+   PanelPainter.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', clFuchsia, clBlack, obj);
+   PanelPainter.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clFuchsia, clBlack, obj);
+   PanelPainter.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d',[Self.stack.Count]), clFuchsia, clBlack, obj);
    Exit();
   end;
 
- Self.Graphics.TextOutput(Self.pos, Format('%.2d',[Self.index]), $A0A0A0, clBlack);
+ PanelPainter.TextOutput(Self.pos, Format('%.2d',[Self.index]), $A0A0A0, clBlack, obj);
 
  case (Self.EZ) of
-   TOREZVolba.closed  : Self.Graphics.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', $A0A0A0, clBlack);
-   TOREZVolba.please  : Self.Graphics.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clYellow, clBlack);
-   TOREZVolba.openned : Self.Graphics.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clWhite, clBlack);
+   TOREZVolba.closed  : PanelPainter.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', $A0A0A0, clBlack, obj);
+   TOREZVolba.please  : PanelPainter.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clYellow, clBlack, obj);
+   TOREZVolba.openned : PanelPainter.TextOutput(Point(Self.pos.X+9, Self.pos.Y), 'EZ', clWhite, clBlack, obj);
  end;//case
 
  if (Self.EZ = TOREZVolba.openned) then
   begin
-   Self.Graphics.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', $A0A0A0, clBlack);
-   Self.Graphics.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', $A0A0A0, clBlack);
+   PanelPainter.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', $A0A0A0, clBlack, obj);
+   PanelPainter.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', $A0A0A0, clBlack, obj);
 
    //vypsani jizdnich cest v zasobniku
    for i := 0 to Self.stack.Count-1 do
@@ -286,18 +286,18 @@ begin
        for j := 0 to _JC_TEXT_WIDTH-Length(Self.stack[i].JC) do txt := txt + ' ';
      end;
 
-     Self.Graphics.TextOutput(Point(Self.pos.X, Self.pos.Y+i+1), ' '+txt, clBlack, bk);
+     PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.Y+i+1), ' '+txt, clBlack, bk, obj);
     end;//for i
 
   end else begin
    // pokud neni EZ
    if (Self.volba = VZ) then
     begin
-     Self.Graphics.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', clWhite, clBlack);
-     Self.Graphics.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', $A0A0A0, clBlack);
+     PanelPainter.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', clWhite, clBlack, obj);
+     PanelPainter.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', $A0A0A0, clBlack, obj);
     end else begin
-     Self.Graphics.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', $A0A0A0, clBlack);
-     Self.Graphics.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', clWhite, clBlack);
+     PanelPainter.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', $A0A0A0, clBlack, obj);
+     PanelPainter.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', clWhite, clBlack, obj);
     end;
 
    // pokud je alespon jedna cesta v zasobniku, vypiseme ji
@@ -309,19 +309,19 @@ begin
        txt := Self.stack[0].JC;
        for j := 0 to _JC_TEXT_WIDTH-Length(Self.stack[0].JC) do txt := txt + ' ';
      end;
-     Self.Graphics.TextOutput(Point(Self.pos.X, Self.pos.Y+1), ' '+txt, clBlack, clTeal);
+     PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.Y+1), ' '+txt, clBlack, clTeal, obj);
     end;
 
-   Self.Graphics.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d', [Self.stack.Count]), $A0A0A0, clBlack);
+   PanelPainter.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d', [Self.stack.Count]), $A0A0A0, clBlack, obj);
 
    if ((Self.hint <> '') or (Self.UPOenabled)) then
     begin
      if (Self.UPOenabled) then begin
-       Self.Graphics.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', clYellow, clBlack);
-       Self.Graphics.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, clYellow, clBlack);
+       PanelPainter.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', clYellow, clBlack, obj);
+       PanelPainter.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, clYellow, clBlack, obj);
      end else begin
-       Self.Graphics.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', $A0A0A0, clBlack);
-       Self.Graphics.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, $A0A0A0, clBlack);
+       PanelPainter.TextOutput(Point(Self.pos.X+15, Self.pos.Y), 'UPO', $A0A0A0, clBlack, obj);
+       PanelPainter.TextOutput(Point(Self.pos.X+19, Self.pos.Y), Self.hint, $A0A0A0, clBlack, obj);
      end;
     end;
   end;

@@ -628,14 +628,8 @@ type
     Data:array [0.._MAX_POM] of TPPomocnyObj;
     Count:Integer;
    end;//Popisky
-   Vyhybky:record
-    Data:array [0.._MAX_VYH] of TPVyhybka;
-    count:Integer;
-   end;//Vyhybky
-   StartJC:record                    // vykresleni 1 symbolu okolo navestidla v usekove funkci
-    Data:array [0..255] of TStartJC;
-    count:Integer;
-   end;
+   Vyhybky:TList<TPVyhybka>;
+   StartJC:TList<TStartJC>;                    // vykresleni 1 symbolu okolo navestidla v usekove funkci
    Prejezdy:record
     Data:array[0.._MAX_PRJ] of TPPrejezd;
     count:Integer;
@@ -682,9 +676,6 @@ type
 
    function FLoad(aFile:string):Byte;
 
-   procedure ShowUseky;
-   procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; visible:boolean; var showed:array of boolean);
-   procedure ShowDKSVetve(usek:TPReliefUsk; visible:boolean; var showed:array of boolean);
    procedure ShowNavestidla;
    procedure ShowPomocneSymboly;
    procedure ShowPopisky;
@@ -702,15 +693,9 @@ type
    procedure ShowRozp;
    procedure ShowVykol;
 
-   procedure PaintSouprava(pos:TPoint; useki:Integer; spri:Integer; bgZaver:boolean = false);
-   procedure ShowUsekSoupravy(useki:Integer);
-   procedure PaintCisloKoleje(pos:TPoint; useki:Integer);
-
    procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
 
    procedure ResetData;
-
-   function GetSprPaintPos(usek:integer;sprlength:integer):TPointArray;
 
    function ORLoad(const ORs:TStrings):Byte;
 
@@ -851,18 +836,20 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     parseHelper;
+     parseHelper, PanelPainterUsek, PanelPainter;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
  inherited Create;
 
  Self.Useky := TList<TPReliefUsk>.Create();
+ Self.Vyhybky := TList<TPVyhybka>.Create();
  Self.Vykol := TList<TPVykol>.Create();
  Self.Rozp  := TList<TPRozp>.Create();
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
  Self.reAuth.old_ors := TList<Integer>.Create();
+ Self.StartJC := TList<TStartJC>.Create();
 
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
@@ -948,9 +935,11 @@ begin
    Self.Useky[i].Soupravy.Free();
    Self.Useky[i].Vetve.Free();
   end;
+ Self.Vyhybky.Free();
  Self.Useky.Free();
  Self.Vykol.Free();
  Self.Rozp.Free();
+ Self.StartJC.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
@@ -981,353 +970,20 @@ begin
  end;
 
  IL.Draw(Self.DrawObject.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka,
-         pos.Y * SymbolSet._Symbol_Vyska, Self.Graphics.GetSymbolIndex(symbol, fg));
+         pos.Y * SymbolSet._Symbol_Vyska, Symbols.GetSymbolIndex(symbol, fg));
 
  IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// vykresleni soupravy na dane pozici
-procedure TRelief.PaintSouprava(pos:TPoint; useki:Integer; spri:Integer; bgZaver:boolean = false);
-var bg: TColor;
-    sipkaLeft, sipkaRight: boolean;
-    souprava:TUsekSouprava;
-begin
- souprava := Self.Useky[useki].PanelProp.soupravy[spri];
- pos := Point(pos.X - (Length(souprava.nazev) div 2), pos.Y);
-
- // urceni barvy
- if (Self.myORs[Self.Useky[useki].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) then
-  begin
-   bg := clYellow;
-   if (Self.Graphics.blik) then Exit();
-  end else if ((bgZaver) and (Self.Useky[useki].PanelProp.KonecJC > TJCType.no)) then
-   bg := _Konec_JC[Integer(Self.Useky[useki].PanelProp.KonecJC)]
-  else
-   bg := souprava.bg;
-
- Self.Graphics.TextOutput(pos, souprava.nazev, souprava.fg, bg, true);
-
- // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
- sipkaLeft := (((souprava.sipkaL) and (Self.myORs[Self.Useky[useki].OblRizeni].Lichy = 1)) or
-              ((souprava.sipkaS) and (Self.myORs[Self.Useky[useki].OblRizeni].Lichy = 0)));
-
- sipkaRight := (((souprava.sipkaS) and (Self.myORs[Self.Useky[useki].OblRizeni].Lichy = 1)) or
-              ((souprava.sipkaL) and (Self.myORs[Self.Useky[useki].OblRizeni].Lichy = 0)));
-
- // vykresleni ramecku kolem cisla soupravy
- if (souprava.ramecek <> clBlack) then
-  begin
-   Self.DrawObject.Surface.Canvas.Pen.Mode    := pmMerge;
-   Self.DrawObject.Surface.Canvas.Pen.Color   := souprava.ramecek;
-   Self.DrawObject.Surface.Canvas.Brush.Color := clBlack;
-   Self.DrawObject.Surface.Canvas.Rectangle(pos.X*SymbolSet._Symbol_Sirka,
-                                            pos.Y*SymbolSet._Symbol_Vyska,
-                                            (pos.X+Length(souprava.nazev))*SymbolSet._Symbol_Sirka,
-                                            (pos.Y+1)*SymbolSet._Symbol_Vyska);
-   Self.DrawObject.Surface.Canvas.Pen.Mode := pmCopy;
-  end;
-
- if (sipkaLeft) then
-   Self.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y-1), _Spr_Sipka_Start+1,
-             souprava.fg, clNone, true);
- if (sipkaRight) then
-   Self.Draw(SymbolSet.IL_Symbols, Point(pos.X+Length(souprava.nazev)-1, pos.Y-1),
-             _Spr_Sipka_Start, souprava.fg, clNone, true);
-
- if ((sipkaLeft) or (sipkaRight)) then
-  begin
-   // vykresleni sipky
-   Self.DrawObject.Surface.Canvas.Pen.Color := souprava.fg;
-   Self.DrawObject.Surface.Canvas.MoveTo(pos.X*SymbolSet._Symbol_Sirka, pos.Y*SymbolSet._Symbol_Vyska-1);
-   Self.DrawObject.Surface.Canvas.LineTo((pos.X+Length(souprava.nazev))*SymbolSet._Symbol_Sirka,
-                                         pos.Y*SymbolSet._Symbol_Vyska-1);
-  end;//if sipkaLeft or sipkaRight
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-// zobrazi soupravy na celem useku
-
-procedure TRelief.ShowUsekSoupravy(useki:Integer);
-var i, step, index:Integer;
-begin
- if ((Self.Useky[useki].PanelProp.soupravy.Count = 0) or (Self.Useky[useki].Soupravy.Count = 0)) then
-   Exit()
- else if (Self.Useky[useki].PanelProp.soupravy.Count = 1) then begin
-   Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count div 2], useki, 0);
- end else begin
-   // vsechny soupravy, ktere se vejdou, krome posledni
-   index := 0;
-   step := Max(Self.Useky[useki].Soupravy.Count div Self.Useky[useki].PanelProp.soupravy.Count, 1);
-   for i := 0 to Min(Self.Useky[useki].Soupravy.Count, Self.Useky[useki].PanelProp.soupravy.Count)-2 do
-    begin
-     Self.PaintSouprava(Self.Useky[useki].Soupravy[index], useki, i);
-     index := index + step;
-    end;
-
-   // posledni souprava na posledni pozici
-   if (Self.Useky[useki].Soupravy.Count > 0) then
-     Self.PaintSouprava(Self.Useky[useki].Soupravy[Self.Useky[useki].Soupravy.Count-1],
-        useki, Self.Useky[useki].PanelProp.Soupravy.Count-1);
- end;
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-
-// vykresleni cisla koleje
-procedure TRelief.PaintCisloKoleje(pos:TPoint; useki:Integer);
-var left:TPoint;
-begin
- left := Point(pos.X - Length(Self.Useky[useki].KpopisekStr) div 2, pos.Y);
-
- if (Self.Useky[useki].PanelProp.KonecJC = TJCType.no) then
-   Self.Graphics.TextOutput(left, Self.Useky[useki].KpopisekStr,
-      Self.Useky[useki].PanelProp.Symbol, Self.Useky[useki].PanelProp.Pozadi)
- else
-   Self.Graphics.TextOutput(left, Self.Useky[useki].KpopisekStr,
-      Self.Useky[useki].PanelProp.Symbol, _Konec_JC[Integer(Self.Useky[useki].PanelProp.KonecJC)]);
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TRelief.ShowUseky();
-var i,j,k:integer;
-    pa:TPointArray;
-    showed:array of boolean;
-    fg, bg:TColor;
-begin
- for i := 0 to Self.Useky.Count-1 do
-  begin
-   // vykresleni symbolu useku
-   // tady se resi vetve
-   if ((Self.Useky[i].Vetve.Count = 0) or (Self.Useky[i].PanelProp.Symbol = clFuchsia)) then
-    begin
-     // pokud nejsou vetve, nebo je usek disabled, vykresim ho cely (bez ohledu na vetve)
-     if (((Self.Useky[i].PanelProp.blikani) or ((Self.Useky[i].PanelProp.soupravy.Count > 0) and
-        (Self.myORs[Self.Useky[i].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
-         and (Self.Graphics.blik)) then
-       fg := clBlack
-     else
-       fg := Self.Useky[i].PanelProp.Symbol;
-
-     for j := 0 to Self.Useky[i].Symbols.Count-1 do
-      begin
-       bg := Self.Useky[i].PanelProp.Pozadi;
-
-       for k := 0 to Self.StartJC.count-1 do
-        if ((Self.StartJC.Data[k].Pos.X = Self.Useky[i].Symbols[j].Position.X) and (Self.StartJC.Data[k].Pos.Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         bg := Self.StartJC.Data[k].Color;
-
-       for k := 0 to Self.Useky[i].JCClick.Count-1 do
-        if ((Self.Useky[i].JCClick[k].X = Self.Useky[i].Symbols[j].Position.X) and (Self.Useky[i].JCClick[k].Y = Self.Useky[i].Symbols[j].Position.Y)) then
-         if (Integer(Self.Useky[i].PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(Self.Useky[i].PanelProp.KonecJC)];
-
-       Self.Draw(SymbolSet.IL_Symbols, Self.Useky[i].Symbols[j].Position, Self.Useky[i].Symbols[j].SymbolID,
-                 fg, bg);
-      end;//for j
-
-    end else begin
-
-     SetLength(showed, Self.Useky[i].Vetve.Count);
-     for j := 0 to Self.Useky[i].Vetve.Count-1 do
-       showed[j] := false;
-
-     // pokud jsou vetve a usek neni disabled, kreslim vetve
-     if (Self.Useky[i].DKStype <> dksNone) then
-       Self.ShowDKSVetve(Self.Useky[i], true, showed)
-     else
-       Self.ShowUsekVetve(Self.Useky[i], 0, true, showed);
-    end;
-
-   // vykresleni cisla koleje
-   pa := Self.GetSprPaintPos(i, Length(Self.Useky[i].KpopisekStr));
-   for j := 0 to pa.count-1 do
-     Self.PaintCisloKoleje(pa.Data[j], i);
-
-   // vykresleni souprav
-   Self.ShowUsekSoupravy(i);
-  end;//for i
-end;//procedure
-
-// Rekurzivne kresli vetve bezneho bloku
-procedure TRelief.ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; visible:boolean; var showed:array of boolean);
-var i,k:Integer;
-    fg, bg:TColor;
-    vetev:TVetev;
-begin
- if (vetevI < 0) then Exit(); 
- if (showed[vetevI]) then Exit();
- showed[vetevI] := true;
- vetev := usek.Vetve[vetevI];
-
- vetev.visible := visible;
- usek.Vetve[vetevI] := vetev;
-
- if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
-    (Self.myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
-    and (Self.Graphics.blik) and (visible)) then
-   fg := clBlack
-  else begin
-   if (visible) then
-     fg := usek.PanelProp.Symbol
-    else
-     fg := usek.PanelProp.nebarVetve;
-  end;
-
- bg := usek.PanelProp.Pozadi;
-
- for i := 0 to Length(vetev.Symbols)-1 do
-  begin
-   if ((vetev.Symbols[i].SymbolID < _Usek_Start) and (vetev.Symbols[i].SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
-
-   bg := usek.PanelProp.Pozadi;
-
-   for k := 0 to Self.StartJC.count-1 do
-    if ((Self.StartJC.Data[k].Pos.X = vetev.Symbols[i].Position.X) and (Self.StartJC.Data[k].Pos.Y = vetev.Symbols[i].Position.Y)) then
-     bg := Self.StartJC.Data[k].Color;
-
-   for k := 0 to usek.JCClick.Count-1 do
-    if ((usek.JCClick[k].X = vetev.Symbols[i].Position.X) and (usek.JCClick[k].Y = vetev.Symbols[i].Position.Y)) then
-     if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
-
-   Self.Draw(SymbolSet.IL_Symbols, vetev.Symbols[i].Position, vetev.Symbols[i].SymbolID, fg, bg);
-  end;//for i
-
-
- if (vetev.node1.vyh > -1) then
-  begin
-   Self.Vyhybky.Data[vetev.node1.vyh].visible := visible;
-
-   // nastaveni barvy neprirazene vyhybky
-   if (Self.Vyhybky.Data[vetev.node1.vyh].Blok = -2) then
-    begin
-     Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Symbol := fg;
-     Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Pozadi := bg;
-    end;
-
-   case (Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Poloha) of
-    TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
-       Self.ShowUsekVetve(usek, vetev.node1.ref_plus, visible, showed);
-       Self.ShowUsekVetve(usek, vetev.node1.ref_minus, visible, showed);
-     end;//case disable, both, none
-
-    TVyhPoloha.plus, TVyhPoloha.minus:begin
-       if ((Integer(Self.Vyhybky.Data[vetev.node1.vyh].PanelProp.Poloha) xor Self.Vyhybky.Data[vetev.node1.vyh].PolohaPlus) = 0) then
-        begin
-         Self.ShowUsekVetve(usek, vetev.node1.ref_plus, visible, showed);
-         Self.ShowUsekVetve(usek, vetev.node1.ref_minus, false, showed);
-        end else begin
-         Self.ShowUsekVetve(usek, vetev.node1.ref_plus, false, showed);
-         Self.ShowUsekVetve(usek, vetev.node1.ref_minus, visible, showed);
-        end;
-     end;//case disable, both, none
-   end;//case
-  end;
-
- if (vetev.node2.vyh > -1) then
-  begin
-   Self.Vyhybky.Data[vetev.node2.vyh].visible := visible;
-
-   // nastaveni barvy neprirazene vyhybky
-   if (Self.Vyhybky.Data[vetev.node2.vyh].Blok = -2) then
-    begin
-     Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Symbol := fg;
-     Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Pozadi := bg;
-    end;
-
-   case (Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Poloha) of
-    TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
-       Self.ShowUsekVetve(usek, vetev.node2.ref_plus, visible, showed);
-       Self.ShowUsekVetve(usek, vetev.node2.ref_minus, visible, showed);
-     end;//case disable, both, none
-
-    TVyhPoloha.plus, TVyhPoloha.minus:begin
-       if ((Integer(Self.Vyhybky.Data[vetev.node2.vyh].PanelProp.Poloha) xor Self.Vyhybky.Data[vetev.node2.vyh].PolohaPlus) = 0) then
-        begin
-         Self.ShowUsekVetve(usek, vetev.node2.ref_plus, visible, showed);
-         Self.ShowUsekVetve(usek, vetev.node2.ref_minus, false, showed);
-        end else begin
-         Self.ShowUsekVetve(usek, vetev.node2.ref_plus, false, showed);
-         Self.ShowUsekVetve(usek, vetev.node2.ref_minus, visible, showed);
-        end;
-     end;//case disable, both, none
-   end;//case
-  end;
-end;//procedure
-
-// Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
-procedure TRelief.ShowDKSVetve(usek:TPReliefUsk; visible:boolean; var showed:array of boolean);
-var polLeft, polRight: TVyhPoloha;
-    leftHidden, rightHidden: boolean;
-    leftCross, rightCross: boolean;
-    fg: TColor;
-begin
- if (usek.Vetve.Count < 3) then Exit();
- if (usek.Vetve[0].node1.vyh < 0) then Exit();
- if (usek.Vetve[1].node1.vyh < 0) then Exit();
-
- // 1) zjistime si polohy vyhybek
- polLeft := Self.Vyhybky.Data[usek.Vetve[0].node1.vyh].PanelProp.Poloha;
- polRight := Self.Vyhybky.Data[usek.Vetve[1].node1.vyh].PanelProp.Poloha;
-
- // 2) rozhodneme o tom co barvit
- leftHidden := ((polLeft = TVyhPoloha.plus) and (polRight = TVyhPoloha.minus));
- rightHidden := ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.plus));
-
- leftCross := (polLeft <> TVyhPoloha.plus) and (not leftHidden);
- rightCross := (polRight <> TVyhPoloha.plus) and (not rightHidden);
-
- Self.ShowUsekVetve(usek, 0, leftCross, showed);
- Self.ShowUsekVetve(usek, 1, rightCross, showed);
- Self.ShowUsekVetve(usek, 2,
-    not (leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.minus))), showed);
- if (usek.Vetve.Count > 3) then Self.ShowUsekVetve(usek, 3, not leftHidden, showed);
- if (usek.Vetve.Count > 4) then Self.ShowUsekVetve(usek, 4, not rightHidden, showed);
-
- Self.Vyhybky.Data[usek.Vetve[0].node1.vyh].visible := not leftHidden;
- Self.Vyhybky.Data[usek.Vetve[1].node1.vyh].visible := not rightHidden;
-
- // 3) vykreslime stredovy kriz
- if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
-    (Self.myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
-    and (Self.Graphics.blik) and (visible)) then
-   fg := clBlack
-  else begin
-   if (visible) then
-     fg := usek.PanelProp.Symbol
-    else
-     fg := usek.PanelProp.nebarVetve;
-  end;
-
- if (usek.DKStype = dksTop) then
-  begin
-   if ((leftCross) and (rightCross)) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, fg, usek.PanelProp.Pozadi)
-   else if (leftCross) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 4, fg, usek.PanelProp.Pozadi)
-   else if (rightCross) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 2, fg, usek.PanelProp.Pozadi)
-   else
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Top, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi)
-  end else begin
-   if ((leftCross) and (rightCross)) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, fg, usek.PanelProp.Pozadi)
-   else if (leftCross) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 3, fg, usek.PanelProp.Pozadi)
-   else if (rightCross) then
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _Usek_Start + 5, fg, usek.PanelProp.Pozadi)
-   else
-     Self.Draw(SymbolSet.IL_Symbols, usek.root, _DKS_Bot, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi)
-  end;
-
-end;
 
 procedure TRelief.ShowNavestidla();
 var i:Integer;
     fg:TColor;
+    sjc:TStartJC;
 begin
- Self.StartJC.count := 0;
+ Self.StartJC.Clear();
 
  for i := 0 to Self.Navestidla.Count-1 do
   begin
@@ -1345,16 +1001,18 @@ begin
                fg, Self.Navestidla.Data[i].PanelProp.Pozadi);
     end;
 
-   if ((Self.Navestidla.Data[i].PanelProp.Pozadi = clGreen) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clWhite) or (Self.Navestidla.Data[i].PanelProp.Pozadi = clTeal)) then
+   if ((Self.Navestidla.Data[i].PanelProp.Pozadi = clGreen) or
+       (Self.Navestidla.Data[i].PanelProp.Pozadi = clWhite) or
+       (Self.Navestidla.Data[i].PanelProp.Pozadi = clTeal)) then
     begin
      //pridani StartJC
-     Self.StartJC.count := Self.StartJC.count + 1;
-     Self.StartJC.Data[Self.StartJC.count-1].Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
-     Self.StartJC.Data[Self.StartJC.count-1].Pos   := Point(Self.Navestidla.Data[i].Position.X-1,Self.Navestidla.Data[i].Position.Y);
+     sjc.Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
+     sjc.Pos   := Point(Self.Navestidla.Data[i].Position.X-1,Self.Navestidla.Data[i].Position.Y);
+     Self.StartJC.Add(sjc);
 
-     Self.StartJC.count := Self.StartJC.count + 1;
-     Self.StartJC.Data[Self.StartJC.count-1].Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
-     Self.StartJC.Data[Self.StartJC.count-1].Pos   := Point(Self.Navestidla.Data[i].Position.X+1,Self.Navestidla.Data[i].Position.Y);
+     sjc.Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
+     sjc.Pos   := Point(Self.Navestidla.Data[i].Position.X+1,Self.Navestidla.Data[i].Position.Y);
+     Self.StartJC.Add(sjc);
     end;
   end;//for i
 end;//procedure
@@ -1397,59 +1055,60 @@ begin
 
     end;//if
 
-   Self.Graphics.TextOutput(Self.Popisky.Data[i].Position, Self.Popisky.Data[i].Text, _Symbol_Colors[Self.Popisky.Data[i].Color], clBlack);
+   PanelPainter.TextOutput(Self.Popisky.Data[i].Position, Self.Popisky.Data[i].Text,
+      _Symbol_Colors[Self.Popisky.Data[i].Color], clBlack, Self.DrawObject);
   end;//for i
 end;//procedure
 
 procedure TRelief.ShowVyhybky();
-var i:Integer;
-    fg:Integer;
+var fg:Integer;
     bkcol:TColor;
+    vyh:TPVyhybka;
 begin
  //vyhybky
- for i := 0 to Self.Vyhybky.Count-1 do
+ for vyh in Self.Vyhybky do
   begin
-   if ((Self.Vyhybky.Data[i].PanelProp.blikani) and (Self.Graphics.blik) and (Self.Vyhybky.Data[i].visible)) then
+   if ((vyh.PanelProp.blikani) and (Self.Graphics.blik) and (vyh.visible)) then
      fg := clBlack
    else begin
-     if ((Self.Vyhybky.Data[i].visible) or (Self.Vyhybky.Data[i].PanelProp.Symbol = clAqua)) then
-      fg := Self.Vyhybky.Data[i].PanelProp.Symbol
+     if ((vyh.visible) or (vyh.PanelProp.Symbol = clAqua)) then
+      fg := vyh.PanelProp.Symbol
      else
-      fg := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.nebarVetve;
+      fg := Self.Useky[vyh.obj].PanelProp.nebarVetve;
    end;
 
-   if (Self.Vyhybky.Data[i].PanelProp.Pozadi = clBlack) then
-     bkcol := Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi
+   if (vyh.PanelProp.Pozadi = clBlack) then
+     bkcol := Self.Useky[vyh.obj].PanelProp.Pozadi
    else
-     bkcol := Self.Vyhybky.Data[i].PanelProp.Pozadi;
+     bkcol := vyh.PanelProp.Pozadi;
 
-   if (Self.Vyhybky.Data[i].Blok = -2) then
+   if (vyh.Blok = -2) then
     begin
      // blok zamerne neprirazen
-     Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-               Self.Vyhybky.Data[i].SymbolID, fg, bkcol);
+     Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
+               vyh.SymbolID, fg, bkcol);
     end else begin
-     case (Self.Vyhybky.Data[i].PanelProp.Poloha) of
+     case (vyh.PanelProp.Poloha) of
       TVyhPoloha.disabled:begin
-       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-                 Self.Vyhybky.Data[i].SymbolID, Self.Useky[Self.Vyhybky.Data[i].obj].PanelProp.Pozadi, clFuchsia);
+       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
+                 vyh.SymbolID, Self.Useky[vyh.obj].PanelProp.Pozadi, clFuchsia);
       end;
       TVyhPoloha.none:begin
-       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+       Self.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
                  bkcol, fg);
       end;
       TVyhPoloha.plus:begin
-       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-                 (Self.Vyhybky.Data[i].SymbolID)+4+(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
+                 (vyh.SymbolID)+4+(4*(vyh.PolohaPlus xor 0)),
                  fg, bkcol);
       end;
       TVyhPoloha.minus:begin
-       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position,
-                 (Self.Vyhybky.Data[i].SymbolID)+8-(4*(Self.Vyhybky.Data[i].PolohaPlus xor 0)),
+       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
+                 (vyh.SymbolID)+8-(4*(vyh.PolohaPlus xor 0)),
                  fg, bkcol);
       end;
       TVyhPoloha.both:begin
-       Self.Draw(SymbolSet.IL_Symbols, Self.Vyhybky.Data[i].Position, Self.Vyhybky.Data[i].SymbolID,
+       Self.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
                  bkcol, clBlue);
       end;
      end;//case
@@ -1537,10 +1196,14 @@ begin
   end;
 
  case (PanelTCPClient.status) of
-  TPanelConnectionStatus.closed    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Odpojeno od serveru', clFuchsia, clBlack);
-  TPanelConnectionStatus.opening   : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Otevírám spojení...', clFuchsia, clBlack);
-  TPanelConnectionStatus.handshake : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Probíhá handshake...', clFuchsia, clBlack);
-  TPanelConnectionStatus.opened    : Self.Graphics.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', $A0A0A0, clBlack);
+  TPanelConnectionStatus.closed    :
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.DrawObject);
+  TPanelConnectionStatus.opening   :
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Otevírám spojení...', clFuchsia, clBlack, Self.DrawObject);
+  TPanelConnectionStatus.handshake :
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Probíhá handshake...', clFuchsia, clBlack, Self.DrawObject);
+  TPanelConnectionStatus.opened    :
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
  end;
 end;//procedure
 
@@ -1685,9 +1348,9 @@ begin
      if (UvazkaSpr.show_index >= UvazkaSpr.strings.Count) then // tato podminka musi byt vne predchozi podminky
        UvazkaSpr.show_index := 0;
 
-     Self.Graphics.TextOutput(Point(Self.UvazkySpr.Data[i].Pos.X, top),
+     PanelPainter.TextOutput(Point(Self.UvazkySpr.Data[i].Pos.X, top),
           Self.UvazkySpr.Data[i].PanelProp.spr[j].strings[UvazkaSpr.show_index],
-          Self.UvazkySpr.Data[i].PanelProp.spr[j].color, clBlack, UvazkaSpr.show_index = 0);
+          Self.UvazkySpr.Data[i].PanelProp.spr[j].color, clBlack, Self.DrawObject, UvazkaSpr.show_index = 0);
      top := top + incr;
 
      Self.UvazkySpr.Data[i].PanelProp.spr[j] := UvazkaSpr;
@@ -1705,7 +1368,8 @@ begin
   begin
    for k := 0 to Self.myORs[j].MereniCasu.Count-1 do
     begin
-     Self.Graphics.TextOutput(Point(Self.myORs[j].Poss.Time.X, Self.myORs[j].Poss.Time.Y+k), 'MER.CASU', clRed, clWhite);
+     PanelPainter.TextOutput(Point(Self.myORs[j].Poss.Time.X, Self.myORs[j].Poss.Time.Y+k),
+       'MER.CASU', clRed, clWhite, Self.DrawObject);
 
      DateTimeToString(Time1, 'ss', Now-Self.myORs[j].MereniCasu[k].Start);
      DateTimeToString(Time2, 'ss', Self.myORs[j].MereniCasu[k].Length);
@@ -1736,7 +1400,8 @@ end;//procedure
 procedure TRelief.ShowMsg();
 begin
  if (Self.msg.show) then
-   Self.Graphics.TextOutput(Point(0, Self.Graphics.PanelHeight-1), Self.msg.msg, clRed, clWhite);
+   PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1), Self.msg.msg,
+     clRed, clWhite, Self.DrawObject);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1756,7 +1421,7 @@ begin
    Self.ShowNavestidla();
    Self.ShowPrj();
    Self.ShowPomocneSymboly();
-   Self.ShowUseky();
+   PanelPainterUsek.ShowUseky(Self.Useky, Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
    Self.ShowPopisky();
    Self.ShowVyhybky();
    Self.ShowZamky();
@@ -1766,16 +1431,16 @@ begin
    Self.ShowOpravneni();
    Self.ShowZasobniky();
    Self.ShowMereniCasu();
-   RucList.Show();
+   RucList.Show(Self.DrawObject);
    Self.ShowMsg();
    Self.ShowInfoTimers();
-   Errors.Show();
+   Errors.Show(Self.DrawObject);
 
-   if (Self.UPO.showing) then Self.UPO.Show();
+   if (Self.UPO.showing) then Self.UPO.Show(Self.DrawObject);
 
    if (Self.Menu.showing) then
     begin
-     Self.Menu.PaintMenu(Self.DrawObject.Surface.Canvas, Self.CursorDraw.Pos)
+     Self.Menu.PaintMenu(Self.DrawObject, Self.CursorDraw.Pos)
     end else begin
      if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then Self.PaintKurzor();
     end;
@@ -1901,7 +1566,7 @@ begin
      if (not Self.DrawObject.CanDraw) then Exit;
 
      if (Self.Menu.showing) then
-       Self.Menu.PaintMenu(Self.DrawObject.Surface.Canvas, Self.CursorDraw.Pos)
+       Self.Menu.PaintMenu(Self.DrawObject, Self.CursorDraw.Pos)
      else begin
        Self.PaintKurzorBg(old);
        Self.PaintKurzor();
@@ -1948,7 +1613,7 @@ begin
  Result := -1;
 
  for i := 0 to Self.Vyhybky.Count-1 do
-   if ((Pos.X = Self.Vyhybky.Data[i].Position.X) and (Pos.Y = Self.Vyhybky.Data[i].Position.Y)) then
+   if ((Pos.X = vyhybky[i].Position.X) and (Pos.Y = vyhybky[i].Position.Y)) then
      Exit(i);
 end;//function
 
@@ -2130,8 +1795,8 @@ begin
  index := Self.GetVyh(Position);
  if (index <> -1) then
   begin
-   if (Self.Vyhybky.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Vyhybky.Data[index].OblRizeni].id, Button, Self.Vyhybky.Data[index].Blok);
+   if (vyhybky[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[vyhybky[index].OblRizeni].id, Button, vyhybky[index].Blok);
    goto EscCheck;
   end;
 
@@ -2193,6 +1858,7 @@ var i,j,k:Integer;
     Usek:TPReliefUsk;
     vykol:TPVykol;
     rozp:TPRozp;
+    vyh:TPVyhybka;
 begin
  Self.ResetData();
 
@@ -2243,7 +1909,6 @@ begin
  Self.Navestidla.Count  := inifile.ReadInteger('P', 'N',   0);
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
- Self.Vyhybky.count     := inifile.ReadInteger('P', 'V',   0);
  Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
  Self.Uvazky.count      := inifile.ReadInteger('P', 'Uv',  0);
  Self.UvazkySpr.count   := inifile.ReadInteger('P', 'UvS', 0);
@@ -2403,26 +2068,27 @@ begin
   end;//for i
 
  //vyhybky
- for i := 0 to Self.Vyhybky.count-1 do
+ for i := 0 to inifile.ReadInteger('P', 'V', 0)-1 do
   begin
-   Self.Vyhybky.Data[i].Blok        := inifile.ReadInteger('V'+IntToStr(i),'B',-1);
-   Self.Vyhybky.Data[i].SymbolID    := inifile.ReadInteger('V'+IntToStr(i),'S',0);
-   Self.Vyhybky.Data[i].PolohaPlus  := inifile.ReadInteger('V'+IntToStr(i),'P',0);
-   Self.Vyhybky.Data[i].Position.X  := inifile.ReadInteger('V'+IntToStr(i),'X',0);
-   Self.Vyhybky.Data[i].Position.Y  := inifile.ReadInteger('V'+IntToStr(i),'Y',0);
-   Self.Vyhybky.Data[i].obj         := inifile.ReadInteger('V'+IntToStr(i),'O',-1);
+   vyh.Blok        := inifile.ReadInteger('V'+IntToStr(i),'B',-1);
+   vyh.SymbolID    := inifile.ReadInteger('V'+IntToStr(i),'S',0);
+   vyh.PolohaPlus  := inifile.ReadInteger('V'+IntToStr(i),'P',0);
+   vyh.Position.X  := inifile.ReadInteger('V'+IntToStr(i),'X',0);
+   vyh.Position.Y  := inifile.ReadInteger('V'+IntToStr(i),'Y',0);
+   vyh.obj         := inifile.ReadInteger('V'+IntToStr(i),'O',-1);
 
    //OR
-   Self.Vyhybky.Data[i].OblRizeni := inifile.ReadInteger('V'+IntToStr(i),'OR',-1);
+   vyh.OblRizeni := inifile.ReadInteger('V'+IntToStr(i),'OR',-1);
 
    //default settings:
-   Self.Vyhybky.Data[i].visible   := true;
-   if (Self.Vyhybky.Data[i].Blok = -2) then
-     Self.Vyhybky.Data[i].PanelProp := _UA_Vyh_Prop
+   vyh.visible   := true;
+   if (vyh.Blok = -2) then
+     vyh.PanelProp := _UA_Vyh_Prop
    else
-     Self.Vyhybky.Data[i].PanelProp := _Def_Vyh_Prop;
+     vyh.PanelProp := _Def_Vyh_Prop;
 
-   Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.Data[i].Blok, i);
+   Self.Vyhybky.Add(vyh);
+   Self.AddToTechBlk(_BLK_VYH, vyh.Blok, Self.Vyhybky.Count-1);
   end;
 
  //prejezdy
@@ -2566,34 +2232,6 @@ begin
  Result := 0;
 end;//procedure LoadFile
 
-//vrati pozice, kde se ma zacit vypisovat text soupravy
-function TRelief.GetSprPaintPos(usek:integer;sprlength:integer):TPointArray;
-var i:Integer;
-    length:integer;
-begin
- if (usek >= Self.Useky.Count) then Exit;
-
- Result.count := Self.Useky[usek].KPopisek.Count;
-
- for i := 0 to Self.Useky[usek].KPopisek.Count-1 do
-  begin
-   length := 1;
-   Result.Data[i] := Self.Useky[usek].KPopisek[i]; //y zustava konstantni - text jde jen vertikalne, X jen vychozi hodnota
-
-   while (true) do //zde se opakuje pridani policka doprava, doleva, doprava, doleva,... tim je definovano, ze se text rozsiruje primarne doprava
-    begin
-     //doprava
-     length := length + 1;
-     if (length >= sprlength) then Exit;
-
-     //doleva
-     Result.Data[i].X := Result.Data[i].X - 1;
-     length := length + 1;
-     if (length >= sprlength) then Exit;
-    end;//while
-  end;//for i
-end;//function
-
 function TRelief.GetDK(Pos:TPoint):Integer;
 var i:Integer;
 begin
@@ -2627,10 +2265,10 @@ begin
    Self.Useky[i].KPopisek.Count := 0;
   end;//for i
 
- Self.Useky.Count      := 0;
+ Self.Useky.Clear();
  Self.Popisky.Count    := 0;
  Self.Navestidla.Count := 0;
- Self.Vyhybky.count    := 0;
+ Self.Vyhybky.Clear();
 
  Self.Tech_blok.Clear();
 
@@ -2725,31 +2363,31 @@ end;//procedure
 
 //ziskani vyhybke, ktere jsou navazany na usek v parametru
 function TRelief.GetUsekVyhybky(usekid:integer):TGetVyhybky;
-var i:Integer;
+var vyh:TPVyhybka;
 begin
  Result.Count := 0;
 
- for i := 0 to Self.Vyhybky.count-1 do
+ for vyh in Self.Vyhybky do
   begin
-   if (Self.Useky[Self.Vyhybky.Data[i].obj].Blok = usekid) then
+   if (Self.Useky[vyh.obj].Blok = usekid) then
     begin
-     Result.Data[Result.Count] := Self.Vyhybky.Data[i].Blok;
+     Result.Data[Result.Count] := vyh.Blok;
      Result.Count := Result.Count + 1;
     end;
   end;
 end;//function
 
 function TRelief.GetUsekID(BlokTechnolgie:integer):TArSmallI;
-var i:Integer;
+var vyh:TPVyhybka;
 begin
  SetLength(Result,0);
 
- for i := 0 to Self.Vyhybky.Count-1 do
+ for vyh in Self.Vyhybky do
   begin
-   if (Self.Vyhybky.Data[i].Blok = BlokTechnolgie) then
+   if (vyh.Blok = BlokTechnolgie) then
     begin
      SetLength(Result,Length(Result)+1);
-     Result[Length(Result)-1] := Self.Useky[Self.Vyhybky.Data[i].obj].Blok;
+     Result[Length(Result)-1] := Self.Useky[vyh.obj].Blok;
     end;
   end;//for i
 end;//function
@@ -3022,6 +2660,7 @@ end;//procedure
 procedure TRelief.ORVyhChange(Sender:string; BlokID:integer; VyhPanelProp:TVyhPanelProp);
 var i:Integer;
     vykol:TPVykol;
+    vyh:TPVyhybka;
     symbols:TList<TTechBlokToSymbol>;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
@@ -3032,8 +2671,12 @@ begin
   begin
    case (symbols[i].blk_type) of
       _BLK_VYH: begin
-        if (Sender = Self.myORs[Self.Vyhybky.Data[symbols[i].symbol_index].OblRizeni].id) then
-            Self.Vyhybky.Data[symbols[i].symbol_index].PanelProp := VyhPanelProp;
+        if (Sender = Self.myORs[vyhybky[symbols[i].symbol_index].OblRizeni].id) then
+         begin
+          vyh := Self.Vyhybky[symbols[i].symbol_index];
+          vyh.PanelProp := VyhPanelProp;
+          Self.Vyhybky[symbols[i].symbol_index] := vyh;
+         end;
       end;
 
       _BLK_VYKOL: begin
@@ -3608,6 +3251,7 @@ var i, j:Integer;
     usk:TPreliefUsk;
     vykol:TPVykol;
     rozp:TPRozp;
+    vyh:TPVyhybka;
 begin
  if (orindex = -1) then
   begin
@@ -3629,9 +3273,12 @@ begin
    end;
 
  for i := 0 to Self.Vyhybky.Count-1 do
-  if (((orindex < 0) or (Self.Vyhybky.Data[i].OblRizeni = orindex)) and
-      (Self.Vyhybky.Data[i].Blok > -2)) then
-    Self.Vyhybky.Data[i].PanelProp := _Def_Vyh_Prop;
+  if (((orindex < 0) or (vyhybky[i].OblRizeni = orindex)) and (vyhybky[i].Blok > -2)) then
+   begin
+    vyh := Self.Vyhybky[i];
+    vyh.PanelProp := _Def_Vyh_Prop;
+    Self.Vyhybky[i] := vyh;
+   end;
 
  for i := 0 to Self.Navestidla.Count-1 do
   if (((orindex < 0) or (Self.Navestidla.Data[i].OblRizeni = orindex)) and
@@ -3726,7 +3373,7 @@ procedure TRelief.ShowZasobniky();
 var i:Integer;
 begin
  for i := 0 to Self.myORs.Count-1 do
-   Self.myORs[i].stack.Show();
+   Self.myORs[i].stack.Show(Self.DrawObject);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3764,7 +3411,8 @@ begin
  for i := 0 to Min(Self.infoTimers.Count, 2)-1 do
   begin
    str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].konec-Now) + ' ';
-   Self.Graphics.TextOutput(Point(Self.PanelWidth-_INFOTIMER_WIDTH, Self.PanelHeight-i-1), str, clRed, clWhite);
+   PanelPainter.TextOutput(Point(Self.PanelWidth-_INFOTIMER_WIDTH, Self.PanelHeight-i-1),
+     str, clRed, clWhite, Self.DrawObject);
   end;//for i
 end;//procedure
 

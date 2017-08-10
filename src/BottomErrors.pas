@@ -2,7 +2,7 @@ unit BottomErrors;
 
 interface
 
-uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils;
+uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws;
 
 const
   _MAX_ERR = 128;
@@ -31,7 +31,7 @@ type
        constructor Create(Graphics:TPanelGraphics);
        destructor Destroy(); override;
 
-       procedure Show();
+       procedure Show(obj:TDXDraw);
 
        procedure writeerror(error:string;system:string;Stanice:string);
        procedure removeerror();
@@ -44,7 +44,7 @@ var
 
 implementation
 
-uses fMain, Sounds;
+uses fMain, Sounds, PanelPainter;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -105,7 +105,7 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.Show();
+procedure TErrors.Show(obj:TDXDraw);
 var i, top, left, len:Integer;
     msg:string;
 begin
@@ -122,10 +122,10 @@ begin
  len := (_TECH_WIDTH - Length(msg)) div 2;
  msg := Format('%*s%s', [len, ' ', msg + Format('%-*s', [len, ' '])]);
  if (Length(msg) < _TECH_WIDTH) then msg := msg + ' ';
- Self.Graphics.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite);
+ PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
 
  msg := Format('%2d', [Self.buf_len]);
- Self.Graphics.TextOutput(Point(_TECH_LEFT+_TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver);
+ PanelPainter.TextOutput(Point(_TECH_LEFT+_TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
 
  len := Min(_ERR_SHOW_CNT, Self.buf_len);
 
@@ -137,7 +137,7 @@ begin
    msg := ' '+Self.buf[i].stanice + ' : ' + Self.buf[i].err;
    msg := Format('%-'+IntToStr(_ERR_WIDTH)+'s', [msg]);
 
-   Self.Graphics.TextOutput(Point(left, top), msg, clRed, clWhite);
+   PanelPainter.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
 
    top := top - 1;
   end;

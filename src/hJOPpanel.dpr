@@ -49,7 +49,8 @@ uses
   LokTokens in 'LokTokens.pas',
   fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot},
   InterProcessCom in 'InterProcessCom.pas',
-  parseHelper in 'parseHelper.pas';
+  parseHelper in 'parseHelper.pas',
+  PanelPainterUsek in 'PanelPainterUsek.pas';
 
 {$R *.res}
 
