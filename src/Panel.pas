@@ -7,7 +7,7 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
-     BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka;
+     BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp;
 
 const
   //limity poli
@@ -78,21 +78,6 @@ type
 
  ///////////////////////////////////////////////////////////////////////////////
 
- // data pro vykreslovani rozpojovace
- TRozpPanelProp = record
-  Symbol,Pozadi:TColor;
-  blik:boolean;
- end;
-
- TPRozp=record
-  Blok:Integer;
-  Pos:TPoint;
-  OblRizeni:Integer;
-  PanelProp:TRozpPanelProp;
- end;
-
- ///////////////////////////////////////////////////////////////////////////////
-
  // data kurzoru
  TCursorDraw=record
    KurzorRamecek,KurzorObsah:TColor;
@@ -159,19 +144,6 @@ type
 
     _DblClick_Timeout_Ms = 250;
 
-    //defaultni chovani bloku:
-    _Def_Rozp_Prop:TRozpPanelProp = (
-        Symbol: clFuchsia;
-        Pozadi: clBlack;
-        blik: false;
-        );
-
-    _UA_Rozp_Prop:TRozpPanelProp = (
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        blik: false;
-        );
-
     //zde je definovano, jaky specialni symbol se ma vykreslovat jakou barvou (mimo separatoru)
     _SpecS_DrawColors:array [0..60] of TColor =
       ($A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,$A0A0A0,
@@ -224,8 +196,6 @@ type
     Count:Integer;
    end;//Popisky
 
-   Rozp  : TList<TPRozp>;
-
    Useky : TPUseky;
    Vyhybky : TPVyhybky;
    Navestidla : TPNavestidla;
@@ -234,6 +204,7 @@ type
    Zamky : TPZamky;
    Prejezdy : TPPrejezdy;
    Vykol : TPVykolejky;
+   Rozp : TPRozpojovace;
 
   SystemOK:record
    Poloha:boolean;
@@ -269,7 +240,6 @@ type
    procedure ShowMsg;
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
-   procedure ShowRozp;
 
    procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
 
@@ -416,7 +386,7 @@ begin
  Self.Vyhybky := TPVyhybky.Create();
  Self.Navestidla := TPNavestidla.Create();
  Self.Vykol := TPVykolejky.Create();
- Self.Rozp  := TList<TPRozp>.Create();
+ Self.Rozp  := TPRozpojovace.Create();
  Self.Prejezdy := TPPrejezdy.Create();
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
@@ -750,7 +720,7 @@ begin
    Self.ShowPopisky();
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
-   Self.ShowRozp();
+   Self.Rozp.Show(Self.DrawObject);
    Self.Vykol.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.ShowDK();
    Self.ShowOpravneni();
@@ -1088,8 +1058,6 @@ var i,j:Integer;
     Obj:string;
     return:Integer;
     ver:string;
-    count:Integer;
-    rozp:TPRozp;
 begin
  Self.ResetData();
 
@@ -1174,27 +1142,7 @@ begin
  Self.Uvazky.Load(inifile);
  Self.UvazkySpr.Load(inifile);
  Self.Zamky.Load(inifile);
-
- // rozpojovace
- Self.Rozp.Clear();
- count := inifile.ReadInteger('P', 'R', 0);
- for i := 0 to count-1 do
-  begin
-   rozp.Blok                      := inifile.ReadInteger('R'+IntToStr(i), 'B', -1);
-   rozp.OblRizeni                 := inifile.ReadInteger('R'+IntToStr(i), 'OR', -1);
-   rozp.Pos.X                     := inifile.ReadInteger('R'+IntToStr(i), 'X', 0);
-   rozp.Pos.Y                     := inifile.ReadInteger('R'+IntToStr(i), 'Y', 0);
-
-   //default settings:
-   if (rozp.Blok = -2) then
-     rozp.PanelProp := Self._UA_Rozp_Prop
-   else
-     rozp.PanelProp := Self._Def_Rozp_Prop;
-
-   Self.Rozp.Add(rozp);
-
-   Self.AddToTechBlk(_BLK_ROZP, rozp.Blok, i);
-  end;//for i
+ Self.Rozp.Load(inifile);
 
  for i := 0 to Self.Useky.data.Count-1 do
    Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
@@ -1219,6 +1167,9 @@ begin
 
  for i := 0 to Self.Vykol.data.Count-1 do
    Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol.data[i].Blok, i);
+
+ for i := 0 to Self.Rozp.data.Count-1 do
+   Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -1772,7 +1723,7 @@ begin
     begin
      rozp := Self.Rozp[symbols[i].symbol_index];
      rozp.PanelProp := RozpPanelProp;
-     Self.Rozp[symbols[i].symbol_index] := rozp;
+     Self.Rozp.data[symbols[i].symbol_index] := rozp;
     end;
 end;//procedure
 
@@ -2242,7 +2193,6 @@ end;
 
 procedure TRelief.OrDisconnect(orindex:Integer = -1);
 var i:Integer;
-    rozp:TPRozp;
 begin
  if (orindex = -1) then
   begin
@@ -2260,15 +2210,7 @@ begin
  Self.UvazkySpr.Reset(orindex);
  Self.Zamky.Reset(orindex);
  Self.Vykol.Reset(orindex);
-
- for i := 0 to Self.Rozp.Count-1 do
-  if (((orindex < 0) or (Self.Rozp[i].OblRizeni = orindex)) and
-      (Self.Rozp[i].Blok > -2)) then
-   begin
-    rozp := Self.Rozp[i];
-    rozp.PanelProp := _Def_Rozp_Prop;
-    Self.Rozp[i] := rozp;
-   end;
+ Self.Rozp.Reset(orindex);
 
  for i := 0 to Self.myORs.Count-1 do
   begin
@@ -2355,16 +2297,6 @@ begin
    PanelPainter.TextOutput(Point(Self.PanelWidth-_INFOTIMER_WIDTH, Self.PanelHeight-i-1),
      str, clRed, clWhite, Self.DrawObject);
   end;//for i
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-// vykreslit rozpojovace
-procedure TRelief.ShowRozp;
-var i:Integer;
-begin
- for i := 0 to Self.Rozp.Count-1 do
-   Self.Draw(SymbolSet.IL_Symbols, Self.Rozp[i].Pos, _Rozp_Start+1, Self.Rozp[i].PanelProp.Symbol, clBlack, true);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

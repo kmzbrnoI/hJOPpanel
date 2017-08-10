@@ -145,6 +145,7 @@
 			<DCCReference Include="BlokyUsek.pas"/>
 			<DCCReference Include="BlokyVyhybka.pas"/>
 			<DCCReference Include="BlokVykolejka.pas"/>
+			<DCCReference Include="BlokRozp.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
