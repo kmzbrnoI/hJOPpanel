@@ -138,6 +138,7 @@
 			<DCCReference Include="PanelPainterVyhybka.pas"/>
 			<DCCReference Include="PanelPainterNavestidlo.pas"/>
 			<DCCReference Include="BlokUvazka.pas"/>
+			<DCCReference Include="BlokUvazkaSpr.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

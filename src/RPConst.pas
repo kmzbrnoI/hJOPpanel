@@ -31,8 +31,6 @@ const
   _MOUSE_PANEL = 0;
   _MOUSE_OS    = 1;
 
-  _UVAZKY_BLIK_PERIOD = 1500;      // perioda blikani soupravy u uvazky v ms
-
   // zakazane znaky pro pouziti v komentarich; delka tohoto pole musi byt alespon 1
   //   zakazane jsou proto, ze se pouzivaji jako oddelovace v komunikaci
   _forbidden_chars : array [0..2] of char = (#13, '{', '}');

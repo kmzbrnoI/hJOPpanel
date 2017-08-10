@@ -5,7 +5,8 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, BlokUvazka;
+     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX,
+     BlokUvazka, BlokUvazkaSpr;
 
 const
   //limity poli
@@ -17,8 +18,6 @@ const
   _MAX_POPISKY  = 64;
   _MAX_PRJ      = 16;
   _MAX_PRJ_LEN  = 10;
-  _MAX_UVAZKY   = 256;
-  _MAX_UVAZKY_SPR = 256;
   _MAX_ZAMKY    = 256;
 
   _INFOTIMER_WIDTH      = 30;
@@ -311,32 +310,6 @@ type
 
  ///////////////////////////////////////////////////////////////////////////////
 
- TUvazkaSpr = record
-  strings:TStrings;
-  show_index:Integer;
-  time:string;
-  color:TColor;
- end;
-
- // data pro vykreslovani uvazky spr
- TUvazkaSprPanelProp = record
-  spr:TList<TUvazkaSpr>;
- end;
-
- TUvazkaSprVertDir = (top = 0, bottom = 1);
-
- TPUvazkaSpr=record
-  Blok:Integer;
-  Pos:TPoint;
-  vertical_dir:TUvazkaSprVertDir;
-  spr_cnt:Integer;
-  OblRizeni:Integer;
-  PanelProp:TUvazkaSprPanelProp;
- end;
-
- ///////////////////////////////////////////////////////////////////////////////
-
- // data pro vykreslovani uvazky spr
  TZamekPanelProp = record
   Symbol,Pozadi:TColor;
   blik:boolean;
@@ -509,10 +482,6 @@ type
         stav: otevreno);
 
 
-    _Def_UvazkaSpr_Prop:TUvazkaSprPanelProp = (
-        );
-
-
     _Def_Zamek_Prop:TZamekPanelProp = (
         Symbol: clBlack;
         Pozadi: clFuchsia;
@@ -578,8 +547,6 @@ type
    root_menu:boolean;
    infoTimers:TList<TInfoTimer>;
 
-   uvazky_change_time:TDateTime;    // cas, kdy ma prebliknout text vsech uvazek
-
    Tech_blok:TDictionary<Integer, TList<TTechBlokToSymbol>>;   // mapuje id technologickeho bloku na
 
    //zde jsou ulozeny vsechny bloky
@@ -599,10 +566,6 @@ type
     Data:array[0.._MAX_PRJ] of TPPrejezd;
     count:Integer;
    end;
-   UvazkySpr:record
-    Data:array[0.._MAX_UVAZKY_SPR] of TPUvazkaSpr;
-    count:Integer;
-   end;
    Zamky:record
     Data:array[0.._MAX_ZAMKY] of TPZamek;
     count:Integer;
@@ -612,6 +575,7 @@ type
    Rozp  : TList<TPRozp>;
 
    Uvazky : TPUvazky;
+   UvazkySpr : TPUvazkySpr;
 
   SystemOK:record
    Poloha:boolean;
@@ -646,7 +610,6 @@ type
    procedure ShowPrj;
    procedure ShowMereniCasu;
    procedure ShowMsg;
-   procedure ShowUvazkySpr;
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
    procedure ShowZamky;
@@ -813,6 +776,7 @@ begin
  Self.StartJC := TList<TStartJC>.Create();
 
  Self.Uvazky := TPUvazky.Create();
+ Self.UvazkySpr := TPUvazkySpr.Create();
 
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
@@ -906,6 +870,7 @@ begin
  Self.StartJC.Free();
 
  Self.Uvazky.Free();
+ Self.UvazkySpr.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
@@ -1143,52 +1108,6 @@ begin
   end;//for i
 end;//procedure
 
-procedure TRelief.ShowUvazkySpr();
-var i, j:Integer;
-    top,incr:Integer;
-    change:boolean;
-    UvazkaSpr:TUvazkaSpr;
-begin
- if (Now > Self.uvazky_change_time) then
-  begin
-   Self.uvazky_change_time := Now + EncodeTime(0, 0, _UVAZKY_BLIK_PERIOD div 1000, _UVAZKY_BLIK_PERIOD mod 1000);
-   change := true;
-  end else
-   change := false;
-
- // projedeme vsechny uvazky
- for i := 0 to Self.UvazkySpr.count-1 do
-  begin
-   if (not Assigned(Self.UvazkySpr.Data[i].PanelProp.spr)) then continue;
-
-   top  := Self.UvazkySpr.Data[i].Pos.Y;
-   if (Self.UvazkySpr.Data[i].vertical_dir = TUvazkaSprVertDir.top) then
-     incr := -1
-    else
-     incr := 1;
-
-   for j := 0 to Self.UvazkySpr.Data[i].PanelProp.spr.Count-1 do
-    begin
-     UvazkaSpr := Self.UvazkySpr.Data[i].PanelProp.spr[j];
-
-     if (not Assigned(Self.UvazkySpr.Data[i].PanelProp.spr[j].strings)) then continue;
-
-     // kontrola preblikavani
-     if ((change) and (UvazkaSpr.strings.Count > 1)) then
-       Inc(UvazkaSpr.show_index);
-     if (UvazkaSpr.show_index >= UvazkaSpr.strings.Count) then // tato podminka musi byt vne predchozi podminky
-       UvazkaSpr.show_index := 0;
-
-     PanelPainter.TextOutput(Point(Self.UvazkySpr.Data[i].Pos.X, top),
-          Self.UvazkySpr.Data[i].PanelProp.spr[j].strings[UvazkaSpr.show_index],
-          Self.UvazkySpr.Data[i].PanelProp.spr[j].color, clBlack, Self.DrawObject, UvazkaSpr.show_index = 0);
-     top := top + incr;
-
-     Self.UvazkySpr.Data[i].PanelProp.spr[j] := UvazkaSpr;
-    end;//for j
-  end;//for i
-end;//procedure
-
 //vykresleni pasku mereni casu
 procedure TRelief.ShowMereniCasu();
 var Time1,Time2:string;
@@ -1247,7 +1166,7 @@ begin
 
    Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
-   Self.ShowUvazkySpr();
+   Self.UvazkySpr.Show(Self.DrawObject);
    Self.Uvazky.Show(Self.DrawObject, Self.Graphics.blik);
    PanelPainterNavestidlo.ShowNavestidla(Self.Navestidla, Self.Graphics.blik, Self.StartJC, Self.DrawObject);
    Self.ShowPrj();
@@ -1741,7 +1660,6 @@ begin
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
- Self.UvazkySpr.count   := inifile.ReadInteger('P', 'UvS', 0);
  Self.Zamky.count       := inifile.ReadInteger('P', 'Z',   0);
  BlkNazvy.Free;
 
@@ -1967,21 +1885,7 @@ begin
   end;//for i
 
  Self.Uvazky.Load(inifile);
-
- // uvazky soupravy
- for i := 0 to Self.UvazkySpr.count-1 do
-  begin
-   Self.UvazkySpr.Data[i].Blok         := inifile.ReadInteger('UvS'+IntToStr(i), 'B', -1);
-   Self.UvazkySpr.Data[i].OblRizeni    := inifile.ReadInteger('UvS'+IntToStr(i), 'OR', -1);
-   Self.UvazkySpr.Data[i].Pos.X        := inifile.ReadInteger('UvS'+IntToStr(i), 'X', 0);
-   Self.UvazkySpr.Data[i].Pos.Y        := inifile.ReadInteger('UvS'+IntToStr(i), 'Y', 0);
-   Self.UvazkySpr.Data[i].vertical_dir := TUvazkaSprVertDir(inifile.ReadInteger('UvS'+IntToStr(i), 'VD', 0));
-   Self.UvazkySpr.Data[i].spr_cnt      := inifile.ReadInteger('UvS'+IntToStr(i), 'C', 1);
-   Self.UvazkySpr.Data[i].PanelProp    := Self._Def_UvazkaSpr_Prop;
-   Self.UvazkySpr.Data[i].PanelProp.spr := TList<TUvazkaSpr>.Create();
-
-   Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.Data[i].Blok, i);
-  end;//for i
+ Self.UvazkySpr.Load(inifile);
 
  // zamky
  for i := 0 to Self.Zamky.count-1 do
@@ -2048,6 +1952,8 @@ begin
  for i := 0 to Self.Uvazky.data.Count-1 do
    Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
 
+ for i := 0 to Self.UvazkySpr.data.Count-1 do
+   Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -2540,6 +2446,7 @@ var i, j:Integer;
     tmp:TUvazkaSprPanelProp;
     symbols:TList<TTechBlokToSymbol>;
     uv:TPUvazka;
+    uvs:TPUvazkaSpr;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
  if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
@@ -2560,8 +2467,10 @@ begin
      _BLK_UVAZKA_SPR: begin
        if (Sender = Self.myORs[Self.UvazkySpr.Data[symbols[i].symbol_index].OblRizeni].id) then
         begin
-         tmp := Self.UvazkySpr.Data[symbols[i].symbol_index].PanelProp;
-         Self.UvazkySpr.Data[symbols[i].symbol_index].PanelProp := UvazkaSprPanelProp;
+         uvs := Self.UvazkySpr.Data[symbols[i].symbol_index];
+         tmp := uvs.PanelProp;
+         uvs.PanelProp := UvazkaSprPanelProp;
+         Self.UvazkySpr.Data[symbols[i].symbol_index] := uvs;
 
          // uvolnime pamet
          for j := 0 to tmp.spr.Count-1 do
@@ -3069,7 +2978,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.OrDisconnect(orindex:Integer = -1);
-var i, j:Integer;
+var i:Integer;
     usk:TPreliefUsk;
     vykol:TPVykol;
     rozp:TPRozp;
@@ -3118,17 +3027,7 @@ begin
     Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
 
  Self.Uvazky.Reset();
-
- for i := 0 to Self.UvazkySpr.Count-1 do
-  if ((orindex < 0) or (Self.UvazkySpr.Data[i].OblRizeni = orindex)) then
-   begin
-    for j := 0 to Self.UvazkySpr.Data[i].PanelProp.spr.Count-1 do
-      Self.UvazkySpr.Data[i].PanelProp.spr[j].strings.Free();
-    Self.UvazkySpr.Data[i].PanelProp.spr.Free();
-
-    Self.UvazkySpr.Data[i].PanelProp     := _Def_UvazkaSpr_Prop;
-    Self.UvazkySpr.Data[i].PanelProp.spr := TList<TUvazkaSpr>.Create();
-   end;
+ Self.UvazkySpr.Reset();
 
  for i := 0 to Self.Zamky.Count-1 do
   if (((orindex < 0) or (Self.Zamky.Data[i].OblRizeni = orindex)) and
