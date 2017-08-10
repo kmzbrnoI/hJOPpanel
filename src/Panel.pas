@@ -164,8 +164,6 @@ type
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
 
-   procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
-
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
 
@@ -409,23 +407,6 @@ end;//destructor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
-begin
- if (transparent) then
-   IL.DrawingStyle := TDrawingStyle.dsTransparent
- else begin
-   IL.DrawingStyle := TDrawingStyle.dsNormal;
-   IL.BkColor := bg;
- end;
-
- IL.Draw(Self.DrawObject.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka,
-         pos.Y * SymbolSet._Symbol_Vyska, Symbols.GetSymbolIndex(symbol, fg));
-
- IL.DrawingStyle := TDrawingStyle.dsNormal;
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-
 //zobrazi vsechny dopravni kancelare
 procedure TRelief.ShowDK();
 var fg:TColor;
@@ -449,15 +430,17 @@ begin
        fg := clYellow;
    end;
 
-   Self.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack);
+   PanelPainter.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack, Self.DrawObject);
 
    // symbol osvetleni se vykresluje vlevo
    if (OblR.dk_osv) then
-     Self.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X-2, OblR.Poss.DK.Y+1), _Hvezdicka, clYellow, clBlack);
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X-2, OblR.Poss.DK.Y+1),
+        _Hvezdicka, clYellow, clBlack, Self.DrawObject);
 
    // symbol zadosti o loko se vykresluje vpravo
    if (((OblR.RegPlease.status = TORRegPleaseStatus.request) or (OblR.RegPlease.status = TORRegPleaseStatus.selected)) and (not Self.Graphics.blik)) then
-     Self.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X+6, OblR.Poss.DK.Y+1), _Kolecko, clYellow, clBlack);
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X+6, OblR.Poss.DK.Y+1),
+        _Kolecko, clYellow, clBlack, Self.DrawObject);
 
   end;//for i
 end;//procedure
@@ -485,24 +468,24 @@ begin
   begin
    // vodorovne
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+1, clBlack, c1);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c1);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+1, clBlack, c1, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c1, Self.DrawObject);
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol+1, c2, c3);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol+1, c2, c3);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol+1, c2, c3);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol+1, c2, c3, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol+1, c2, c3, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol+1, c2, c3, Self.DrawObject);
   end else begin
    // svisle
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol, c1, c1);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol+1, clBlack, c1, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y+1), _Plny_Symbol, c1, c1, Self.DrawObject);
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+2, c2, clBlack);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol, c2, clBlack);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y), _Plny_Symbol+2, c2, clBlack, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+1, Pos.Y+1), _Plny_Symbol, c2, clBlack, Self.DrawObject);
 
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c3);
-   Self.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol, c3, c3);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y), _Plny_Symbol+1, clBlack, c3, Self.DrawObject);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X+2, Pos.Y+1), _Plny_Symbol, c3, c3, Self.DrawObject);
   end;
 
  case (PanelTCPClient.status) of
@@ -534,16 +517,18 @@ begin
      DateTimeToString(Time2, 'ss', Self.myORs[j].MereniCasu[k].Length);
 
      for i := 0 to (Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2)-1 do
-      Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol, clRed, clBlack);
+      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k),
+        _Plny_Symbol, clRed, clBlack, Self.DrawObject);
 
      for i := (Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2) to (_delka div 2)-1 do
-      Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol, clWhite, clBlack);
+      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+i, Self.myORs[j].Poss.Time.Y+k),
+        _Plny_Symbol, clWhite, clBlack, Self.DrawObject);
 
      //vykresleni poloviny symbolu
      SymbolSet.IL_Symbols.BkColor := clWhite;
      if ((Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) mod 2) = 1) then
-       Self.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+(Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2),
-                 Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol+1, clRed, clWhite);
+       PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+(Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2),
+                 Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol+1, clRed, clWhite, Self.DrawObject);
 
     end;//for i
 
