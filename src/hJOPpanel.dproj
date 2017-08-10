@@ -140,6 +140,7 @@
 			<DCCReference Include="BlokUvazka.pas"/>
 			<DCCReference Include="BlokUvazkaSpr.pas"/>
 			<DCCReference Include="BlokZamek.pas"/>
+			<DCCReference Include="BlokPrejezd.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

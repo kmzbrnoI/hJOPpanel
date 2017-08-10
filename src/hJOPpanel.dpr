@@ -56,7 +56,8 @@ uses
   PanelPainterNavestidlo in 'PanelPainterNavestidlo.pas',
   BlokUvazka in 'BlokUvazka.pas',
   BlokUvazkaSpr in 'BlokUvazkaSpr.pas',
-  BlokZamek in 'BlokZamek.pas';
+  BlokZamek in 'BlokZamek.pas',
+  BlokPrejezd in 'BlokPrejezd.pas';
 
 {$R *.res}
 

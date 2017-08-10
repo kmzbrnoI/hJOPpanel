@@ -43,6 +43,12 @@ type
     symbol_width, symbol_height:Integer;
   end;
 
+  // 1 bitmapovy symbol na reliefu (ze symbolu se skladaji useky)
+  TReliefSym=record
+   Position:TPoint;
+   SymbolID:Integer;
+  end;
+
   TSymbolSet = class
     private const
       // tady jsou nadefinovane Resource nazvy ImageListu jendotlivych setu a rozmery jejich symbolu

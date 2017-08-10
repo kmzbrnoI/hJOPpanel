@@ -6,7 +6,7 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX,
-     BlokUvazka, BlokUvazkaSpr, BlokZamek;
+     BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd;
 
 const
   //limity poli
@@ -16,8 +16,6 @@ const
   _MAX_VYH      = 256;
   _MAX_SYMBOLS  = 256;
   _MAX_POPISKY  = 64;
-  _MAX_PRJ      = 16;
-  _MAX_PRJ_LEN  = 10;
 
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
@@ -133,12 +131,6 @@ type
 
  ///////////////////////////////////////////////////////////////////////////////
  // blok usek:
-
- // 1 bitmapovy symbol na reliefu (ze symbolu se skladaji useky)
- TReliefSym=record
-  Position:TPoint;
-  SymbolID:Integer;
- end;
 
  TUsekSouprava=record
   nazev:string;
@@ -271,41 +263,6 @@ type
    end;//Symbols
   Symbol:Integer;
  end;//PomocnyObj
-
- ///////////////////////////////////////////////////////////////////////////////
-
- TBlkPrjPanelStav = (err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
-
- // data pro vykreslovani
- TPrjPanelProp = record
-  Symbol,Pozadi:TColor;
-  stav:TBlkPrjPanelStav;
- end;
-
- // jeden blikajici blok prejezdu
- // je potreba v nem take ulozit, jaky technologicky blok se ma vykreslit, pokud je prejezd uzavren
- TBlikPoint = record
-  Pos:TPoint;
-  PanelUsek:Integer;       // pozor, tady je usek panelu!, toto je zmena oproti editoru a mergeru !
- end;
-
- // 1 blok prejezdu na reliefu:
- TPPrejezd=record
-  Blok:Integer;
-
-  StaticPositions: record
-   data:array [0.._MAX_PRJ_LEN] of TPoint;
-   Count:Byte;
-  end;
-
-  BlikPositions: record
-   data:array [0.._MAX_PRJ_LEN] of TBlikPoint;
-   Count:Byte;
-  end;
-
-  OblRizeni:Integer;
-  PanelProp:TPrjPanelProp;
- end;
 
  ///////////////////////////////////////////////////////////////////////////////
 
@@ -456,17 +413,6 @@ type
         blikani: false);
 
 
-    _Def_Prj_Prop:TPrjPanelProp = (
-        Symbol: clBlack;
-        Pozadi: clFuchsia;
-        stav: otevreno);
-
-    _UA_Prj_Prop:TPrjPanelProp = (
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        stav: otevreno);
-
-
     _Def_Rozp_Prop:TRozpPanelProp = (
         Symbol: clFuchsia;
         Pozadi: clBlack;
@@ -535,17 +481,13 @@ type
    Vyhybky:TList<TPVyhybka>;
    StartJC:TList<TStartJC>;                    // vykresleni 1 symbolu okolo navestidla v usekove funkci
 
-   Prejezdy:record
-    Data:array[0.._MAX_PRJ] of TPPrejezd;
-    count:Integer;
-   end;
-
    Vykol : TList<TPVykol>;
    Rozp  : TList<TPRozp>;
 
    Uvazky : TPUvazky;
    UvazkySpr : TPUvazkySpr;
    Zamky : TPZamky;
+   Prejezdy : TPPrejezdy;
 
   SystemOK:record
    Poloha:boolean;
@@ -1013,71 +955,6 @@ begin
  end;
 end;//procedure
 
-procedure TRelief.ShowPrj();
-var i,j:Integer;
-    usek:Integer;
-    sym:TReliefSym;
-begin
- for i := 0 to Self.Prejezdy.count-1 do
-  begin
-   // vykreslit staticke pozice:
-   for j := 0 to Self.Prejezdy.Data[i].StaticPositions.Count-1 do
-     Self.Draw(SymbolSet.IL_Symbols, Self.Prejezdy.Data[i].StaticPositions.data[j], _Prj_Start, Self.Prejezdy.Data[i].PanelProp.Symbol, Self.Prejezdy.Data[i].PanelProp.Pozadi);
-
-   // vykreslit blikajici pozice podle stavu prejezdu:
-   if ((Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.otevreno) or
-      (Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.anulace) or
-      (Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.err) or
-      ((Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.vystraha) and (Self.Graphics.blik))) then
-    begin
-       // nestaticke pozice proste vykreslime:
-       for j := 0 to Self.Prejezdy.Data[i].BlikPositions.Count-1 do
-        begin
-         // musime smazat pripadne useky navic:
-
-         if (Self.Prejezdy.Data[i].BlikPositions.data[j].PanelUsek > -1) then
-          begin
-           // porovname, pokud tam uz nahodou neni
-           usek := Self.Prejezdy.Data[i].BlikPositions.data[j].PanelUsek;
-           if (Self.Useky[usek].Symbols[Self.Useky[usek].Symbols.Count-1].Position.X = Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.X)
-           and (Self.Useky[usek].Symbols[Self.Useky[usek].Symbols.Count-1].Position.Y = Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.Y) then
-            begin
-             // pokud je, odebereme
-             Self.Useky[usek].Symbols.Count := Self.Useky[usek].Symbols.Count - 1;
-            end;
-          end;
-
-         Self.Draw(SymbolSet.IL_Symbols, Self.Prejezdy.Data[i].BlikPositions.data[j].Pos, _Prj_Start, Self.Prejezdy.Data[i].PanelProp.Symbol, Self.Prejezdy.Data[i].PanelProp.Pozadi);
-        end;
-    end else begin
-
-       // na nestatickych pozicich vykreslime usek
-       // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
-
-       if (Self.Prejezdy.Data[i].PanelProp.stav = TBlkPrjPanelStav.vystraha) then continue;       
-
-       for j := 0 to Self.Prejezdy.Data[i].BlikPositions.Count-1 do
-        begin
-         if (Self.Prejezdy.Data[i].BlikPositions.data[j].PanelUsek > -1) then
-          begin
-           // porovname, pokud tam uz nahodou neni
-           usek := Self.Prejezdy.Data[i].BlikPositions.data[j].PanelUsek;
-           if (Self.Useky[usek].Symbols[Self.Useky[usek].Symbols.Count-1].Position.X <> Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.X)
-           or (Self.Useky[usek].Symbols[Self.Useky[usek].Symbols.Count-1].Position.Y <> Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.Y) then
-            begin
-             // pokud neni, pridame:
-             sym.Position := Self.Prejezdy.Data[i].BlikPositions.data[j].Pos;
-             sym.SymbolID := 12;
-             Self.Useky[usek].Symbols.Add(sym);
-            end;
-          end;
-
-        end;// for j
-    end;
-
-  end;//for i
-end;//procedure
-
 //vykresleni pasku mereni casu
 procedure TRelief.ShowMereniCasu();
 var Time1,Time2:string;
@@ -1347,34 +1224,6 @@ begin
      Exit(i);
 end;//function
 
-function TRelief.GetPrj(Pos:TPoint):Integer;
-var i, j:Integer;
-begin
- Result := -1;
-
- // kontrola prejezdu:
- for i := 0 to Self.Prejezdy.Count-1 do
-  begin
-   for j := 0 to Self.Prejezdy.Data[i].StaticPositions.Count-1 do
-     if ((Pos.X = Self.Prejezdy.Data[i].StaticPositions.data[j].X) and (Pos.Y = Self.Prejezdy.Data[i].StaticPositions.data[j].Y)) then
-       Exit(i);
-
-   for j := 0 to Self.Prejezdy.Data[i].BlikPositions.Count-1 do
-     if ((Pos.X = Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.X) and (Pos.Y = Self.Prejezdy.Data[i].BlikPositions.data[j].Pos.Y)) then
-       Exit(i);
-
-  end;//for i
-
- // dale je take zapotrebi zkontrolovat popisky:
- for i := 0 to Self.Popisky.Count-1 do
-  begin
-   if (Self.Popisky.Data[i].prejezd_ref < 0) then continue;
-
-   if ((Pos.X >= Self.Popisky.Data[i].Position.X-1) and (Pos.X <= Self.Popisky.Data[i].Position.X+1) and (Pos.Y = Self.Popisky.Data[i].Position.Y)) then
-     Exit(Self.Popisky.Data[i].prejezd_ref);
-  end;//for i
-end;//function
-
 //vraci index ve svem poli symbolu
 function TRelief.GetUsek(tech_id:Integer):Integer;
 var i:Integer;
@@ -1386,7 +1235,7 @@ begin
  Result := -1;
 end;//function
 
-function TRelief.GetPrj(tech_id:Integer):Integer;
+{ TODO function TRelief.GetPrj(tech_id:Integer):Integer;
 var i:Integer;
 begin
  for i := 0 to Self.Prejezdy.Count-1 do
@@ -1394,7 +1243,7 @@ begin
      Exit(i);
 
  Result := -1;
-end;//function
+end;//function }
 
 function TRelief.GetVykol(Pos:TPoint):Integer;
 var i:Integer;
@@ -1452,7 +1301,7 @@ begin
   end;
 
  //prejezd
- index := Self.GetPrj(Position);
+ index := Self.Prejezdy.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Prejezdy.Data[index].Blok < 0) then goto EscCheck;
@@ -1620,7 +1469,6 @@ begin
 
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
- Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
  BlkNazvy.Free;
 
  //useky
@@ -1802,37 +1650,7 @@ begin
    Self.AddToTechBlk(_BLK_VYH, vyh.Blok, Self.Vyhybky.Count-1);
   end;
 
- //prejezdy
- for i := 0 to Self.Prejezdy.count-1 do
-  begin
-   Self.Prejezdy.Data[i].Blok        := inifile.ReadInteger('PRJ'+IntToStr(i), 'B', -1);
-   Self.Prejezdy.Data[i].OblRizeni   := inifile.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
-
-   obj := inifile.ReadString('PRJ'+IntToStr(i), 'BP', '');
-   Self.Prejezdy.Data[i].BlikPositions.Count := (Length(obj) div 9);
-   for j := 0 to Self.Prejezdy.Data[i].BlikPositions.Count-1 do
-    begin
-     Self.Prejezdy.Data[i].BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*9+1, 3), 0);
-     Self.Prejezdy.Data[i].BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*9+4, 3), 0);
-     Self.Prejezdy.Data[i].BlikPositions.Data[j].PanelUsek := Self.GetUsek(StrToIntDef(copy(obj, j*9+7, 3), 0));
-    end;//for j
-
-   obj := inifile.ReadString('PRJ'+IntToStr(i), 'SP', '');
-   Self.Prejezdy.Data[i].StaticPositions.Count := (Length(obj) div 6);
-   for j := 0 to Self.Prejezdy.Data[i].StaticPositions.Count-1 do
-    begin
-     Self.Prejezdy.Data[i].StaticPositions.Data[j].X := StrToIntDef(copy(obj, j*6+1, 3), 0);
-     Self.Prejezdy.Data[i].StaticPositions.Data[j].Y := StrToIntDef(copy(obj, j*6+4, 3), 0);
-    end;//for j
-
-   //default settings:
-   if (Self.Prejezdy.Data[i].Blok = -2) then
-     Self.Prejezdy.Data[i].PanelProp := _UA_Prj_Prop
-   else
-     Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
-
-   Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.Data[i].Blok, i);
-  end;
+ Self.Prejezdy.Load(inifile);
 
  //popisky
  for i := 0 to Self.Popisky.Count - 1 do
@@ -1901,6 +1719,9 @@ begin
 
  for i := 0 to Self.Zamky.data.Count-1 do
    Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.data[i].Blok, i);
+
+ for i := 0 to Self.Prejezdy.data.Count-1 do
+   Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -2378,6 +2199,7 @@ end;//procedure
 procedure TRelief.ORPrjChange(Sender:string; BlokID:integer; PrjPanelProp:TPrjPanelProp);
 var i:Integer;
     symbols:TList<TTechBlokToSymbol>;
+    prj:TPPrejezd;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
  if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
@@ -2385,7 +2207,11 @@ begin
 
  for i := 0 to symbols.Count-1 do
    if ((symbols[i].blk_type = _BLK_PREJEZD) and (Sender = Self.myORs[Self.Prejezdy.Data[symbols[i].symbol_index].OblRizeni].id)) then
-    Self.Prejezdy.Data[symbols[i].symbol_index].PanelProp := PrjPanelProp;
+    begin
+     prj := Self.Prejezdy.Data[symbols[i].symbol_index];
+     prj.PanelProp := PrjPanelProp;
+     Self.Prejezdy.Data[symbols[i].symbol_index] := prj;
+    end;
 end;//procedure
 
 procedure TRelief.ORUvazkaChange(Sender:string; BlokID:integer; UvazkaPanelProp:TUvazkaPanelProp; UvazkaSprPanelProp:TUvazkaSprPanelProp);
@@ -2973,11 +2799,7 @@ begin
     Self.Navestidla[i] := nav;
    end;
 
- for i := 0 to Self.Prejezdy.Count-1 do
-  if (((orindex < 0) or (Self.Prejezdy.Data[i].OblRizeni = orindex)) and
-      (Self.Prejezdy.Data[i].Blok > -2)) then
-    Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
-
+ Self.Prejezdy.Reset();
  Self.Uvazky.Reset();
  Self.UvazkySpr.Reset();
  Self.Zamky.Reset();
