@@ -679,7 +679,6 @@ type
    procedure ShowNavestidla;
    procedure ShowPomocneSymboly;
    procedure ShowPopisky;
-   procedure ShowVyhybky;
    procedure ShowDK;
    procedure ShowOpravneni;
    procedure ShowPrj;
@@ -836,7 +835,7 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     parseHelper, PanelPainterUsek, PanelPainter;
+     parseHelper, PanelPainterUsek, PanelPainter, PanelPainterVyhybka;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -1057,62 +1056,6 @@ begin
 
    PanelPainter.TextOutput(Self.Popisky.Data[i].Position, Self.Popisky.Data[i].Text,
       _Symbol_Colors[Self.Popisky.Data[i].Color], clBlack, Self.DrawObject);
-  end;//for i
-end;//procedure
-
-procedure TRelief.ShowVyhybky();
-var fg:Integer;
-    bkcol:TColor;
-    vyh:TPVyhybka;
-begin
- //vyhybky
- for vyh in Self.Vyhybky do
-  begin
-   if ((vyh.PanelProp.blikani) and (Self.Graphics.blik) and (vyh.visible)) then
-     fg := clBlack
-   else begin
-     if ((vyh.visible) or (vyh.PanelProp.Symbol = clAqua)) then
-      fg := vyh.PanelProp.Symbol
-     else
-      fg := Self.Useky[vyh.obj].PanelProp.nebarVetve;
-   end;
-
-   if (vyh.PanelProp.Pozadi = clBlack) then
-     bkcol := Self.Useky[vyh.obj].PanelProp.Pozadi
-   else
-     bkcol := vyh.PanelProp.Pozadi;
-
-   if (vyh.Blok = -2) then
-    begin
-     // blok zamerne neprirazen
-     Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
-               vyh.SymbolID, fg, bkcol);
-    end else begin
-     case (vyh.PanelProp.Poloha) of
-      TVyhPoloha.disabled:begin
-       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 vyh.SymbolID, Self.Useky[vyh.obj].PanelProp.Pozadi, clFuchsia);
-      end;
-      TVyhPoloha.none:begin
-       Self.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
-                 bkcol, fg);
-      end;
-      TVyhPoloha.plus:begin
-       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+4+(4*(vyh.PolohaPlus xor 0)),
-                 fg, bkcol);
-      end;
-      TVyhPoloha.minus:begin
-       Self.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+8-(4*(vyh.PolohaPlus xor 0)),
-                 fg, bkcol);
-      end;
-      TVyhPoloha.both:begin
-       Self.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
-                 bkcol, clBlue);
-      end;
-     end;//case
-    end;//else blok zamerne neprirazn
   end;//for i
 end;//procedure
 
@@ -1423,7 +1366,7 @@ begin
    Self.ShowPomocneSymboly();
    PanelPainterUsek.ShowUseky(Self.Useky, Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
    Self.ShowPopisky();
-   Self.ShowVyhybky();
+   PanelPainterVyhybka.ShowVyhybky(Self.Vyhybky, Self.Graphics.blik, Self.Useky, Self.DrawObject);
    Self.ShowZamky();
    Self.ShowRozp();
    Self.ShowVykol();

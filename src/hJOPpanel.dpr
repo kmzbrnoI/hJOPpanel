@@ -50,7 +50,9 @@ uses
   fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot},
   InterProcessCom in 'InterProcessCom.pas',
   parseHelper in 'parseHelper.pas',
-  PanelPainterUsek in 'PanelPainterUsek.pas';
+  PanelPainterUsek in 'PanelPainterUsek.pas',
+  PanelPainter in 'PanelPainter.pas',
+  PanelPainterVyhybka in 'PanelPainterVyhybka.pas';
 
 {$R *.res}
 
