@@ -1,7 +1,9 @@
 unit PGraphics;
 
-// panel graphics
-//  je trida, ktera obsahuje vykreslovaci nastroje dostupne pro vsechny podtridy panelu
+{
+  Panel graphics je trida, ktera obsahuje vykreslovaci nastroje dostupne pro
+  vsechny podtridy panelu.
+}
 
 interface
 
@@ -9,18 +11,14 @@ uses DXDraws, Graphics, Classes, Types, SysUtils, StrUtils;
 
 type
   TPanelGraphics = class
-    private
+   blik:boolean;                          // pokud neco ma blikat, tady je globalne ulozen jeho stav
+                                          // true = sviti, false = zhasnuto
+                                          // obsluhu promenne zajistuje timer
 
-    public
+   DrawObject:TDXDraw;
+   PanelWidth,PanelHeight:SmallInt;
 
-     blik:boolean;                          // pokud neco ma blikat, tady je globalne ulozen jeho stav
-                                            // true = sviti, false = zhasnuto
-                                            // obsluhu promenne zajistuje timer
-
-      DrawObject:TDXDraw;
-      PanelWidth,PanelHeight:SmallInt;
-
-      constructor Create(drawObject:TDXDraw);
+   constructor Create(drawObject:TDXDraw);
   end;
 
 implementation
@@ -34,9 +32,6 @@ begin
  inherited Create();
  Self.DrawObject := drawObject;
 end;//ctor
-
-////////////////////////////////////////////////////////////////////////////////
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
