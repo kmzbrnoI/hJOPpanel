@@ -53,7 +53,8 @@ uses
   PanelPainterUsek in 'PanelPainterUsek.pas',
   PanelPainter in 'PanelPainter.pas',
   PanelPainterVyhybka in 'PanelPainterVyhybka.pas',
-  PanelPainterNavestidlo in 'PanelPainterNavestidlo.pas';
+  PanelPainterNavestidlo in 'PanelPainterNavestidlo.pas',
+  BlokUvazka in 'BlokUvazka.pas';
 
 {$R *.res}
 

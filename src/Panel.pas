@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX;
+     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, BlokUvazka;
 
 const
   //limity poli
@@ -309,23 +309,6 @@ type
   PanelProp:TPrjPanelProp;
  end;
 
- TUvazkaSmer = (disabled = -1, zadny = 0, zakladni = 1, opacny = 2);
-
- // data pro vykreslovani uvazky
- TUvazkaPanelProp = record
-  Symbol,Pozadi:TColor;
-  blik:boolean;
-  smer:TUvazkaSmer;
- end;
-
- TPUvazka=record
-  Blok:Integer;
-  Pos:TPoint;
-  defalt_dir:Integer;
-  OblRizeni:Integer;
-  PanelProp:TUvazkaPanelProp;
- end;
-
  ///////////////////////////////////////////////////////////////////////////////
 
  TUvazkaSpr = record
@@ -526,21 +509,6 @@ type
         stav: otevreno);
 
 
-    _Def_Uvazka_Prop:TUvazkaPanelProp = (
-        Symbol: clBlack;
-        Pozadi: clFuchsia;
-        blik: false;
-        smer: disabled;
-        );
-
-    _UA_Uvazka_Prop:TUvazkaPanelProp = (
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        blik: false;
-        smer: zadny;
-        );
-
-
     _Def_UvazkaSpr_Prop:TUvazkaSprPanelProp = (
         );
 
@@ -631,10 +599,6 @@ type
     Data:array[0.._MAX_PRJ] of TPPrejezd;
     count:Integer;
    end;
-   Uvazky:record
-    Data:array[0.._MAX_UVAZKY] of TPUvazka;
-    count:Integer;
-   end;
    UvazkySpr:record
     Data:array[0.._MAX_UVAZKY_SPR] of TPUvazkaSpr;
     count:Integer;
@@ -646,6 +610,8 @@ type
 
    Vykol : TList<TPVykol>;
    Rozp  : TList<TPRozp>;
+
+   Uvazky : TPUvazky;
 
   SystemOK:record
    Poloha:boolean;
@@ -680,7 +646,6 @@ type
    procedure ShowPrj;
    procedure ShowMereniCasu;
    procedure ShowMsg;
-   procedure ShowUvazky;
    procedure ShowUvazkySpr;
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
@@ -700,7 +665,6 @@ type
    function GetPrj(Pos:TPoint):Integer; overload;
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
-   function GetUvazka(Pos:TPoint):integer;
    function GetZamek(Pos:TPoint):Integer;
    function GetVykol(Pos:TPoint):Integer;
 
@@ -848,6 +812,8 @@ begin
  Self.reAuth.old_ors := TList<Integer>.Create();
  Self.StartJC := TList<TStartJC>.Create();
 
+ Self.Uvazky := TPUvazky.Create();
+
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
  Self.mouseTimer.OnTimer := Self.OnMouseTimer;
@@ -938,6 +904,8 @@ begin
  Self.Vykol.Free();
  Self.Rozp.Free();
  Self.StartJC.Free();
+
+ Self.Uvazky.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
@@ -1175,46 +1143,6 @@ begin
   end;//for i
 end;//procedure
 
-procedure TRelief.ShowUvazky;
-var i:Integer;
-    fg:TColor;
-begin
- for i := 0 to Self.Uvazky.count-1 do
-  begin
-   if ((Self.Uvazky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then
-     fg := clBlack
-   else
-     fg := Self.Uvazky.Data[i].PanelProp.Symbol;
-
-   case (Self.Uvazky.Data[i].PanelProp.smer) of
-    TUvazkaSmer.disabled, TUvazkaSmer.zadny:begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-               _Uvazka_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-     Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-               _Uvazka_Start+1, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-    end;
-
-    TUvazkaSmer.zakladni, TUvazkaSmer.opacny:begin
-     if (((Self.Uvazky.Data[i].PanelProp.smer = zakladni) and (Self.Uvazky.Data[i].defalt_dir = 0)) or
-        ((Self.Uvazky.Data[i].PanelProp.smer = opacny) and (Self.Uvazky.Data[i].defalt_dir = 1))) then
-      begin
-       // sipka zleva doprava
-       Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-                 _Usek_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-       Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-                 _Uvazka_Start+1, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-      end else begin
-       // sipka zprava doleva
-       Self.Draw(SymbolSet.IL_Symbols, Self.Uvazky.Data[i].Pos,
-                 _Uvazka_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-       Self.Draw(SymbolSet.IL_Symbols, Point(Self.Uvazky.Data[i].Pos.X+1, Self.Uvazky.Data[i].Pos.Y),
-                 _Usek_Start, fg, Self.Uvazky.Data[i].PanelProp.Pozadi);
-      end;
-    end;
-   end;
-  end;
-end;//procedure
-
 procedure TRelief.ShowUvazkySpr();
 var i, j:Integer;
     top,incr:Integer;
@@ -1320,7 +1248,7 @@ begin
    Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
    Self.ShowUvazkySpr();
-   Self.ShowUvazky();
+   Self.Uvazky.Show(Self.DrawObject, Self.Graphics.blik);
    PanelPainterNavestidlo.ShowNavestidla(Self.Navestidla, Self.Graphics.blik, Self.StartJC, Self.DrawObject);
    Self.ShowPrj();
    Self.ShowPomocneSymboly();
@@ -1716,7 +1644,7 @@ begin
   end;
 
  //uvazka
- index := Self.GetUvazka(Position);
+ index := Self.Uvazky.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Uvazky.Data[index].Blok < 0) then goto EscCheck;
@@ -1813,7 +1741,6 @@ begin
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
- Self.Uvazky.count      := inifile.ReadInteger('P', 'Uv',  0);
  Self.UvazkySpr.count   := inifile.ReadInteger('P', 'UvS', 0);
  Self.Zamky.count       := inifile.ReadInteger('P', 'Z',   0);
  BlkNazvy.Free;
@@ -2039,23 +1966,7 @@ begin
    Self.Popisky.Data[i].prejezd_ref := Self.GetPrj(inifile.ReadInteger('T'+IntToStr(i),'B', -1));
   end;//for i
 
- // uvazky
- for i := 0 to Self.Uvazky.Count-1 do
-  begin
-   Self.Uvazky.Data[i].Blok        := inifile.ReadInteger('Uv'+IntToStr(i), 'B', -1);
-   Self.Uvazky.Data[i].OblRizeni   := inifile.ReadInteger('Uv'+IntToStr(i), 'OR', -1);
-   Self.Uvazky.Data[i].Pos.X       := inifile.ReadInteger('Uv'+IntToStr(i), 'X', 0);
-   Self.Uvazky.Data[i].Pos.Y       := inifile.ReadInteger('Uv'+IntToStr(i), 'Y', 0);
-   Self.Uvazky.Data[i].defalt_dir  := inifile.ReadInteger('Uv'+IntToStr(i), 'D', 0);
-
-   //default settings:
-   if (Self.Uvazky.Data[i].Blok = -2) then
-     Self.Uvazky.Data[i].PanelProp := _UA_Uvazka_Prop
-   else
-     Self.Uvazky.Data[i].PanelProp := _Def_Uvazka_Prop;
-
-   Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.Data[i].Blok, i);
-  end;//for i
+ Self.Uvazky.Load(inifile);
 
  // uvazky soupravy
  for i := 0 to Self.UvazkySpr.count-1 do
@@ -2134,6 +2045,10 @@ begin
    Self.AddToTechBlk(_BLK_ROZP, rozp.Blok, i);
   end;//for i
 
+ for i := 0 to Self.Uvazky.data.Count-1 do
+   Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
+
+
  inifile.Free;
  Result := 0;
 end;//procedure LoadFile
@@ -2146,16 +2061,6 @@ begin
      Exit(i);
 
  Result := -1;
-end;//function
-
-function TRelief.GetUvazka(Pos:TPoint):integer;
-var i:Integer;
-begin
- Result := -1;
-
- for i := 0 to Self.Uvazky.count-1 do
-   if ((Pos.X >= Self.Uvazky.Data[i].Pos.X) and (Pos.Y = Self.Uvazky.Data[i].Pos.Y) and (Pos.X <= Self.Uvazky.Data[i].Pos.X+1)) then
-     Exit(i);
 end;//function
 
 //reset dat
@@ -2634,6 +2539,7 @@ procedure TRelief.ORUvazkaChange(Sender:string; BlokID:integer; UvazkaPanelProp:
 var i, j:Integer;
     tmp:TUvazkaSprPanelProp;
     symbols:TList<TTechBlokToSymbol>;
+    uv:TPUvazka;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
  if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
@@ -2644,7 +2550,11 @@ begin
    case (symbols[i].blk_type) of
      _BLK_UVAZKA: begin
        if (Sender = Self.myORs[Self.Uvazky.Data[symbols[i].symbol_index].OblRizeni].id) then
-        Self.Uvazky.Data[symbols[i].symbol_index].PanelProp := UvazkaPanelProp;
+        begin
+         uv := Self.Uvazky.data[symbols[i].symbol_index];
+         uv.PanelProp := UvazkaPanelProp;
+         Self.Uvazky.data[symbols[i].symbol_index] := uv;
+        end;
      end;
 
      _BLK_UVAZKA_SPR: begin
@@ -3207,10 +3117,7 @@ begin
       (Self.Prejezdy.Data[i].Blok > -2)) then
     Self.Prejezdy.Data[i].PanelProp := _Def_Prj_Prop;
 
- for i := 0 to Self.Uvazky.Count-1 do
-  if (((orindex < 0) or (Self.Uvazky.Data[i].OblRizeni = orindex)) and
-      (Self.Uvazky.Data[i].Blok > -2)) then
-    Self.Uvazky.Data[i].PanelProp := _Def_Uvazka_Prop;
+ Self.Uvazky.Reset();
 
  for i := 0 to Self.UvazkySpr.Count-1 do
   if ((orindex < 0) or (Self.UvazkySpr.Data[i].OblRizeni = orindex)) then
