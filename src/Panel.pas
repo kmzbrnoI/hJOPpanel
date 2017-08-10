@@ -762,7 +762,7 @@ begin
  for i := 0 to Self.myORs.Count-1 do
   begin
    if (Self.myORs[i].tech_rights < TORControlRights.write) then continue;
-   if ((Self.myORs[i].RegPlease.status > TORRegPleaseStatus.null) and (Position.X = Self.myORs[i].Poss.DK.X+6) and (Position.Y = Self.myORs[i].Poss.DK.Y+1)) then
+   if ((Self.myORs[i].RegPlease.status > TORRegPleaseStatus.none) and (Position.X = Self.myORs[i].Poss.DK.X+6) and (Position.Y = Self.myORs[i].Poss.DK.Y+1)) then
     begin
      if (Button = ENTER) then
       begin
@@ -1806,7 +1806,7 @@ procedure TRelief.ShowRegMenu(obl_rizeni:Integer);
 var menu_str:string;
 begin
  if ((PanelTCPClient.status <> TPanelConnectionStatus.opened) or
-     (Self.myORs[obl_rizeni].RegPlease.status = TORRegPleaseStatus.null)) then Exit();
+     (Self.myORs[obl_rizeni].RegPlease.status = TORRegPleaseStatus.none)) then Exit();
 
  menu_str := '$' + Self.myORs[obl_rizeni].Name + ',$Žádost o loko,-,INFO,ODMÍTNI';
 
@@ -1867,7 +1867,7 @@ begin
       Self.myORs[obl_r].RegPlease.firstname,
       Self.myORs[obl_r].RegPlease.lastname,
       Self.myORs[obl_r].RegPlease.comment,
-      (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.null),
+      (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.none),
       false, false, (item = 'MAUS loko'));
 end;//procedure
 
@@ -1924,7 +1924,7 @@ begin
      Self.myORs[i].dk_osv           := false;
      Self.myORs[i].stack.enabled    := false;
      Self.myORs[i].dk_click_server  := false;
-     Self.myORs[i].RegPlease.status := TORRegPleaseStatus.null;
+     Self.myORs[i].RegPlease.status := TORRegPleaseStatus.none;
      Self.myORs[i].hlaseni          := false;
      Self.myORs[i].login            := '';
      Self.myORs[i].username         := '';
@@ -2105,19 +2105,19 @@ begin
  else if (parsed[2] = 'OK') then
   begin
    F_RegReq.ServerResponseOK();
-   OblR.RegPlease.status  := TORRegPleaseStatus.null;
+   OblR.RegPlease.status  := TORRegPleaseStatus.none;
   end
 
  else if (parsed[2] = 'ERR') then
   begin
    F_RegReq.ServerResponseErr(parsed[3]);
-   OblR.RegPlease.status  := TORRegPleaseStatus.null;
+   OblR.RegPlease.status  := TORRegPleaseStatus.nOne;
   end
 
  else if (parsed[2] = 'CANCEL') then
   begin
    F_RegReq.ServerCanceled();
-   OblR.RegPlease.status  := TORRegPleaseStatus.null;
+   OblR.RegPlease.status  := TORRegPleaseStatus.none;
   end
 
  else if (parsed[2] = 'U-OK') then

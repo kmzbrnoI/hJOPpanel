@@ -4,7 +4,8 @@ unit GlobalConfig;
 
 interface
 
-uses IniFiles, SysUtils, RPConst, Types, Generics.Collections, Classes;
+uses IniFiles, SysUtils, RPConst, Types, Generics.Collections, Classes, PanelOR,
+     Symbols;
 
 type
   TSoundsConfig = record

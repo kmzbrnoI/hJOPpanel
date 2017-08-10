@@ -11,7 +11,7 @@ interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal, ExtCtrls,
      Classes, StrUtils, RPConst, Graphics, Windows, fPotvrSekv, Forms, Controls,
-     Generics.Collections, Resuscitation;
+     Generics.Collections, Resuscitation, PanelOR;
 
 const
   _DEFAULT_PORT = 5896;

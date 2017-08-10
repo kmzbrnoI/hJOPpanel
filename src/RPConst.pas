@@ -5,16 +5,7 @@ interface
 uses Classes, SysUtils;
 
 const
-  _MAX_OSV = 8;
   _MAX_OR = 16;
-  _MAX_TRAT_SPR = 4;
-
-  // tady je jen napsano, kolikrat se nasobi puvodni rozmery = kolik symbol zabira poli
-  _Trat_Sirka = 2;
-  _Trat_Vyska = 1;
-
-  _DK_Sirka = 5;
-  _DK_Vyska = 3;
 
   _BLK_VYH     = 0;
   _BLK_USEK    = 1;
@@ -37,11 +28,9 @@ const
 
 
 type
-  TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
   TPanelButton = (F1, F2, ENTER, ESCAPE);
   TJCType = (undefinned = -1, no = 0, vlak = 1, posun = 2, nouz = 3, staveni = 4);
   TNUZstatus = (no_nuz = 0, blk_in_nuz = 1, nuzing = 2);
-  TSymbolSetType = (normal = 0, bigger = 1);
 
   TWordAr = array of Word;
   TIntAr = array of Integer;
@@ -51,7 +40,6 @@ type
   function PanelButtonToString(button:TPanelButton):string;
 
 implementation
-
 
 function StrToBool(str:string):boolean;
 begin

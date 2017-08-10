@@ -34,8 +34,16 @@ const
   _DKS_Top         = 58;
   _DKS_Bot         = 59;
 
+  // tady je jen napsano, kolikrat se nasobi puvodni rozmery = kolik symbol zabira poli
+  _Trat_Sirka = 2;
+  _Trat_Vyska = 1;
+
+  _DK_Sirka = 5;
+  _DK_Vyska = 3;
 
 type
+  TSymbolSetType = (normal = 0, bigger = 1);
+
   TOneSymbolSet = record
     Names : record
       Symbols, Text, DK, Trat:string;

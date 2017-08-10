@@ -143,7 +143,7 @@ var
 implementation
 
 uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth, TCPClientPanel,
-     uLIclient;
+     uLIclient, PanelOR;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -5,7 +5,10 @@ interface
 uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,
      PGraphics;
 
+
 type
+ TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
+
  // prava oblasti rizeni
  TORRights=record
   ModCasStart:Boolean;
@@ -34,7 +37,7 @@ type
    id:Integer;
   end;
 
- TORRegPleaseStatus = (null = 0, request = 1, selected = 2);
+ TORRegPleaseStatus = (none = 0, request = 1, selected = 2);
 
  TORRegPlease = record
   status:TORRegPleaseStatus;
