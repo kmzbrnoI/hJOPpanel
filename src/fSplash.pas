@@ -1,5 +1,9 @@
 unit fSplash;
 
+{
+  Vyskakovaci okno zobrazovane pri spousteni.
+}
+
 interface
 
 uses

@@ -1,8 +1,10 @@
 unit Resuscitation;
 
-// Trida TResuscitation ma za ukol kontrolovat beh serveru.
-//  Jakmile zjisti, ze server bezi, informuje o tom aplikaci a ta se k serveru pripoji.
-//  Slouzi k automatickemu pripojovani k serveru.
+{
+  Trida TResuscitation ma za ukol kontrolovat beh serveru.
+   Jakmile zjisti, ze server bezi, informuje o tom aplikaci a ta se k serveru pripoji.
+   Slouzi k automatickemu pripojovani k serveru.
+}
 
 interface
 

@@ -1,6 +1,8 @@
 unit LokoRuc;
 
-// Tato unita zobrazuje do panelu seznam lokomotiv v rucnim rizeni
+{
+  Tato unita zobrazuje do panelu seznam lokomotiv v rucnim rizeni.
+}
 
 interface
 

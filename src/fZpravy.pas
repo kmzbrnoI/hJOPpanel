@@ -1,5 +1,9 @@
 unit fZpravy;
 
+{
+  Okynko zprav.
+}
+
 interface
 
 uses

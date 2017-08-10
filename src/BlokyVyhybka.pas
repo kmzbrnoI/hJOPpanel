@@ -1,5 +1,9 @@
 unit BlokyVyhybka;
 
+{
+  Definice databaze vyhybek.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,

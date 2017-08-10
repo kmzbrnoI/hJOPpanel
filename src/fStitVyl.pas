@@ -1,5 +1,9 @@
 unit fStitVyl;
 
+{
+  Okno editace stitku a vyluky.
+}
+
 interface
 
 uses

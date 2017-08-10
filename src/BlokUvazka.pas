@@ -1,5 +1,10 @@
 unit BlokUvazka;
 
+{
+  Definice bloku uvazka, jeho vlastnosti a stavu v panelu.
+  Definice databaze bloku typu uvazka.
+}
+
 interface
 
 uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws;

@@ -1,5 +1,9 @@
 unit fSprHVEdit;
 
+{
+  Okno editace HV v ramci editace soupravy.
+}
+
 interface
 
 uses

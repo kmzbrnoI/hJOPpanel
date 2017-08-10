@@ -1,5 +1,9 @@
 unit Sounds;
 
+{
+  Technologie prehravani zvuku.
+}
+
 interface
 
 uses SysUtils, SoundsThread, Classes, mmsystem;

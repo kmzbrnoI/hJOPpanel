@@ -1,5 +1,9 @@
 unit BlokyUsek;
 
+{
+  Definice databaze useku.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,

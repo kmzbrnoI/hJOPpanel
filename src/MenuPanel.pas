@@ -1,7 +1,9 @@
 unit MenuPanel;
 
-// TPanelMenu
-//  zobrazovani menu na panelu
+{
+  TPanelMenu
+  Zobrazovani menu na panelu.
+}
 
 interface
 

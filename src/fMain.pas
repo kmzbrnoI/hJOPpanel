@@ -1,5 +1,9 @@
 unit fMain;
 
+{
+  Unit hlavniho okna, resi hlavne GUI.
+}
+
 interface
 
 uses

@@ -1,5 +1,11 @@
 unit BlokUvazkaSpr;
 
+{
+  Definice bloku uvazka-spr, jeho vlastnosti a stavu v panelu.
+  Definice databaze bloku typu uvazka-spr.
+  Uvazka-spr je seznam souprav u uvazky.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;

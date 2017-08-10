@@ -1,5 +1,11 @@
 unit BlokPomocny;
 
+{
+  Definice pomocneho bloku.
+  Definice databaze pomocnych bloku.
+  Pomocne bloky jsou symboly zobrazene na reliefu, nemaji zadnou funkci.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;

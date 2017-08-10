@@ -1,7 +1,9 @@
 unit ORList;
 
-// TORDb shromazduje vsechny oblasti rizeni
-//  ostatni casti programu se ho pak muzou na ORs ptat
+{
+  TORDb shromazduje vsechny oblasti rizeni
+   ostatni casti programu se ho pak muzou na ORs ptat
+}
 
 interface
 

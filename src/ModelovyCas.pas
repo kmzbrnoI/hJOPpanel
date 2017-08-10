@@ -1,22 +1,16 @@
 unit ModelovyCas;
 
+{
+  Sprava modeloveho casu.
+}
+
 interface
 
 uses Classes, SysUtils, IniFiles, IDContext, Graphics, ExtCtrls, DateUtils;
 
 type
 
-  TModCasMTB=record                                   //data o pinech modeloveho casu
-   MtbAdr:Integer;                                     //Mtb adresa na vysupy hodin
-
-   PORT_Hodiny:SmallInt;                               //port na kazdou hodinu, -1 pokud nevyuzito
-   PORT_Minuty:SmallInt;                               //port na kazdou minutu, -1 pokud nevyuzito
-   PORT_Sekundy:SmallInt;                              //port na kazdou sekundu, -1 pokud nevyuzito
-  end;
-
   TModCas = class
-   private const
-
    private
     ftime:TTime;
     fnasobic:Integer;
@@ -27,8 +21,6 @@ type
     procedure OnTimer(Sender:TObject);
 
    public
-    MTBdata:TModCasMTB;
-
      constructor Create();
      destructor Destroy(); override;
 

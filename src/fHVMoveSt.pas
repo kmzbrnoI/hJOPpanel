@@ -1,5 +1,9 @@
 unit fHVMoveSt;
 
+{
+  Okno presunu lokomotivy do jine oblasti rizeni.
+}
+
 interface
 
 uses

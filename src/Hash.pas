@@ -1,6 +1,8 @@
 unit Hash;
 
-// Generace hashu hesla pro odesilani na server.
+{
+  Generace hashu hesla pro odesilani na server.
+}
 
 interface
 

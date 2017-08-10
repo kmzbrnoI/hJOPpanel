@@ -1,7 +1,9 @@
 unit UPO;
 
-// Unita resici vykreslovani upozorneni v leve dolni casti reliefu.
-// Jedna se napriklad o upozorneni pri staveni jizdnich cest (napr. "kolejovy usek zapevnen").
+{
+  Unita resici vykreslovani upozorneni v leve dolni casti reliefu.
+  Jedna se napriklad o upozorneni pri staveni jizdnich cest (napr. "kolejovy usek zapevnen").
+}
 
 interface
 

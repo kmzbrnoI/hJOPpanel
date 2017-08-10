@@ -1,5 +1,9 @@
 unit PanelPainter;
 
+{
+  Zakldni vykreslovaci funkce pro interakci s platnem.
+}
+
 interface
 
 uses Controls, Types, Graphics, ImgList, DXDraws;

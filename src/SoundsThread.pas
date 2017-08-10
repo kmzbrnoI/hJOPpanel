@@ -1,6 +1,10 @@
 unit SoundsThread;
 
-// toto vlako je jen pro opakujici se zvuky
+{
+  Vlakno resici prehravani dlouhotrvajicich zvuku.
+  Toto vlako je jen pro opakujici se zvuky.
+  Jednorazove zvuky se pousti z hlavniho vlakna (asynchronne, viz Sounds.pas).
+}
 
 interface
 

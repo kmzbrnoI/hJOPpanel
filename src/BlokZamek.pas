@@ -1,5 +1,10 @@
 unit BlokZamek;
 
+{
+  Definice bloku usek, jeho vlastnosti a stavu v panelu.
+  Definice databaze bloku typu zamek.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;

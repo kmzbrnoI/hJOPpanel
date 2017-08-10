@@ -1,5 +1,9 @@
 unit uLIClient;
 
+{
+  Komunikace s uLI-master.
+}
+
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,

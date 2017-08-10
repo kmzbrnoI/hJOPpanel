@@ -1,5 +1,9 @@
 unit fHVSearch;
 
+{
+  Okno zadani parametru ke hledani lokomotivy na kolejisti.
+}
+
 interface
 
 uses

@@ -1,5 +1,9 @@
 unit fSprToSlot;
 
+{
+  Okno predavani LOKO do konkretniho slotu uLI-master.
+}
+
 interface
 
 uses

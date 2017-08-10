@@ -351,7 +351,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 175
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 6
   end
   object CB_Cilova: TComboBox
@@ -360,7 +360,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 177
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 7
   end
   object T_Timeout: TTimer

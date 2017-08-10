@@ -1,10 +1,12 @@
 unit InterProcessCom;
 
-// Inter-process communication for sharing logins between running instances
-// of panel.
+{
+  Inter-process communication for sharing logins between running instances
+  of panel.
 
-// Sadly, the implementation of the real inter-process communication must be
-// be bound to a form, so this class just calls methods of F_Main.
+  Sadly, the implementation of the real inter-process communication must be
+  be bound to a form, so this class just calls methods of F_Main.
+}
 
 interface
 

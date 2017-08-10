@@ -1,5 +1,10 @@
 unit BlokPopisek;
 
+{
+  Definice bloku popisek a jeho vlastnosti.
+  Definice databaze popisku.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,

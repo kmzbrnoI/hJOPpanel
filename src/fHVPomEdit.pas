@@ -1,5 +1,9 @@
 unit fHVPomEdit;
 
+{
+  Okno zadani POM parametru.
+}
+
 interface
 
 uses

@@ -1,5 +1,9 @@
 unit Debug;
 
+{
+  Debug okno.
+}
+
 interface
 
 uses

@@ -1,6 +1,8 @@
 unit Zasobnik;
 
-// Tato unita resi zasobnik jizdnich cest jedne oblasti rizeni.
+{
+  Tato unita resi zasobnik jizdnich cest jedne oblasti rizeni.
+}
 
 interface
 

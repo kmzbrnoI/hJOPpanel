@@ -1,5 +1,9 @@
 unit PanelOR;
 
+{
+  Definice oblasti rizeni.
+}
+
 interface
 
 uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,

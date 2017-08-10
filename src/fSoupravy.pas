@@ -1,5 +1,9 @@
 unit fSoupravy;
 
+{
+  Okno seznamu vsech souprav.
+}
+
 interface
 
 uses

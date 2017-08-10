@@ -1,5 +1,9 @@
 unit fRegReq;
 
+{
+  Okno potvrzovani zadost o loko z rucniho regulatoru.
+}
+
 interface
 
 uses

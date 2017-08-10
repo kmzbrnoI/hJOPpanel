@@ -1,5 +1,11 @@
 unit BlokVyhybka;
 
+{
+  Definice bloku vyhybka.
+  Sem patri pouze definice bloku, nikoliv definice databaze vyhybek
+  (kvuli pouzivani v jinych unitach).
+}
+
 interface
 
 uses Classes, Graphics, Types;

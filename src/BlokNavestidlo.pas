@@ -1,5 +1,10 @@
 unit BlokNavestidlo;
 
+{
+  Definice bloku navestidla, jeho vlastnosti a stavu v panelu.
+  Definice databaze navestidel.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;

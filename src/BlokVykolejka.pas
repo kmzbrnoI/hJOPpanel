@@ -1,5 +1,10 @@
 unit BlokVykolejka;
 
+{
+  Definice bloku vykolejka, jeho vlastnosti a stavu v panelu.
+  Definice databaze vykolejek.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,

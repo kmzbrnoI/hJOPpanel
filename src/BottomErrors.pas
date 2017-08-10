@@ -1,5 +1,9 @@
 unit BottomErrors;
 
+{
+  Sprava vypisovani technologickych chyb do spodni casti panelu.
+}
+
 interface
 
 uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws;

@@ -1,5 +1,9 @@
 unit fHVEdit;
 
+{
+  Okno editace vlastnosti hnacicho vozidla.
+}
+
 interface
 
 uses

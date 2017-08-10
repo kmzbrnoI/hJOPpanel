@@ -1,5 +1,9 @@
 unit fPotvrSekv;
 
+{
+  Okno potvrzovaci sekvence.
+}
+
 interface
 
 uses

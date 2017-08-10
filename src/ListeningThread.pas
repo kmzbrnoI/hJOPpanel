@@ -1,5 +1,9 @@
 unit ListeningThread;
 
+{
+  Poslouchaci vlakno TCP spojeni
+}
+
 interface
 
 uses

@@ -1,5 +1,9 @@
 unit DCC_Icons;
 
+{
+  Udrzovani stavu DCC a zobrazovani tlacitek dle aktualniho stavu.
+}
+
 interface
 
 uses Classes, Types, SysUtils;

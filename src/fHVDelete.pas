@@ -1,5 +1,9 @@
 unit fHVDelete;
 
+{
+  Okno potrvzeni zadosti o mazani hnaciho vozidla.
+}
+
 interface
 
 uses

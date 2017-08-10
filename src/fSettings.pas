@@ -1,5 +1,9 @@
 unit fSettings;
 
+{
+  Okynko nastaveni.
+}
+
 interface
 
 uses

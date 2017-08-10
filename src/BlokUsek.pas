@@ -1,5 +1,11 @@
 unit BlokUsek;
 
+{
+  Definice bloku usek.
+  Sem patri pouze definice bloku, nikoliv definice databaze useku
+  (kvuli pouzivani v jinych unitach).
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, RPConst, Symbols;

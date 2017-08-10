@@ -1,5 +1,9 @@
 unit Panel;
 
+{
+  Hlavni logika celeho panelu.
+}
+
 interface
 
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,

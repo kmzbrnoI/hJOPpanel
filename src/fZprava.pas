@@ -1,5 +1,9 @@
 unit fZprava;
 
+{
+  Okno jednoho komunikacniho sezeni.
+}
+
 interface
 
 uses

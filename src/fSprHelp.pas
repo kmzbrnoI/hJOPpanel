@@ -1,5 +1,9 @@
 unit fSprHelp;
 
+{
+  Okno napovedy k souprave.
+}
+
 interface
 
 uses

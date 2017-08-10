@@ -1,5 +1,9 @@
 unit LokTokens;
 
+{
+  Databaze autorizacnich tokenu pro rucni rizeni hnacich vozidel.
+}
+
 interface
 
 uses SysUtils, Generics.Collections, Classes;

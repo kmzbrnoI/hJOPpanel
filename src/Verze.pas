@@ -1,5 +1,9 @@
 unit Verze;
 
+{
+  Ziskani verze programu.
+}
+
 interface
 
 uses Windows, SysUtils, Forms, jclPEImage;

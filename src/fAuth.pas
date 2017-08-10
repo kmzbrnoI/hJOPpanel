@@ -1,5 +1,9 @@
 unit fAuth;
 
+{
+  Autorizacni okno.
+}
+
 interface
 
 uses

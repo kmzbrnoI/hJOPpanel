@@ -1,5 +1,10 @@
 unit BlokRozp;
 
+{
+  Definice bloku rozpojovac, jeho vlastnosti a stavu v panelu.
+  Definice databaze rozpojovacu.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;

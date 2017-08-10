@@ -1,5 +1,10 @@
 unit HVDb;
 
+{
+  Sprava seznamu hnacich vozidel, ktere nam posle server.
+  (napr. pri prilezitosti editace soupravy)
+}
+
 interface
 
 uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,

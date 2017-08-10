@@ -1,5 +1,10 @@
 unit BlokPrejezd;
 
+{
+  Definice bloku prejezd, jeho vlastnosti a stavu v panelu.
+  Definice databaze bloku typu prejezd.
+}
+
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,

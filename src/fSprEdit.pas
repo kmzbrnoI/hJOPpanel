@@ -1,5 +1,9 @@
 unit fSprEdit;
 
+{
+  Okno editace soupravy.
+}
+
 interface
 
 uses

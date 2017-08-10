@@ -1,5 +1,9 @@
 unit fNastaveni_Casu;
 
+{
+  Okno nastaveni modeloveho casu.
+}
+
 interface
 
 uses
