@@ -11,6 +11,8 @@ implementation
 
 uses Symbols;
 
+////////////////////////////////////////////////////////////////////////////////
+
 procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; obj:TDXDraw; transparent:boolean = false);
 begin
  if (transparent) then
@@ -25,6 +27,8 @@ begin
 
  IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 procedure TextOutput(Pos:TPoint; Text:string; fg, bg:TColor; obj:TDXDraw; underline:boolean = false);
 var j:Integer;
@@ -85,5 +89,9 @@ begin
                                 (Pos.X+Length(Text))*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska);
   end;
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+//                    VYKRESLOVANI KONKRETNICH OBJEKTU                        //
+////////////////////////////////////////////////////////////////////////////////
 
 end.

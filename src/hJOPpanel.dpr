@@ -52,7 +52,8 @@ uses
   parseHelper in 'parseHelper.pas',
   PanelPainterUsek in 'PanelPainterUsek.pas',
   PanelPainter in 'PanelPainter.pas',
-  PanelPainterVyhybka in 'PanelPainterVyhybka.pas';
+  PanelPainterVyhybka in 'PanelPainterVyhybka.pas',
+  PanelPainterNavestidlo in 'PanelPainterNavestidlo.pas';
 
 {$R *.res}
 

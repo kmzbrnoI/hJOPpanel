@@ -616,10 +616,7 @@ type
 
    //zde jsou ulozeny vsechny bloky
    Useky:TList<TPReliefUsk>;
-   Navestidla:record
-    Data:array [0.._MAX_NAV] of TPNavestidlo;
-    Count:Integer;
-   end;
+   Navestidla:TList<TPNavestidlo>;
    Popisky:record
     Data:array [0.._MAX_POPISKY] of TPPopisek;
     Count:Integer;
@@ -676,7 +673,6 @@ type
 
    function FLoad(aFile:string):Byte;
 
-   procedure ShowNavestidla;
    procedure ShowPomocneSymboly;
    procedure ShowPopisky;
    procedure ShowDK;
@@ -835,7 +831,8 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     parseHelper, PanelPainterUsek, PanelPainter, PanelPainterVyhybka;
+     parseHelper, PanelPainterUsek, PanelPainter, PanelPainterVyhybka,
+     PanelPainterNavestidlo;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -843,6 +840,7 @@ begin
 
  Self.Useky := TList<TPReliefUsk>.Create();
  Self.Vyhybky := TList<TPVyhybka>.Create();
+ Self.Navestidla := TList<TPNavestidlo>.Create();
  Self.Vykol := TList<TPVykol>.Create();
  Self.Rozp  := TList<TPRozp>.Create();
  Self.ParentForm := aParentForm;
@@ -936,6 +934,7 @@ begin
   end;
  Self.Vyhybky.Free();
  Self.Useky.Free();
+ Self.Navestidla.Free();
  Self.Vykol.Free();
  Self.Rozp.Free();
  Self.StartJC.Free();
@@ -976,53 +975,14 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-procedure TRelief.ShowNavestidla();
-var i:Integer;
-    fg:TColor;
-    sjc:TStartJC;
-begin
- Self.StartJC.Clear();
-
- for i := 0 to Self.Navestidla.Count-1 do
-  begin
-   if ((Self.Navestidla.Data[i].PanelProp.blikani) and (Self.Graphics.blik)) then
-     fg := clBlack
-   else
-     fg := Self.Navestidla.Data[i].PanelProp.Symbol;
-
-   if (Self.Navestidla.Data[i].PanelProp.AB) then
-    begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID+2,
-               fg, Self.Navestidla.Data[i].PanelProp.Pozadi);
-    end else begin
-     Self.Draw(SymbolSet.IL_Symbols, Self.Navestidla.Data[i].Position, _SCom_Start+Self.Navestidla.Data[i].SymbolID,
-               fg, Self.Navestidla.Data[i].PanelProp.Pozadi);
-    end;
-
-   if ((Self.Navestidla.Data[i].PanelProp.Pozadi = clGreen) or
-       (Self.Navestidla.Data[i].PanelProp.Pozadi = clWhite) or
-       (Self.Navestidla.Data[i].PanelProp.Pozadi = clTeal)) then
-    begin
-     //pridani StartJC
-     sjc.Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
-     sjc.Pos   := Point(Self.Navestidla.Data[i].Position.X-1,Self.Navestidla.Data[i].Position.Y);
-     Self.StartJC.Add(sjc);
-
-     sjc.Color := Self.Navestidla.Data[i].PanelProp.Pozadi;
-     sjc.Pos   := Point(Self.Navestidla.Data[i].Position.X+1,Self.Navestidla.Data[i].Position.Y);
-     Self.StartJC.Add(sjc);
-    end;
-  end;//for i
-end;//procedure
-
 procedure TRelief.ShowPomocneSymboly();
 var i,j:Integer;
 begin
  //pomocne symboly
  for i := 0 to Self.PomocneObj.Count-1 do
    for j := 0 to Self.PomocneObj.Data[i].Positions.Count-1 do
-     Self.Draw(SymbolSet.IL_Symbols, Self.PomocneObj.Data[i].Positions.Data[j], Self.PomocneObj.Data[i].Symbol, _SpecS_DrawColors[Self.PomocneObj.Data[i].Symbol], clBlack);
+     Self.Draw(SymbolSet.IL_Symbols, Self.PomocneObj.Data[i].Positions.Data[j],
+       Self.PomocneObj.Data[i].Symbol, _SpecS_DrawColors[Self.PomocneObj.Data[i].Symbol], clBlack);
 end;//procedure
 
 procedure TRelief.ShowPopisky();
@@ -1361,7 +1321,7 @@ begin
 
    Self.ShowUvazkySpr();
    Self.ShowUvazky();
-   Self.ShowNavestidla();
+   PanelPainterNavestidlo.ShowNavestidla(Self.Navestidla, Self.Graphics.blik, Self.StartJC, Self.DrawObject);
    Self.ShowPrj();
    Self.ShowPomocneSymboly();
    PanelPainterUsek.ShowUseky(Self.Useky, Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
@@ -1546,7 +1506,7 @@ begin
  Result := -1;
 
  for i := 0 to Self.Navestidla.Count-1 do
-   if ((Pos.X = Self.Navestidla.Data[i].Position.X) and (Pos.Y = Self.Navestidla.Data[i].Position.Y)) then
+   if ((Pos.X = Self.Navestidla[i].Position.X) and (Pos.Y = Self.Navestidla[i].Position.Y)) then
      Exit(i);
 end;//function
 
@@ -1729,8 +1689,8 @@ begin
  index := Self.GetNav(Position);
  if (index <> -1) then
   begin
-   if (Self.Navestidla.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla.Data[index].OblRizeni].id, Button, Self.Navestidla.Data[index].Blok);
+   if (Self.Navestidla[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla[index].OblRizeni].id, Button, Self.Navestidla[index].Blok);
    goto EscCheck;
   end;
 
@@ -1802,6 +1762,7 @@ var i,j,k:Integer;
     vykol:TPVykol;
     rozp:TPRozp;
     vyh:TPVyhybka;
+    nav:TPNavestidlo;
 begin
  Self.ResetData();
 
@@ -1849,7 +1810,6 @@ begin
 
  BlkNazvy := TStringList.Create;
 
- Self.Navestidla.Count  := inifile.ReadInteger('P', 'N',   0);
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
@@ -1977,23 +1937,25 @@ begin
   end;//for i
 
  //navestidla
- for i := 0 to Self.Navestidla.Count-1 do
+ count := inifile.ReadInteger('P', 'N', 0);
+ for i := 0 to count-1 do
   begin
-   Self.Navestidla.Data[i].Blok       := inifile.ReadInteger('N'+IntToStr(i),'B',-1);
-   Self.Navestidla.Data[i].Position.X := inifile.ReadInteger('N'+IntToStr(i),'X',0);
-   Self.Navestidla.Data[i].Position.Y := inifile.ReadInteger('N'+IntToStr(i),'Y',0);
-   Self.Navestidla.Data[i].SymbolID   := inifile.ReadInteger('N'+IntToStr(i),'S',0);
+   nav.Blok       := inifile.ReadInteger('N'+IntToStr(i),'B',-1);
+   nav.Position.X := inifile.ReadInteger('N'+IntToStr(i),'X',0);
+   nav.Position.Y := inifile.ReadInteger('N'+IntToStr(i),'Y',0);
+   nav.SymbolID   := inifile.ReadInteger('N'+IntToStr(i),'S',0);
 
    //OR
-   Self.Navestidla.Data[i].OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
+   nav.OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
 
    //default settings:
    if (usek.Blok = -2) then
-     Self.Navestidla.Data[i].PanelProp := _UA_Nav_Prop
+     nav.PanelProp := _UA_Nav_Prop
    else
-     Self.Navestidla.Data[i].PanelProp := _Def_Nav_Prop;
+     nav.PanelProp := _Def_Nav_Prop;
 
-   Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.Data[i].Blok, i);
+   Self.Navestidla.Add(nav);
+   Self.AddToTechBlk(_BLK_SCOM, nav.Blok, Self.Navestidla.Count-1);
   end;//for i
 
  //pomocne symboly
@@ -2011,7 +1973,8 @@ begin
   end;//for i
 
  //vyhybky
- for i := 0 to inifile.ReadInteger('P', 'V', 0)-1 do
+ count := inifile.ReadInteger('P', 'V', 0);
+ for i := 0 to count-1 do
   begin
    vyh.Blok        := inifile.ReadInteger('V'+IntToStr(i),'B',-1);
    vyh.SymbolID    := inifile.ReadInteger('V'+IntToStr(i),'S',0);
@@ -2209,8 +2172,8 @@ begin
   end;//for i
 
  Self.Useky.Clear();
- Self.Popisky.Count    := 0;
- Self.Navestidla.Count := 0;
+ Self.Popisky.Count := 0;
+ Self.Navestidla.Clear();
  Self.Vyhybky.Clear();
 
  Self.Tech_blok.Clear();
@@ -2638,14 +2601,20 @@ end;//procedure
 procedure TRelief.ORNavChange(Sender:string; BlokID:integer; NavPanelProp:TNavPanelProp);
 var i:Integer;
     symbols:TList<TTechBlokToSymbol>;
+    nav:TPNavestidlo;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
  if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
  symbols := Self.Tech_blok[BlokID];
 
  for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_SCOM) and (Sender = Self.myORs[Self.Navestidla.Data[symbols[i].symbol_index].OblRizeni].id)) then
-    Self.Navestidla.Data[symbols[i].symbol_index].PanelProp := NavPanelProp;
+   if ((symbols[i].blk_type = _BLK_SCOM) and
+       (Sender = Self.myORs[Self.Navestidla[symbols[i].symbol_index].OblRizeni].id)) then
+    begin
+     nav := Self.Navestidla[symbols[i].symbol_index];
+     nav.PanelProp := NavPanelProp;
+     Self.Navestidla[symbols[i].symbol_index] := nav;
+    end;
 end;//procedure
 
 procedure TRelief.ORPrjChange(Sender:string; BlokID:integer; PrjPanelProp:TPrjPanelProp);
@@ -3195,6 +3164,7 @@ var i, j:Integer;
     vykol:TPVykol;
     rozp:TPRozp;
     vyh:TPVyhybka;
+    nav:TPNavestidlo;
 begin
  if (orindex = -1) then
   begin
@@ -3224,9 +3194,13 @@ begin
    end;
 
  for i := 0 to Self.Navestidla.Count-1 do
-  if (((orindex < 0) or (Self.Navestidla.Data[i].OblRizeni = orindex)) and
-      (Self.Navestidla.Data[i].Blok > -2)) then
-    Self.Navestidla.Data[i].PanelProp := _Def_Nav_Prop;
+  if (((orindex < 0) or (Self.Navestidla[i].OblRizeni = orindex)) and
+      (Self.Navestidla[i].Blok > -2)) then
+   begin
+    nav := Self.Navestidla[i];
+    nav.PanelProp := _Def_Nav_Prop;
+    Self.Navestidla[i] := nav;
+   end;
 
  for i := 0 to Self.Prejezdy.Count-1 do
   if (((orindex < 0) or (Self.Prejezdy.Data[i].OblRizeni = orindex)) and

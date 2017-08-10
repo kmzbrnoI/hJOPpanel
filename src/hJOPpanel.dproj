@@ -136,6 +136,7 @@
 			<DCCReference Include="PanelPainterUsek.pas"/>
 			<DCCReference Include="PanelPainter.pas"/>
 			<DCCReference Include="PanelPainterVyhybka.pas"/>
+			<DCCReference Include="PanelPainterNavestidlo.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
