@@ -38,6 +38,7 @@ type
       startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
+   function GetUsek(tech_id:Integer):Integer;
 
    property Items[index : integer] : TPUsek read GetItem; default;
    property Count : integer read GetCount;
@@ -607,6 +608,18 @@ end;
 function TPUseky.GetCount():Integer;
 begin
  Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUseky.GetUsek(tech_id:Integer):Integer;
+var i:Integer;
+begin
+ for i := 0 to Self.data.Count-1 do
+   if (tech_id = Self.data[i].Blok) then
+     Exit(i);
+
+ Result := -1;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

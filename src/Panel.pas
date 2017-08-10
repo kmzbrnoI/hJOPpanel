@@ -26,18 +26,7 @@ type
  // globalni datove struktury:
 
  TArSmallI=array of Smallint;
-
  TSpecialMenu = (none, dk, osv, loko, reg_please, hlaseni);
-
- TBoolArray=record
-  count:integer;
-  Data:array [-1..255] of boolean;
- end;
-
- TPointArray=record
-  count:integer;
-  Data:array [0..255] of TPoint;
- end;
 
  ///////////////////////////////////////////////////////////////////////////////
  // eventy:
@@ -110,35 +99,12 @@ type
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
- ///
- PTRelief = ^TRelief;
  TRelief=class
   private const
     //vychozi data
     _Def_Color_Pozadi = clBlack;
-    _Def_Color_Mrizka = clGray;
     _Def_Color_Kurzor_Ramecek = clYellow;
     _Def_Color_Kurzor_Obsah   = clMaroon;
-
-    _JCPopisek_Index = 360;
-
-    _Usek_Start      = 12;
-    _Usek_End        = 23;
-    _Vyhybka_End     = 3;
-    _SCom_Start      = 24;
-    _SCom_End        = 29;
-    _Plny_Symbol     = 37;
-    _Prj_Start       = 40;
-    _Hvezdicka       = 41;
-    _Kolecko         = 42;
-    _Uvazka_Start    = 43;
-    _Spr_Sipka_Start = 46;
-    _Zamek           = 48;
-    _Vykol_Start     = 49;
-    _Vykol_End       = 54;
-    _Rozp_Start      = 55;
-    _DKS_Top         = 58;
-    _DKS_Bot         = 59;
 
     _msg_width = 30;
 
@@ -249,8 +215,6 @@ type
 
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
-
-//   function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
 
    procedure AEMessage(var Msg: tagMSG; var Handled: Boolean);
 
@@ -891,17 +855,6 @@ begin
      Exit(i);
 end;//function
 
-{ TODO //vraci index ve svem poli symbolu
-function TRelief.GetUsek(tech_id:Integer):Integer;
-var i:Integer;
-begin
- for i := 0 to Self.Useky.Count-1 do
-   if (tech_id = Self.Useky[i].Blok) then
-     Exit(i);
-
- Result := -1;
-end;//function }
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //vyvolano pri kliku na relief
@@ -1127,7 +1080,7 @@ begin
   end;//for i
 
  Self.Vyhybky.Load(inifile);
- Self.Prejezdy.Load(inifile);
+ Self.Prejezdy.Load(inifile, Self.Useky);
 
  //popisky
  for i := 0 to Self.Popisky.Count - 1 do

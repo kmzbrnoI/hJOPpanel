@@ -3,7 +3,7 @@ unit BlokPrejezd;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-     BlokUsek;
+     BlokUsek, BlokyUsek;
 
 const
  _MAX_PRJ_LEN = 64;
@@ -48,7 +48,7 @@ type
    constructor Create();
    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile);
+   procedure Load(ini:TMemIniFile; useky:TPUseky);
    procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
@@ -86,7 +86,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Load(ini:TMemIniFile);
+procedure TPPrejezdy.Load(ini:TMemIniFile; useky:TPUseky);
 var i, j, count:Integer;
     prj:TPPrejezd;
     obj:string;
@@ -105,8 +105,7 @@ begin
     begin
      prj.BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*9+1, 3), 0);
      prj.BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*9+4, 3), 0);
-//     prj.BlikPositions.Data[j].PanelUsek := Self.GetUsek(StrToIntDef(copy(obj, j*9+7, 3), 0));
-     // TODO
+     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*9+7, 3), 0));
     end;//for j
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'SP', '');
