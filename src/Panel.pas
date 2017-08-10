@@ -7,7 +7,7 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
-     BlokNavestidlo, BlokVyhybka, BlokUsek;
+     BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka;
 
 const
   //limity poli
@@ -89,20 +89,6 @@ type
   Pos:TPoint;
   OblRizeni:Integer;
   PanelProp:TRozpPanelProp;
- end;
-
- ///////////////////////////////////////////////////////////////////////////////
-
- // data pro vykreslovani vykolejek
- TPVykol=record
-  Blok:Integer;
-  Pos:TPoint;
-  OblRizeni:Integer;
-  PanelProp:TVyhPanelProp;
-
-  symbol:Integer;
-  usek:integer;              // index useku, na kterem je vykolejka
-  vetev:integer;             // cislo vetve, ve kterem je vykolejka
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
@@ -238,7 +224,6 @@ type
     Count:Integer;
    end;//Popisky
 
-   Vykol : TList<TPVykol>;
    Rozp  : TList<TPRozp>;
 
    Useky : TPUseky;
@@ -248,6 +233,7 @@ type
    UvazkySpr : TPUvazkySpr;
    Zamky : TPZamky;
    Prejezdy : TPPrejezdy;
+   Vykol : TPVykolejky;
 
   SystemOK:record
    Poloha:boolean;
@@ -284,7 +270,6 @@ type
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
    procedure ShowRozp;
-   procedure ShowVykol;
 
    procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
 
@@ -294,7 +279,6 @@ type
 
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
-   function GetVykol(Pos:TPoint):Integer;
 
 //   function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
 
@@ -431,7 +415,7 @@ begin
  Self.Useky := TPUseky.Create();
  Self.Vyhybky := TPVyhybky.Create();
  Self.Navestidla := TPNavestidla.Create();
- Self.Vykol := TList<TPVykol>.Create();
+ Self.Vykol := TPVykolejky.Create();
  Self.Rozp  := TList<TPRozp>.Create();
  Self.Prejezdy := TPPrejezdy.Create();
  Self.ParentForm := aParentForm;
@@ -767,7 +751,7 @@ begin
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.ShowRozp();
-   Self.ShowVykol();
+   Self.Vykol.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.ShowDK();
    Self.ShowOpravneni();
    Self.ShowZasobniky();
@@ -948,16 +932,6 @@ begin
  Result := -1;
 end;//function }
 
-
-function TRelief.GetVykol(Pos:TPoint):Integer;
-var i:Integer;
-begin
- for i := 0 to Self.Vykol.Count-1 do
-   if ((pos.X = Self.Vykol[i].Pos.X) and (pos.Y = Self.Vykol[i].Pos.Y)) then
-     Exit(i);
- Result := -1;
-end;//function
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //vyvolano pri kliku na relief
@@ -1023,7 +997,7 @@ begin
   end;
 
  //vykolejka
- index := Self.GetVykol(Position);
+ index := Self.Vykol.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Vykol[index].Blok < 0) then goto EscCheck;
@@ -1115,7 +1089,6 @@ var i,j:Integer;
     return:Integer;
     ver:string;
     count:Integer;
-    vykol:TPVykol;
     rozp:TPRozp;
 begin
  Self.ResetData();
@@ -1202,30 +1175,6 @@ begin
  Self.UvazkySpr.Load(inifile);
  Self.Zamky.Load(inifile);
 
- // vykolejky
- Self.Vykol.Clear();
- count := inifile.ReadInteger('P', 'Vyk', 0);
- for i := 0 to count-1 do
-  begin
-   vykol.Blok                      := inifile.ReadInteger('Vyk'+IntToStr(i), 'B', -1);
-   vykol.OblRizeni                 := inifile.ReadInteger('Vyk'+IntToStr(i), 'OR', -1);
-   vykol.Pos.X                     := inifile.ReadInteger('Vyk'+IntToStr(i), 'X', 0);
-   vykol.Pos.Y                     := inifile.ReadInteger('Vyk'+IntToStr(i), 'Y', 0);
-   vykol.usek                      := inifile.ReadInteger('Vyk'+IntToStr(i), 'O', -1);
-   vykol.vetev                     := inifile.ReadInteger('Vyk'+IntToStr(i), 'V', -1);
-   vykol.symbol                    := inifile.ReadInteger('Vyk'+IntToStr(i), 'T', 0);
-
-   //default settings:
-   if (vykol.Blok = -2) then
-     vykol.PanelProp := _UA_Vyh_Prop
-   else
-     vykol.PanelProp := _Def_Vyh_Prop;
-
-   Self.Vykol.Add(vykol);
-
-   Self.AddToTechBlk(_BLK_VYKOL, vykol.Blok, i);
-  end;//for i
-
  // rozpojovace
  Self.Rozp.Clear();
  count := inifile.ReadInteger('P', 'R', 0);
@@ -1267,6 +1216,9 @@ begin
 
  for i := 0 to Self.Navestidla.data.Count-1 do
    Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.data[i].Blok, i);
+
+ for i := 0 to Self.Vykol.data.Count-1 do
+   Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -1677,7 +1629,7 @@ end;//procedure
 
 procedure TRelief.ORVyhChange(Sender:string; BlokID:integer; VyhPanelProp:TVyhPanelProp);
 var i:Integer;
-    vykol:TPVykol;
+    vykol:TPVykolejka;
     vyh:TPVyhybka;
     symbols:TList<TTechBlokToSymbol>;
 begin
@@ -1702,7 +1654,7 @@ begin
         begin
          vykol := Self.Vykol[symbols[i].symbol_index];
          vykol.PanelProp := VyhPanelProp;
-         Self.Vykol[symbols[i].symbol_index] := vykol;
+         Self.Vykol.data[symbols[i].symbol_index] := vykol;
         end;
 
       end;
@@ -2290,7 +2242,6 @@ end;
 
 procedure TRelief.OrDisconnect(orindex:Integer = -1);
 var i:Integer;
-    vykol:TPVykol;
     rozp:TPRozp;
 begin
  if (orindex = -1) then
@@ -2308,15 +2259,7 @@ begin
  Self.Uvazky.Reset(orindex);
  Self.UvazkySpr.Reset(orindex);
  Self.Zamky.Reset(orindex);
-
- for i := 0 to Self.Vykol.Count-1 do
-  if (((orindex < 0) or (Self.Vykol[i].OblRizeni = orindex)) and
-      (Self.Vykol[i].Blok > -2)) then
-   begin
-    vykol := Self.Vykol[i];
-    vykol.PanelProp := _Def_Vyh_Prop;
-    Self.Vykol[i] := vykol;
-   end;
+ Self.Vykol.Reset(orindex);
 
  for i := 0 to Self.Rozp.Count-1 do
   if (((orindex < 0) or (Self.Rozp[i].OblRizeni = orindex)) and
@@ -2422,49 +2365,6 @@ var i:Integer;
 begin
  for i := 0 to Self.Rozp.Count-1 do
    Self.Draw(SymbolSet.IL_Symbols, Self.Rozp[i].Pos, _Rozp_Start+1, Self.Rozp[i].PanelProp.Symbol, clBlack, true);
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-// vykreslit vykolejky
-procedure TRelief.ShowVykol;
-var i:Integer;
-    fg, bkcol:TColor;
-    visible:boolean;
-begin
- for i := 0 to Self.Vykol.Count-1 do
-  begin
-   visible := ((Self.Vykol[i].PanelProp.Poloha = TVyhPoloha.disabled) or (Self.Vykol[i].vetev < 0) or
-     (Self.Vykol[i].vetev >= Self.Useky[Self.Vykol[i].usek].Vetve.Count) or
-     (Self.Useky[Self.Vykol[i].usek].Vetve[Self.Vykol[i].vetev].visible));
-
-   if ((Self.Vykol[i].PanelProp.blikani) and (Self.Graphics.blik) and (visible)) then
-     fg := clBlack
-   else begin
-     if ((visible) or (Self.Vykol[i].PanelProp.Symbol = clAqua)) then
-      fg := Self.Vykol[i].PanelProp.Symbol
-     else
-      fg := Self.Useky[Self.Vykol[i].usek].PanelProp.nebarVetve;
-   end;
-
-   if (Self.Vykol[i].PanelProp.Pozadi = clBlack) then
-     bkcol := Self.Useky[Self.Vykol[i].usek].PanelProp.Pozadi
-   else
-     bkcol := Self.Vykol[i].PanelProp.Pozadi;
-
-   case (Self.Vykol[i].PanelProp.Poloha) of
-    TVyhPoloha.disabled : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
-        _Vykol_Start+Self.Vykol[i].symbol, Self.Useky[Self.Vykol[i].usek].PanelProp.Pozadi, clFuchsia);
-    TVyhPoloha.none     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
-        _Vykol_Start+Self.Vykol[i].symbol, bkcol, fg);
-    TVyhPoloha.plus     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
-        _Vykol_Start+Self.Vykol[i].symbol, fg, bkcol);
-    TVyhPoloha.minus    : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
-        _Vykol_Start+Self.Vykol[i].symbol+2, fg, bkcol);
-    TVyhPoloha.both     : Self.Draw(SymbolSet.IL_Symbols, Self.Vykol[i].Pos,
-        _Vykol_Start+Self.Vykol[i].symbol, bkcol, clBlue);
-   end;
-  end;//for i
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

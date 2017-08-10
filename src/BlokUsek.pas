@@ -74,6 +74,21 @@ type
  // program si duplikuje ulozena data - po rozdeleni useku na vetve uklada usek jak nerozdeleny tak rozdeleny
  end;
 
+const
+  _Def_Usek_Prop:TUsekPanelProp = (
+      blikani: false;
+      Symbol: clFuchsia;
+      Pozadi: clBlack;
+      nebarVetve: $A0A0A0;
+      KonecJC: no);
+
+  _UA_Usek_Prop:TUsekPanelProp = (
+      blikani: false;
+      Symbol: $A0A0A0;
+      Pozadi: clBlack;
+      nebarVetve: $A0A0A0;
+      KonecJC: no);
+
 implementation
 
 end.

@@ -43,21 +43,6 @@ type
    property Count : integer read GetCount;
  end;
 
-const
-  _Def_Usek_Prop:TUsekPanelProp = (
-      blikani: false;
-      Symbol: clFuchsia;
-      Pozadi: clBlack;
-      nebarVetve: $A0A0A0;
-      KonecJC: no);
-
-  _UA_Usek_Prop:TUsekPanelProp = (
-      blikani: false;
-      Symbol: $A0A0A0;
-      Pozadi: clBlack;
-      nebarVetve: $A0A0A0;
-      KonecJC: no);
-
 implementation
 
 uses ParseHelper, PanelPainter;
@@ -245,26 +230,6 @@ begin
     end;
   end;
 end;
-
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-
-{
-procedure PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
-    myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
-procedure ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
-procedure PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
-procedure ShowUsekVetve(usek:TPUsek; vetevI:Integer; visible:boolean;
-    var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
-    startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
-procedure ShowDKSVetve(usek:TPUsek; visible:boolean;
-    var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
-    startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
-
-implementation
-
-uses PanelPainter, RPConst;                }
 
 ////////////////////////////////////////////////////////////////////////////////
 

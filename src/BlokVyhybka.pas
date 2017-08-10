@@ -27,6 +27,19 @@ type
   visible:boolean;      // na zaklade viditelnosti ve vetvich je rekonstruovana viditelnost vyhybky
  end;//Navestidlo
 
+const
+  _Def_Vyh_Prop:TVyhPanelProp = (
+      blikani: false;
+      Symbol: clBlack;
+      Pozadi: clFuchsia;
+      Poloha: TVyhPoloha.disabled);
+
+  _UA_Vyh_Prop:TVyhPanelProp = (
+      blikani: false;
+      Symbol: $A0A0A0;
+      Pozadi: clBlack;
+      Poloha: TVyhPoloha.both);
+
 implementation
 
 end.
