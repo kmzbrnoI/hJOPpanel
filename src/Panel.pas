@@ -5,12 +5,11 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX,
-     BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd;
+     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
+     BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokUsek;
 
 const
   //limity poli
-  _MAX_USK      = 256;
   _MAX_NAV      = 256;
   _MAX_POM      = 256;
   _MAX_VYH      = 256;
@@ -51,151 +50,11 @@ type
  TLoginChangeEvent = procedure(Sender:TObject; str:string) of object;
 
  ///////////////////////////////////////////////////////////////////////////////
- // data k oblastem rizeni:
-
- // 1 element osvetleni oblasti rizeni
- TOsv = record
-  board:Byte;
-  port:Byte;
-  name:string;  //max 5 znaku
-  state:boolean;
- end;
-
- // prava oblasti rizeni
- TORRights=record
-  ModCasStart:Boolean;
-  ModCasStop:Boolean;
-  ModCasSet:Boolean;
- end;
-
- // pozice symbolu OR
- TPoss=record
-  DK:TPoint;
-  DKOr:byte;  //orientace DK (0,1)
-  Time:TPoint;
- end;
-
- // fronta JC
- TPanelQ = record
-  data:array [0..15] of string;
-  cnt:Integer;
- end;
-
- TMereniCasu = record
-   Start:TDateTime;
-   Length:TDateTime;
-   id:Integer;
-  end;
-
- TORRegPleaseStatus = (null = 0, request = 1, selected = 2);
-
- TORRegPlease = record
-  status:TORRegPleaseStatus;
-  user,firstname, lastname, comment:string;
- end;
-
- // 1 oblast rizeni
- TORPanel=class
-  str:string;
-  Name:string;
-  ShortName:string;
-  id:string;
-  Lichy:Byte;     // 0 = zleva doprava ->, 1 = zprava doleva <-
-  Rights:TORRights;
-  Poss:TPoss;
-  Osvetleni:TList<TOsv>;
-  MereniCasu:TList<TMereniCasu>;
-
-  tech_rights:TORControlRights;
-  dk_osv:Boolean;
-  dk_blik:Boolean;
-  dk_click_server:boolean;
-  stack:TORStack;
-
-  username:string;
-  login:string;
-
-  NUZ_status:TNUZstatus;
-  RegPlease:TORRegPlease;
-
-  HVs:THVDb;
-
-  hlaseni:boolean;
- end;
 
  // prehlasovani pomoci Ctrl+R (reader vs. normalni uzivatel)
  TReAuth = record
   old_login:string;                                                             // guest -> username
   old_ors:TList<Integer>;                                                       // (guest -> username) seznam indexu oblati rizeni k autorizaci
- end;
-
- ///////////////////////////////////////////////////////////////////////////////
- // blok usek:
-
- TUsekSouprava=record
-  nazev:string;
-  sipkaL,sipkaS:boolean;
-  fg, bg, ramecek:TColor;
- end;
-
- // data o useku pro spravne vykreslovani
- TUsekPanelProp=record
-  blikani:boolean;
-  Symbol,Pozadi,nebarVetve:TColor;
-  KonecJC:TJCType;
-  soupravy:TList<TUsekSouprava>;
- end;
-
- // useku rozdeleny na vetve je reprezentovan takto:
-
- // ukoncovaci element vetve = vyhybka
- TVetevEnd = record
-  vyh:Integer;                     // pokud usek nema vyhybky -> vyh1 = -1, vyh2 = -1 (nastava u useku bez vyhybky a u koncovych vetvi)
-                                   // referuje na index v poli vyhybek (nikoliv na technologicke ID vyhybky!)
-                                   // kazda vetev je ukoncena maximalne 2-ma vyhybkama - koren muze byt ukoncen 2-ma vyhybkama, pak jen jedna
-  ref_plus,ref_minus:Integer;      // reference  na vetev, kterou se pokracuje, pokud je vyh v poloze + resp. poloze -
-                                   // posledni vetev resp. usek bez vyhybky ma obe reference = -1
- end;
-
- //vetev useku
- TVetev=record             //vetev useku
-
-  node1:TVetevEnd;           // reference na 1. vyhybku, ktera ukoncuje tuto vetev
-  node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
-  visible:boolean;           // pokud je vetve viditelna, je zde true; jinak false
-
-
-
-  Symbols:array of TReliefSym;
-                            // s timto dynamicky alokovanym polem je potreba zachazet opradu opatrne
-                            // realokace trva strasne dlouho !
-                            // presto si myslim, ze se jedna o vyhodne reseni: pole se bude plnit jen jednou
- end;
-
- TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
-
- // 1 usek na reliefu
- TPReliefUsk=record
-  Blok:Integer;
-
-  OblRizeni:Integer;
-  PanelProp:TUsekPanelProp;
-  root:TPoint;
-  DKStype:TDKSType;
-
-  Symbols:TList<TReliefSym>;
-  JCClick:TList<TPoint>;
-  KPopisek:TList<TPoint>;
-  Soupravy:TList<TPoint>; // je zaruceno, ze tento seznam je usporadany v lichem smeru (resi se pri nacitani souboru)
-  KpopisekStr:string;
-
-  Vetve:TList<TVetev>;               // vetve useku
-   //vetev 0 je vzdy koren
-   //zde je ulozen binarni strom v pseudo-forme
-     //na 0. indexu je koren, kazdy vrchol pak obsahuje referenci na jeho deti
-
-
- // program si duplikuje ulozena data - po rozdeleni useku na vetve uklada usek jak nerozdeleny tak rozdeleny
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
@@ -372,21 +231,6 @@ type
     _DblClick_Timeout_Ms = 250;
 
     //defaultni chovani bloku:
-    _Def_Usek_Prop:TUsekPanelProp = (
-        blikani: false;
-        Symbol: clFuchsia;
-        Pozadi: clBlack;
-        nebarVetve: $A0A0A0;
-        KonecJC: no);
-
-    _UA_Usek_Prop:TUsekPanelProp = (
-        blikani: false;
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        nebarVetve: $A0A0A0;
-        KonecJC: no);
-
-
     _Def_Vyh_Prop:TVyhPanelProp = (
         blikani: false;
         Symbol: clBlack;
@@ -468,7 +312,6 @@ type
    Tech_blok:TDictionary<Integer, TList<TTechBlokToSymbol>>;   // mapuje id technologickeho bloku na
 
    //zde jsou ulozeny vsechny bloky
-   Useky:TList<TPReliefUsk>;
    Navestidla:TList<TPNavestidlo>;
    Popisky:record
     Data:array [0.._MAX_POPISKY] of TPPopisek;
@@ -484,6 +327,7 @@ type
    Vykol : TList<TPVykol>;
    Rozp  : TList<TPRozp>;
 
+   Useky : TPUseky;
    Uvazky : TPUvazky;
    UvazkySpr : TPUvazkySpr;
    Zamky : TPZamky;
@@ -533,7 +377,6 @@ type
 
    function ORLoad(const ORs:TStrings):Byte;
 
-   function GetUsek(Pos:TPoint):Integer; overload;
    function GetNav(Pos:TPoint):Integer;
    function GetVyh(Pos:TPoint):Integer;
    function GetPrj(Pos:TPoint):Integer; overload;
@@ -675,7 +518,7 @@ constructor TRelief.Create(aParentForm:TForm);
 begin
  inherited Create;
 
- Self.Useky := TList<TPReliefUsk>.Create();
+ Self.Useky := TPUseky.Create();
  Self.Vyhybky := TList<TPVyhybka>.Create();
  Self.Navestidla := TList<TPNavestidlo>.Create();
  Self.Vykol := TList<TPVykol>.Create();
@@ -764,15 +607,6 @@ begin
   end;
  Self.myORs.Free();
 
- for i := 0 to Self.Useky.Count-1 do
-  begin
-   Self.Useky[i].PanelProp.soupravy.Free();
-   Self.Useky[i].Symbols.Free();
-   Self.Useky[i].JCClick.Free();
-   Self.Useky[i].KPopisek.Free();
-   Self.Useky[i].Soupravy.Free();
-   Self.Useky[i].Vetve.Free();
-  end;
  Self.Vyhybky.Free();
  Self.Useky.Free();
  Self.Navestidla.Free();
@@ -1018,7 +852,7 @@ begin
    PanelPainterNavestidlo.ShowNavestidla(Self.Navestidla, Self.Graphics.blik, Self.StartJC, Self.DrawObject);
    Self.ShowPrj();
    Self.ShowPomocneSymboly();
-   PanelPainterUsek.ShowUseky(Self.Useky, Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
+   Self.Useky.Show(Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
    Self.ShowPopisky();
    PanelPainterVyhybka.ShowVyhybky(Self.Vyhybky, Self.Graphics.blik, Self.Useky, Self.DrawObject);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
@@ -1183,17 +1017,6 @@ begin
   end;
 end;//procedure
 
-function TRelief.GetUsek(Pos:TPoint):Integer;
-var i,j:Integer;
-begin
- Result := -1;
-
- for i := 0 to Self.Useky.Count-1 do
-   for j := 0 to Self.Useky[i].Symbols.Count-1 do
-     if ((Pos.X = Self.Useky[i].Symbols[j].Position.X) and (Pos.Y = Self.Useky[i].Symbols[j].Position.Y)) then
-       Exit(i);
-end;//function
-
 function TRelief.GetNav(Pos:TPoint):Integer;
 var i:Integer;
 begin
@@ -1224,7 +1047,7 @@ begin
      Exit(i);
 end;//function
 
-//vraci index ve svem poli symbolu
+{ TODO //vraci index ve svem poli symbolu
 function TRelief.GetUsek(tech_id:Integer):Integer;
 var i:Integer;
 begin
@@ -1233,7 +1056,7 @@ begin
      Exit(i);
 
  Result := -1;
-end;//function
+end;//function }
 
 { TODO function TRelief.GetPrj(tech_id:Integer):Integer;
 var i:Integer;
@@ -1328,17 +1151,17 @@ begin
   end;
 
  //usek
- index := Self.GetUsek(Position);
+ index := Self.Useky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Useky[index].Blok < 0) then goto EscCheck;
+   if (Self.Useky.data[index].Blok < 0) then goto EscCheck;
 
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
-   if ((Self.myORs[Self.Useky[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = ENTER)) then
+   if ((Self.myORs[Self.Useky.data[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = ENTER)) then
      //  or;LOK-REQ;U-PLEASE;blk_id              - zadost o vydani seznamu hnacich vozidel na danem useku
-     PanelTCPClient.SendLn(Self.myORs[Self.Useky[index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[index].Blok))
+     PanelTCPClient.SendLn(Self.myORs[Self.Useky.data[index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky.data[index].Blok))
    else
-     PanelTCPClient.PanelClick(Self.myORs[Self.Useky[index].OblRizeni].id, Button, Self.Useky[index].Blok);
+     PanelTCPClient.PanelClick(Self.myORs[Self.Useky.data[index].OblRizeni].id, Button, Self.Useky.data[index].Blok);
    goto EscCheck;
   end;
 
@@ -1415,7 +1238,7 @@ var i,j,k:Integer;
     pos:TPoint;
     count, count2:Integer;
     Vetev:TVetev;
-    Usek:TPReliefUsk;
+    Usek:TPUsek;
     vykol:TPVykol;
     rozp:TPRozp;
     vyh:TPVyhybka;
@@ -1471,124 +1294,6 @@ begin
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  BlkNazvy.Free;
 
- //useky
- count := inifile.ReadInteger('P', 'U', 0);
- for i := 0 to count-1 do
-  begin
-   usek.Blok      := inifile.ReadInteger('U'+IntToStr(i),'B',-1);
-   usek.OblRizeni := inifile.ReadInteger('U'+IntToStr(i),'OR',-1);
-   usek.root      := GetPos(inifile.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
-   usek.DKStype := TDKSType(inifile.ReadInteger('U'+IntToStr(i), 'DKS', Integer(dksNone)));
-
-   //Symbols
-   usek.Symbols := TList<TReliefSym>.Create();
-   obj := inifile.ReadString('U'+IntToStr(i),'S', '');
-   for j := 0 to (Length(obj) div 8)-1 do
-    begin
-     try
-       symbol.Position.X := StrToInt(copy(obj,j*8+1,3));
-       symbol.Position.Y := StrToInt(copy(obj,j*8+4,3));
-       symbol.SymbolID   := StrToInt(copy(obj,j*8+7,2));
-     except
-       continue;
-     end;
-     usek.Symbols.Add(symbol);
-    end;//for j
-
-   //JCClick
-   usek.JCClick := TList<TPoint>.Create();
-   obj := inifile.ReadString('U'+IntToStr(i),'C','');
-   for j := 0 to (Length(obj) div 6)-1 do
-    begin
-     try
-       pos.X := StrToInt(copy(obj,j*6+1,3));
-       pos.Y := StrToInt(copy(obj,j*6+4,3));
-     except
-      continue;
-     end;
-     usek.JCClick.Add(pos);
-    end;//for j
-
-   //KPopisek
-   obj := inifile.ReadString('U'+IntToStr(i),'P','');
-   usek.KPopisek := TList<TPoint>.Create();
-   for j := 0 to (Length(obj) div 6)-1 do
-    begin
-     try
-       pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
-       pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
-     except
-       continue;
-     end;
-     usek.KPopisek.Add(pos);
-    end;//for j
-
-   //Nazev
-   usek.KpopisekStr := inifile.ReadString('U'+IntToStr(i),'N','');
-
-   //Soupravy
-   obj := inifile.ReadString('U'+IntToStr(i),'Spr','');
-   usek.Soupravy := TList<TPoint>.Create();
-   for j := 0 to (Length(obj) div 6)-1 do
-    begin
-     try
-       pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
-       pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
-     except
-       continue;
-     end;
-     usek.Soupravy.Add(pos);
-    end;//for j
-
-   // usporadame seznam souprav podle licheho smeru
-   if (Self.myORs[usek.OblRizeni].Lichy = 1) then
-     usek.Soupravy.Reverse();
-
-   // pokud nejsou pozice na soupravu, kreslime soupravu na cisle koleje
-   if ((usek.Soupravy.Count = 0) and (usek.KpopisekStr <> '') and (usek.KPopisek.Count <> 0)) then
-     usek.Soupravy.Add(usek.KPopisek[0]);
-
-   //nacitani vetvi:
-   usek.Vetve := TList<TVetev>.Create();
-   count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
-   for j := 0 to count2-1 do
-    begin
-     obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
-
-     vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
-     vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
-     vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
-
-     vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
-     vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
-     vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
-
-     obj := RightStr(obj, Length(obj)-14);
-
-     SetLength(vetev.Symbols, Length(obj) div 9);
-
-     for k := 0 to Length(vetev.Symbols)-1 do
-      begin
-       vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
-       vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
-       vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
-      end;
-
-     usek.Vetve.Add(vetev);
-    end;//for j
-
-   //default settings:
-   if (usek.Blok = -2) then
-     usek.PanelProp := _UA_Usek_Prop
-   else
-     usek.PanelProp := _Def_Usek_Prop;
-
-   usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
-
-   Self.Useky.Add(usek);
-   Self.AddToTechBlk(_BLK_USEK, usek.Blok, Self.Useky.Count-1);
-  end;//for i
-
  //navestidla
  count := inifile.ReadInteger('P', 'N', 0);
  for i := 0 to count-1 do
@@ -1602,7 +1307,7 @@ begin
    nav.OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
 
    //default settings:
-   if (usek.Blok = -2) then
+   if (nav.Blok = -2) then
      nav.PanelProp := _UA_Nav_Prop
    else
      nav.PanelProp := _Def_Nav_Prop;
@@ -1711,6 +1416,9 @@ begin
    Self.AddToTechBlk(_BLK_ROZP, rozp.Blok, i);
   end;//for i
 
+ for i := 0 to Self.Useky.data.Count-1 do
+   Self.AddToTechBlk(_BLK_USEK, Self.Usek.data[i].Blok, i);
+
  for i := 0 to Self.Uvazky.data.Count-1 do
    Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
 
@@ -1741,16 +1449,6 @@ end;//function
 procedure TRelief.ResetData;
 var i:Integer;
 begin
- //vymazani dat
- for i := 0 to Self.Useky.Count-1 do
-  begin
-   Self.Useky[i].Symbols.Count  := 0;
-   Self.Useky[i].JCClick.Count  := 0;
-   Self.Useky[i].Soupravy.Count := 0;
-   Self.Useky[i].KPopisek.Count := 0;
-  end;//for i
-
- Self.Useky.Clear();
  Self.Popisky.Count := 0;
  Self.Navestidla.Clear();
  Self.Vyhybky.Clear();
@@ -2116,7 +1814,7 @@ end;
 
 procedure TRelief.ORUsekChange(Sender:string; BlokID:integer; UsekPanelProp:TUsekPanelProp);
 var i:Integer;
-    usk:TPReliefUsk;
+    usk:TPUsek;
     symbols:TList<TTechBlokToSymbol>;
     t:TList<TUsekSouprava>;
 begin
@@ -2127,7 +1825,7 @@ begin
  for i := 0 to symbols.Count-1 do
    if ((symbols[i].blk_type = _BLK_USEK) and (Sender = Self.myORs[Self.Useky[symbols[i].symbol_index].OblRizeni].id)) then
     begin
-     usk := Self.Useky[symbols[i].symbol_index];
+     usk := Self.Useky.data[symbols[i].symbol_index];
 
      // zkopirujeme seznam souprav
      t := usk.PanelProp.soupravy;
@@ -2136,7 +1834,7 @@ begin
      t.AddRange(UsekPanelProp.soupravy);
      usk.PanelProp.soupravy := t;
 
-     Self.Useky[symbols[i].symbol_index] := usk;
+     Self.Useky.data[symbols[i].symbol_index] := usk;
     end;
 
  UsekPanelProp.soupravy.Free();
@@ -2757,7 +2455,7 @@ end;
 
 procedure TRelief.OrDisconnect(orindex:Integer = -1);
 var i:Integer;
-    usk:TPreliefUsk;
+    usk:TPUsek;
     vykol:TPVykol;
     rozp:TPRozp;
     vyh:TPVyhybka;
@@ -2771,16 +2469,7 @@ begin
    Self.Graphics.DrawObject.Enabled := true;
   end;
 
- for i := 0 to Self.Useky.Count-1 do
-  if (((orindex < 0) or (Self.Useky[i].OblRizeni = orindex)) and
-      (Self.Useky[i].Blok > -2)) then
-   begin
-    usk := Self.Useky[i];
-    usk.PanelProp.soupravy.Free();
-    usk.PanelProp := _Def_Usek_Prop;
-    usk.PanelProp.soupravy := TList<TUsekSouprava>.Create();
-    Self.Useky[i] := usk;
-   end;
+ Self.Useky.Reset();
 
  for i := 0 to Self.Vyhybky.Count-1 do
   if (((orindex < 0) or (vyhybky[i].OblRizeni = orindex)) and (vyhybky[i].Blok > -2)) then

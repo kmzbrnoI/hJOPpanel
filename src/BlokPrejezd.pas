@@ -2,7 +2,8 @@ unit BlokPrejezd;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+     BlokUsek;
 
 const
  _MAX_PRJ_LEN = 64;
@@ -48,7 +49,7 @@ type
    destructor Destroy(); override;
 
    procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPReliefUsk>);
+   procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset();
  end;

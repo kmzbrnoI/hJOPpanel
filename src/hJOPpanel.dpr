@@ -57,7 +57,9 @@ uses
   BlokUvazka in 'BlokUvazka.pas',
   BlokUvazkaSpr in 'BlokUvazkaSpr.pas',
   BlokZamek in 'BlokZamek.pas',
-  BlokPrejezd in 'BlokPrejezd.pas';
+  BlokPrejezd in 'BlokPrejezd.pas',
+  BlokUsek in 'BlokUsek.pas',
+  PanelOR in 'PanelOR.pas';
 
 {$R *.res}
 
