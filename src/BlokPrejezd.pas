@@ -213,17 +213,7 @@ begin
      if ((Pos.X = Self.data[i].BlikPositions.data[j].Pos.X) and (Pos.Y = Self.data[i].BlikPositions.data[j].Pos.Y)) then
        Exit(i);
 
-  end;//for i
-
-{ TODO // dale je take zapotrebi zkontrolovat popisky:
- for i := 0 to Self.Popisky.Count-1 do
-  begin
-   if (Self.Popisky.Data[i].prejezd_ref < 0) then continue;
-
-   if ((Pos.X >= Self.Popisky.Data[i].Position.X-1) and (Pos.X <= Self.Popisky.Data[i].Position.X+1) and
-       (Pos.Y = Self.Popisky.Data[i].Position.Y)) then
-     Exit(Self.Popisky.Data[i].prejezd_ref);
-  end;//for i }
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

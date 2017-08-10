@@ -7,13 +7,12 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
-     BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp;
+     BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek;
 
 const
   //limity poli
   _MAX_POM      = 256;
   _MAX_SYMBOLS  = 256;
-  _MAX_POPISKY  = 64;
 
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
@@ -41,17 +40,6 @@ type
   old_login:string;                                                             // guest -> username
   old_ors:TList<Integer>;                                                       // (guest -> username) seznam indexu oblati rizeni k autorizaci
  end;
-
- ///////////////////////////////////////////////////////////////////////////////
- // blok popisek:
-
- // 1 blok na reliefu:
- TPPopisek=record
-  Text:string;
-  Position:TPoint;
-  Color:Integer;
-  prejezd_ref:Integer;
- end;//Text
 
  ///////////////////////////////////////////////////////////////////////////////
  // blok pomocny objekt:
@@ -152,15 +140,10 @@ type
 
    Tech_blok:TDictionary<Integer, TList<TTechBlokToSymbol>>;   // mapuje id technologickeho bloku na
 
-   //zde jsou ulozeny vsechny bloky
-   Popisky:record
-    Data:array [0.._MAX_POPISKY] of TPPopisek;
-    Count:Integer;
-   end;//Popisky
    PomocneObj:record
     Data:array [0.._MAX_POM] of TPPomocnyObj;
     Count:Integer;
-   end;//Popisky
+   end;
 
    Useky : TPUseky;
    Vyhybky : TPVyhybky;
@@ -171,6 +154,7 @@ type
    Prejezdy : TPPrejezdy;
    Vykol : TPVykolejky;
    Rozp : TPRozpojovace;
+   Popisky : TPPopisky;
 
   SystemOK:record
    Poloha:boolean;
@@ -199,7 +183,6 @@ type
    function FLoad(aFile:string):Byte;
 
    procedure ShowPomocneSymboly;
-   procedure ShowPopisky;
    procedure ShowDK;
    procedure ShowOpravneni;
    procedure ShowMereniCasu;
@@ -352,13 +335,14 @@ begin
  Self.Vykol := TPVykolejky.Create();
  Self.Rozp  := TPRozpojovace.Create();
  Self.Prejezdy := TPPrejezdy.Create();
- Self.ParentForm := aParentForm;
- Self.myORs := TList<TORPanel>.Create();
- Self.reAuth.old_ors := TList<Integer>.Create();
-
+ Self.Popisky := TPPopisky.Create();
  Self.Uvazky := TPUvazky.Create();
  Self.UvazkySpr := TPUvazkySpr.Create();
  Self.Zamky := TPZamky.Create();
+
+ Self.ParentForm := aParentForm;
+ Self.myORs := TList<TORPanel>.Create();
+ Self.reAuth.old_ors := TList<Integer>.Create();
 
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
@@ -441,10 +425,10 @@ begin
  Self.Vykol.Free();
  Self.Rozp.Free();
  Self.Prejezdy.Free();
-
  Self.Uvazky.Free();
  Self.UvazkySpr.Free();
  Self.Zamky.Free();
+ Self.Popisky.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
@@ -490,40 +474,6 @@ begin
    for j := 0 to Self.PomocneObj.Data[i].Positions.Count-1 do
      Self.Draw(SymbolSet.IL_Symbols, Self.PomocneObj.Data[i].Positions.Data[j],
        Self.PomocneObj.Data[i].Symbol, _SpecS_DrawColors[Self.PomocneObj.Data[i].Symbol], clBlack);
-end;//procedure
-
-procedure TRelief.ShowPopisky();
-var i:Integer;
-begin
- //popisky
- for i := 0 to Self.Popisky.Count-1 do
-  begin
-   if (Self.Popisky.Data[i].prejezd_ref > -1) then
-    begin
-     // popisek ma referenci na prejezd
-     if ((Self.Prejezdy.Data[Self.Popisky.Data[i].prejezd_ref].PanelProp.Pozadi = clBlack) or (Self.Prejezdy.Data[Self.Popisky.Data[i].prejezd_ref].PanelProp.Pozadi = clTeal)) then
-      begin
-       Self.DrawObject.Surface.Canvas.Brush.Color := clGreen;
-      end else begin
-       Self.DrawObject.Surface.Canvas.Brush.Color := Self.Prejezdy.Data[Self.Popisky.Data[i].prejezd_ref].PanelProp.Pozadi;
-      end;
-
-     Self.DrawObject.Surface.Canvas.Pen.Color   := Self.DrawObject.Surface.Canvas.Brush.Color;
-     Self.DrawObject.Surface.Canvas.Rectangle((Self.Popisky.Data[i].Position.X-1)*SymbolSet._Symbol_Sirka, Self.Popisky.Data[i].Position.Y*SymbolSet._Symbol_Vyska, (Self.Popisky.Data[i].Position.X)*SymbolSet._Symbol_Sirka, (Self.Popisky.Data[i].Position.Y+1)*SymbolSet._Symbol_Vyska);
-
-     case (Self.Prejezdy.Data[Self.Popisky.Data[i].prejezd_ref].PanelProp.stav) of
-       TBlkPrjPanelStav.anulace: begin
-        Self.DrawObject.Surface.Canvas.Brush.Color := clWhite;
-        Self.DrawObject.Surface.Canvas.Pen.Color   := clWhite;
-        Self.DrawObject.Surface.Canvas.Rectangle((Self.Popisky.Data[i].Position.X+1)*SymbolSet._Symbol_Sirka, Self.Popisky.Data[i].Position.Y*SymbolSet._Symbol_Vyska, (Self.Popisky.Data[i].Position.X+2)*SymbolSet._Symbol_Sirka, (Self.Popisky.Data[i].Position.Y+1)*SymbolSet._Symbol_Vyska);
-       end;
-      end;//case
-
-    end;//if
-
-   PanelPainter.TextOutput(Self.Popisky.Data[i].Position, Self.Popisky.Data[i].Text,
-      _Symbol_Colors[Self.Popisky.Data[i].Color], clBlack, Self.DrawObject);
-  end;//for i
 end;//procedure
 
 //zobrazi vsechny dopravni kancelare
@@ -681,7 +631,7 @@ begin
    Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.ShowPomocneSymboly();
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
-   Self.ShowPopisky();
+   Self.Popisky.Show(Self.DrawObject, Self.Prejezdy.data);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Rozp.Show(Self.DrawObject);
@@ -910,6 +860,15 @@ begin
    goto EscCheck;
   end;
 
+ //souctova hlaska
+ index := Self.Popisky.GetIndex(Position);
+ if (index <> -1) then
+  begin
+   if (Self.Prejezdy.Data[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Button, Self.Prejezdy.Data[index].Blok);
+   goto EscCheck;
+  end;
+
  //rozpojovac
  index := Self.GetRozp(Position);
  if (index <> -1) then
@@ -1059,7 +1018,6 @@ begin
  BlkNazvy := TStringList.Create;
 
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
- Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  BlkNazvy.Free;
 
  Self.Useky.Load(inifile, Self.myORs);
@@ -1081,21 +1039,11 @@ begin
 
  Self.Vyhybky.Load(inifile);
  Self.Prejezdy.Load(inifile, Self.Useky);
-
- //popisky
- for i := 0 to Self.Popisky.Count - 1 do
-  begin
-   Self.Popisky.Data[i].Text        := inifile.ReadString('T'+IntToStr(i),'T','0');
-   Self.Popisky.Data[i].Position.X  := inifile.ReadInteger('T'+IntToStr(i),'X',0);
-   Self.Popisky.Data[i].Position.Y  := inifile.ReadInteger('T'+IntToStr(i),'Y',0);
-   Self.Popisky.Data[i].Color       := inifile.ReadInteger('T'+IntToStr(i),'C',0);
-   Self.Popisky.Data[i].prejezd_ref := Prejezdy.GetPrj(inifile.ReadInteger('T'+IntToStr(i),'B', -1));
-  end;//for i
-
  Self.Uvazky.Load(inifile);
  Self.UvazkySpr.Load(inifile);
  Self.Zamky.Load(inifile);
  Self.Rozp.Load(inifile);
+ Self.Popisky.Load(inifile, Self.Prejezdy);
 
  for i := 0 to Self.Useky.data.Count-1 do
    Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
@@ -1142,8 +1090,6 @@ end;//function
 procedure TRelief.ResetData;
 var i:Integer;
 begin
- Self.Popisky.Count := 0;
-
  Self.Tech_blok.Clear();
 
  for i := 0 to Self.PomocneObj.Count-1 do Self.PomocneObj.Data[i].Positions.Count := 0;
