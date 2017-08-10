@@ -63,7 +63,8 @@ uses
   BlokyVyhybka in 'BlokyVyhybka.pas',
   BlokVykolejka in 'BlokVykolejka.pas',
   BlokRozp in 'BlokRozp.pas',
-  BlokPopisek in 'BlokPopisek.pas';
+  BlokPopisek in 'BlokPopisek.pas',
+  BlokPomocny in 'BlokPomocny.pas';
 
 {$R *.res}
 
