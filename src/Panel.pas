@@ -6,7 +6,7 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX,
-     BlokUvazka, BlokUvazkaSpr;
+     BlokUvazka, BlokUvazkaSpr, BlokZamek;
 
 const
   //limity poli
@@ -18,7 +18,6 @@ const
   _MAX_POPISKY  = 64;
   _MAX_PRJ      = 16;
   _MAX_PRJ_LEN  = 10;
-  _MAX_ZAMKY    = 256;
 
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
@@ -310,20 +309,6 @@ type
 
  ///////////////////////////////////////////////////////////////////////////////
 
- TZamekPanelProp = record
-  Symbol,Pozadi:TColor;
-  blik:boolean;
- end;
-
- TPZamek=record
-  Blok:Integer;
-  Pos:TPoint;
-  OblRizeni:Integer;
-  PanelProp:TZamekPanelProp;
- end;
-
- ///////////////////////////////////////////////////////////////////////////////
-
  // data pro vykreslovani rozpojovace
  TRozpPanelProp = record
   Symbol,Pozadi:TColor;
@@ -482,19 +467,6 @@ type
         stav: otevreno);
 
 
-    _Def_Zamek_Prop:TZamekPanelProp = (
-        Symbol: clBlack;
-        Pozadi: clFuchsia;
-        blik: false;
-        );
-
-    _UA_Zamek_Prop:TZamekPanelProp = (
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        blik: false;
-        );
-
-
     _Def_Rozp_Prop:TRozpPanelProp = (
         Symbol: clFuchsia;
         Pozadi: clBlack;
@@ -562,12 +534,9 @@ type
    end;//Popisky
    Vyhybky:TList<TPVyhybka>;
    StartJC:TList<TStartJC>;                    // vykresleni 1 symbolu okolo navestidla v usekove funkci
+
    Prejezdy:record
     Data:array[0.._MAX_PRJ] of TPPrejezd;
-    count:Integer;
-   end;
-   Zamky:record
-    Data:array[0.._MAX_ZAMKY] of TPZamek;
     count:Integer;
    end;
 
@@ -576,6 +545,7 @@ type
 
    Uvazky : TPUvazky;
    UvazkySpr : TPUvazkySpr;
+   Zamky : TPZamky;
 
   SystemOK:record
    Poloha:boolean;
@@ -612,7 +582,6 @@ type
    procedure ShowMsg;
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
-   procedure ShowZamky;
    procedure ShowRozp;
    procedure ShowVykol;
 
@@ -628,7 +597,6 @@ type
    function GetPrj(Pos:TPoint):Integer; overload;
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
-   function GetZamek(Pos:TPoint):Integer;
    function GetVykol(Pos:TPoint):Integer;
 
    function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
@@ -777,6 +745,7 @@ begin
 
  Self.Uvazky := TPUvazky.Create();
  Self.UvazkySpr := TPUvazkySpr.Create();
+ Self.Zamky := TPZamky.Create();
 
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
@@ -871,6 +840,7 @@ begin
 
  Self.Uvazky.Free();
  Self.UvazkySpr.Free();
+ Self.Zamky.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
@@ -1174,7 +1144,7 @@ begin
    PanelPainterUsek.ShowUseky(Self.Useky, Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
    Self.ShowPopisky();
    PanelPainterVyhybka.ShowVyhybky(Self.Vyhybky, Self.Graphics.blik, Self.Useky, Self.DrawObject);
-   Self.ShowZamky();
+   Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.ShowRozp();
    Self.ShowVykol();
    Self.ShowDK();
@@ -1426,15 +1396,6 @@ begin
  Result := -1;
 end;//function
 
-function TRelief.GetZamek(Pos:TPoint):Integer;
-var i:Integer;
-begin
- for i := 0 to Self.Zamky.Count-1 do
-   if ((pos.X = Self.Zamky.Data[i].Pos.X) and (pos.Y = Self.Zamky.Data[i].Pos.Y)) then
-     Exit(i);
- Result := -1;
-end;//function
-
 function TRelief.GetVykol(Pos:TPoint):Integer;
 var i:Integer;
 begin
@@ -1572,7 +1533,7 @@ begin
   end;
 
  //zamek
- index := Self.GetZamek(Position);
+ index := Self.Zamky.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Zamky.Data[index].Blok < 0) then goto EscCheck;
@@ -1660,7 +1621,6 @@ begin
  Self.PomocneObj.Count  := inifile.ReadInteger('P', 'P',   0);
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  Self.Prejezdy.count    := inifile.ReadInteger('P', 'PRJ', 0);
- Self.Zamky.count       := inifile.ReadInteger('P', 'Z',   0);
  BlkNazvy.Free;
 
  //useky
@@ -1886,23 +1846,7 @@ begin
 
  Self.Uvazky.Load(inifile);
  Self.UvazkySpr.Load(inifile);
-
- // zamky
- for i := 0 to Self.Zamky.count-1 do
-  begin
-   Self.Zamky.Data[i].Blok         := inifile.ReadInteger('Z'+IntToStr(i), 'B', -1);
-   Self.Zamky.Data[i].OblRizeni    := inifile.ReadInteger('Z'+IntToStr(i), 'OR', -1);
-   Self.Zamky.Data[i].Pos.X        := inifile.ReadInteger('Z'+IntToStr(i), 'X', 0);
-   Self.Zamky.Data[i].Pos.Y        := inifile.ReadInteger('Z'+IntToStr(i), 'Y', 0);
-
-   //default settings:
-   if (Self.Zamky.Data[i].Blok = -2) then
-     Self.Zamky.Data[i].PanelProp := _UA_Zamek_Prop
-   else
-     Self.Zamky.Data[i].PanelProp := _Def_Zamek_Prop;
-
-   Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.Data[i].Blok, i);
-  end;//for i
+ Self.Zamky.Load(inifile);
 
  // vykolejky
  Self.Vykol.Clear();
@@ -1954,6 +1898,9 @@ begin
 
  for i := 0 to Self.UvazkySpr.data.Count-1 do
    Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.data[i].Blok, i);
+
+ for i := 0 to Self.Zamky.data.Count-1 do
+   Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -2485,6 +2432,7 @@ end;//procedure
 procedure TRelief.ORZamekChange(Sender:string; BlokID:integer; ZamekPanelProp:TZamekPanelProp);
 var i:Integer;
     symbols:TList<TTechBlokToSymbol>;
+    zam:TPZamek;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
  if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
@@ -2492,7 +2440,11 @@ begin
 
  for i := 0 to symbols.Count-1 do
    if ((symbols[i].blk_type = _BLK_ZAMEK) and (Sender = Self.myORs[Self.Zamky.Data[symbols[i].symbol_index].OblRizeni].id)) then
-    Self.Zamky.Data[symbols[i].symbol_index].PanelProp := ZamekPanelProp;
+    begin
+     zam := Self.Zamky.Data[symbols[i].symbol_index];
+     zam.PanelProp := ZamekPanelProp;
+     Self.Zamky.Data[symbols[i].symbol_index] := zam;
+    end;
 end;//procedure
 
 procedure TRelief.ORRozpChange(Sender:string; BlokID:integer; RozpPanelProp:TRozpPanelProp);
@@ -3028,11 +2980,7 @@ begin
 
  Self.Uvazky.Reset();
  Self.UvazkySpr.Reset();
-
- for i := 0 to Self.Zamky.Count-1 do
-  if (((orindex < 0) or (Self.Zamky.Data[i].OblRizeni = orindex)) and
-      (Self.Zamky.Data[i].Blok > -2)) then
-    Self.Zamky.Data[i].PanelProp := _Def_Zamek_Prop;
+ Self.Zamky.Reset();
 
  for i := 0 to Self.Vykol.Count-1 do
   if (((orindex < 0) or (Self.Vykol[i].OblRizeni = orindex)) and
@@ -3136,24 +3084,6 @@ begin
    str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].konec-Now) + ' ';
    PanelPainter.TextOutput(Point(Self.PanelWidth-_INFOTIMER_WIDTH, Self.PanelHeight-i-1),
      str, clRed, clWhite, Self.DrawObject);
-  end;//for i
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TRelief.ShowZamky();
-var i:Integer;
-    fg:TColor;
-begin
- for i := 0 to Self.Zamky.Count-1 do
-  begin
-   if ((Self.Zamky.Data[i].PanelProp.blik) and (Self.Graphics.blik)) then
-     fg := clBlack
-   else
-     fg := Self.Zamky.Data[i].PanelProp.Symbol;
-
-   Self.Draw(SymbolSet.IL_Symbols, Self.Zamky.Data[i].Pos, _Zamek,
-             fg, Self.Zamky.Data[i].PanelProp.Pozadi);
   end;//for i
 end;//procedure
 

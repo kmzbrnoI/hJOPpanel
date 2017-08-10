@@ -139,6 +139,7 @@
 			<DCCReference Include="PanelPainterNavestidlo.pas"/>
 			<DCCReference Include="BlokUvazka.pas"/>
 			<DCCReference Include="BlokUvazkaSpr.pas"/>
+			<DCCReference Include="BlokZamek.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
