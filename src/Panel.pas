@@ -155,7 +155,7 @@ type
 
    procedure ObjectMouseUp(Position:TPoint; Button:TPanelButton);
 
-   function FLoad(aFile:string):Byte;
+   procedure FLoad(aFile:string);
 
    procedure ShowDK;
    procedure ShowOpravneni;
@@ -165,8 +165,6 @@ type
    procedure ShowInfoTimers;
 
    procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; transparent:boolean = false);
-
-   function ORLoad(const ORs:TStrings):Byte;
 
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
@@ -223,7 +221,7 @@ type
    constructor Create(aParentForm:TForm);
    destructor Destroy; override;
 
-   function Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string):Byte;
+   procedure Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string);
    procedure Show();
 
    function GetUsekVyhybky(usekid:integer):TGetVyhybky;
@@ -323,8 +321,7 @@ begin
  Self.mouseTimer.Enabled := false;
 end;//contructor
 
-function TRelief.Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string):Byte;
-var return:Integer;
+procedure TRelief.Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string);
 begin
  Self.Graphics := TPanelGraphics.Create(DrawObject);
 
@@ -365,15 +362,11 @@ begin
 
  Self.StaniceIndex := StIndex;
 
- return := Self.FLoad(aFile);
- if (return <> 0) then
-   Exit(return);
+ Self.FLoad(aFile);
 
  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth*SymbolSet._Symbol_Sirka, Self.Graphics.PanelHeight*SymbolSet._Symbol_Vyska);
 
  Self.Show();
-
- Result := 0;
 end;//function
 
 destructor TRelief.Destroy();
@@ -382,14 +375,7 @@ begin
  Self.mouseTimer.Free();
 
  for i := Self.myORs.Count-1 downto 0 do
-  begin
-   Self.myORs[i].stack.Free();
-   Self.myORs[i].Osvetleni.Free();
-   if (Assigned(Self.myORs[i].HVs)) then
-     FreeAndNil(Self.myORs[i].HVs);
-   Self.myORs[i].MereniCasu.Free();
    Self.myORs[i].Free();
-  end;
  Self.myORs.Free();
 
  Self.Vyhybky.Free();
@@ -928,96 +914,89 @@ EscCheck:
   Self.Escape(false);
 end;//procedure
 
-function TRelief.FLoad(aFile:string):Byte;
+procedure TRelief.FLoad(aFile:string);
 var i:Integer;
     inifile:TMemIniFile;
-    sect_str,obl_rizeni:TStrings;
-    return:Integer;
+    sect_str:TStrings;
     ver:string;
 begin
- //kontrola existence
- if (not FileExists(aFile)) then Exit(1);
+ if (not FileExists(aFile)) then
+   raise Exception.Create('Soubor panelu ' + aFile + ' neexistuje!');
 
- //samotne nacitani dat
+ inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
+
  try
-   inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
- except
-  Exit(3);
- end;
+   Self.Graphics.PanelWidth := inifile.ReadInteger('P', 'W', 100);
+   Self.Graphics.PanelHeight := inifile.ReadInteger('P', 'H', 20);
 
- Self.Graphics.PanelWidth := inifile.ReadInteger('P','W',0);
- Self.Graphics.PanelHeight := inifile.ReadInteger('P','H',0);
-
- //kontrola verze
- ver := inifile.ReadString('G','ver',_FileVersion);
- if (_FileVersion <> ver) then
-  begin
-   if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+'Aplikace momentálnì podporuje verzi '+_FileVersion+#13#10+'Chcete pokraèovat?'), 'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+   //kontrola verze
+   ver := inifile.ReadString('G','ver',_FileVersion);
+   if (_FileVersion <> ver) then
     begin
-     Result := 2;
-     Exit;
+     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+'Aplikace momentálnì podporuje verzi '+
+        _FileVersion+#13#10+'Chcete pokraèovat?'), 'Varování', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+       Exit;
     end;
-  end;
 
- //oblasti rizeni
- sect_str := TStringList.Create();
- obl_rizeni := TStringList.Create();
- inifile.ReadSection('OR',sect_str);
- for i := 0 to sect_str.Count-1 do
-    obl_rizeni.Add(inifile.ReadString('OR',sect_str[i],''));
+   // Oblasti rizeni
+   sect_str := TStringList.Create();
+   try
+     inifile.ReadSection('OR', sect_str);
+     Self.myORs.Clear();
+     for i := 0 to sect_str.Count-1 do
+       Self.myORs.Add(TORPanel.Create(inifile.ReadString('OR', sect_str[i], ''), Self.Graphics));
+   finally
+     sect_str.Free();
+   end;
 
- return := Self.ORLoad(obl_rizeni);
- if (return <> 0) then
-  begin
-   Result := return+8;
-   Exit;
-  end;
+   // vytvorime okynka zprav
+   TF_Messages.frm_cnt := Self.myORs.Count;
+   for i := 0 to Self.myORs.Count-1 do
+     TF_Messages.frm_db[i] := TF_Messages.Create(Self.myORs[i].Name, Self.myORs[i].id);
 
- sect_str.Free();
- obl_rizeni.Free();
+   Self.Useky.Load(inifile, Self.myORs);
+   Self.Navestidla.Load(inifile);
+   Self.Vyhybky.Load(inifile);
+   Self.Prejezdy.Load(inifile, Self.Useky);
+   Self.Uvazky.Load(inifile);
+   Self.UvazkySpr.Load(inifile);
+   Self.Zamky.Load(inifile);
+   Self.Rozp.Load(inifile);
+   Self.Popisky.Load(inifile, Self.Prejezdy);
+   Self.PomocneObj.Load(inifile);
 
- Self.Useky.Load(inifile, Self.myORs);
- Self.Navestidla.Load(inifile);
- Self.Vyhybky.Load(inifile);
- Self.Prejezdy.Load(inifile, Self.Useky);
- Self.Uvazky.Load(inifile);
- Self.UvazkySpr.Load(inifile);
- Self.Zamky.Load(inifile);
- Self.Rozp.Load(inifile);
- Self.Popisky.Load(inifile, Self.Prejezdy);
- Self.PomocneObj.Load(inifile);
+   Self.Tech_blok.Clear();
 
- Self.Tech_blok.Clear();
+   for i := 0 to Self.Useky.data.Count-1 do
+     Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
 
- for i := 0 to Self.Useky.data.Count-1 do
-   Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
+   for i := 0 to Self.Vyhybky.data.Count-1 do
+     Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.data[i].Blok, i);
 
- for i := 0 to Self.Vyhybky.data.Count-1 do
-   Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.data[i].Blok, i);
+   for i := 0 to Self.Uvazky.data.Count-1 do
+     Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
 
- for i := 0 to Self.Uvazky.data.Count-1 do
-   Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
+   for i := 0 to Self.UvazkySpr.data.Count-1 do
+     Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.data[i].Blok, i);
 
- for i := 0 to Self.UvazkySpr.data.Count-1 do
-   Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.data[i].Blok, i);
+   for i := 0 to Self.Zamky.data.Count-1 do
+     Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.data[i].Blok, i);
 
- for i := 0 to Self.Zamky.data.Count-1 do
-   Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.data[i].Blok, i);
+   for i := 0 to Self.Prejezdy.data.Count-1 do
+     Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.data[i].Blok, i);
 
- for i := 0 to Self.Prejezdy.data.Count-1 do
-   Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.data[i].Blok, i);
+   for i := 0 to Self.Navestidla.data.Count-1 do
+     Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.data[i].Blok, i);
 
- for i := 0 to Self.Navestidla.data.Count-1 do
-   Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.data[i].Blok, i);
+   for i := 0 to Self.Vykol.data.Count-1 do
+     Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol.data[i].Blok, i);
 
- for i := 0 to Self.Vykol.data.Count-1 do
-   Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol.data[i].Blok, i);
+   for i := 0 to Self.Rozp.data.Count-1 do
+     Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
 
- for i := 0 to Self.Rozp.data.Count-1 do
-   Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
-
- inifile.Free;
- Result := 0;
+ finally
+   inifile.Free;
+ end;
 end;//procedure LoadFile
 
 function TRelief.GetDK(Pos:TPoint):Integer;
@@ -1610,100 +1589,6 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//na kazdem radku je ulozena jedna oblast rizeni ve formatu:
-//  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
-function TRelief.ORLoad(const ORs:TStrings):Byte;
-var data_main,data_osv,data_osv2:TStrings;
-    i,j:Integer;
-    Osv:TOsv;
-    Pos:TPoint;
-    OblR:TORPanel;
-begin
- data_main := TStringList.Create();
- data_osv  := TStringList.Create();
- data_osv2 := TStringList.Create();
-
- Self.myORs.Clear();
-
- for i := 0 to ORs.Count-1 do
-  begin
-   data_main.Clear();
-   ExtractStrings([';'],[],PChar(ORs[i]),data_main);
-
-   if (data_main.Count < 14) then
-    begin
-     Result := 2;
-     Exit;
-    end;
-
-   OblR := TORPanel.Create();
-
-   OblR.str := ORs[i];
-
-   OblR.Name       := data_main[0];
-   OblR.ShortName  := data_main[1];
-   OblR.id         := data_main[2];
-   OblR.Lichy      := StrToInt(data_main[3]);
-   OblR.Poss.DKOr  := StrToInt(data_main[4]);
-
-   OblR.Rights.ModCasStart := StrToBool(data_main[5]);
-   OblR.Rights.ModCasStop  := StrToBool(data_main[6]);
-   OblR.Rights.ModCasSet   := StrToBool(data_main[7]);
-
-   OblR.Poss.DK.X := StrToInt(data_main[8]);
-   OblR.Poss.DK.Y := StrToInt(data_main[9]);
-
-   Pos.X := StrToInt(data_main[10]);
-   Pos.Y := StrToInt(data_main[11]);
-   OblR.stack := TORStack.Create(Self.Graphics, OblR.id, Pos);
-
-   OblR.Poss.Time.X := StrToInt(data_main[12]);
-   OblR.Poss.Time.Y := StrToInt(data_main[13]);
-
-   OblR.Osvetleni := TList<TOsv>.Create();
-   OblR.MereniCasu := TList<TMereniCasu>.Create();
-
-   data_osv.Clear();
-   if (data_main.Count >= 15) then
-    begin
-     ExtractStrings(['|'],[],PChar(data_main[14]),data_osv);
-     for j := 0 to data_osv.Count-1 do
-      begin
-       data_osv2.Clear();
-       ExtractStrings(['#'],[],PChar(data_osv[j]),data_osv2);
-
-       if (data_osv2.Count < 2) then
-        begin
-         Result := 3;
-         Exit;
-        end;
-
-       Osv.board := StrToInt(data_osv2[0]);
-       Osv.port  := StrToInt(data_osv2[1]);
-       if (data_osv2.Count > 2) then Osv.name := data_osv2[2] else Osv.name := '';
-       OblR.Osvetleni.Add(Osv);
-      end;//for j
-     end;//.Count >= 15
-
-   OblR.HVs := THVDb.Create();
-
-   Self.myORs.Add(OblR);
-  end;//for i
-
- FreeAndNil(data_main);
- FreeAndNil(data_osv);
- FreeAndNil(data_osv2);
-
- // vytvorime okynka zprav
- TF_Messages.frm_cnt := Self.myORs.Count;
- for i := 0 to Self.myORs.Count-1 do
-   TF_Messages.frm_db[i] := TF_Messages.Create(Self.myORs[i].Name, Self.myORs[i].id);
-
- Result := 0;
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
 //technologie posle nejake menu a my ho zobrazime:
 procedure TRelief.ORShowMenu(items:string);
 begin
@@ -2201,11 +2086,6 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//  or;LOK-REQ;REQ;username;firstname;lastname;comment
-//                                          - pozadavek na prevzeti loko na rucni rizeni
-//  or;LOK-REQ;OK                           - seznam loko na rucni rizeni schvalen serverem
-//  or;LOK-REQ;ERR;comment                  - seznam loko na rucni rizeni odmitnut serverem
-//  or;LOK-REQ;CANCEL;                      - zruseni pozadavku na prevzeti loko na rucni rizeni
 procedure TRelief.ORLokReq(Sender:string; parsed:TStrings);
 var i:Integer;
     OblR:TORPanel;

@@ -266,7 +266,6 @@ begin
 end;
 
 procedure TF_Main.Init(const config_fn:string);
-var return:Integer;
 begin
  F_splash.AddStav('Naèítám konfiguraci...');
 
@@ -316,14 +315,18 @@ begin
  Relief := TRelief.Create(Self);
  Relief.OnMove := Self.OnReliefMove;
  Relief.OnLoginUserChange := Self.OnReliefLoginChange;
- return := Relief.Initialize(Self.DXD_Main, GlobConfig.data.panel_fn, GlobConfig.data.vysv_fn);
 
- if (return <> 0) then
-  begin
-   Application.MessageBox(PChar('Pøi inicializaci reliéfu došlo k chybì:'+#13#10+_open_file_errors[return]), 'Chyba', MB_OK OR MB_ICONWARNING);
-   Self.DXD_Main.Enabled := false;
-   Self.P_Connection.Enabled := false;
-  end;
+ try
+   Relief.Initialize(Self.DXD_Main, GlobConfig.data.panel_fn, GlobConfig.data.vysv_fn);
+ except
+   on E:Exception do
+    begin
+     Application.MessageBox(PChar('Pøi inicializaci reliéfu došlo k chybì:'+#13#10+E.Message),
+       'Chyba', MB_OK OR MB_ICONWARNING);
+     Self.DXD_Main.Enabled := false;
+     Self.P_Connection.Enabled := false;
+    end;
+ end;
 
  if ((GlobConfig.data.frmPos.X >= 0) and (GlobConfig.data.frmPos.Y >= 0) and
    (GlobConfig.data.frmPos.X+100 < Screen.Width) and (GlobConfig.data.frmPos.Y+100 < Screen.Height)) then

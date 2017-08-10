@@ -2,7 +2,8 @@ unit PanelOR;
 
 interface
 
-uses Generics.Collections, Zasobnik, Types, HVDb, RPConst;
+uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,
+     PGraphics;
 
 type
  // prava oblasti rizeni
@@ -40,8 +41,10 @@ type
   user,firstname, lastname, comment:string;
  end;
 
+ EInvalidData = class(Exception);
+
  // 1 oblast rizeni
- TORPanel=class
+ TORPanel = class
   str:string;
   Name:string;
   ShortName:string;
@@ -67,8 +70,95 @@ type
   HVs:THVDb;
 
   hlaseni:boolean;
+
+   constructor Create(line:string; Graphics:TPanelGraphics);
+   destructor Destroy(); override;
  end;
 
 implementation
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TORPanel.Create(line:string; Graphics:TPanelGraphics);
+var data_main, data_osv, data_osv2:TStrings;
+    j:Integer;
+    Osv:TOsv;
+    Pos:TPoint;
+begin
+ inherited Create();
+
+ data_main := TStringList.Create();
+ data_osv  := TStringList.Create();
+ data_osv2 := TStringList.Create();
+
+ try
+   ExtractStringsEx([';'], [], line, data_main);
+
+   if (data_main.Count < 14) then
+     raise EInvalidData.Create('Prilis malo polozek v zaznamu oblasti rizeni!');
+
+   Self.str := line;
+
+   Self.Name       := data_main[0];
+   Self.ShortName  := data_main[1];
+   Self.id         := data_main[2];
+   Self.Lichy      := StrToInt(data_main[3]);
+   Self.Poss.DKOr  := StrToInt(data_main[4]);
+
+   Self.Rights.ModCasStart := StrToBool(data_main[5]);
+   Self.Rights.ModCasStop  := StrToBool(data_main[6]);
+   Self.Rights.ModCasSet   := StrToBool(data_main[7]);
+
+   Self.Poss.DK.X := StrToInt(data_main[8]);
+   Self.Poss.DK.Y := StrToInt(data_main[9]);
+
+   Pos.X := StrToInt(data_main[10]);
+   Pos.Y := StrToInt(data_main[11]);
+   Self.stack := TORStack.Create(graphics, Self.id, Pos);
+
+   Self.Poss.Time.X := StrToInt(data_main[12]);
+   Self.Poss.Time.Y := StrToInt(data_main[13]);
+
+   Self.Osvetleni := TList<TOsv>.Create();
+   Self.MereniCasu := TList<TMereniCasu>.Create();
+
+   data_osv.Clear();
+   if (data_main.Count >= 15) then
+    begin
+     ExtractStrings(['|'],[],PChar(data_main[14]),data_osv);
+     for j := 0 to data_osv.Count-1 do
+      begin
+       data_osv2.Clear();
+       ExtractStrings(['#'],[],PChar(data_osv[j]),data_osv2);
+
+       if (data_osv2.Count < 2) then continue;
+
+       Osv.board := StrToInt(data_osv2[0]);
+       Osv.port  := StrToInt(data_osv2[1]);
+       if (data_osv2.Count > 2) then Osv.name := data_osv2[2] else Osv.name := '';
+       Self.Osvetleni.Add(Osv);
+      end;//for j
+     end;//.Count >= 15
+
+   Self.HVs := THVDb.Create();
+ finally
+   data_main.Free();
+   data_osv.Free();
+   data_osv2.Free();
+ end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+destructor TORPanel.Destroy();
+begin
+ Self.stack.Free();
+ Self.Osvetleni.Free();
+ Self.MereniCasu.Free();
+ Self.HVs.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.
