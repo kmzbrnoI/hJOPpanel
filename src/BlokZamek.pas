@@ -27,7 +27,7 @@ type
    procedure Load(ini:TMemIniFile);
    procedure Show(obj:TDXDraw; blik:boolean);
    function GetIndex(Pos:TPoint):Integer;
-   procedure Reset();
+   procedure Reset(orindex:Integer = -1);
  end;
 
 const
@@ -119,15 +119,18 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPZamky.Reset();
+procedure TPZamky.Reset(orindex:Integer = -1);
 var i:Integer;
     zam:TPZamek;
 begin
  for i := 0 to Self.data.Count-1 do
   begin
-   zam := Self.data[i];
-   zam.PanelProp := _Def_Zamek_Prop;
-   Self.data[i] := zam;
+   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+    begin
+     zam := Self.data[i];
+     zam.PanelProp := _Def_Zamek_Prop;
+     Self.data[i] := zam;
+    end;
   end;
 end;
 

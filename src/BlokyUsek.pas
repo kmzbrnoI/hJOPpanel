@@ -1,93 +1,338 @@
-unit PanelPainterUsek;
+unit BlokyUsek;
 
 interface
 
-uses Panel, Symbols, Types, Graphics, Generics.Collections, DXDraws, IBUtils,;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+     Symbols, RPConst, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, IBUtils,
+     BlokUsek;
 
-procedure ShowUseky(useky:TList<TPReliefUsk>; myORs:TList<TORPanel>; blik:boolean;
-    startJC:TList<TStartJC>; obj:TDXDraw; var vyhybky:TList<TPVyhybka>);
+const
+  _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)
+
+type
+ TPUseky = class
+  private
+   function GetItem(index:Integer):TPUsek;
+   function GetCount():Integer;
+
+   procedure PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
+       myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
+   procedure ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
+   procedure PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
+   procedure ShowUsekVetve(usek:TPUsek; vetevI:Integer; visible:boolean;
+       var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
+       startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
+   procedure ShowDKSVetve(usek:TPUsek; visible:boolean;
+       var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
+       startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
+
+  public
+
+   data:TList<TPUsek>;
+
+   constructor Create();
+   destructor Destroy(); override;
+
+   procedure Load(ini:TMemIniFile; myORs:TList<TORPanel>);
+   procedure Show(obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>;
+      startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
+   function GetIndex(Pos:TPoint):Integer;
+   procedure Reset(orindex:Integer = -1);
+
+   property Items[index : integer] : TPUsek read GetItem; default;
+   property Count : integer read GetCount;
+ end;
+
+const
+  _Def_Usek_Prop:TUsekPanelProp = (
+      blikani: false;
+      Symbol: clFuchsia;
+      Pozadi: clBlack;
+      nebarVetve: $A0A0A0;
+      KonecJC: no);
+
+  _UA_Usek_Prop:TUsekPanelProp = (
+      blikani: false;
+      Symbol: $A0A0A0;
+      Pozadi: clBlack;
+      nebarVetve: $A0A0A0;
+      KonecJC: no);
+
+implementation
+
+uses ParseHelper, PanelPainter;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TPUseky.Create();
+begin
+ inherited;
+ Self.data := TList<TPUsek>.Create();
+end;
+
+destructor TPUseky.Destroy();
+var i:Integer;
+begin
+ for i := 0 to Self.data.Count-1 do
+  begin
+   Self.data[i].PanelProp.soupravy.Free();
+   Self.data[i].Symbols.Free();
+   Self.data[i].JCClick.Free();
+   Self.data[i].KPopisek.Free();
+   Self.data[i].Soupravy.Free();
+   Self.data[i].Vetve.Free();
+  end;
+
+ Self.data.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPUseky.Load(ini:TMemIniFile; myORs:TList<TORPanel>);
+var i, j, k, count, count2:Integer;
+    usek:TPUsek;
+    obj:string;
+    symbol:TReliefSym;
+    pos:TPoint;
+    Vetev:TVetev;
+begin
+ count := ini.ReadInteger('P', 'U', 0);
+ for i := 0 to count-1 do
+  begin
+   usek.Blok      := ini.ReadInteger('U'+IntToStr(i),'B',-1);
+   usek.OblRizeni := ini.ReadInteger('U'+IntToStr(i),'OR',-1);
+   usek.root      := GetPos(ini.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
+   usek.DKStype := TDKSType(ini.ReadInteger('U'+IntToStr(i), 'DKS', Integer(dksNone)));
+
+   //Symbols
+   usek.Symbols := TList<TReliefSym>.Create();
+   obj := ini.ReadString('U'+IntToStr(i),'S', '');
+   for j := 0 to (Length(obj) div 8)-1 do
+    begin
+     try
+       symbol.Position.X := StrToInt(copy(obj,j*8+1,3));
+       symbol.Position.Y := StrToInt(copy(obj,j*8+4,3));
+       symbol.SymbolID   := StrToInt(copy(obj,j*8+7,2));
+     except
+       continue;
+     end;
+     usek.Symbols.Add(symbol);
+    end;//for j
+
+   //JCClick
+   usek.JCClick := TList<TPoint>.Create();
+   obj := ini.ReadString('U'+IntToStr(i),'C','');
+   for j := 0 to (Length(obj) div 6)-1 do
+    begin
+     try
+       pos.X := StrToInt(copy(obj,j*6+1,3));
+       pos.Y := StrToInt(copy(obj,j*6+4,3));
+     except
+      continue;
+     end;
+     usek.JCClick.Add(pos);
+    end;//for j
+
+   //KPopisek
+   obj := ini.ReadString('U'+IntToStr(i),'P','');
+   usek.KPopisek := TList<TPoint>.Create();
+   for j := 0 to (Length(obj) div 6)-1 do
+    begin
+     try
+       pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
+       pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
+     except
+       continue;
+     end;
+     usek.KPopisek.Add(pos);
+    end;//for j
+
+   //Nazev
+   usek.KpopisekStr := ini.ReadString('U'+IntToStr(i),'N','');
+
+   //Soupravy
+   obj := ini.ReadString('U'+IntToStr(i),'Spr','');
+   usek.Soupravy := TList<TPoint>.Create();
+   for j := 0 to (Length(obj) div 6)-1 do
+    begin
+     try
+       pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
+       pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
+     except
+       continue;
+     end;
+     usek.Soupravy.Add(pos);
+    end;//for j
+
+   // usporadame seznam souprav podle licheho smeru
+   if (myORs[usek.OblRizeni].Lichy = 1) then
+     usek.Soupravy.Reverse();
+
+   // pokud nejsou pozice na soupravu, kreslime soupravu na cisle koleje
+   if ((usek.Soupravy.Count = 0) and (usek.KpopisekStr <> '') and (usek.KPopisek.Count <> 0)) then
+     usek.Soupravy.Add(usek.KPopisek[0]);
+
+   //nacitani vetvi:
+   usek.Vetve := TList<TVetev>.Create();
+   count2 := ini.ReadInteger('U'+IntToStr(i), 'VC', 0);
+   for j := 0 to count2-1 do
+    begin
+     obj := ini.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
+
+     vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
+     vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
+     vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
+
+     vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
+     vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
+     vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
+
+     obj := RightStr(obj, Length(obj)-14);
+
+     SetLength(vetev.Symbols, Length(obj) div 9);
+
+     for k := 0 to Length(vetev.Symbols)-1 do
+      begin
+       vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
+       vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
+       vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
+      end;
+
+     usek.Vetve.Add(vetev);
+    end;//for j
+
+   //default settings:
+   if (usek.Blok = -2) then
+     usek.PanelProp := _UA_Usek_Prop
+   else
+     usek.PanelProp := _Def_Usek_Prop;
+
+   usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
+
+   Self.data.Add(usek);
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUseky.GetIndex(Pos:TPoint):Integer;
+var i,j:Integer;
+begin
+ Result := -1;
+
+ for i := 0 to Self.data.Count-1 do
+   for j := 0 to Self.data[i].Symbols.Count-1 do
+     if ((Pos.X = Self.data[i].Symbols[j].Position.X) and (Pos.Y = Self.data[i].Symbols[j].Position.Y)) then
+       Exit(i);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPUseky.Reset(orindex:Integer = -1);
+var i:Integer;
+    usek:TPUsek;
+begin
+ for i := 0 to Self.data.Count-1 do
+  begin
+   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+    begin
+     usek := Self.data[i];
+     usek.PanelProp.soupravy.Free();
+     usek.PanelProp := _Def_Usek_Prop;
+     usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
+     Self.data[i] := usek;
+    end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+
+{
 procedure PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
     myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
-procedure ShowUsekSoupravy(const usek:TPReliefUsk; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
-procedure PaintCisloKoleje(pos:TPoint; const usek:TPReliefUsk; obj:TDXDraw);
-procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; visible:boolean;
+procedure ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
+procedure PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
+procedure ShowUsekVetve(usek:TPUsek; vetevI:Integer; visible:boolean;
     var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
     startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
-procedure ShowDKSVetve(usek:TPReliefUsk; visible:boolean;
+procedure ShowDKSVetve(usek:TPUsek; visible:boolean;
     var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
     startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
 
 implementation
 
-uses PanelPainter, RPConst;
+uses PanelPainter, RPConst;                }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// zobrazeni vsech useku na panelu
-procedure ShowUseky(useky:TList<TPReliefUsk>; myORs:TList<TORPanel>;
-    blik:boolean; startJC:TList<TStartJC>; obj:TDXDraw; var vyhybky:TList<TPVyhybka>);
-var i,j,k:integer;
+procedure TPUseky.Show(obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>;
+      startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
+var j,k:integer;
     showed:array of boolean;
     fg, bg:TColor;
     sjc:TStartJC;
     sym:TReliefSym;
     p:TPoint;
+    usek:TPUsek;
 begin
- for i := 0 to Useky.Count-1 do
+ for usek in Self.data do
   begin
    // vykresleni symbolu useku
    // tady se resi vetve
-   if ((Useky[i].Vetve.Count = 0) or (Useky[i].PanelProp.Symbol = clFuchsia)) then
+   if ((usek.Vetve.Count = 0) or (usek.PanelProp.Symbol = clFuchsia)) then
     begin
      // pokud nejsou vetve, nebo je usek disabled, vykresim ho cely (bez ohledu na vetve)
-     if (((Useky[i].PanelProp.blikani) or ((Useky[i].PanelProp.soupravy.Count > 0) and
-        (myORs[Useky[i].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
+     if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
+        (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
          and (blik)) then
        fg := clBlack
      else
-       fg := Useky[i].PanelProp.Symbol;
+       fg := usek.PanelProp.Symbol;
 
-     for sym in Useky[i].Symbols do
+     for sym in usek.Symbols do
       begin
-       bg := Useky[i].PanelProp.Pozadi;
+       bg := usek.PanelProp.Pozadi;
 
        for sjc in startJC do
          if ((sjc.Pos.X = sym.Position.X) and (sjc.Pos.Y = sym.Position.Y)) then
            bg := sjc.Color;
 
-       for k := 0 to Useky[i].JCClick.Count-1 do
-        if ((Useky[i].JCClick[k].X = sym.Position.X) and (Useky[i].JCClick[k].Y = sym.Position.Y)) then
-         if (Integer(Useky[i].PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(Useky[i].PanelProp.KonecJC)];
+       for k := 0 to usek.JCClick.Count-1 do
+        if ((usek.JCClick[k].X = sym.Position.X) and (usek.JCClick[k].Y = sym.Position.Y)) then
+         if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
        PanelPainter.Draw(SymbolSet.IL_Symbols, sym.Position, sym.SymbolID, fg, bg, obj);
       end;//for j
 
     end else begin
 
-     SetLength(showed, Useky[i].Vetve.Count);
-     for j := 0 to Useky[i].Vetve.Count-1 do
+     SetLength(showed, usek.Vetve.Count);
+     for j := 0 to usek.Vetve.Count-1 do
        showed[j] := false;
 
      // pokud jsou vetve a usek neni disabled, kreslim vetve
-     if (Useky[i].DKStype <> dksNone) then
-       ShowDKSVetve(Useky[i], true, showed, myORs, blik, obj, startJC, vyhybky)
+     if (usek.DKStype <> dksNone) then
+       ShowDKSVetve(usek, true, showed, myORs, blik, obj, startJC, vyhybky)
      else
-       ShowUsekVetve(Useky[i], 0, true, showed, myORs, blik, obj, startJC, vyhybky);
+       ShowUsekVetve(usek, 0, true, showed, myORs, blik, obj, startJC, vyhybky);
     end;
 
    // vykresleni cisla koleje
-   for p in useky[i].KPopisek do
-     PaintCisloKoleje(Point(p.X - (Length(Useky[i].KpopisekStr) div 2), p.Y), useky[i], obj);
+   for p in usek.KPopisek do
+     PaintCisloKoleje(Point(p.X - (Length(usek.KpopisekStr) div 2), p.Y), usek, obj);
 
    // vykresleni souprav
-   ShowUsekSoupravy(useky[i], obj, blik, myORs);
+   ShowUsekSoupravy(usek, obj, blik, myORs);
   end;//for i
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // vykresleni soupravy na dane pozici
-procedure PaintSouprava(pos:TPoint; const usek:TPReliefUsk; spri:Integer;
+procedure TPUseky.PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
     myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
 var bg: TColor;
     sipkaLeft, sipkaRight: boolean;
@@ -148,7 +393,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 // zobrazi soupravy na celem useku
 
-procedure ShowUsekSoupravy(const usek:TPReliefUsk; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
+procedure TPUseky.ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
 var i, step, index:Integer;
 begin
  if ((usek.PanelProp.soupravy.Count = 0) or (usek.Soupravy.Count = 0)) then
@@ -175,7 +420,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 // vykresleni cisla koleje
-procedure PaintCisloKoleje(pos:TPoint; const usek:TPReliefUsk; obj:TDXDraw);
+procedure TPUseky.PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
 var left:TPoint;
 begin
  left := Point(pos.X - Length(usek.KpopisekStr) div 2, pos.Y);
@@ -191,9 +436,9 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 // Rekurzivne kresli vetve bezneho bloku
-procedure ShowUsekVetve(usek:TPReliefUsk; vetevI:Integer; visible:boolean;
+procedure TPUseky.ShowUsekVetve(usek:TPUsek; vetevI:Integer; visible:boolean;
     var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
-    startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
+    startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
 var i:Integer;
     fg, bg:TColor;
     vetev:TVetev;
@@ -228,7 +473,7 @@ begin
 
    bg := usek.PanelProp.Pozadi;
 
-   for sjc in startJC do     
+   for sjc in startJC do
      if ((sjc.Pos.X = vetev.Symbols[i].Position.X) and (sjc.Pos.Y = vetev.Symbols[i].Position.Y)) then
        bg := sjc.Color;
 
@@ -253,7 +498,7 @@ begin
     end;
 
    vyhybky[vetev.node1.vyh] := vyh;
-    
+
    case (vyh.PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
        ShowUsekVetve(usek, vetev.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
@@ -276,7 +521,7 @@ begin
  if (vetev.node2.vyh > -1) then
   begin
    vyh := vyhybky[vetev.node2.vyh];
-   vyh.visible := visible;  
+   vyh.visible := visible;
 
    // nastaveni barvy neprirazene vyhybky
    if (vyh.Blok = -2) then
@@ -286,7 +531,7 @@ begin
     end;
 
    vyhybky[vetev.node2.vyh] := vyh;
-    
+
    case (vyh.PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
        ShowUsekVetve(usek, vetev.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
@@ -310,9 +555,9 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 // Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
-procedure ShowDKSVetve(usek:TPReliefUsk; visible:boolean;
+procedure TPUseky.ShowDKSVetve(usek:TPUsek; visible:boolean;
     var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
-    startJC:TList<TStartJC>; var vyhybky:TList<TPVyhybka>);
+    startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
 var polLeft, polRight: TVyhPoloha;
     leftHidden, rightHidden: boolean;
     leftCross, rightCross: boolean;
@@ -349,7 +594,7 @@ begin
  vyh := vyhybky[usek.Vetve[1].node1.vyh];
  vyh.visible := not rightHidden;
  vyhybky[usek.Vetve[1].node1.vyh] := vyh;
-  
+
  // 3) vykreslime stredovy kriz
  if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
     (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
@@ -385,4 +630,21 @@ begin
 
 end;
 
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUseky.GetItem(index:Integer):TPUsek;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUseky.GetCount():Integer;
+begin
+ Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
 end.
+

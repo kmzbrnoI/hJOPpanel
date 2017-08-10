@@ -50,16 +50,17 @@ uses
   fSprToSlot in 'fSprToSlot.pas' {F_SprToSlot},
   InterProcessCom in 'InterProcessCom.pas',
   parseHelper in 'parseHelper.pas',
-  PanelPainterUsek in 'PanelPainterUsek.pas',
   PanelPainter in 'PanelPainter.pas',
-  PanelPainterVyhybka in 'PanelPainterVyhybka.pas',
-  PanelPainterNavestidlo in 'PanelPainterNavestidlo.pas',
   BlokUvazka in 'BlokUvazka.pas',
   BlokUvazkaSpr in 'BlokUvazkaSpr.pas',
   BlokZamek in 'BlokZamek.pas',
   BlokPrejezd in 'BlokPrejezd.pas',
   BlokUsek in 'BlokUsek.pas',
-  PanelOR in 'PanelOR.pas';
+  PanelOR in 'PanelOR.pas',
+  BlokVyhybka in 'BlokVyhybka.pas',
+  BlokNavestidlo in 'BlokNavestidlo.pas',
+  BlokyUsek in 'BlokyUsek.pas',
+  BlokyVyhybka in 'BlokyVyhybka.pas';
 
 {$R *.res}
 

@@ -51,7 +51,8 @@ type
    procedure Load(ini:TMemIniFile);
    procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
    function GetIndex(Pos:TPoint):Integer;
-   procedure Reset();
+   procedure Reset(orindex:Integer = -1);
+   function GetPrj(tech_id:Integer):Integer;
  end;
 
 const
@@ -128,8 +129,8 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Show(obj:TDXDraw; blik:boolean; useky:TList<TPReliefUsk>);
-var i,j:Integer;
+procedure TPPrejezdy.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
+var j:Integer;
     usek:Integer;
     sym:TReliefSym;
     prj:TPPrejezd;
@@ -160,7 +161,7 @@ begin
            and (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y = prj.BlikPositions.data[j].Pos.Y) then
             begin
              // pokud je, odebereme
-             Useky[usek].Symbols.Count := Self.Useky[usek].Symbols.Count - 1;
+             Useky[usek].Symbols.Count := Useky[usek].Symbols.Count - 1;
             end;
           end;
 
@@ -215,28 +216,44 @@ begin
 
   end;//for i
 
- // dale je take zapotrebi zkontrolovat popisky:
+{ TODO // dale je take zapotrebi zkontrolovat popisky:
  for i := 0 to Self.Popisky.Count-1 do
   begin
    if (Self.Popisky.Data[i].prejezd_ref < 0) then continue;
 
-   if ((Pos.X >= Self.Popisky.Data[i].Position.X-1) and (Pos.X <= Self.Popisky.Data[i].Position.X+1) and (Pos.Y = Self.Popisky.Data[i].Position.Y)) then
+   if ((Pos.X >= Self.Popisky.Data[i].Position.X-1) and (Pos.X <= Self.Popisky.Data[i].Position.X+1) and
+       (Pos.Y = Self.Popisky.Data[i].Position.Y)) then
      Exit(Self.Popisky.Data[i].prejezd_ref);
-  end;//for i
+  end;//for i }
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Reset();
+procedure TPPrejezdy.Reset(orindex:Integer = -1);
 var i:Integer;
     prj:TPPrejezd;
 begin
  for i := 0 to Self.data.Count-1 do
   begin
-   prj := Self.data[i];
-   prj.PanelProp := _Def_Prj_Prop;
-   Self.data[i] := prj;
+   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+    begin
+     prj := Self.data[i];
+     prj.PanelProp := _Def_Prj_Prop;
+     Self.data[i] := prj;
+    end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPPrejezdy.GetPrj(tech_id:Integer):Integer;
+var i:Integer;
+begin
+ for i := 0 to Self.data.Count-1 do
+   if (tech_id = Self.data[i].Blok) then
+     Exit(i);
+
+ Result := -1;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

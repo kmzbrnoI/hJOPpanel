@@ -6,13 +6,12 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
      fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
      Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
-     BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokUsek;
+     BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
+     BlokNavestidlo, BlokVyhybka, BlokUsek;
 
 const
   //limity poli
-  _MAX_NAV      = 256;
   _MAX_POM      = 256;
-  _MAX_VYH      = 256;
   _MAX_SYMBOLS  = 256;
   _MAX_POPISKY  = 64;
 
@@ -20,9 +19,6 @@ const
   _INFOTIMER_TEXT_WIDTH = 22;
 
   _FileVersion = '1.1';
-
-const
-    _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)
 
 type
 
@@ -58,29 +54,6 @@ type
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
- // blok vyhybka:
-
- // data pro vykreslovani
- TVyhPanelProp = record
-  blikani:boolean;
-  Symbol,Pozadi:TColor;
-  Poloha:TVyhPoloha;
- end;
-
- // 1 vyhybka na reliefu
- TPVyhybka=record
-  Blok:Integer;
-  PolohaPlus:Byte;
-  Position:TPoint;
-  SymbolID:Integer;
-  obj:integer;
-
-  OblRizeni:Integer;
-  PanelProp:TVyhPanelProp;
-  visible:boolean;      // na zaklade viditelnosti ve vetvich je rekonstruovana viditelnost vyhybky
- end;//Navestidlo
-
- ///////////////////////////////////////////////////////////////////////////////
  // blok popisek:
 
  // 1 blok na reliefu:
@@ -90,26 +63,6 @@ type
   Color:Integer;
   prejezd_ref:Integer;
  end;//Text
-
- ///////////////////////////////////////////////////////////////////////////////
- // blok navestidlo:
-
- // data pro vykreslovani
- TNavPanelProp = record
-  Symbol,Pozadi:TColor;
-  AB:Boolean;
-  blikani:boolean;
- end;
-
- // 1 blok na reliefu
- TPNavestidlo=record
-  Blok:Integer;
-  Position:TPoint;
-  SymbolID:Integer;
-
-  OblRizeni:Integer;
-  PanelProp:TNavPanelProp;
- end;//Navestidlo
 
  ///////////////////////////////////////////////////////////////////////////////
  // blok pomocny objekt:
@@ -162,16 +115,6 @@ type
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
-
- TStartJC=record
-  Pos:TPoint;
-  Color:TColor;
- end;
-
- TPJC=record
-  text:string;
-  index:integer;
- end;
 
  TGetVyhybky=record
   Count:Integer;
@@ -231,32 +174,6 @@ type
     _DblClick_Timeout_Ms = 250;
 
     //defaultni chovani bloku:
-    _Def_Vyh_Prop:TVyhPanelProp = (
-        blikani: false;
-        Symbol: clBlack;
-        Pozadi: clFuchsia;
-        Poloha: TVyhPoloha.disabled);
-
-    _UA_Vyh_Prop:TVyhPanelProp = (
-        blikani: false;
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        Poloha: TVyhPoloha.both);
-
-
-    _Def_Nav_Prop:TNavPanelProp = (
-        Symbol: clBlack;
-        Pozadi: clFuchsia;
-        AB: false;
-        blikani: false);
-
-    _UA_Nav_Prop:TNavPanelProp = (
-        Symbol: $A0A0A0;
-        Pozadi: clBlack;
-        AB: false;
-        blikani: false);
-
-
     _Def_Rozp_Prop:TRozpPanelProp = (
         Symbol: clFuchsia;
         Pozadi: clBlack;
@@ -312,7 +229,6 @@ type
    Tech_blok:TDictionary<Integer, TList<TTechBlokToSymbol>>;   // mapuje id technologickeho bloku na
 
    //zde jsou ulozeny vsechny bloky
-   Navestidla:TList<TPNavestidlo>;
    Popisky:record
     Data:array [0.._MAX_POPISKY] of TPPopisek;
     Count:Integer;
@@ -321,13 +237,13 @@ type
     Data:array [0.._MAX_POM] of TPPomocnyObj;
     Count:Integer;
    end;//Popisky
-   Vyhybky:TList<TPVyhybka>;
-   StartJC:TList<TStartJC>;                    // vykresleni 1 symbolu okolo navestidla v usekove funkci
 
    Vykol : TList<TPVykol>;
    Rozp  : TList<TPRozp>;
 
    Useky : TPUseky;
+   Vyhybky : TPVyhybky;
+   Navestidla : TPNavestidla;
    Uvazky : TPUvazky;
    UvazkySpr : TPUvazkySpr;
    Zamky : TPZamky;
@@ -363,7 +279,6 @@ type
    procedure ShowPopisky;
    procedure ShowDK;
    procedure ShowOpravneni;
-   procedure ShowPrj;
    procedure ShowMereniCasu;
    procedure ShowMsg;
    procedure ShowZasobniky;
@@ -377,15 +292,11 @@ type
 
    function ORLoad(const ORs:TStrings):Byte;
 
-   function GetNav(Pos:TPoint):Integer;
-   function GetVyh(Pos:TPoint):Integer;
-   function GetPrj(Pos:TPoint):Integer; overload;
    function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
    function GetVykol(Pos:TPoint):Integer;
 
-   function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
-   function GetPrj(tech_id:Integer):Integer; overload;
+//   function GetUsek(tech_id:Integer):Integer; overload;   // pozor: vraci jen prvni vyskyt !
 
    procedure AEMessage(var Msg: tagMSG; var Handled: Boolean);
 
@@ -511,22 +422,21 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     parseHelper, PanelPainterUsek, PanelPainter, PanelPainterVyhybka,
-     PanelPainterNavestidlo;
+     parseHelper, PanelPainter;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
  inherited Create;
 
  Self.Useky := TPUseky.Create();
- Self.Vyhybky := TList<TPVyhybka>.Create();
- Self.Navestidla := TList<TPNavestidlo>.Create();
+ Self.Vyhybky := TPVyhybky.Create();
+ Self.Navestidla := TPNavestidla.Create();
  Self.Vykol := TList<TPVykol>.Create();
  Self.Rozp  := TList<TPRozp>.Create();
+ Self.Prejezdy := TPPrejezdy.Create();
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
  Self.reAuth.old_ors := TList<Integer>.Create();
- Self.StartJC := TList<TStartJC>.Create();
 
  Self.Uvazky := TPUvazky.Create();
  Self.UvazkySpr := TPUvazkySpr.Create();
@@ -612,7 +522,7 @@ begin
  Self.Navestidla.Free();
  Self.Vykol.Free();
  Self.Rozp.Free();
- Self.StartJC.Free();
+ Self.Prejezdy.Free();
 
  Self.Uvazky.Free();
  Self.UvazkySpr.Free();
@@ -849,12 +759,12 @@ begin
 
    Self.UvazkySpr.Show(Self.DrawObject);
    Self.Uvazky.Show(Self.DrawObject, Self.Graphics.blik);
-   PanelPainterNavestidlo.ShowNavestidla(Self.Navestidla, Self.Graphics.blik, Self.StartJC, Self.DrawObject);
-   Self.ShowPrj();
+   Self.Navestidla.Show(Self.DrawObject, Self.Graphics.blik);
+   Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.ShowPomocneSymboly();
-   Self.Useky.Show(Self.myORs, Self.Graphics.blik, Self.StartJC, Self.DrawObject, Self.Vyhybky);
+   Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
    Self.ShowPopisky();
-   PanelPainterVyhybka.ShowVyhybky(Self.Vyhybky, Self.Graphics.blik, Self.Useky, Self.DrawObject);
+   Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.ShowRozp();
    Self.ShowVykol();
@@ -1017,26 +927,6 @@ begin
   end;
 end;//procedure
 
-function TRelief.GetNav(Pos:TPoint):Integer;
-var i:Integer;
-begin
- Result := -1;
-
- for i := 0 to Self.Navestidla.Count-1 do
-   if ((Pos.X = Self.Navestidla[i].Position.X) and (Pos.Y = Self.Navestidla[i].Position.Y)) then
-     Exit(i);
-end;//function
-
-function TRelief.GetVyh(Pos:TPoint):Integer;
-var i:Integer;
-begin
- Result := -1;
-
- for i := 0 to Self.Vyhybky.Count-1 do
-   if ((Pos.X = vyhybky[i].Position.X) and (Pos.Y = vyhybky[i].Position.Y)) then
-     Exit(i);
-end;//function
-
 function TRelief.GetRozp(Pos:TPoint):Integer;
 var i:Integer;
 begin
@@ -1058,15 +948,6 @@ begin
  Result := -1;
 end;//function }
 
-{ TODO function TRelief.GetPrj(tech_id:Integer):Integer;
-var i:Integer;
-begin
- for i := 0 to Self.Prejezdy.Count-1 do
-   if (tech_id = Self.Prejezdy.Data[i].Blok) then
-     Exit(i);
-
- Result := -1;
-end;//function }
 
 function TRelief.GetVykol(Pos:TPoint):Integer;
 var i:Integer;
@@ -1166,7 +1047,7 @@ begin
   end;
 
  //navestidlo
- index := Self.GetNav(Position);
+ index := Self.Navestidla.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Navestidla[index].Blok < 0) then goto EscCheck;
@@ -1175,11 +1056,11 @@ begin
   end;
 
  //vyhybka
- index := Self.GetVyh(Position);
+ index := Self.Vyhybky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (vyhybky[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[vyhybky[index].OblRizeni].id, Button, vyhybky[index].Blok);
+   if (Vyhybky.data[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Vyhybky.data[index].OblRizeni].id, Button, Vyhybky.data[index].Blok);
    goto EscCheck;
   end;
 
@@ -1227,22 +1108,15 @@ EscCheck:
 end;//procedure
 
 function TRelief.FLoad(aFile:string):Byte;
-var i,j,k:Integer;
+var i,j:Integer;
     inifile:TMemIniFile;
     BlkNazvy,sect_str,obl_rizeni:TStrings;
     Obj:string;
     return:Integer;
     ver:string;
-
-    symbol:TReliefSym;
-    pos:TPoint;
-    count, count2:Integer;
-    Vetev:TVetev;
-    Usek:TPUsek;
+    count:Integer;
     vykol:TPVykol;
     rozp:TPRozp;
-    vyh:TPVyhybka;
-    nav:TPNavestidlo;
 begin
  Self.ResetData();
 
@@ -1294,27 +1168,8 @@ begin
  Self.Popisky.Count     := inifile.ReadInteger('P', 'T',   0);
  BlkNazvy.Free;
 
- //navestidla
- count := inifile.ReadInteger('P', 'N', 0);
- for i := 0 to count-1 do
-  begin
-   nav.Blok       := inifile.ReadInteger('N'+IntToStr(i),'B',-1);
-   nav.Position.X := inifile.ReadInteger('N'+IntToStr(i),'X',0);
-   nav.Position.Y := inifile.ReadInteger('N'+IntToStr(i),'Y',0);
-   nav.SymbolID   := inifile.ReadInteger('N'+IntToStr(i),'S',0);
-
-   //OR
-   nav.OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
-
-   //default settings:
-   if (nav.Blok = -2) then
-     nav.PanelProp := _UA_Nav_Prop
-   else
-     nav.PanelProp := _Def_Nav_Prop;
-
-   Self.Navestidla.Add(nav);
-   Self.AddToTechBlk(_BLK_SCOM, nav.Blok, Self.Navestidla.Count-1);
-  end;//for i
+ Self.Useky.Load(inifile, Self.myORs);
+ Self.Navestidla.Load(inifile);
 
  //pomocne symboly
  for i := 0 to Self.PomocneObj.Count-1 do
@@ -1330,31 +1185,7 @@ begin
     end;//for j
   end;//for i
 
- //vyhybky
- count := inifile.ReadInteger('P', 'V', 0);
- for i := 0 to count-1 do
-  begin
-   vyh.Blok        := inifile.ReadInteger('V'+IntToStr(i),'B',-1);
-   vyh.SymbolID    := inifile.ReadInteger('V'+IntToStr(i),'S',0);
-   vyh.PolohaPlus  := inifile.ReadInteger('V'+IntToStr(i),'P',0);
-   vyh.Position.X  := inifile.ReadInteger('V'+IntToStr(i),'X',0);
-   vyh.Position.Y  := inifile.ReadInteger('V'+IntToStr(i),'Y',0);
-   vyh.obj         := inifile.ReadInteger('V'+IntToStr(i),'O',-1);
-
-   //OR
-   vyh.OblRizeni := inifile.ReadInteger('V'+IntToStr(i),'OR',-1);
-
-   //default settings:
-   vyh.visible   := true;
-   if (vyh.Blok = -2) then
-     vyh.PanelProp := _UA_Vyh_Prop
-   else
-     vyh.PanelProp := _Def_Vyh_Prop;
-
-   Self.Vyhybky.Add(vyh);
-   Self.AddToTechBlk(_BLK_VYH, vyh.Blok, Self.Vyhybky.Count-1);
-  end;
-
+ Self.Vyhybky.Load(inifile);
  Self.Prejezdy.Load(inifile);
 
  //popisky
@@ -1364,7 +1195,7 @@ begin
    Self.Popisky.Data[i].Position.X  := inifile.ReadInteger('T'+IntToStr(i),'X',0);
    Self.Popisky.Data[i].Position.Y  := inifile.ReadInteger('T'+IntToStr(i),'Y',0);
    Self.Popisky.Data[i].Color       := inifile.ReadInteger('T'+IntToStr(i),'C',0);
-   Self.Popisky.Data[i].prejezd_ref := Self.GetPrj(inifile.ReadInteger('T'+IntToStr(i),'B', -1));
+   Self.Popisky.Data[i].prejezd_ref := Prejezdy.GetPrj(inifile.ReadInteger('T'+IntToStr(i),'B', -1));
   end;//for i
 
  Self.Uvazky.Load(inifile);
@@ -1386,9 +1217,9 @@ begin
 
    //default settings:
    if (vykol.Blok = -2) then
-     vykol.PanelProp := Self._UA_Vyh_Prop
+     vykol.PanelProp := _UA_Vyh_Prop
    else
-     vykol.PanelProp := Self._Def_Vyh_Prop;
+     vykol.PanelProp := _Def_Vyh_Prop;
 
    Self.Vykol.Add(vykol);
 
@@ -1417,7 +1248,10 @@ begin
   end;//for i
 
  for i := 0 to Self.Useky.data.Count-1 do
-   Self.AddToTechBlk(_BLK_USEK, Self.Usek.data[i].Blok, i);
+   Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
+
+ for i := 0 to Self.Vyhybky.data.Count-1 do
+   Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.data[i].Blok, i);
 
  for i := 0 to Self.Uvazky.data.Count-1 do
    Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
@@ -1430,6 +1264,9 @@ begin
 
  for i := 0 to Self.Prejezdy.data.Count-1 do
    Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.data[i].Blok, i);
+
+ for i := 0 to Self.Navestidla.data.Count-1 do
+   Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.data[i].Blok, i);
 
  inifile.Free;
  Result := 0;
@@ -1450,8 +1287,6 @@ procedure TRelief.ResetData;
 var i:Integer;
 begin
  Self.Popisky.Count := 0;
- Self.Navestidla.Clear();
- Self.Vyhybky.Clear();
 
  Self.Tech_blok.Clear();
 
@@ -1550,7 +1385,7 @@ var vyh:TPVyhybka;
 begin
  Result.Count := 0;
 
- for vyh in Self.Vyhybky do
+ for vyh in Self.Vyhybky.data do
   begin
    if (Self.Useky[vyh.obj].Blok = usekid) then
     begin
@@ -1565,7 +1400,7 @@ var vyh:TPVyhybka;
 begin
  SetLength(Result,0);
 
- for vyh in Self.Vyhybky do
+ for vyh in Self.Vyhybky.data do
   begin
    if (vyh.Blok = BlokTechnolgie) then
     begin
@@ -1854,11 +1689,11 @@ begin
   begin
    case (symbols[i].blk_type) of
       _BLK_VYH: begin
-        if (Sender = Self.myORs[vyhybky[symbols[i].symbol_index].OblRizeni].id) then
+        if (Sender = Self.myORs[Vyhybky.data[symbols[i].symbol_index].OblRizeni].id) then
          begin
-          vyh := Self.Vyhybky[symbols[i].symbol_index];
+          vyh := Self.Vyhybky.data[symbols[i].symbol_index];
           vyh.PanelProp := VyhPanelProp;
-          Self.Vyhybky[symbols[i].symbol_index] := vyh;
+          Self.Vyhybky.data[symbols[i].symbol_index] := vyh;
          end;
       end;
 
@@ -1890,7 +1725,7 @@ begin
     begin
      nav := Self.Navestidla[symbols[i].symbol_index];
      nav.PanelProp := NavPanelProp;
-     Self.Navestidla[symbols[i].symbol_index] := nav;
+     Self.Navestidla.data[symbols[i].symbol_index] := nav;
     end;
 end;//procedure
 
@@ -2455,11 +2290,8 @@ end;
 
 procedure TRelief.OrDisconnect(orindex:Integer = -1);
 var i:Integer;
-    usk:TPUsek;
     vykol:TPVykol;
     rozp:TPRozp;
-    vyh:TPVyhybka;
-    nav:TPNavestidlo;
 begin
  if (orindex = -1) then
   begin
@@ -2469,29 +2301,13 @@ begin
    Self.Graphics.DrawObject.Enabled := true;
   end;
 
- Self.Useky.Reset();
-
- for i := 0 to Self.Vyhybky.Count-1 do
-  if (((orindex < 0) or (vyhybky[i].OblRizeni = orindex)) and (vyhybky[i].Blok > -2)) then
-   begin
-    vyh := Self.Vyhybky[i];
-    vyh.PanelProp := _Def_Vyh_Prop;
-    Self.Vyhybky[i] := vyh;
-   end;
-
- for i := 0 to Self.Navestidla.Count-1 do
-  if (((orindex < 0) or (Self.Navestidla[i].OblRizeni = orindex)) and
-      (Self.Navestidla[i].Blok > -2)) then
-   begin
-    nav := Self.Navestidla[i];
-    nav.PanelProp := _Def_Nav_Prop;
-    Self.Navestidla[i] := nav;
-   end;
-
- Self.Prejezdy.Reset();
- Self.Uvazky.Reset();
- Self.UvazkySpr.Reset();
- Self.Zamky.Reset();
+ Self.Useky.Reset(orindex);
+ Self.Vyhybky.Reset(orindex);
+ Self.Navestidla.Reset(orindex);
+ Self.Prejezdy.Reset(orindex);
+ Self.Uvazky.Reset(orindex);
+ Self.UvazkySpr.Reset(orindex);
+ Self.Zamky.Reset(orindex);
 
  for i := 0 to Self.Vykol.Count-1 do
   if (((orindex < 0) or (Self.Vykol[i].OblRizeni = orindex)) and

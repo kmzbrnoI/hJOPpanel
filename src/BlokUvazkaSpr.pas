@@ -39,7 +39,7 @@ type
 
    procedure Load(ini:TMemIniFile);
    procedure Show(obj:TDXDraw);
-   procedure Reset();
+   procedure Reset(orindex:Integer = -1);
  end;
 
 const
@@ -141,22 +141,25 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazkySpr.Reset();
+procedure TPUvazkySpr.Reset(orindex:Integer = -1);
 var i, j:Integer;
     uvs:TPUvazkaSpr;
 begin
  for i := 0 to Self.data.Count-1 do
   begin
-   uvs := Self.data[i];
+   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+    begin
+     uvs := Self.data[i];
 
-   for j := 0 to uvs.PanelProp.spr.Count-1 do
-     uvs.PanelProp.spr[j].strings.Free();
-   uvs.PanelProp.spr.Free();
+     for j := 0 to uvs.PanelProp.spr.Count-1 do
+       uvs.PanelProp.spr[j].strings.Free();
+     uvs.PanelProp.spr.Free();
 
-   uvs.PanelProp     := _Def_UvazkaSpr_Prop;
-   uvs.PanelProp.spr := TList<TUvazkaSpr>.Create();
+     uvs.PanelProp     := _Def_UvazkaSpr_Prop;
+     uvs.PanelProp.spr := TList<TUvazkaSpr>.Create();
 
-   Self.data[i] := uvs;
+     Self.data[i] := uvs;
+    end;
   end;
 end;
 

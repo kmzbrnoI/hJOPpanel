@@ -40,7 +40,6 @@ type
   TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
   TPanelButton = (F1, F2, ENTER, ESCAPE);
   TJCType = (undefinned = -1, no = 0, vlak = 1, posun = 2, nouz = 3, staveni = 4);
-  TVyhPoloha  = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
   TNUZstatus = (no_nuz = 0, blk_in_nuz = 1, nuzing = 2);
   TSymbolSetType = (normal = 0, bigger = 1);
 

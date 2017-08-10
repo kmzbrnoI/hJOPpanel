@@ -133,16 +133,17 @@
 			</DCCReference>
 			<DCCReference Include="InterProcessCom.pas"/>
 			<DCCReference Include="parseHelper.pas"/>
-			<DCCReference Include="PanelPainterUsek.pas"/>
 			<DCCReference Include="PanelPainter.pas"/>
-			<DCCReference Include="PanelPainterVyhybka.pas"/>
-			<DCCReference Include="PanelPainterNavestidlo.pas"/>
 			<DCCReference Include="BlokUvazka.pas"/>
 			<DCCReference Include="BlokUvazkaSpr.pas"/>
 			<DCCReference Include="BlokZamek.pas"/>
 			<DCCReference Include="BlokPrejezd.pas"/>
 			<DCCReference Include="BlokUsek.pas"/>
 			<DCCReference Include="PanelOR.pas"/>
+			<DCCReference Include="BlokVyhybka.pas"/>
+			<DCCReference Include="BlokNavestidlo.pas"/>
+			<DCCReference Include="BlokyUsek.pas"/>
+			<DCCReference Include="BlokyVyhybka.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

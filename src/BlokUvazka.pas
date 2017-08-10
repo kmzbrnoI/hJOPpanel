@@ -30,7 +30,7 @@ type
    procedure Load(ini:TMemIniFile);
    procedure Show(obj:TDXDraw; blik:boolean);
    function GetIndex(Pos:TPoint):Integer;
-   procedure Reset();
+   procedure Reset(orindex:Integer = -1);
  end;
 
 const
@@ -150,15 +150,18 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazky.Reset();
+procedure TPUvazky.Reset(orindex:Integer = -1);
 var i:Integer;
     uv:TPUvazka;
 begin
  for i := 0 to Self.data.Count-1 do
   begin
-   uv := Self.data[i];
-   uv.PanelProp := _Def_Uvazka_Prop;
-   Self.data[i] := uv;
+   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+    begin
+     uv := Self.data[i];
+     uv.PanelProp := _Def_Uvazka_Prop;
+     Self.data[i] := uv;
+    end;
   end;
 end;
 
