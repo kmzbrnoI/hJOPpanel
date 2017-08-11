@@ -21,6 +21,7 @@ type
    tech:string;
    stanice:string;
    cas:TDateTime;
+   techStr:string;
   end;
 
   TErrors = class
@@ -77,6 +78,8 @@ end;//dtor
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.writeerror(error:string; system:string; Stanice:string);
+var len:Integer;
+    msg:string;
 begin
  if (Self.buf_len > _MAX_ERR) then Exit();
 
@@ -84,6 +87,16 @@ begin
  Self.buf[Self.buf_len].err     := error;
  Self.buf[Self.buf_len].tech    := system;
  Self.buf[Self.buf_len].stanice := stanice;
+
+ system := '! '+system+' !';
+ if (Length(system) > _TECH_WIDTH) then
+   system := LeftStr(system, _TECH_WIDTH);
+
+ len := (_TECH_WIDTH - Length(system)) div 2;
+ msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
+ if (Length(msg) < _TECH_WIDTH) then msg := msg + ' ';
+ Self.buf[Self.buf_len].techStr := msg;
+
  Self.buf_len := Self.buf_len + 1;
 
  Self.Graphics.DrawObject.Enabled := false;
@@ -115,24 +128,20 @@ var i, top, left, len:Integer;
 begin
  if (Self.buf_len <= 0) then Exit();
 
+ // vypsani zdroje chyby (napr. "TECHNOLOGIE")
  if (Self.Graphics.blik) then
-  msg := '! '+Self.buf[0].tech+' !'
+  msg := Self.buf[0].techStr
  else
-  msg := '';
+  msg := StringOfChar(' ', _TECH_WIDTH);
 
- if (Length(msg) > _TECH_WIDTH) then
-  msg := LeftStr(msg, _TECH_WIDTH);
-
- len := (_TECH_WIDTH - Length(msg)) div 2;
- msg := Format('%*s%s', [len, ' ', msg + Format('%-*s', [len, ' '])]);
- if (Length(msg) < _TECH_WIDTH) then msg := msg + ' ';
  PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
 
+ // vypsani poctu chyb
  msg := Format('%2d', [Self.buf_len]);
  PanelPainter.TextOutput(Point(_TECH_LEFT+_TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
 
+ // vypsani samotnych chyb
  len := Min(_ERR_SHOW_CNT, Self.buf_len);
-
  top  := Relief.PanelHeight - 1;
  left := (Relief.PanelWidth div 2) - (_ERR_WIDTH div 2) + 10;
 
