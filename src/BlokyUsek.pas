@@ -22,7 +22,7 @@ type
    procedure PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
        myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
    procedure ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
-   procedure PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
+   procedure PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw; hidden:boolean);
    procedure ShowUsekVetve(usek:TPUsek; vetevI:Integer; visible:boolean;
        var showed:array of boolean; myORs:TList<TORPanel>; blik:boolean; obj:TDXDraw;
        startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
@@ -251,17 +251,17 @@ begin
  for usek in Self.data do
   begin
    // vykresleni symbolu useku
-   // tady se resi vetve
+
+   if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
+      (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
+       and (blik)) then
+     fg := clBlack
+   else
+     fg := usek.PanelProp.Symbol;
+
    if ((usek.Vetve.Count = 0) or (usek.PanelProp.Symbol = clFuchsia)) then
     begin
      // pokud nejsou vetve, nebo je usek disabled, vykresim ho cely (bez ohledu na vetve)
-     if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and
-        (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected)))
-         and (blik)) then
-       fg := clBlack
-     else
-       fg := usek.PanelProp.Symbol;
-
      for sym in usek.Symbols do
       begin
        bg := usek.PanelProp.Pozadi;
@@ -292,7 +292,7 @@ begin
 
    // vykresleni cisla koleje
    for p in usek.KPopisek do
-     PaintCisloKoleje(p, usek, obj);
+     PaintCisloKoleje(p, usek, obj, fg = clBlack);
 
    // vykresleni souprav
    ShowUsekSoupravy(usek, obj, blik, myORs);
@@ -304,24 +304,30 @@ end;//procedure
 // vykresleni soupravy na dane pozici
 procedure TPUseky.PaintSouprava(pos:TPoint; const usek:TPUsek; spri:Integer;
     myORs:TList<TORPanel>; obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
-var bg: TColor;
+var fg, bg: TColor;
     sipkaLeft, sipkaRight: boolean;
     souprava:TUsekSouprava;
 begin
  souprava := usek.PanelProp.soupravy[spri];
  pos := Point(pos.X - (Length(souprava.nazev) div 2), pos.Y);
 
+ fg := souprava.fg;
+
  // urceni barvy
  if (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) then
   begin
-   bg := clYellow;
-   if (blik) then Exit();
+   if (blik) then
+    begin
+     fg := clBlack;
+     bg := usek.PanelProp.Pozadi;
+    end else
+     bg := clYellow;
   end else if ((bgZaver) and (usek.PanelProp.KonecJC > TJCType.no)) then
    bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)]
   else
    bg := souprava.bg;
 
- PanelPainter.TextOutput(pos, souprava.nazev, souprava.fg, bg, obj, true);
+ PanelPainter.TextOutput(pos, souprava.nazev, fg, bg, obj, true);
 
  // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
  sipkaLeft := (((souprava.sipkaL) and (myORs[usek.OblRizeni].Lichy = 1)) or
@@ -345,15 +351,15 @@ begin
 
  if (sipkaLeft) then
    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y-1), _Spr_Sipka_Start+1,
-             souprava.fg, clNone, obj, true);
+             fg, clNone, obj, true);
  if (sipkaRight) then
    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X+Length(souprava.nazev)-1, pos.Y-1),
-             _Spr_Sipka_Start, souprava.fg, clNone, obj, true);
+             _Spr_Sipka_Start, fg, clNone, obj, true);
 
  if ((sipkaLeft) or (sipkaRight)) then
   begin
    // vykresleni sipky
-   obj.Surface.Canvas.Pen.Color := souprava.fg;
+   obj.Surface.Canvas.Pen.Color := fg;
    obj.Surface.Canvas.MoveTo(pos.X*SymbolSet._Symbol_Sirka, pos.Y*SymbolSet._Symbol_Vyska-1);
    obj.Surface.Canvas.LineTo((pos.X+Length(souprava.nazev))*SymbolSet._Symbol_Sirka,
                                          pos.Y*SymbolSet._Symbol_Vyska-1);
@@ -390,17 +396,23 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 // vykresleni cisla koleje
-procedure TPUseky.PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
+procedure TPUseky.PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw; hidden:boolean);
 var left:TPoint;
+    fg:TColor;
 begin
  left := Point(pos.X - (Length(usek.KpopisekStr) div 2), pos.Y);
 
+ if (hidden) then
+   fg := clBlack
+ else
+   fg := usek.PanelProp.Symbol;
+
  if (usek.PanelProp.KonecJC = TJCType.no) then
    PanelPainter.TextOutput(left, usek.KpopisekStr,
-      usek.PanelProp.Symbol, usek.PanelProp.Pozadi, obj)
+      fg, usek.PanelProp.Pozadi, obj)
  else
    PanelPainter.TextOutput(left, usek.KpopisekStr,
-      usek.PanelProp.Symbol, _Konec_JC[Integer(usek.PanelProp.KonecJC)], obj);
+      fg, _Konec_JC[Integer(usek.PanelProp.KonecJC)], obj);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
