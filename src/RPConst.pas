@@ -38,6 +38,7 @@ type
 
   TWordAr = array of Word;
   TIntAr = array of Integer;
+  TArSmallI = array of Smallint;
 
   procedure ExtractStringsEx(Separators: TSysCharSet; Ignore: TSysCharSet; Content: string; var Strings: TStrings);
   function GetForbidderChars():string;

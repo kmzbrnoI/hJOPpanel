@@ -36,6 +36,7 @@ type
 
    procedure Load(ini:TMemIniFile);
    procedure Show(obj:TDXDraw);
+   function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
 
    property Items[index : integer] : TPRozp read GetItem; default;
@@ -108,6 +109,18 @@ begin
  for rozp in Self.data do
    PanelPainter.Draw(SymbolSet.IL_Symbols, rozp.Pos, _Rozp_Start+1, rozp.PanelProp.Symbol,
       clBlack, obj, true);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPRozpojovace.GetIndex(Pos:TPoint):Integer;
+var i:Integer;
+begin
+ Result := -1;
+
+ for i := 0 to Self.data.Count-1 do
+   if ((Pos.X = Self.data[i].Pos.X) and (Pos.Y = Self.data[i].Pos.Y)) then
+     Exit(i);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

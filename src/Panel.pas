@@ -6,30 +6,23 @@ unit Panel;
 
 interface
 
-uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
-     Forms, StdCtrls, ExtCtrls, Menus, AppEvnts, inifiles, Messages, RPConst,
-     fPotvrSekv, MenuPanel, StrUtils, PGraphics, HVDb, Generics.Collections,
-     Zasobnik, UPO, IBUtils, Hash, PngImage, DirectX, PanelOR,
+uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, StdCtrls,
+     ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
+     StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO, IBUtils,
+     Hash, PngImage, DirectX, PanelOR,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
      BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek,
      BlokPomocny;
 
 const
-  //limity poli
-  _MAX_POM      = 256;
-  _MAX_SYMBOLS  = 256;
-
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
 
   _FileVersion = '1.1';
 
 type
-
  ///////////////////////////////////////////////////////////////////////////////
- // globalni datove struktury:
 
- TArSmallI=array of Smallint;
  TSpecialMenu = (none, dk, osv, loko, reg_please, hlaseni);
 
  ///////////////////////////////////////////////////////////////////////////////
@@ -57,13 +50,6 @@ type
 
  ///////////////////////////////////////////////////////////////////////////////
 
- TGetVyhybky=record
-  Count:Integer;
-  Data:array [0..32] of integer;
- end;
-
- //////////////////////////////////////////////////////////////////////////////
-
  TInfoTimer = record
   konec:TDateTime;
   str:string;
@@ -80,9 +66,8 @@ type
  end;
 
  ///////////////////////////////////////////////////////////////////////////////
- TRelief=class
+ TRelief = class
   private const
-    //vychozi data
     _Def_Color_Pozadi = clBlack;
     _Def_Color_Kurzor_Ramecek = clYellow;
     _Def_Color_Kurzor_Obsah   = clMaroon;
@@ -95,7 +80,6 @@ type
    DrawObject:TDXDraw;
    ParentForm:TForm;
    AE:TApplicationEvents;
-   PM_Properties:TPopupMenu;
    T_SystemOK:TTimer; //timer na SystemOK na 500ms - nevykresluje
    Graphics:TPanelGraphics;
 
@@ -168,7 +152,6 @@ type
    procedure ShowZasobniky;
    procedure ShowInfoTimers;
 
-   function GetRozp(Pos:TPoint):Integer;
    function GetDK(Pos:TPoint):Integer;
 
    procedure AEMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -225,9 +208,6 @@ type
 
    procedure Initialize(var DrawObject:TDXDraw; aFile:string; hints_file:string);
    procedure Show();
-
-   function GetUsekVyhybky(usekid:integer):TGetVyhybky;
-   function GetUsekID(BlokTechnolgie:integer):TArSmallI;
 
    function AddMereniCasu(Sender:string; Delka:TDateTime; id:Integer):byte;
    procedure StopMereniCasu(Sender:string; id:Integer);
@@ -348,8 +328,6 @@ begin
  Self.CursorDraw.Pozadi.Width  := SymbolSet._Symbol_Sirka+2;    // +2 kvuli okrajum kurzoru
  Self.CursorDraw.Pozadi.Height := SymbolSet._Symbol_Vyska+2;
 
- Self.PM_Properties := TPopupMenu.Create(Self.ParentForm);
-
  Self.AE := TApplicationEvents.Create(Self.ParentForm);
  Self.AE.OnMessage := Self.AEMessage;
 
@@ -395,7 +373,6 @@ begin
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
  if (Assigned(Self.UPO)) then FreeAndNil(Self.UPO);
  if (Assigned(Self.T_SystemOK)) then FreeAndNil(Self.T_SystemOK);
- if (Assigned(Self.PM_Properties)) then FreeAndNil(Self.PM_Properties);
  if (Assigned(Self.Menu)) then FreeAndNil(Self.Menu);
  if (Assigned(Self.Graphics)) then FreeAndNil(Self.Graphics);
  if (Assigned(Self.reAuth.old_ors)) then FreeAndNil(Self.reAuth.old_ors);
@@ -735,16 +712,6 @@ begin
   end;
 end;//procedure
 
-function TRelief.GetRozp(Pos:TPoint):Integer;
-var i:Integer;
-begin
- Result := -1;
-
- for i := 0 to Self.Rozp.Count-1 do
-   if ((Pos.X = Self.Rozp[i].Pos.X) and (Pos.Y = Self.Rozp[i].Pos.Y)) then
-     Exit(i);
-end;//function
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //vyvolano pri kliku na relief
@@ -811,7 +778,7 @@ begin
   end;
 
  //rozpojovac
- index := Self.GetRozp(Position);
+ index := Self.Rozp.GetIndex(Position);
  if (index <> -1) then
   begin
    if (Self.Rozp[index].Blok < 0) then goto EscCheck;
@@ -1087,37 +1054,6 @@ begin
  if (send) then
    PanelTCPClient.PanelClick('-', TPanelButton.ESCAPE);
 end;//procedure
-
-//ziskani vyhybke, ktere jsou navazany na usek v parametru
-function TRelief.GetUsekVyhybky(usekid:integer):TGetVyhybky;
-var vyh:TPVyhybka;
-begin
- Result.Count := 0;
-
- for vyh in Self.Vyhybky.data do
-  begin
-   if (Self.Useky[vyh.obj].Blok = usekid) then
-    begin
-     Result.Data[Result.Count] := vyh.Blok;
-     Result.Count := Result.Count + 1;
-    end;
-  end;
-end;//function
-
-function TRelief.GetUsekID(BlokTechnolgie:integer):TArSmallI;
-var vyh:TPVyhybka;
-begin
- SetLength(Result,0);
-
- for vyh in Self.Vyhybky.data do
-  begin
-   if (vyh.Blok = BlokTechnolgie) then
-    begin
-     SetLength(Result,Length(Result)+1);
-     Result[Length(Result)-1] := Self.Useky[vyh.obj].Blok;
-    end;
-  end;//for i
-end;//function
 
 function TRelief.AddMereniCasu(Sender:string; Delka:TDateTime; id:Integer):byte;
 var orindex:Integer;
