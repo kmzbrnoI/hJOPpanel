@@ -84,7 +84,7 @@ type
      // udalosti z panelu:
       procedure PanelAuthorise(Sender:string; rights:TORControlRights; username,password:string);
       procedure PanelFirstGet(Sender:string);
-      procedure PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1);
+      procedure PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1; params:string = '');
       procedure PanelMenuClick(item_hint:string; item_index:Integer);
       procedure PanelSetStitVyl(typ:Integer; stitvyl:string);
       procedure PanelPotvrSekv(reason:TPSEnd);
@@ -632,6 +632,7 @@ begin
         us.sipkaS := ((souprava[1] <> '') and (souprava[1][2] = '1'));
         us.fg := strToColor(souprava[2]);
         us.bg := strToColor(souprava[3]);
+        us.posindex := -1;
 
         if (souprava.Count > 4) then
           us.ramecek := strToColor(souprava[4])
@@ -751,12 +752,14 @@ begin
  Self.SendLn(Sender+';GET-ALL;');
 end;//procedure
 
-procedure TPanelTCPClient.PanelClick(Sender:string; Button:TPanelButton; blokid:Integer);
+procedure TPanelTCPClient.PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1; params:string = '');
 begin
  if (blokid > -1) then
-   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button)+';'+IntToStr(blokid))
+   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button)+';'+IntToStr(blokid)+';'+params)
+ else if (params = '') then
+   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button))
  else
-   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button));
+   Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button)+';;'+params);
 end;//procedure
 
 procedure TPanelTCPClient.PanelMenuClick(item_hint:string; item_index:Integer);

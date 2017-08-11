@@ -14,6 +14,11 @@ const
   _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)
 
 type
+ TPUsekID = record
+  index:Integer;
+  soupravaI:Integer;
+ end;
+
  TPUseky = class
   private
    function GetItem(index:Integer):TPUsek;
@@ -40,7 +45,7 @@ type
    procedure Load(ini:TMemIniFile; myORs:TList<TORPanel>);
    procedure Show(obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>;
       startJC:TList<TStartJC>; vyhybky:TList<TPVyhybka>);
-   function GetIndex(Pos:TPoint):Integer;
+   function GetIndex(Pos:TPoint):TPUsekID;
    procedure Reset(orindex:Integer = -1);
    function GetUsek(tech_id:Integer):Integer;
 
@@ -206,15 +211,37 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPUseky.GetIndex(Pos:TPoint):Integer;
+function TPUseky.GetIndex(Pos:TPoint):TPUsekID;
 var i,j:Integer;
+    us:TUsekSouprava;
 begin
- Result := -1;
+ Result.index := -1;
 
  for i := 0 to Self.data.Count-1 do
    for j := 0 to Self.data[i].Symbols.Count-1 do
      if ((Pos.X = Self.data[i].Symbols[j].Position.X) and (Pos.Y = Self.data[i].Symbols[j].Position.Y)) then
-       Exit(i);
+      begin
+       Result.index := i;
+       Break;
+      end;
+
+ if (Result.index = -1) then Exit();
+ Result.soupravaI := -1;
+
+ // zjisteni indexu soupravy
+ for i := 0 to Self.data[Result.index].PanelProp.soupravy.Count-1 do
+  begin
+   us := Self.data[Result.index].PanelProp.soupravy[i];
+
+   if (us.posindex < 0) then continue;
+
+   if ((Pos.X >= Self.data[Result.index].Soupravy[us.posindex].X - (Length(us.nazev) div 2)) and
+       (Pos.X < Self.data[Result.index].Soupravy[us.posindex].X + (Length(us.nazev) div 2) + (Length(us.nazev) mod 2))) then
+    begin
+     Result.soupravaI := i;
+     Exit();
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -371,11 +398,24 @@ end;
 
 procedure TPUseky.ShowUsekSoupravy(const usek:TPUsek; obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
 var i, step, index:Integer;
+    s:TUsekSouprava;
 begin
+ // Posindex neni potreba mazat, protoze se vzdy se zmenou stavu bloku
+ // prepisuje automaticky na -1.
+
  if ((usek.PanelProp.soupravy.Count = 0) or (usek.Soupravy.Count = 0)) then
    Exit()
+
  else if (usek.PanelProp.soupravy.Count = 1) then begin
    PaintSouprava(usek.Soupravy[usek.Soupravy.Count div 2], usek, 0, myORs, obj, blik);
+
+   if (usek.PanelProp.soupravy[0].posindex <> 0) then
+    begin
+     s := usek.PanelProp.soupravy[0];
+     s.posindex := 0;
+     usek.PanelProp.soupravy[0] := s;
+    end;
+
  end else begin
    // vsechny soupravy, ktere se vejdou, krome posledni
    index := 0;
@@ -383,13 +423,30 @@ begin
    for i := 0 to Min(usek.Soupravy.Count, usek.PanelProp.soupravy.Count)-2 do
     begin
      PaintSouprava(usek.Soupravy[index], usek, i, myORs, obj, blik);
+
+     if (usek.PanelProp.soupravy[i].posindex <> index) then
+      begin
+       s := usek.PanelProp.soupravy[i];
+       s.posindex := index;
+       usek.PanelProp.soupravy[i] := s;
+      end;
+
      index := index + step;
     end;
 
    // posledni souprava na posledni pozici
    if (usek.Soupravy.Count > 0) then
+    begin
      PaintSouprava(usek.Soupravy[usek.Soupravy.Count-1], usek,
         usek.PanelProp.Soupravy.Count-1, myORs, obj, blik);
+
+     if (usek.PanelProp.soupravy[usek.PanelProp.Soupravy.Count-1].posindex <> usek.Soupravy.Count-1) then
+      begin
+       s := usek.PanelProp.soupravy[usek.PanelProp.Soupravy.Count-1];
+       s.posindex := usek.Soupravy.Count-1;
+       usek.PanelProp.soupravy[usek.PanelProp.Soupravy.Count-1] := s;
+      end;
+    end;
  end;
 end;
 

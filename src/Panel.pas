@@ -751,6 +751,7 @@ end;//function
 procedure TRelief.ObjectMouseUp(Position:TPoint; Button:TPanelButton);
 var i, index:Integer;
     handled:boolean;
+    uid:TPUsekID;
 label
     EscCheck;
 begin
@@ -828,17 +829,21 @@ begin
   end;
 
  //usek
- index := Self.Useky.GetIndex(Position);
- if (index <> -1) then
+ uid := Self.Useky.GetIndex(Position);
+ if (uid.index <> -1) then
   begin
-   if (Self.Useky.data[index].Blok < 0) then goto EscCheck;
+   if (Self.Useky.data[uid.index].Blok < 0) then goto EscCheck;
 
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
-   if ((Self.myORs[Self.Useky.data[index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and (Button = ENTER)) then
-     //  or;LOK-REQ;U-PLEASE;blk_id              - zadost o vydani seznamu hnacich vozidel na danem useku
-     PanelTCPClient.SendLn(Self.myORs[Self.Useky.data[index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky.data[index].Blok))
+   if ((Self.myORs[Self.Useky[uid.index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and
+       (Button = ENTER)) then
+     //  zadost o vydani seznamu hnacich vozidel na danem useku
+     PanelTCPClient.SendLn(Self.myORs[Self.Useky[uid.index].OblRizeni].id +
+       ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[uid.index].Blok))
    else
-     PanelTCPClient.PanelClick(Self.myORs[Self.Useky.data[index].OblRizeni].id, Button, Self.Useky.data[index].Blok);
+     PanelTCPClient.PanelClick(Self.myORs[Self.Useky[uid.index].OblRizeni].id,
+       Button, Self.Useky[uid.index].Blok, IntToStr(uid.soupravaI));
+
    goto EscCheck;
   end;
 

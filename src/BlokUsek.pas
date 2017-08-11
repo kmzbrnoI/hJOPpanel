@@ -14,14 +14,14 @@ const
   _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)
 
 type
- TUsekSouprava=record
+ TUsekSouprava = record
   nazev:string;
   sipkaL,sipkaS:boolean;
   fg, bg, ramecek:TColor;
+  posindex:Integer;               // index pozice, na ktere je umistena tato konkretni souprava
  end;
 
- // data o useku pro spravne vykreslovani
- TUsekPanelProp=record
+ TUsekPanelProp = record
   blikani:boolean;
   Symbol,Pozadi,nebarVetve:TColor;
   KonecJC:TJCType;
