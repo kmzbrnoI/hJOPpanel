@@ -72,22 +72,16 @@ type
       property OnClick:TPanelMenuClickEvent read PanelMenuClickEvent write PanelMenuClickEvent;
   end;
 
-//  or;MENU;prikaz1,prikaz2,...             - pozadavek na zobrazeni MENU
-//                                             pokud je prikaz '-', vypisuje se oddelovac
-//                                             pokud je prvni znak #, pole je disabled
-//                                             pokud je prvni znak !, pole je dulezite (zvyrazneno cervenou barvou)
-//                                             pokud je prvni znak $, pole je vycentrovane a povazovane na nadpis
-//                                             pokud je prvni znak *, pole je povazovano za admin nabidku a podbarveno jinou barvou
-
 implementation
 
 uses Panel, Symbols, RPConst, PanelPainter;
 
-// format souboru hintu:
-//  csv soubor, kde na kazdem radku je jeden hint
-//  prvni je vzdy zkratka v menu, druha je vysvetlivka
-//  napr. V+;Pøestavit výhybku do polohy plus
-//  soubor je v UTF8
+{ format souboru hintu:
+   csv soubor, kde na kazdem radku je jeden hint
+   prvni je vzdy zkratka v menu, druha je vysvetlivka
+   napr. V+;Pøestavit výhybku do polohy plus
+   soubor je v UTF8
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +97,8 @@ destructor TPanelMenu.Destroy();
 begin
  if (Assigned(Self.Hints)) then
   FreeAndNil(Self.Hints);
+
+ inherited;
 end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -370,10 +366,18 @@ begin
     SetCursorPos(mouse.X, mouse.Y);
   end;
 
-  65..90:begin
+  48..57, 65..90:begin
    mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0,0));
    mouse.X := mouse.X + (3*SymbolSet._Symbol_Sirka);
    mouse.Y := mouse.Y + Round((2.5+Self.GetItemIndex(chr(key)))*SymbolSet._Symbol_Vyska);
+   SetCursorPos(mouse.X, mouse.Y);
+  end;
+
+  // numpad keys
+  96..105:begin
+   mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0,0));
+   mouse.X := mouse.X + (3*SymbolSet._Symbol_Sirka);
+   mouse.Y := mouse.Y + Round((2.5+Self.GetItemIndex(chr(key-VK_NUMPAD0+ord('0'))))*SymbolSet._Symbol_Vyska);
    SetCursorPos(mouse.X, mouse.Y);
   end;
 
