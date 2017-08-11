@@ -834,12 +834,12 @@ begin
   begin
    if (Self.Useky.data[uid.index].Blok < 0) then goto EscCheck;
 
-   // kliknutim na usek pri zadani o lokomotivu vybereme hnaciho vozidla na souprave v tomto useku
+   // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na souprave v tomto useku
    if ((Self.myORs[Self.Useky[uid.index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and
        (Button = ENTER)) then
      //  zadost o vydani seznamu hnacich vozidel na danem useku
      PanelTCPClient.SendLn(Self.myORs[Self.Useky[uid.index].OblRizeni].id +
-       ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[uid.index].Blok))
+       ';LOK-REQ;U-PLEASE;' + IntToStr(Self.Useky[uid.index].Blok) + ';' + IntToStr(uid.soupravaI))
    else
      PanelTCPClient.PanelClick(Self.myORs[Self.Useky[uid.index].OblRizeni].id,
        Button, Self.Useky[uid.index].Blok, IntToStr(uid.soupravaI));
