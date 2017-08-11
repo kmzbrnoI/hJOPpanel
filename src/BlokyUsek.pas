@@ -292,7 +292,7 @@ begin
 
    // vykresleni cisla koleje
    for p in usek.KPopisek do
-     PaintCisloKoleje(Point(p.X - (Length(usek.KpopisekStr) div 2), p.Y), usek, obj);
+     PaintCisloKoleje(p, usek, obj);
 
    // vykresleni souprav
    ShowUsekSoupravy(usek, obj, blik, myORs);
@@ -393,7 +393,7 @@ end;
 procedure TPUseky.PaintCisloKoleje(pos:TPoint; const usek:TPUsek; obj:TDXDraw);
 var left:TPoint;
 begin
- left := Point(pos.X - Length(usek.KpopisekStr) div 2, pos.Y);
+ left := Point(pos.X - (Length(usek.KpopisekStr) div 2), pos.Y);
 
  if (usek.PanelProp.KonecJC = TJCType.no) then
    PanelPainter.TextOutput(left, usek.KpopisekStr,
