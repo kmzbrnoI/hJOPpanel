@@ -1431,6 +1431,8 @@ begin
      nav.PanelProp := NavPanelProp;
      Self.Navestidla.data[symbols[i].symbol_index] := nav;
     end;
+
+ Self.Navestidla.UpdateStartJC();
 end;//procedure
 
 procedure TRelief.ORPrjChange(Sender:string; BlokID:integer; PrjPanelProp:TPrjPanelProp);

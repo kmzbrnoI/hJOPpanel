@@ -47,6 +47,8 @@ type
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
 
+   procedure UpdateStartJC();
+
    property Items[index : integer] : TPNavestidlo read GetItem; default;
    property Count : integer read GetCount;
  end;
@@ -119,10 +121,7 @@ end;
 procedure TPNavestidla.Show(obj:TDXDraw; blik:boolean);
 var nav:TPNavestidlo;
     fg:TColor;
-    sjc:TStartJC;
 begin
- startJC.Clear();
-
  for nav in Self.data do
   begin
    if ((nav.PanelProp.blikani) and (blik)) then
@@ -137,20 +136,6 @@ begin
     end else begin
      PanelPainter.Draw(SymbolSet.IL_Symbols, nav.Position, _SCom_Start+nav.SymbolID,
                fg, nav.PanelProp.Pozadi, obj);
-    end;
-
-   if ((nav.PanelProp.Pozadi = clGreen) or
-       (nav.PanelProp.Pozadi = clWhite) or
-       (nav.PanelProp.Pozadi = clTeal)) then
-    begin
-     //pridani StartJC
-     sjc.Color := nav.PanelProp.Pozadi;
-     sjc.Pos   := Point(nav.Position.X-1,nav.Position.Y);
-     startJC.Add(sjc);
-
-     sjc.Color := nav.PanelProp.Pozadi;
-     sjc.Pos   := Point(nav.Position.X+1,nav.Position.Y);
-     startJC.Add(sjc);
     end;
   end;//for i
 end;
@@ -183,6 +168,8 @@ begin
      Self.data[i] := nav;
     end;
   end;
+
+ Self.startJC.Clear();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -197,6 +184,31 @@ end;
 function TPNavestidla.GetCount():Integer;
 begin
  Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPNavestidla.UpdateStartJC();
+var nav:TPNavestidlo;
+    sjc:TStartJC;
+begin
+ Self.startJC.Clear();
+
+ for nav in Self.data do
+  begin
+   if ((nav.PanelProp.Pozadi = clGreen) or
+       (nav.PanelProp.Pozadi = clWhite) or
+       (nav.PanelProp.Pozadi = clTeal)) then
+    begin
+     sjc.Color := nav.PanelProp.Pozadi;
+     sjc.Pos   := Point(nav.Position.X-1,nav.Position.Y);
+     Self.startJC.Add(sjc);
+
+     sjc.Color := nav.PanelProp.Pozadi;
+     sjc.Pos   := Point(nav.Position.X+1,nav.Position.Y);
+     Self.startJC.Add(sjc);
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
