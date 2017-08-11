@@ -412,7 +412,7 @@ begin
    if (usek.PanelProp.soupravy[0].posindex <> 0) then
     begin
      s := usek.PanelProp.soupravy[0];
-     s.posindex := 0;
+     s.posindex := usek.Soupravy.Count div 2;
      usek.PanelProp.soupravy[0] := s;
     end;
 
