@@ -1268,11 +1268,9 @@ begin
   Self.ORInfoMsg(comment);
 end;//procedure
 
-//chyba komunikace
 procedure TRelief.ORInfoMsg(msg:string);
 begin
- Self.msg.msg  := msg;
- while (Length(Self.msg.msg) < Self._msg_width) do Self.msg.msg := Self.msg.msg + ' ';
+ Self.msg.msg := msg + StringOfChar(' ', Max(Self._msg_width - Length(msg), 0));
  Self.msg.show := true;
 end;//procedure
 
