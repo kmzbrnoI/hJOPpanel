@@ -1,4 +1,4 @@
-unit fMain;
+Ôªøunit fMain;
 
 {
   Unit hlavniho okna, resi hlavne GUI.
@@ -14,8 +14,8 @@ uses
 const
   _open_file_errors: array [1..3] of string =
     ('Soubor panelu neexistuje',
-     'Verze souboru panelu nenÌ podporov·na',
-     'Soubor panelu se nepoda¯ilo otev¯Ìt');
+     'Verze souboru panelu nen√≠ podporov√°na',
+     'Soubor panelu se nepoda≈ôilo otev≈ô√≠t');
 
   _MUTE_MIN = 3;    // ztisit zvuky je mozne maximalne na 3 minuty, pak se znovu zapnou
   _ULIAUTH_TIMEOUT_SEC = 5;
@@ -154,7 +154,7 @@ begin
   PanelTCPClient.Connect(GlobConfig.data.server.host, GlobConfig.data.server.port);
  except
   on E : Exception do
-    Application.MessageBox(PChar('P¯ipojenÌ se nezda¯ilo'+#13#10+E.Message), 'Nep¯ipojeno', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox(PChar('P≈ôipojen√≠ se nezda≈ôilo'+#13#10+E.Message), 'Nep≈ôipojeno', MB_OK OR MB_ICONWARNING);
  end;
 
  Screen.Cursor := crDefault;
@@ -186,7 +186,7 @@ begin
    end;
 
    if (FileExists(fn)) then
-     if (Application.MessageBox(PChar('Soubor ' +fn + ' jiû existuje, p¯ejete si ho nahradit?'),
+     if (Application.MessageBox(PChar('Soubor ' +fn + ' ji≈æ existuje, p≈ôejete si ho nahradit?'),
          'Nahradit soubor?', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
        Exit();
 
@@ -273,13 +273,13 @@ end;
 
 procedure TF_Main.Init(const config_fn:string);
 begin
- F_splash.AddStav('NaËÌt·m konfiguraci...');
+ F_splash.AddStav('Naƒç√≠t√°m konfiguraci...');
 
  GlobConfig.LoadFile(config_fn);
 
  Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' - hJOPpanel - v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
 
- F_splash.AddStav('Vytv·¯Ìm pl·tno...');
+ F_splash.AddStav('Vytv√°≈ô√≠m pl√°tno...');
 
  try
    Self.DXD_main := TDXDraw.Create(Self);
@@ -290,7 +290,7 @@ begin
  except
    on E : Exception do
     begin
-     Application.MessageBox(PChar('Nepoda¯ilo se inicializovat pl·tno, aplikace bude ukonËena'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Application.MessageBox(PChar('Nepoda≈ôilo se inicializovat pl√°tno, aplikace bude ukonƒçena'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
      Self.Close();
      Exit();
     end;
@@ -303,20 +303,20 @@ begin
    F_Main.DXD_Main.Cursor := crDefault;
   end;
 
- F_splash.AddStav('NaËÌt·m symboly...');
+ F_splash.AddStav('Naƒç√≠t√°m symboly...');
 
  try
    SymbolSet := TSymbolSet.Create(GlobConfig.data.symbolSet);
  except
    on e:Exception do
     begin
-     Application.MessageBox(PChar('Nepoda¯ilo se naËÌst symboly, aplikace bude ukonËena'+#13#10+e.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Application.MessageBox(PChar('Nepoda≈ôilo se naƒç√≠st symboly, aplikace bude ukonƒçena'+#13#10+e.Message), 'Chyba', MB_OK OR MB_ICONERROR);
      Self.Close();
      Exit();
     end;
  end;
 
- F_splash.AddStav('Vytv·¯Ìm panel...');
+ F_splash.AddStav('Vytv√°≈ô√≠m panel...');
 
  Relief := TRelief.Create(Self);
  Relief.OnMove := Self.OnReliefMove;
@@ -327,7 +327,7 @@ begin
  except
    on E:Exception do
     begin
-     Application.MessageBox(PChar('P¯i inicializaci reliÈfu doölo k chybÏ:'+#13#10+E.Message),
+     Application.MessageBox(PChar('P≈ôi inicializaci reli√©fu do≈°lo k chybƒõ:'+#13#10+E.Message),
        'Chyba', MB_OK OR MB_ICONWARNING);
      Self.DXD_Main.Enabled := false;
      Self.P_Connection.Enabled := false;
@@ -347,13 +347,13 @@ begin
 
  if (GlobConfig.data.uLI.path <> '') then
   begin
-   F_splash.AddStav('SpouötÌm uLI-daemon...');
+   F_splash.AddStav('Spou≈°t√≠m uLI-daemon...');
    Self.RunuLIDaemon();
   end;
 
  if (GlobConfig.data.uLI.use) then
   begin
-   F_splash.AddStav('Aktivuji spojenÌ s uLI-daemon...');
+   F_splash.AddStav('Aktivuji spojen√≠ s uLI-daemon...');
    BridgeClient.enabled := true;
   end;
 
@@ -416,7 +416,7 @@ begin
    Self.RunuLIDaemon()
  else begin
    if (GlobConfig.data.auth.password = '') then
-     F_Auth.OpenForm('uLI-daemon vyûaduje autentizaci', Self.uLILoginFilled, nil, false)
+     F_Auth.OpenForm('uLI-daemon vy≈æaduje autentizaci', Self.uLILoginFilled, nil, false)
    else
      BridgeClient.Auth();
  end;
@@ -435,7 +435,7 @@ begin
  if (Assigned(Relief)) then Relief.Show();
 
  Self.P_Time.Caption := FormatDateTime('hh:mm:ss', Now);
- Self.P_Date.Caption := FormatDateTime('d.m.yyyy', Now);
+ Self.P_Date.Caption := FormatDateTime('d.‚Äâm.‚Äâyyyy', Now);
 
  PanelTCPClient.Update();
  BridgeClient.Update();
@@ -463,7 +463,7 @@ procedure TF_Main.ShowAboutDialog();
 begin
  Application.MessageBox(PChar('hJOPpanel v'+NactiVerzi(Application.ExeName)+#13#10+
   'build '+GetLastBuildDate()+' '+GetLastBuildTime()+#13#10+
-  'Vytvo¯il Jan Hor·Ëek (c) 2014-2016 pro KMé Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
+  'Vytvo≈ôil Jan Hor√°ƒçek (c) 2014-2016 pro KM≈Ω Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -519,7 +519,7 @@ begin
   begin
    Self.uliauth_enabled := false;
    if (GlobConfig.data.auth.password = '') then
-     F_Auth.OpenForm('uLI-daemon vyûaduje autentizaci', Self.uLILoginFilled, nil, false);
+     F_Auth.OpenForm('uLI-daemon vy≈æaduje autentizaci', Self.uLILoginFilled, nil, false);
   end;
 
  F_Main.UpdateuLIIcon();
@@ -530,7 +530,7 @@ end;
 procedure TF_Main.uLILoginFilled(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 begin
  if (BridgeClient.toLogin.password = '') then
-   F_Auth.AuthError(0, 'Je t¯eba povolit autorizaci uLI-daemon!')
+   F_Auth.AuthError(0, 'Je t≈ôeba povolit autorizaci uLI-daemon!')
  else begin
    F_Auth.AuthOK(0);
    BridgeClient.Auth();

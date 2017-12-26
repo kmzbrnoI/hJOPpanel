@@ -3297,9 +3297,9 @@ object F_Main: TF_Main
       end
     end
     object P_Time: TPanel
-      Left = 642
+      Left = 660
       Top = 4
-      Width = 120
+      Width = 106
       Height = 25
       Margins.Left = 2
       Margins.Top = 2
@@ -3320,16 +3320,16 @@ object F_Main: TF_Main
       TabOrder = 2
     end
     object P_Date: TPanel
-      Left = 514
+      Left = 518
       Top = 4
-      Width = 120
+      Width = 137
       Height = 25
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
       BevelOuter = bvNone
-      Caption = '1.1.2000'
+      Caption = '1. 1. 2000'
       Color = clWhite
       DoubleBuffered = True
       Font.Charset = EASTEUROPE_CHARSET
@@ -3619,9 +3619,9 @@ object F_Main: TF_Main
       end>
   end
   object P_Time_modelovy: TPanel
-    Left = 766
+    Left = 770
     Top = 4
-    Width = 110
+    Width = 106
     Height = 25
     Hint = 'Modelov'#253' cas'
     Margins.Left = 2
