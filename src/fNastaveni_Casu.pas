@@ -14,9 +14,10 @@ type
   TF_ModCasSet = class(TForm)
     ME_start_time: TMaskEdit;
     L_time_start: TLabel;
-    RG_zrychleni: TRadioGroup;
     B_OK: TButton;
     B_Storno: TButton;
+    Label1: TLabel;
+    ME_Nasobic: TMaskEdit;
     procedure B_OKClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure ME_start_timeKeyPress(Sender: TObject; var Key: Char);
@@ -50,7 +51,13 @@ procedure TF_ModCasSet.B_OKClick(Sender: TObject);
       Exit;
      end;
 
-    PanelTCPClient.SendLn('-;MOD-CAS;TIME;'+Self.ME_start_time.Text+':00;'+IntToStr(Self.RG_zrychleni.ItemIndex+2));
+    if (StrToFloat(ME_Nasobic.Text) >= 10) then
+     begin
+      Application.MessageBox('Násobiè zadejte v rozsahu 0-9.9','Nelze nastavit cas',MB_OK OR MB_ICONWARNING);
+      Exit;
+     end;
+
+    PanelTCPClient.SendLn('-;MOD-CAS;TIME;'+Self.ME_start_time.Text+':00;'+Self.ME_Nasobic.Text);
 
     Self.Close();
   except
@@ -77,9 +84,10 @@ end;//procedure
 
 procedure TF_ModCasSet.OpenForm;
  begin
-  Self.ME_start_time.Text     := FormatDateTime('hh:nn', ModCas.time);
-  Self.RG_zrychleni.ItemIndex := ModCas.nasobic-2;
+  Self.ME_start_time.Text := FormatDateTime('hh:nn', ModCas.time);
+  Self.ME_Nasobic.Text    := FloatToStrF(ModCas.nasobic, ffNumber, 1, 1);
 
+  Self.ActiveControl := Self.ME_start_time;
   Self.Show();
  end;//procedure
 

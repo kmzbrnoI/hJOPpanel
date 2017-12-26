@@ -99,6 +99,8 @@ type
      procedure SetPanelSize(width,height:Integer);
      procedure UpdateuLIIcon();
      procedure uLIAuthUpdate();
+
+     procedure CheckNasobicWidth();
   end;
 
 var
@@ -565,6 +567,23 @@ begin
   end
   else
     inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.CheckNasobicWidth();
+const _SMALL = 33;
+      _LARGE = 50;
+begin
+ if ((Length(Self.P_Zrychleni.Caption) > 2) and (Self.P_Zrychleni.Width <= _SMALL)) then
+  begin
+   Self.P_Zrychleni.Width := _LARGE;
+   Self.FormResize(Self);
+ end else if ((Length(Self.P_Zrychleni.Caption) = 2) and (Self.P_Zrychleni.Width = _LARGE)) then
+  begin
+   Self.P_Zrychleni.Width := _SMALL;
+   Self.FormResize(Self);
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

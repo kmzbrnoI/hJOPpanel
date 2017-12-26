@@ -4,7 +4,7 @@ object F_ModCasSet: TF_ModCasSet
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Nastaven'#237' modelov'#233'ho '#269'asu'
-  ClientHeight = 234
+  ClientHeight = 145
   ClientWidth = 202
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -34,6 +34,13 @@ object F_ModCasSet: TF_ModCasSet
     Font.Style = []
     ParentFont = False
   end
+  object Label1: TLabel
+    Left = 8
+    Top = 64
+    Width = 73
+    Height = 13
+    Caption = 'Zrychlen'#237' '#269'asu:'
+  end
   object ME_start_time: TMaskEdit
     Left = 104
     Top = 12
@@ -58,36 +65,9 @@ object F_ModCasSet: TF_ModCasSet
     Text = '00:00'
     OnKeyPress = ME_start_timeKeyPress
   end
-  object RG_zrychleni: TRadioGroup
-    Left = 8
-    Top = 64
-    Width = 185
-    Height = 121
-    Hint = 'Zadejte zrychlen'#237' modelov'#233'ho casu'
-    Margins.Left = 2
-    Margins.Top = 2
-    Margins.Right = 2
-    Margins.Bottom = 2
-    Caption = ' Zrychlen'#237' '#269'asu  '
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'MS Sans Serif'
-    Font.Style = []
-    Items.Strings = (
-      '2 x'
-      '3 x'
-      '4 x'
-      '5 x'
-      '6 x')
-    ParentFont = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 1
-  end
   object B_OK: TButton
-    Left = 118
-    Top = 202
+    Left = 120
+    Top = 114
     Width = 75
     Height = 25
     Margins.Left = 2
@@ -100,12 +80,29 @@ object F_ModCasSet: TF_ModCasSet
     OnClick = B_OKClick
   end
   object B_Storno: TButton
-    Left = 38
-    Top = 202
+    Left = 40
+    Top = 114
     Width = 75
     Height = 25
     Caption = 'Storno'
     TabOrder = 3
     OnClick = B_StornoClick
+  end
+  object ME_Nasobic: TMaskEdit
+    Left = 104
+    Top = 64
+    Width = 88
+    Height = 45
+    EditMask = '!9.9;1;_'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -32
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    MaxLength = 3
+    ParentFont = False
+    TabOrder = 1
+    Text = ' . '
+    OnKeyPress = ME_start_timeKeyPress
   end
 end

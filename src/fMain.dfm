@@ -3308,12 +3308,14 @@ object F_Main: TF_Main
       BevelOuter = bvNone
       Caption = '00:00:00'
       Color = clWhite
+      DoubleBuffered = True
       Font.Charset = EASTEUROPE_CHARSET
       Font.Color = clWindowText
       Font.Height = -24
       Font.Name = 'Arial'
       Font.Style = []
       ParentBackground = False
+      ParentDoubleBuffered = False
       ParentFont = False
       TabOrder = 2
     end
@@ -3329,12 +3331,14 @@ object F_Main: TF_Main
       BevelOuter = bvNone
       Caption = '1.1.2000'
       Color = clWhite
+      DoubleBuffered = True
       Font.Charset = EASTEUROPE_CHARSET
       Font.Color = clWindowText
       Font.Height = -24
       Font.Name = 'Arial'
       Font.Style = []
       ParentBackground = False
+      ParentDoubleBuffered = False
       ParentFont = False
       TabOrder = 3
     end
@@ -3569,12 +3573,14 @@ object F_Main: TF_Main
       Alignment = taLeftJustify
       BevelOuter = bvNone
       Color = clWhite
+      DoubleBuffered = True
       Font.Charset = EASTEUROPE_CHARSET
       Font.Color = clWindowText
       Font.Height = -24
       Font.Name = 'Arial'
       Font.Style = []
       ParentBackground = False
+      ParentDoubleBuffered = False
       ParentFont = False
       TabOrder = 6
       Visible = False
@@ -3625,12 +3631,14 @@ object F_Main: TF_Main
     BevelOuter = bvNone
     Caption = '00:00:00'
     Color = clSkyBlue
+    DoubleBuffered = True
     Font.Charset = EASTEUROPE_CHARSET
     Font.Color = clRed
     Font.Height = -23
     Font.Name = 'Arial'
     Font.Style = []
     ParentBackground = False
+    ParentDoubleBuffered = False
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -3649,12 +3657,14 @@ object F_Main: TF_Main
     BevelOuter = bvNone
     Caption = '1x'
     Color = clSkyBlue
+    DoubleBuffered = True
     Font.Charset = EASTEUROPE_CHARSET
     Font.Color = clRed
     Font.Height = -23
     Font.Name = 'Arial'
     Font.Style = []
     ParentBackground = False
+    ParentDoubleBuffered = False
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -3667,7 +3677,7 @@ object F_Main: TF_Main
     Left = 872
     Top = 56
     Bitmap = {
-      494C010164008801140208000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
+      494C0101640088012C0208000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000020000000380100000100200000000000009C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -5017,7 +5027,7 @@ object F_Main: TF_Main
     Left = 808
     Top = 56
     Bitmap = {
-      494C010108007C01A80210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010108007C01C00210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

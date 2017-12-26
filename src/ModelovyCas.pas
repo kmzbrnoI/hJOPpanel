@@ -13,12 +13,14 @@ type
   TModCas = class
    private
     ftime:TTime;
-    fnasobic:Integer;
+    fnasobic:Real;
     fstarted:boolean;
     timer:TTimer;
     last_call:TDateTime;
 
     procedure OnTimer(Sender:TObject);
+
+    function GetStrNasobic():string;
 
    public
      constructor Create();
@@ -30,8 +32,9 @@ type
      procedure Reset();
 
      property time:TTime read ftime;
-     property nasobic:Integer read fnasobic;
+     property nasobic:Real read fnasobic;
      property started:boolean read fstarted;
+     property strNasobic:string read GetStrNasobic;
   end;//class TModCas
 
 var
@@ -69,7 +72,7 @@ begin
  Self.timer.Enabled := Self.fstarted;
  Self.last_call     := Now;
 
- Self.fnasobic := StrToInt(data[3]);
+ Self.fnasobic := StrToFloat(data[3]);
  Self.ftime    := StrToTime(data[4]);
 
  Self.Show();
@@ -101,8 +104,10 @@ begin
    F_Main.P_Zrychleni.Font.Color     := clRed;
   end;
 
- F_Main.P_Zrychleni.Caption     := IntToStr(Self.nasobic)+'x';
+ F_Main.P_Zrychleni.Caption     := Self.strNasobic+'×';
  F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', Self.ftime);
+
+ F_Main.CheckNasobicWidth();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,6 +122,13 @@ begin
 
  Self.Show();
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TModCas.GetStrNasobic():string;
+begin
+ Result := FloatToStrF(Self.nasobic, ffGeneral, 1, 1);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
