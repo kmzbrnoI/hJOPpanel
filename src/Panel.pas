@@ -577,7 +577,8 @@ begin
    Self.DrawObject.Flip();
  finally
    try
-     Self.DrawObject.Surface.Canvas.UnLock();
+     if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
+       Self.DrawObject.Surface.Canvas.UnLock();
    except
 
    end;
