@@ -142,7 +142,9 @@ type
 
    procedure T_SystemOKOnTimer(Sender:TObject);
 
+   procedure ObjectMouseClick(Position:TPoint; Button:TPanelButton);
    procedure ObjectMouseUp(Position:TPoint; Button:TPanelButton);
+   procedure ObjectMouseDown(Position:TPoint; Button:TPanelButton);
 
    procedure FLoad(aFile:string);
 
@@ -629,19 +631,29 @@ begin
   );
 end;//procedure
 
+////////////////////////////////////////////////////////////////////////////////
+
 procedure TRelief.DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
  Self.CursorDraw.Pos.X := X div SymbolSet._Symbol_Sirka;
  Self.CursorDraw.Pos.Y := Y div SymbolSet._Symbol_Vyska;
 
  case (Button) of
-  mbLeft   : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ENTER);
-  mbRight  : Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+  mbLeft   : begin
+    Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ENTER);
+    Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.ENTER);
+  end;
+  mbRight  : begin
+    Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+    Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+  end;
   mbMiddle : begin
+    Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F1);
+
     if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick < EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
      begin
       Self.mouseTimer.Enabled := false;
-      Self.ObjectMouseUp(Self.mouseClickPos, TPanelButton.F2);
+      Self.ObjectMouseClick(Self.mouseClickPos, TPanelButton.F2);
      end else begin
       Self.mouseTimer.Enabled := true;
       Self.mouseClickPos := Self.CursorDraw.Pos;
@@ -658,14 +670,8 @@ end;//procedure
 // Tato funkce neni skoro vubec vyuzivana, je pouze na specialni veci.
 // Vsechny kliky mysi se resi pomoci MouseUp
 procedure TRelief.DXDMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var handled:boolean;
-    i:Integer;
-    pos:TPoint;
-    myBut:TPanelButton;
+var myBut:TPanelButton;
 begin
- pos := Point(X div SymbolSet._Symbol_Sirka, Y div SymbolSet._Symbol_Vyska);
- handled := false;
-
  case (Button) of
   mbLeft   : myBut := TPanelButton.ENTER;
   mbRight  : myBut := TPanelButton.ESCAPE;
@@ -674,21 +680,14 @@ begin
   Exit();
  end;
 
- // zasobniky
- handled := false;
- for i := 0 to Self.myORs.Count-1 do
-  begin
-   if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
-   Self.myORs[i].stack.MouseDown(pos, myBut, handled);
-   if (handled) then Exit();
-  end;
+ Self.ObjectMouseDown(Point(X div SymbolSet._Symbol_Sirka, Y div SymbolSet._Symbol_Vyska), myBut);
 end;
 
 procedure TRelief.OnMouseTimer(Sender:TObject);
 begin
  if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick > EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
   begin
-   Self.ObjectMouseUp(Self.mouseClickPos, TPanelButton.F1);
+   Self.ObjectMouseClick(Self.mouseClickPos, TPanelButton.F1);
    Self.mouseTimer.Enabled := false;
    Self.Show();
   end;
@@ -765,7 +764,7 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 //vyvolano pri kliku na relief
-procedure TRelief.ObjectMouseUp(Position:TPoint; Button:TPanelButton);
+procedure TRelief.ObjectMouseClick(Position:TPoint; Button:TPanelButton);
 var i, index:Integer;
     handled:boolean;
     uid:TPUsekID;
@@ -805,7 +804,7 @@ begin
  for i := 0 to Self.myORs.Count-1 do
   begin
    if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
-   Self.myORs[i].stack.MouseUp(Position, Button, handled);
+   Self.myORs[i].stack.MouseClick(Position, Button, handled);
    if (handled) then goto EscCheck;
   end;
 
@@ -924,6 +923,44 @@ EscCheck:
  if (Button = TPanelButton.ESCAPE) then
   Self.Escape(false);
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.ObjectMouseUp(Position:TPoint; Button:TPanelButton);
+var handled:boolean;
+    i:Integer;
+begin
+ handled := false;
+
+ // zasobniky
+ handled := false;
+ for i := 0 to Self.myORs.Count-1 do
+  begin
+   if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
+   Self.myORs[i].stack.MouseUp(Position, Button, handled);
+   if (handled) then Exit();
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.ObjectMouseDown(Position:TPoint; Button:TPanelButton);
+var handled:boolean;
+    i:Integer;
+begin
+ handled := false;
+
+ // zasobniky
+ handled := false;
+ for i := 0 to Self.myORs.Count-1 do
+  begin
+   if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
+   Self.myORs[i].stack.MouseDown(Position, Button, handled);
+   if (handled) then Exit();
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.FLoad(aFile:string);
 var i:Integer;
@@ -1054,10 +1091,10 @@ begin
     end;//for i
 
    case  (msg.wParam) of                                     //case moznosti stisknutych klaves
-     VK_F1 : Self.ObjectMouseUp(Self.CursorDraw.Pos, F1);
-     VK_F2 : Self.ObjectMouseUp(Self.CursorDraw.Pos, F2);
-     VK_ESCAPE: Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
-     VK_RETURN: Self.ObjectMouseUp(Self.CursorDraw.Pos, ENTER);
+     VK_F1 : Self.ObjectMouseClick(Self.CursorDraw.Pos, F1);
+     VK_F2 : Self.ObjectMouseClick(Self.CursorDraw.Pos, F2);
+     VK_ESCAPE: Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
+     VK_RETURN: Self.ObjectMouseClick(Self.CursorDraw.Pos, ENTER);
      VK_BACK: Errors.removeerror();
 
      VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:begin

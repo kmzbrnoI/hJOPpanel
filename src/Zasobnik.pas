@@ -63,6 +63,7 @@ type
 
       procedure ParseCommand(data:TStrings);
 
+      procedure MouseClick(Position:TPoint; Button:TPanelButton; var handled:boolean);
       procedure MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
       procedure MouseDown(Position:TPoint; Button:TPanelButton; var handled:boolean);
       procedure KeyPress(key:Integer; var handled:boolean);
@@ -383,9 +384,8 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TORStack.MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
+procedure TORStack.MouseClick(Position:TPoint; Button:TPanelButton; var handled:boolean);
 var cmdi:Integer;
-    cmd:TORStackCmd;
 begin
  // klik na horni symboly
  if ((Position.Y = Self.pos.Y) and (Button <> TPanelButton.ESCAPE)) then
@@ -456,50 +456,10 @@ begin
      // not escape
      cmdi := Position.Y - Self.pos.Y - 1;
 
-     if (Self.dragged = -1) then
+     if ((Self.dragged = -1) and ((cmdi <> 0) or (Self.first_enabled))) then
       begin
        // select
-       if ((cmdi <> 0) or (Self.first_enabled)) then
-        begin
-         Self.selected := cmdi;
-         handled := true;
-         Exit();
-        end;
-
-      end else begin
-       // drop
-       try
-         if ((cmdi = 0) and (not Self.first_enabled)) then
-           cmdi := 1;
-
-         if (cmdi = Self.stack.Count-1) then begin
-           PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+';END');
-
-           cmd := Self.stack[Self.dragged];
-           Self.stack.Delete(Self.dragged);
-           Self.stack.Add(cmd);
-           Self.selected := Self.stack.Count - 1;
-         end else begin
-           if (cmdi > Self.dragged) then
-             PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
-                                   ';'+IntToStr(Self.stack[cmdi+1].id))
-           else
-             PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
-                                   ';'+IntToStr(Self.stack[cmdi].id));
-
-           cmd := Self.stack[Self.dragged];
-           Self.stack.Delete(Self.dragged);
-           Self.stack.Insert(cmdi, cmd);
-           Self.selected := cmdi;
-         end;
-
-         Self.dirty := Self.selected;
-
-       except
-         Self.selected := -1;
-       end;
-
-       Self.dragged := -1;
+       Self.selected := cmdi;
        handled := true;
        Exit();
       end;
@@ -512,6 +472,52 @@ begin
    if (Self.EZ <> TOREZVolba.closed) then Self.EZ := TOREZVolba.closed;
   end;
 end;//procedure
+
+procedure TORStack.MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
+var cmdi:Integer;
+    cmd:TORStackCmd;
+begin
+ if ((Self.EZ = TOREZVolba.openned) and (Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
+     (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count) and (Button = TPanelButton.F1) and
+     (Self.dragged <> -1)) then
+  begin
+   // drop
+
+   cmdi := Position.Y - Self.pos.Y - 1;
+   try
+     if ((cmdi = 0) and (not Self.first_enabled)) then
+       cmdi := 1;
+
+     if (cmdi = Self.stack.Count-1) then begin
+       PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+';END');
+
+       cmd := Self.stack[Self.dragged];
+       Self.stack.Delete(Self.dragged);
+       Self.stack.Add(cmd);
+       Self.selected := Self.stack.Count - 1;
+     end else begin
+       if (cmdi > Self.dragged) then
+         PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
+                               ';'+IntToStr(Self.stack[cmdi+1].id))
+       else
+         PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
+                               ';'+IntToStr(Self.stack[cmdi].id));
+
+       cmd := Self.stack[Self.dragged];
+       Self.stack.Delete(Self.dragged);
+       Self.stack.Insert(cmdi, cmd);
+       Self.selected := cmdi;
+     end;
+
+     Self.dirty := Self.selected;
+   except
+     Self.selected := -1;
+   end;
+
+   Self.dragged := -1;
+   handled := true;
+  end;
+end;
 
 procedure TORStack.MouseDown(Position:TPoint; Button:TPanelButton; var handled:boolean);
 begin
