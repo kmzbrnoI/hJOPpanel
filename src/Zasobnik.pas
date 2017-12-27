@@ -32,6 +32,7 @@ type
      parent:string;
      fenabled:boolean;
      selected:Integer;
+     dragged:Integer;
      first_enabled:boolean;
      UPOenabled:boolean;
 
@@ -43,18 +44,23 @@ type
       procedure AddJC(data:string);
       procedure RemoveJC(id:Integer);
 
+      procedure ShowStackCMD(ypos:Integer; text:string; first:boolean;
+                             selected:boolean; available:boolean; obj:TDXDraw);
+
    public
 
 
       constructor Create(Graphics:TPanelGraphics; parent:string; pos:TPoint);
       destructor Destroy(); override;
 
-      procedure Show(obj:TDXDraw);
+      procedure Show(obj:TDXDraw; mousePos:TPoint);
 
       procedure ParseCommand(data:TStrings);
 
-      procedure MouseClick(Position:TPoint; Button:TPanelButton; var handled:boolean);
+      procedure MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
+      procedure MouseDown(Position:TPoint; Button:TPanelButton; var handled:boolean);
       procedure KeyPress(key:Integer; var handled:boolean);
+      function IsDragged():boolean;
 
       property enabled:boolean read fenabled write SetEnabled;
 
@@ -80,6 +86,7 @@ begin
  Self.parent        := parent;
  Self.fenabled      := false;
  Self.selected      := -1;
+ Self.dragged       := -1;
  Self.first_enabled := true;
 
  Self.Graphics := Graphics;
@@ -117,6 +124,8 @@ begin
       Self.first_enabled := false;
       if (Self.selected = 0) then
        Self.selected := 1;
+      if (Self.dragged = 0) then
+       Self.dragged := -1;
     end
    else if (data[2] = 'INDEX') then
     Self.index := StrToInt(data[3])
@@ -156,6 +165,7 @@ begin
    Self.EZ            := closed;
    Self.volba         := PV;
    Self.selected      := -1;
+   Self.dragged       := -1;
    Self.first_enabled := true;
   end;
 
@@ -205,6 +215,8 @@ begin
    begin
     if (Self.selected = i) then
      Self.selected := -1;
+    if (Self.dragged = i) then
+     Self.dragged := -1;
     Self.stack.Delete(i);
     if ((Self.stack.Count = 0) and (Self.EZ <> TOREZVolba.closed)) then
       Self.EZ := TOREZVolba.closed;
@@ -240,10 +252,8 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TORStack.Show(obj:TDXDraw);
-var i, j:Integer;
-    bk:TColor;
-    txt:string;
+procedure TORStack.Show(obj:TDXDraw; mousePos:TPoint);
+var jc, y, jcpos:Integer;
 begin
  // zasobnik Disabled
  if (not Self.fenabled) then
@@ -269,27 +279,27 @@ begin
    PanelPainter.TextOutput(Point(Self.pos.X+3, Self.pos.Y), 'VZ', $A0A0A0, clBlack, obj);
    PanelPainter.TextOutput(Point(Self.pos.X+6, Self.pos.Y), 'PV', $A0A0A0, clBlack, obj);
 
+   jcpos := mousePos.Y - Self.pos.Y - 1;
+   if ((Self.dragged > -1) and ((jcpos < 0) or (jcpos >= Self.stack.Count))) then
+     Self.dragged := -1;
+   if ((not Self.first_enabled) and (jcpos = 0)) then
+     jcpos := 1;
+
    //vypsani jizdnich cest v zasobniku
-   for i := 0 to Self.stack.Count-1 do
+   jc := 0;
+   for y := 0 to Self.stack.Count-1 do
     begin
-     if (Self.selected = i) then
-      bk := clOlive
+     if ((Self.dragged > -1) and (y = jcpos)) then
+       Self.ShowStackCMD(y, Self.stack[Self.dragged].JC, false, true, true, obj)
      else begin
-      if (i = 0) then
-        bk := clTeal
-      else
-        bk := $A0A0A0;
-     end;
+       if (jc = Self.dragged) then
+         Inc(jc);
 
-     if (Length(Self.stack[i].JC) > _JC_TEXT_WIDTH) then
-       txt := LeftStr(Self.stack[i].JC, _JC_TEXT_WIDTH)
-     else begin
-       txt := Self.stack[i].JC;
-       for j := 0 to _JC_TEXT_WIDTH-Length(Self.stack[i].JC) do txt := txt + ' ';
+       Self.ShowStackCMD(y, Self.stack[jc].JC, ((y = 0) and (y <> dragged)),
+                         jc = selected, (jc <> 0) or (Self.first_enabled), obj);
+       Inc(jc);
      end;
-
-     PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.Y+i+1), ' '+txt, clBlack, bk, obj);
-    end;//for i
+    end;
 
   end else begin
    // pokud neni EZ
@@ -304,15 +314,7 @@ begin
 
    // pokud je alespon jedna cesta v zasobniku, vypiseme ji
    if (Self.stack.Count > 0) then
-    begin
-     if (Length(Self.stack[0].JC) > _JC_TEXT_WIDTH) then
-       txt := LeftStr(Self.stack[0].JC, _JC_TEXT_WIDTH)
-     else begin
-       txt := Self.stack[0].JC;
-       for j := 0 to _JC_TEXT_WIDTH-Length(Self.stack[0].JC) do txt := txt + ' ';
-     end;
-     PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.Y+1), ' '+txt, clBlack, clTeal, obj);
-    end;
+     Self.ShowStackCMD(0, Self.stack[0].JC, true, false, Self.first_enabled, obj);
 
    PanelPainter.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d', [Self.stack.Count]), $A0A0A0, clBlack, obj);
 
@@ -331,10 +333,47 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TORStack.MouseClick(Position:TPoint; Button:TPanelButton; var handled:boolean);
+procedure TORStack.ShowStackCMD(ypos:Integer; text:string; first:boolean;
+                       selected:boolean; available:boolean; obj:TDXDraw);
+var bk, fg:TColor;
+    j:Integer;
+begin
+ bk := $A0A0A0;
+ fg := clBlack;
+
+ if (first) then
+  begin
+   bk := clTeal;
+   if (available) then
+     fg := clWhite
+   else
+     fg := clBlack;
+  end;
+
+ if (selected) then
+  begin
+   bk := clOlive;
+   fg := clWhite;
+  end;
+
+ if (Length(text) > _JC_TEXT_WIDTH) then
+   text := LeftStr(text, _JC_TEXT_WIDTH)
+ else begin
+   for j := 0 to _JC_TEXT_WIDTH-Length(text) do
+     text := text + ' ';
+ end;
+
+ PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.Y+ypos+1), ' '+text, fg, bk, obj);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TORStack.MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
+var cmdi:Integer;
+    cmd:TORStackJC;
 begin
  // klik na horni symboly
- if (Position.Y = Self.pos.Y) then
+ if ((Position.Y = Self.pos.Y) and (Button <> TPanelButton.ESCAPE)) then
   begin
    if (Self.EZ = TOREZVolba.closed) then
     begin
@@ -357,6 +396,7 @@ begin
       end;
       TOREZVolba.openned, TOREZVolba.please : begin
         Self.selected := -1;
+        Self.dragged := -1;
         Self.EZ := closed;
         PanelTCPClient.SendLn(Self.parent+';ZAS;EZ;0;');
       end;
@@ -366,21 +406,112 @@ begin
    //UPO
    if ((Position.X >= Self.pos.X+15) and (Position.X <= Self.pos.X+17+1+Length(Self.hint)) and (Self.UPOenabled)) then
      PanelTCPClient.SendLn(Self.parent+';ZAS;UPO;');
-   
+
+   Exit();
   end;//if Position.Y = Self.pos.Y
 
  // klik na cestu v zasobniku
  if ((Self.EZ = TOREZVolba.openned) and (Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
      (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count)) then
   begin
+   // inside
+   if (Button = TPanelButton.ESCAPE) then
+    begin
+     if (Self.dragged > -1) then
+      begin
+       Self.selected := -1;
+       Self.dragged := -1;
+       handled := true;
+       Exit();
+      end;
+
+     if (Self.selected > -1) then
+      begin
+       Self.selected := -1;
+       handled := true;
+       Exit();
+      end;
+
+     if (Self.EZ <> TOREZVolba.closed) then
+      begin
+       Self.EZ := TOREZVolba.closed;
+       handled := true;
+       Exit();
+      end;
+
+    end else begin
+     // not escape
+     cmdi := Position.Y - Self.pos.Y - 1;
+
+     if (Self.dragged = -1) then
+      begin
+       // select
+       if ((cmdi <> 0) or (Self.first_enabled)) then
+        begin
+         Self.selected := cmdi;
+         handled := true;
+         Exit();
+        end;
+
+      end else begin
+       // drop
+       try
+         if ((cmdi = 0) and (not Self.first_enabled)) then
+           cmdi := 1;
+
+         if (cmdi = Self.stack.Count-1) then begin
+           PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+';END');
+
+           cmd := Self.stack[Self.dragged];
+           Self.stack.Delete(Self.dragged);
+           Self.stack.Add(cmd);
+           Self.selected := Self.stack.Count - 1;
+         end else begin
+           if (cmdi > Self.dragged) then
+             PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
+                                   ';'+IntToStr(Self.stack[cmdi+1].id))
+           else
+             PanelTCPClient.SendLn(Self.parent+';ZAS;SWITCH;'+IntToStr(Self.stack[Self.dragged].id)+
+                                   ';'+IntToStr(Self.stack[cmdi].id));
+
+           cmd := Self.stack[Self.dragged];
+           Self.stack.Delete(Self.dragged);
+           Self.stack.Insert(cmdi, cmd);
+           Self.selected := cmdi;
+         end;
+
+       except
+         Self.selected := -1;
+       end;
+
+       Self.dragged := -1;
+       handled := true;
+       Exit();
+      end;
+    end;
+
+  end else begin
+   // outside
+   if (Self.dragged > -1) then Self.dragged := -1;
+   if (Self.selected > -1) then Self.selected := -1;
+   if (Self.EZ <> TOREZVolba.closed) then Self.EZ := TOREZVolba.closed;
+  end;
+end;//procedure
+
+procedure TORStack.MouseDown(Position:TPoint; Button:TPanelButton; var handled:boolean);
+begin
+ // klik na cestu v zasobniku
+ if ((Self.EZ = TOREZVolba.openned) and (Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
+     (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count) and (Button = TPanelButton.F1)) then
+  begin
    if (((Position.Y - Self.pos.Y - 1) <> 0) or (Self.first_enabled)) then
     begin
-     Self.selected := Position.Y - Self.pos.Y - 1;
+     Self.dragged := Position.Y - Self.pos.Y - 1;
+     Self.selected := Self.dragged;
      handled := true;
     end;
   end;
-
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -396,19 +527,16 @@ begin
        PanelTCPClient.SendLn(Self.parent+';ZAS;RM;'+IntToStr(Self.stack[Self.selected].id));
        handled := true;
     end;
-
-    VK_ESCAPE:begin
-      if (Self.EZ <> TOREZVolba.closed) then
-       begin
-        Self.EZ := TOREZVolba.closed;
-        handled := true;
-       end;
-    end;
    end;//case
   end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
+
+function TORStack.IsDragged():boolean;
+begin
+ Result := (Self.dragged <> -1);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

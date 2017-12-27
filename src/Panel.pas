@@ -137,6 +137,7 @@ type
    procedure PaintKurzorBg(Pos:TPoint);
 
    procedure DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+   procedure DXDMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
    procedure DXDMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 
    procedure T_SystemOKOnTimer(Sender:TObject);
@@ -321,6 +322,7 @@ begin
  Self.DrawObject := DrawObject;
 
  Self.DrawObject.OnMouseUp   := Self.DXDMouseUp;
+ Self.DrawObject.OnMouseDown := Self.DXDMouseDown;
  Self.DrawObject.OnMouseMove := Self.DXDMouseMove;
 
  Self.CursorDraw.Pos.X := -2;
@@ -650,6 +652,35 @@ begin
  Self.Show();
 end;//procedure
 
+// Tato funkce neni skoro vubec vyuzivana, je pouze na specialni veci.
+// Vsechny kliky mysi se resi pomoci MouseUp
+procedure TRelief.DXDMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var handled:boolean;
+    i:Integer;
+    pos:TPoint;
+    myBut:TPanelButton;
+begin
+ pos := Point(X div SymbolSet._Symbol_Sirka, Y div SymbolSet._Symbol_Vyska);
+ handled := false;
+
+ case (Button) of
+  mbLeft   : myBut := TPanelButton.ENTER;
+  mbRight  : myBut := TPanelButton.ESCAPE;
+  mbMiddle : myBut := TPanelButton.F1;
+ else
+  Exit();
+ end;
+
+ // zasobniky
+ handled := false;
+ for i := 0 to Self.myORs.Count-1 do
+  begin
+   if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
+   Self.myORs[i].stack.MouseDown(pos, myBut, handled);
+   if (handled) then Exit();
+  end;
+end;
+
 procedure TRelief.OnMouseTimer(Sender:TObject);
 begin
  if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick > EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
@@ -662,6 +693,8 @@ end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var old:TPoint;
+    i:Integer;
+    stackDragged:boolean;
 begin
  // pokud se nemeni pozice kurzoru -- ramecku, neni potreba prekreslovat
  if ((X div SymbolSet._Symbol_Sirka = Self.CursorDraw.Pos.X) and (Y div SymbolSet._Symbol_Vyska = Self.CursorDraw.Pos.Y)) then Exit;
@@ -680,9 +713,16 @@ begin
  // zavolame vnejsi event
  if (Assigned(Self.FOnMove)) then Self.FOnMove(Self, Self.CursorDraw.Pos);
 
+ // potencialni prekresleni zasobniku pri presunu povelu
+ stackDragged := false;
+ for i := 0 to Self.myORs.Count-1 do
+   if (Self.myORs[i].stack.IsDragged()) then
+     stackDragged := true;
+
  // panel prekreslujeme jen kdyz je nutne vykreslovat mys na panelu
- // pokud se vyjresluje mys operacniho systemu, panel neni prekreslovan
- if ((GlobConfig.data.panel_mouse = _MOUSE_PANEL) or (Self.Menu.showing)) then
+ // pokud se vykresluje mys operacniho systemu, panel neni prekreslovan
+ if ((GlobConfig.data.panel_mouse = _MOUSE_PANEL) or (Self.Menu.showing) or
+     (stackDragged)) then
   begin
    // neprekreslujeme cely panel, ale pouze policko, na kterem byla mys v minule pozici
    //  obsah tohoto policka je ulozen v Self.CursorDraw.History
@@ -695,6 +735,11 @@ begin
        Self.Menu.PaintMenu(Self.DrawObject, Self.CursorDraw.Pos)
      else begin
        Self.PaintKurzorBg(old);
+
+       for i := 0 to Self.myORs.Count-1 do
+         if (Self.myORs[i].stack.IsDragged()) then
+           Self.myORs[i].stack.Show(Self.DrawObject, Self.CursorDraw.Pos);
+
        Self.PaintKurzor();
      end;
 
@@ -755,7 +800,7 @@ begin
  for i := 0 to Self.myORs.Count-1 do
   begin
    if (Self.myORs[i].tech_rights = TORControlRights.null) then continue;
-   Self.myORs[i].stack.MouseClick(Position, Button, handled);
+   Self.myORs[i].stack.MouseUp(Position, Button, handled);
    if (handled) then goto EscCheck;
   end;
 
@@ -1904,7 +1949,7 @@ procedure TRelief.ShowZasobniky();
 var i:Integer;
 begin
  for i := 0 to Self.myORs.Count-1 do
-   Self.myORs[i].stack.Show(Self.DrawObject);
+   Self.myORs[i].stack.Show(Self.DrawObject, Self.CursorDraw.Pos);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
