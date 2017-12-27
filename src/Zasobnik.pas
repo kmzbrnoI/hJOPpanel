@@ -27,7 +27,7 @@ type
      stack:TList<TORStackCmd>;                                                   // povely
      volba:TORStackVolba;                                                       // aktualni volba
      hint:string;                                                               // upozorneni vpravo nahore
-     EZ:TOREZVolba;                                                             // stav EZ
+     fEZ:TOREZVolba;                                                            // stav EZ
      pos:TPoint;                                                                // pozice leveho horniho rohu zasobniku
      parent:string;                                                             // id materske oblasti rizeni
      fenabled:boolean;                                                          // jestli je na zasobnik mozo klikat
@@ -46,7 +46,12 @@ type
       procedure RemoveJC(id:Integer);
 
       procedure ShowStackCMD(ypos:Integer; text:string; first:boolean;
-                             selected:boolean; available:boolean; obj:TDXDraw);
+                             selected:boolean; available:boolean; dirty:boolean;
+                             obj:TDXDraw);
+
+      procedure SetEZ(new:TOREZVolba);
+
+      property EZ:TOREZVolba read fEZ write SetEz;
 
    public
 
@@ -111,6 +116,7 @@ begin
     Self.volba := PV
    else if (data[2] = 'LIST') then
     begin
+     Self.dirty := -1;
      if (data.Count > 4) then
        Self.ParseList(data[4])
      else
@@ -292,13 +298,13 @@ begin
    for y := 0 to Self.stack.Count-1 do
     begin
      if ((Self.dragged > -1) and (y = jcpos)) then
-       Self.ShowStackCMD(y, Self.stack[Self.dragged].JC, false, true, true, obj)
+       Self.ShowStackCMD(y, Self.stack[Self.dragged].JC, false, true, true, false, obj)
      else begin
        if (jc = Self.dragged) then
          Inc(jc);
 
        Self.ShowStackCMD(y, Self.stack[jc].JC, ((y = 0) and (y <> dragged)),
-                         jc = selected, (jc <> 0) or (Self.first_enabled), obj);
+                         jc = selected, (jc <> 0) or (Self.first_enabled), y = Self.dirty, obj);
        Inc(jc);
      end;
     end;
@@ -316,7 +322,7 @@ begin
 
    // pokud je alespon jedna cesta v zasobniku, vypiseme ji
    if (Self.stack.Count > 0) then
-     Self.ShowStackCMD(0, Self.stack[0].JC, true, false, Self.first_enabled, obj);
+     Self.ShowStackCMD(0, Self.stack[0].JC, true, false, Self.first_enabled, false, obj);
 
    PanelPainter.TextOutput(Point(Self.pos.X+12, Self.pos.Y), Format('%.2d', [Self.stack.Count]), $A0A0A0, clBlack, obj);
 
@@ -336,7 +342,8 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TORStack.ShowStackCMD(ypos:Integer; text:string; first:boolean;
-                       selected:boolean; available:boolean; obj:TDXDraw);
+                       selected:boolean; available:boolean; dirty:boolean;
+                       obj:TDXDraw);
 var bk, fg:TColor;
     j:Integer;
 begin
@@ -356,6 +363,12 @@ begin
   begin
    bk := clOlive;
    fg := clWhite;
+  end;
+
+ if (dirty) then
+  begin
+   fg := clBlack;
+   bk := clYellow;
   end;
 
  if (Length(text) > _JC_TEXT_WIDTH) then
@@ -397,8 +410,6 @@ begin
         PanelTCPClient.SendLn(Self.parent+';ZAS;EZ;1');
       end;
       TOREZVolba.openned, TOREZVolba.please : begin
-        Self.selected := -1;
-        Self.dragged := -1;
         Self.EZ := closed;
         PanelTCPClient.SendLn(Self.parent+';ZAS;EZ;0;');
       end;
@@ -482,6 +493,8 @@ begin
            Self.selected := cmdi;
          end;
 
+         Self.dirty := Self.selected;
+
        except
          Self.selected := -1;
        end;
@@ -504,7 +517,8 @@ procedure TORStack.MouseDown(Position:TPoint; Button:TPanelButton; var handled:b
 begin
  // klik na cestu v zasobniku
  if ((Self.EZ = TOREZVolba.openned) and (Position.X >= Self.pos.X) and (Position.X <= Self.pos.X+_JC_TEXT_WIDTH) and
-     (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count) and (Button = TPanelButton.F1)) then
+     (Position.Y > Self.pos.Y) and (Position.Y <= Self.pos.Y+Self.stack.Count) and (Button = TPanelButton.F1) and
+     (Self.dirty = -1)) then
   begin
    if (((Position.Y - Self.pos.Y - 1) <> 0) or (Self.first_enabled)) then
     begin
@@ -538,6 +552,21 @@ end;//procedure
 function TORStack.IsDragged():boolean;
 begin
  Result := (Self.dragged <> -1);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TORStack.SetEZ(new:TOREZVolba);
+begin
+ if (Self.fEZ = new) then Exit();
+
+ Self.fEZ := new;
+ if (new = TOREZVolba.closed) then
+  begin
+   Self.selected := -1;
+   Self.dragged  := -1;
+   Self.dirty    := -1;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
