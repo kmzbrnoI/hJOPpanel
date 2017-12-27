@@ -575,13 +575,15 @@ begin
 
    Self.DrawObject.Surface.Canvas.Release();
    Self.DrawObject.Flip();
- finally
-   try
-     if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
-       Self.DrawObject.Surface.Canvas.UnLock();
-   except
+ except
 
-   end;
+ end;
+
+ try
+   if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
+     Self.DrawObject.Surface.Canvas.UnLock();
+ except
+
  end;
 end;//procedure
 
@@ -747,13 +749,15 @@ begin
      // prekreslime si platno
      Self.DrawObject.Surface.Canvas.Release();
      Self.DrawObject.Flip();
-   finally
-     try
-       if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
-         Self.DrawObject.Surface.Canvas.UnLock();
-     except
+   except
 
-     end;
+   end;
+
+   try
+     if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
+       Self.DrawObject.Surface.Canvas.UnLock();
+   except
+
    end;
   end;
 end;//procedure
