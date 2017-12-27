@@ -13,7 +13,7 @@ type
   TORStackVolba = (PV = 0, VZ = 1);
   TOREZVolba = (closed = 0, please = 1, openned = 2);
 
-  TORStackJC = record
+  TORStackCmd = record
    JC:string;
    id:Integer;
   end;
@@ -23,18 +23,19 @@ type
     _JC_TEXT_WIDTH = 25;
 
    private
-     index:Integer;
-     stack:TList<TORStackJC>;
-     volba:TORStackVolba;
-     hint:string;
-     EZ:TOREZVolba;
-     pos:TPoint;
-     parent:string;
-     fenabled:boolean;
-     selected:Integer;
-     dragged:Integer;
-     first_enabled:boolean;
-     UPOenabled:boolean;
+     index:Integer;                                                             // index zasobniku
+     stack:TList<TORStackCmd>;                                                   // povely
+     volba:TORStackVolba;                                                       // aktualni volba
+     hint:string;                                                               // upozorneni vpravo nahore
+     EZ:TOREZVolba;                                                             // stav EZ
+     pos:TPoint;                                                                // pozice leveho horniho rohu zasobniku
+     parent:string;                                                             // id materske oblasti rizeni
+     fenabled:boolean;                                                          // jestli je na zasobnik mozo klikat
+     selected:Integer;                                                          // index aktualne vybrane polozky (-1 default)
+     dragged:Integer;                                                           // index aktualne presouvane polozky (-1 default)
+     dirty:Integer;                                                             // index nepotvrzene polozky (-1 default)
+     first_enabled:boolean;                                                     // jestli je prvni povel mozno editovat (presouvat, mazat)
+     UPOenabled:boolean;                                                        // jestli je mozno kliknout na UPO (zlute UPO)
 
      Graphics:TPanelGraphics;
 
@@ -78,7 +79,7 @@ begin
  inherited Create();
 
  Self.index         := 0;
- Self.stack         := TList<TORStackJC>.Create();
+ Self.stack         := TList<TORStackCmd>.Create();
  Self.volba         := PV;
  Self.hint          := '';
  Self.EZ            := closed;
@@ -87,6 +88,7 @@ begin
  Self.fenabled      := false;
  Self.selected      := -1;
  Self.dragged       := -1;
+ Self.dirty         := -1;
  Self.first_enabled := true;
 
  Self.Graphics := Graphics;
@@ -177,7 +179,7 @@ end;//procedure
 procedure TORStack.ParseList(list:string);
 var str1, str2:TStrings;
     i:Integer;
-    stack_jc:TORStackJC;
+    stack_jc:TORStackCmd;
 begin
  str1 := TStringList.Create();
  str2 := TStringList.Create();
@@ -234,7 +236,7 @@ end;//procedure
 
 procedure TORStack.AddJC(data:string);
 var str:TStrings;
-    stack_jc:TORStackJC;
+    stack_jc:TORStackCmd;
 begin
  str := TStringList.Create();
  ExtractStringsEx(['|'], [], data, str);
@@ -370,7 +372,7 @@ end;
 
 procedure TORStack.MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
 var cmdi:Integer;
-    cmd:TORStackJC;
+    cmd:TORStackCmd;
 begin
  // klik na horni symboly
  if ((Position.Y = Self.pos.Y) and (Button <> TPanelButton.ESCAPE)) then
