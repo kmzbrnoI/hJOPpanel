@@ -13,14 +13,14 @@ type
   TModCas = class
    private
     ftime:TTime;
-    fnasobic:Real;
+    fspeed:Real;
     fstarted:boolean;
     timer:TTimer;
     last_call:TDateTime;
 
     procedure OnTimer(Sender:TObject);
 
-    function GetStrNasobic():string;
+    function GetStrSpeed():string;
 
    public
      constructor Create();
@@ -32,9 +32,9 @@ type
      procedure Reset();
 
      property time:TTime read ftime;
-     property nasobic:Real read fnasobic;
+     property speed:Real read fspeed;
      property started:boolean read fstarted;
-     property strNasobic:string read GetStrNasobic;
+     property strSpeed:string read GetStrSpeed;
   end;//class TModCas
 
 var
@@ -65,14 +65,14 @@ end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//  -;MOD-CAS;running;nasobic;cas;                  - oznameni o stavu modeloveho casu - aktualni modelovy cas a jestli bezi
+//  -;MOD-CAS;running;speed;cas;                  - oznameni o stavu modeloveho casu - aktualni modelovy cas a jestli bezi
 procedure TModCas.ParseData(data:TStrings);
 begin
  Self.fstarted      := (data[2] = '1');
  Self.timer.Enabled := Self.fstarted;
  Self.last_call     := Now;
 
- Self.fnasobic := StrToFloat(data[3]);
+ Self.fspeed := StrToFloat(data[3]);
  Self.ftime    := StrToTime(data[4]);
 
  Self.Show();
@@ -85,7 +85,7 @@ var diff:TTime;
 begin
  // pocitani aktualniho modeloveho casu:
  diff := Now - Self.last_call;
- Self.ftime := Self.time + (diff*Self.nasobic);
+ Self.ftime := Self.time + (diff*Self.speed);
 
  Self.last_call := now;
  Self.Show();
@@ -104,10 +104,10 @@ begin
    F_Main.P_Zrychleni.Font.Color     := clRed;
   end;
 
- F_Main.P_Zrychleni.Caption     := Self.strNasobic+'×';
+ F_Main.P_Zrychleni.Caption     := Self.strSpeed+'×';
  F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', Self.ftime);
 
- F_Main.CheckNasobicWidth();
+ F_Main.ChecknasobicWidth();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ procedure TModCas.Reset();
 begin
  Self.ftime    := EncodeTime(0, 0, 0, 0);
  Self.fstarted := false;
- Self.fnasobic := 1;
+ Self.fspeed := 1;
 
  Self.timer.Enabled := false;
 
@@ -125,9 +125,9 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TModCas.GetStrNasobic():string;
+function TModCas.GetStrSpeed():string;
 begin
- Result := FloatToStrF(Self.nasobic, ffGeneral, 1, 1);
+ Result := FloatToStrF(Self.speed, ffGeneral, 1, 1);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

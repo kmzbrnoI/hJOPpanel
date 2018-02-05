@@ -85,7 +85,7 @@ end;//procedure
 procedure TF_ModCasSet.OpenForm;
  begin
   Self.ME_start_time.Text := FormatDateTime('hh:nn', ModCas.time);
-  Self.ME_Nasobic.Text    := FloatToStrF(ModCas.nasobic, ffNumber, 1, 1);
+  Self.ME_Nasobic.Text    := FloatToStrF(ModCas.speed, ffNumber, 1, 1);
 
   Self.ActiveControl := Self.ME_start_time;
   Self.Show();
