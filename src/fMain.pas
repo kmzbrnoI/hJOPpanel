@@ -41,8 +41,6 @@ type
     P_Date: TPanel;
     A_Print: TAction;
     SD_Image: TSaveDialog;
-    P_Time_modelovy: TPanel;
-    P_Zrychleni: TPanel;
     P_DCC: TPanel;
     SB_DCC_Go: TSpeedButton;
     SB_DCC_Stop: TSpeedButton;
@@ -56,6 +54,8 @@ type
     SB_Logout: TSpeedButton;
     SB_PrintScreen: TSpeedButton;
     SB_uLIdaemon: TSpeedButton;
+    P_Time_modelovy: TPanel;
+    P_Zrychleni: TPanel;
     procedure FormDestroy(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -100,7 +100,8 @@ type
      procedure UpdateuLIIcon();
      procedure uLIAuthUpdate();
 
-     procedure CheckNasobicWidth();
+     procedure OnModTimeChanged();
+     procedure CheckTimeSpeedWidth();
   end;
 
 var
@@ -257,10 +258,18 @@ end;
 
 procedure TF_Main.FormResize(Sender: TObject);
 begin
- Self.P_Zrychleni.Left     := Self.P_Header.Width - Self.P_Zrychleni.Width - 5;
- Self.P_Time_modelovy.Left := Self.P_Zrychleni.Left - Self.P_Time_modelovy.Width - 5;
+ Self.P_Time_modelovy.Visible := ModCas.used;
+ Self.P_Zrychleni.Visible := ModCas.used;
 
- Self.P_Time.Left := Self.P_Time_modelovy.Left - Self.P_Time.Width - 5;
+ if (ModCas.used) then
+  begin
+   Self.P_Zrychleni.Left     := Self.P_Header.Width - Self.P_Zrychleni.Width - 5;
+   Self.P_Time_modelovy.Left := Self.P_Zrychleni.Left - Self.P_Time_modelovy.Width - 5;
+   Self.P_Time.Left := Self.P_Time_modelovy.Left - Self.P_Time.Width - 5;
+  end else begin
+   Self.P_Time.Left := Self.P_Header.Width - Self.P_Time.Width - 5;
+  end;
+
  Self.P_Date.Left := Self.P_Time.Left - Self.P_Date.Width - 5;
 
  Self.P_Login.Visible := ((Self.P_Login.Left+Self.P_Login.Width) < Self.P_Time_modelovy.Left);
@@ -571,19 +580,32 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TF_Main.CheckNasobicWidth();
+procedure TF_Main.OnModTimeChanged();
+begin
+ if (ModCas.started) then
+  begin
+   F_Main.P_Time_modelovy.Font.Color := clBlack;
+   F_Main.P_Zrychleni.Font.Color     := clBlack;
+  end else begin
+   F_Main.P_Time_modelovy.Font.Color := clRed;
+   F_Main.P_Zrychleni.Font.Color     := clRed;
+  end;
+
+ F_Main.P_Zrychleni.Caption     := ModCas.strSpeed+'×';
+ F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', ModCas.time);
+
+ Self.CheckTimeSpeedWidth();
+ Self.FormResize(Self);
+end;
+
+procedure TF_Main.CheckTimeSpeedWidth();
 const _SMALL = 33;
       _LARGE = 50;
 begin
  if ((Length(Self.P_Zrychleni.Caption) > 2) and (Self.P_Zrychleni.Width <= _SMALL)) then
-  begin
-   Self.P_Zrychleni.Width := _LARGE;
-   Self.FormResize(Self);
- end else if ((Length(Self.P_Zrychleni.Caption) = 2) and (Self.P_Zrychleni.Width = _LARGE)) then
-  begin
+   Self.P_Zrychleni.Width := _LARGE
+ else if ((Length(Self.P_Zrychleni.Caption) = 2) and (Self.P_Zrychleni.Width = _LARGE)) then
    Self.P_Zrychleni.Width := _SMALL;
-   Self.FormResize(Self);
-  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

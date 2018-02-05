@@ -18,9 +18,11 @@ type
     B_Storno: TButton;
     Label1: TLabel;
     ME_Nasobic: TMaskEdit;
+    CHB_Used: TCheckBox;
     procedure B_OKClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure ME_start_timeKeyPress(Sender: TObject; var Key: Char);
+    procedure CHB_UsedClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -57,7 +59,10 @@ procedure TF_ModCasSet.B_OKClick(Sender: TObject);
       Exit;
      end;
 
-    PanelTCPClient.SendLn('-;MOD-CAS;TIME;'+Self.ME_start_time.Text+':00;'+Self.ME_Nasobic.Text);
+    if (Self.CHB_Used.Checked) then
+      PanelTCPClient.SendLn('-;MOD-CAS;TIME;'+Self.ME_start_time.Text+':00;'+Self.ME_Nasobic.Text+';1')
+    else
+      PanelTCPClient.SendLn('-;MOD-CAS;TIME;'+Self.ME_start_time.Text+':00;'+Self.ME_Nasobic.Text+';0');
 
     Self.Close();
   except
@@ -69,6 +74,12 @@ procedure TF_ModCasSet.B_OKClick(Sender: TObject);
 procedure TF_ModCasSet.B_StornoClick(Sender: TObject);
 begin
  Self.Close();
+end;
+
+procedure TF_ModCasSet.CHB_UsedClick(Sender: TObject);
+begin
+ Self.ME_start_time.Enabled := Self.CHB_Used.Checked;
+ Self.ME_Nasobic.Enabled := Self.CHB_Used.Checked;
 end;
 
 procedure TF_ModCasSet.ME_start_timeKeyPress(Sender: TObject; var Key: Char);
@@ -84,10 +95,13 @@ end;//procedure
 
 procedure TF_ModCasSet.OpenForm;
  begin
+  Self.CHB_Used.Checked   := ModCas.used;
   Self.ME_start_time.Text := FormatDateTime('hh:nn', ModCas.time);
   Self.ME_Nasobic.Text    := FloatToStrF(ModCas.speed, ffNumber, 1, 1);
 
-  Self.ActiveControl := Self.ME_start_time;
+  Self.CHB_UsedClick(Self.CHB_Used);
+
+  Self.ActiveControl := Self.CHB_Used;
   Self.Show();
  end;//procedure
 

@@ -3599,6 +3599,58 @@ object F_Main: TF_Main
         ParentFont = False
       end
     end
+    object P_Time_modelovy: TPanel
+      Left = 770
+      Top = 4
+      Width = 106
+      Height = 25
+      Hint = 'Modelov'#253' cas'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      BevelOuter = bvNone
+      Caption = '00:00:00'
+      Color = clSkyBlue
+      DoubleBuffered = True
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clRed
+      Font.Height = -23
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentBackground = False
+      ParentDoubleBuffered = False
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
+    object P_Zrychleni: TPanel
+      Left = 880
+      Top = 4
+      Width = 33
+      Height = 25
+      Hint = 'Prevod modelov'#233'ho casu'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      BevelOuter = bvNone
+      Caption = '1x'
+      Color = clSkyBlue
+      DoubleBuffered = True
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clRed
+      Font.Height = -23
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentBackground = False
+      ParentDoubleBuffered = False
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 8
+    end
   end
   object SB_Main: TStatusBar
     Left = 0
@@ -3618,58 +3670,6 @@ object F_Main: TF_Main
         Width = 50
       end>
   end
-  object P_Time_modelovy: TPanel
-    Left = 770
-    Top = 4
-    Width = 106
-    Height = 25
-    Hint = 'Modelov'#253' cas'
-    Margins.Left = 2
-    Margins.Top = 2
-    Margins.Right = 2
-    Margins.Bottom = 2
-    BevelOuter = bvNone
-    Caption = '00:00:00'
-    Color = clSkyBlue
-    DoubleBuffered = True
-    Font.Charset = EASTEUROPE_CHARSET
-    Font.Color = clRed
-    Font.Height = -23
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentBackground = False
-    ParentDoubleBuffered = False
-    ParentFont = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 2
-  end
-  object P_Zrychleni: TPanel
-    Left = 880
-    Top = 4
-    Width = 33
-    Height = 25
-    Hint = 'Prevod modelov'#233'ho casu'
-    Margins.Left = 2
-    Margins.Top = 2
-    Margins.Right = 2
-    Margins.Bottom = 2
-    BevelOuter = bvNone
-    Caption = '1x'
-    Color = clSkyBlue
-    DoubleBuffered = True
-    Font.Charset = EASTEUROPE_CHARSET
-    Font.Color = clRed
-    Font.Height = -23
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentBackground = False
-    ParentDoubleBuffered = False
-    ParentFont = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 3
-  end
   object IL_Ostatni: TImageList
     BkColor = clBlack
     Height = 12
@@ -3677,7 +3677,7 @@ object F_Main: TF_Main
     Left = 872
     Top = 56
     Bitmap = {
-      494C0101640088012C0208000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
+      494C010164008801300208000C0000000000FF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000020000000380100000100200000000000009C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -5027,7 +5027,7 @@ object F_Main: TF_Main
     Left = 808
     Top = 56
     Bitmap = {
-      494C010108007C01C00210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010108007C01C40210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

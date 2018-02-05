@@ -15,6 +15,7 @@ type
     ftime:TTime;
     fspeed:Real;
     fstarted:boolean;
+    fused:boolean;
     timer:TTimer;
     last_call:TDateTime;
 
@@ -28,11 +29,11 @@ type
 
      procedure ParseData(data:TStrings);
 
-     procedure Show();
      procedure Reset();
 
      property time:TTime read ftime;
      property speed:Real read fspeed;
+     property used:boolean read fused;
      property started:boolean read fstarted;
      property strSpeed:string read GetStrSpeed;
   end;//class TModCas
@@ -73,9 +74,14 @@ begin
  Self.last_call     := Now;
 
  Self.fspeed := StrToFloat(data[3]);
- Self.ftime    := StrToTime(data[4]);
+ Self.ftime := StrToTime(data[4]);
 
- Self.Show();
+ if (data.Count >= 6) then
+   Self.fused := (data[5] = '1')
+ else
+   Self.fused := true;
+
+ F_Main.OnModTimeChanged();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,26 +94,7 @@ begin
  Self.ftime := Self.time + (diff*Self.speed);
 
  Self.last_call := now;
- Self.Show();
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TModCas.Show();
-begin
- if (Self.started) then
-  begin
-   F_Main.P_Time_modelovy.Font.Color := clBlack;
-   F_Main.P_Zrychleni.Font.Color     := clBlack;
-  end else begin
-   F_Main.P_Time_modelovy.Font.Color := clRed;
-   F_Main.P_Zrychleni.Font.Color     := clRed;
-  end;
-
- F_Main.P_Zrychleni.Caption     := Self.strSpeed+'×';
- F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', Self.ftime);
-
- F_Main.ChecknasobicWidth();
+ F_Main.OnModTimeChanged();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,11 +103,12 @@ procedure TModCas.Reset();
 begin
  Self.ftime    := EncodeTime(0, 0, 0, 0);
  Self.fstarted := false;
- Self.fspeed := 1;
+ Self.fspeed   := 1;
+ Self.fused    := false;
 
  Self.timer.Enabled := false;
 
- Self.Show();
+ F_Main.OnModTimeChanged();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

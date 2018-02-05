@@ -1666,13 +1666,16 @@ begin
 
    menu_str := menu_str + 'MSG,';
 
-   if (ModCas.started) then
+   if (ModCas.used) then
     begin
-     if (Self.myORs[obl_rizeni].Rights.ModCasStop) then
-      menu_str := menu_str + 'CAS<,';
-    end else begin
-     if (Self.myORs[obl_rizeni].Rights.ModCasStart) then
-      menu_str := menu_str + 'CAS>,';
+     if (ModCas.started) then
+      begin
+       if (Self.myORs[obl_rizeni].Rights.ModCasStop) then
+        menu_str := menu_str + 'CAS<,';
+      end else begin
+       if (Self.myORs[obl_rizeni].Rights.ModCasStart) then
+        menu_str := menu_str + 'CAS>,';
+      end;
     end;
 
    if ((Self.myORs[obl_rizeni].Rights.ModCasSet) and (not ModCas.started)) then
