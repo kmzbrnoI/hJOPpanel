@@ -821,8 +821,8 @@ begin
  index := Self.Popisky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Prejezdy.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Button, Self.Prejezdy.Data[index].Blok);
+   if (Self.Popisky.Data[index].Blok < 0) then goto EscCheck;
+//   PanelTCPClient.PanelClick(Self.myORs[Self.Popisky.Data[index].OblRizeni].id, Button, Self.Popisky.Data[index].Blok);
    goto EscCheck;
   end;
 

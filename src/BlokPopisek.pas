@@ -11,11 +11,19 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
      BlokPrejezd;
 
 type
+ TPopisekPanelProp = record
+  Symbol, Pozadi: TColor;
+  left, right: TColor;
+  blikani:boolean;
+ end;
+
  TPPopisek = record
   Text:string;
   Position:TPoint;
   Color:Integer;
-  prejezd_ref:Integer;
+  Blok:Integer;
+
+  PanelProp: TPopisekPanelProp;
  end;
 
 
@@ -29,6 +37,15 @@ type
    procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
    function GetIndex(Pos:TPoint):Integer;
  end;
+
+const
+  _Def_Popisek_Prop:TPopisekPanelProp = (
+      Symbol: $A0A0A0;
+      Pozadi: clBlack;
+      left: clFuchsia;
+      right: clFuchsia;
+      blikani: false
+  );
 
 implementation
 
@@ -63,7 +80,9 @@ begin
    popisek.Position.X  := ini.ReadInteger('T'+IntToStr(i),'X',0);
    popisek.Position.Y  := ini.ReadInteger('T'+IntToStr(i),'Y',0);
    popisek.Color       := ini.ReadInteger('T'+IntToStr(i),'C',0);
-   popisek.prejezd_ref := Prejezdy.GetPrj(ini.ReadInteger('T'+IntToStr(i),'B', -1));
+   popisek.Blok        := ini.ReadInteger('T'+IntToStr(i),'B', -1);
+
+   popisek.PanelProp := _Def_Popisek_Prop;
 
    Self.data.Add(popisek);
   end;
@@ -76,36 +95,28 @@ var popisek:TPPopisek;
 begin
  for popisek in Self.data do
   begin
-   if (popisek.prejezd_ref > -1) then
+   if (popisek.Blok > -1) then
     begin
-     // popisek ma referenci na prejezd
-     if ((prejezdy[popisek.prejezd_ref].PanelProp.Pozadi = clBlack) or
-         (prejezdy[popisek.prejezd_ref].PanelProp.Pozadi = clTeal)) then
-      begin
-       obj.Surface.Canvas.Brush.Color := clGreen;
-      end else begin
-       obj.Surface.Canvas.Brush.Color := prejezdy[popisek.prejezd_ref].PanelProp.Pozadi;
-      end;
+     // popisek ma referenci na souctovou hlasku
 
-     obj.Surface.Canvas.Pen.Color   := obj.Surface.Canvas.Brush.Color;
+     obj.Surface.Canvas.Brush.Color := popisek.PanelProp.left;
+     obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
      obj.Surface.Canvas.Rectangle((popisek.Position.X-1)*SymbolSet._Symbol_Sirka,
        popisek.Position.Y*SymbolSet._Symbol_Vyska, (popisek.Position.X)*SymbolSet._Symbol_Sirka,
        (popisek.Position.Y+1)*SymbolSet._Symbol_Vyska);
 
-     case (prejezdy[popisek.prejezd_ref].PanelProp.stav) of
-       TBlkPrjPanelStav.anulace: begin
-        obj.Surface.Canvas.Brush.Color := clWhite;
-        obj.Surface.Canvas.Pen.Color   := clWhite;
-        obj.Surface.Canvas.Rectangle((popisek.Position.X+1)*SymbolSet._Symbol_Sirka,
-          popisek.Position.Y*SymbolSet._Symbol_Vyska, (popisek.Position.X+2)*SymbolSet._Symbol_Sirka,
-          (popisek.Position.Y+1)*SymbolSet._Symbol_Vyska);
-       end;
-      end;//case
+     obj.Surface.Canvas.Brush.Color := popisek.PanelProp.right;
+     obj.Surface.Canvas.Pen.Color   := obj.Surface.Canvas.Brush.Color;
+     obj.Surface.Canvas.Rectangle((popisek.Position.X+1)*SymbolSet._Symbol_Sirka,
+       popisek.Position.Y*SymbolSet._Symbol_Vyska, (popisek.Position.X+2)*SymbolSet._Symbol_Sirka,
+       (popisek.Position.Y+1)*SymbolSet._Symbol_Vyska);
 
-    end;//if
-
-   PanelPainter.TextOutput(popisek.Position, popisek.Text,
-      _Symbol_Colors[popisek.Color], clBlack, obj);
+     PanelPainter.TextOutput(popisek.Position, popisek.Text,
+        popisek.PanelProp.Symbol, popisek.PanelProp.Pozadi, obj);
+    end else begin
+     PanelPainter.TextOutput(popisek.Position, popisek.Text,
+        _Symbol_Colors[popisek.Color], clBlack, obj);
+    end;
   end;//for i
 end;
 
@@ -116,11 +127,9 @@ var i:Integer;
 begin
  for i := 0 to Self.data.Count-1 do
   begin
-   if (Self.data[i].prejezd_ref < 0) then continue;
-
    if ((Pos.X >= Self.data[i].Position.X-1) and (Pos.X <= Self.data[i].Position.X+1) and
        (Pos.Y = Self.data[i].Position.Y)) then
-     Exit(Self.data[i].prejezd_ref);
+     Exit(i);
   end;
 
  Result := -1;
