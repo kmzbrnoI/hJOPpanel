@@ -1037,6 +1037,10 @@ begin
    for i := 0 to Self.Rozp.data.Count-1 do
      Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
 
+   for i := 0 to Self.Popisky.Count-1 do
+     if (Self.Popisky[i].Blok > -1) then
+       Self.AddToTechBlk(_BLK_SH, Self.Popisky[i].Blok, i);
+
  finally
    inifile.Free;
  end;
@@ -1435,6 +1439,13 @@ begin
            (Sender = Self.myORs[Self.UvazkySpr.Data[symbols[i].symbol_index].OblRizeni].id)) then
          Self.UvazkySpr[symbols[i].symbol_index].PanelProp.Change(parsed);
      end;
+
+     _BLK_SH: begin
+       if (symbols[i].blk_type = _BLK_SH) then
+//       TODO    (Sender = Self.myORs[Self.Popisky[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Popisky[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
+
    end;//case
   end;//for
 
@@ -1835,6 +1846,7 @@ begin
  Self.Zamky.Reset(orindex);
  Self.Vykol.Reset(orindex);
  Self.Rozp.Reset(orindex);
+ Self.Popisky.Reset(orindex);
 
  for i := 0 to Self.myORs.Count-1 do
   begin

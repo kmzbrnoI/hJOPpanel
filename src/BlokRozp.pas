@@ -27,22 +27,22 @@ type
 
  TPRozpojovace = class
   private
-   function GetItem(index:Integer):TPRozp;
-   function GetCount():Integer;
+    function GetItem(index:Integer):TPRozp;
+    function GetCount():Integer;
 
   public
    data:TList<TPRozp>;
 
-   constructor Create();
-   destructor Destroy(); override;
+    constructor Create();
+    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw);
-   function GetIndex(Pos:TPoint):Integer;
-   procedure Reset(orindex:Integer = -1);
+    procedure Load(ini:TMemIniFile);
+    procedure Show(obj:TDXDraw);
+    function GetIndex(Pos:TPoint):Integer;
+    procedure Reset(orindex:Integer = -1);
 
-   property Items[index : integer] : TPRozp read GetItem; default;
-   property Count : integer read GetCount;
+    property Items[index : integer] : TPRozp read GetItem; default;
+    property Count : integer read GetCount;
  end;
 
 const

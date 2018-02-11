@@ -22,6 +22,7 @@ const
   _BLK_ROZP    = 8;
   _BLK_UVAZKA_SPR = 9;
   _BLK_VYKOL   = 10;
+  _BLK_SH      = 11;
 
   _MOUSE_PANEL = 0;
   _MOUSE_OS    = 1;
