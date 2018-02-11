@@ -84,7 +84,7 @@ type
 
 implementation
 
-uses GlobalConfig, fMain, TCPClientPanel;
+uses GlobalConfig, fMain, TCPClientPanel, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

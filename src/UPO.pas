@@ -51,7 +51,7 @@ type
 
 implementation
 
-uses TCPClientPanel, fMain, RPConst, PanelPainter;
+uses TCPClientPanel, fMain, parseHelper, PanelPainter;
 
 ////////////////////////////////////////////////////////////////////////////////
 

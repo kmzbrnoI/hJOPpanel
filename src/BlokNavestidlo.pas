@@ -14,16 +14,18 @@ type
   Symbol,Pozadi:TColor;
   AB:Boolean;
   blikani:boolean;
+
+  procedure Change(data:TStrings);
  end;
 
- TPNavestidlo = record
+ TPNavestidlo = class
   Blok:Integer;
   Position:TPoint;
   SymbolID:Integer;
 
   OblRizeni:Integer;
   PanelProp:TNavPanelProp;
- end;//Navestidlo
+ end;
 
  TStartJC=record
   Pos:TPoint;
@@ -69,7 +71,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols;
+uses PanelPainter, Symbols, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +100,8 @@ begin
  count := ini.ReadInteger('P', 'N', 0);
  for i := 0 to count-1 do
   begin
+   nav := TPNavestidlo.Create();
+
    nav.Blok       := ini.ReadInteger('N'+IntToStr(i),'B',-1);
    nav.Position.X := ini.ReadInteger('N'+IntToStr(i),'X',0);
    nav.Position.Y := ini.ReadInteger('N'+IntToStr(i),'Y',0);
@@ -209,6 +213,16 @@ begin
      Self.startJC.Add(sjc);
     end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TNavPanelProp.Change(data:TStrings);
+begin
+ Symbol  := StrToColor(data[4]);
+ Pozadi  := StrToColor(data[5]);
+ blikani := StrToBool(data[6]);
+ AB      := StrToBool(data[7]);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -252,13 +252,8 @@ type
    procedure ORConnectionOpenned_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
    //Change blok
-   procedure ORUsekChange(Sender:string; BlokID:integer; UsekPanelProp:TUsekPanelProp);
-   procedure ORVyhChange(Sender:string; BlokID:integer; VyhPanelProp:TVyhPanelProp);
-   procedure ORNavChange(Sender:string; BlokID:integer; NavPanelProp:TNavPanelProp);
-   procedure ORPrjChange(Sender:string; BlokID:integer; PrjPanelProp:TPrjPanelProp);
-   procedure ORUvazkaChange(Sender:string; BlokID:integer; UvazkaPanelProp:TUvazkaPanelProp; UvazkaSprPanelProp:TUvazkaSprPanelProp);
-   procedure ORZamekChange(Sender:string; BlokID:integer; ZamekPanelProp:TZamekPanelProp);
-   procedure ORRozpChange(Sender:string; BlokID:integer; RozpPanelProp:TRozpPanelProp);
+   procedure ORBlkChange(Sender:string; BlokID:integer; BlokTyp:Integer; parsed:TStrings);
+
    procedure ORInfoTimer(id:Integer; time_min:Integer; time_sec:Integer; str:string);
    procedure ORInfoTimerRemove(id:Integer);
    procedure ORDKClickServer(Sender:string; enable:boolean);
@@ -1377,38 +1372,9 @@ end;
 //komunikace s oblastmi rizeni:
 //change blok stav:
 
-procedure TRelief.ORUsekChange(Sender:string; BlokID:integer; UsekPanelProp:TUsekPanelProp);
+procedure TRelief.ORBlkChange(Sender:string; BlokID:integer; BlokTyp:Integer;
+                              parsed:TStrings);
 var i:Integer;
-    usk:TPUsek;
-    symbols:TList<TTechBlokToSymbol>;
-    t:TList<TUsekSouprava>;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
-
- for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_USEK) and (Sender = Self.myORs[Self.Useky[symbols[i].symbol_index].OblRizeni].id)) then
-    begin
-     usk := Self.Useky.data[symbols[i].symbol_index];
-
-     // zkopirujeme seznam souprav
-     t := usk.PanelProp.soupravy;
-     usk.PanelProp := UsekPanelProp;
-     t.Clear();
-     t.AddRange(UsekPanelProp.soupravy);
-     usk.PanelProp.soupravy := t;
-
-     Self.Useky.data[symbols[i].symbol_index] := usk;
-    end;
-
- UsekPanelProp.soupravy.Free();
-end;//procedure
-
-procedure TRelief.ORVyhChange(Sender:string; BlokID:integer; VyhPanelProp:TVyhPanelProp);
-var i:Integer;
-    vykol:TPVykolejka;
-    vyh:TPVyhybka;
     symbols:TList<TTechBlokToSymbol>;
 begin
  // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
@@ -1417,144 +1383,64 @@ begin
 
  for i := 0 to symbols.Count-1 do
   begin
-   case (symbols[i].blk_type) of
-      _BLK_VYH: begin
-        if (Sender = Self.myORs[Vyhybky.data[symbols[i].symbol_index].OblRizeni].id) then
-         begin
-          vyh := Self.Vyhybky.data[symbols[i].symbol_index];
-          vyh.PanelProp := VyhPanelProp;
-          Self.Vyhybky.data[symbols[i].symbol_index] := vyh;
-         end;
-      end;
+   case (BlokTyp) of
+     _BLK_USEK: begin
+       if ((symbols[i].blk_type = _BLK_USEK) and
+           (Sender = Self.myORs[Self.Useky[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Useky[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
-      _BLK_VYKOL: begin
-       if (Sender = Self.myORs[Self.Vykol[symbols[i].symbol_index].OblRizeni].id) then
-        begin
-         vykol := Self.Vykol[symbols[i].symbol_index];
-         vykol.PanelProp := VyhPanelProp;
-         Self.Vykol.data[symbols[i].symbol_index] := vykol;
-        end;
+     _BLK_VYH: begin
+       if ((symbols[i].blk_type = _BLK_VYH) and
+           (Sender = Self.myORs[Vyhybky.data[symbols[i].symbol_index].OblRizeni].id)) then
+        Self.Vyhybky[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
-      end;
-   end;//case
-  end;//for i
-end;//procedure
+     _BLK_VYKOL: begin
+      if ((symbols[i].blk_type = _BLK_VYKOL) and
+          (Sender = Self.myORs[Self.Vykol[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Vykol[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
-procedure TRelief.ORNavChange(Sender:string; BlokID:integer; NavPanelProp:TNavPanelProp);
-var i:Integer;
-    symbols:TList<TTechBlokToSymbol>;
-    nav:TPNavestidlo;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
+     _BLK_SCOM: begin
+       if ((symbols[i].blk_type = _BLK_SCOM) and
+           (Sender = Self.myORs[Self.Navestidla[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Navestidla[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
- for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_SCOM) and
-       (Sender = Self.myORs[Self.Navestidla[symbols[i].symbol_index].OblRizeni].id)) then
-    begin
-     nav := Self.Navestidla[symbols[i].symbol_index];
-     nav.PanelProp := NavPanelProp;
-     Self.Navestidla.data[symbols[i].symbol_index] := nav;
-    end;
+     _BLK_PREJEZD: begin
+       if ((symbols[i].blk_type = _BLK_PREJEZD) and
+           (Sender = Self.myORs[Self.Prejezdy[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Prejezdy[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
- Self.Navestidla.UpdateStartJC();
-end;//procedure
+     _BLK_ZAMEK: begin
+       if ((symbols[i].blk_type = _BLK_ZAMEK) and
+           (Sender = Self.myORs[Self.Zamky[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Zamky[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
-procedure TRelief.ORPrjChange(Sender:string; BlokID:integer; PrjPanelProp:TPrjPanelProp);
-var i:Integer;
-    symbols:TList<TTechBlokToSymbol>;
-    prj:TPPrejezd;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
+     _BLK_ROZP: begin
+       if ((symbols[i].blk_type = _BLK_ROZP) and
+           (Sender = Self.myORs[Self.Rozp[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Rozp[symbols[i].symbol_index].PanelProp.Change(parsed);
+     end;
 
- for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_PREJEZD) and (Sender = Self.myORs[Self.Prejezdy.Data[symbols[i].symbol_index].OblRizeni].id)) then
-    begin
-     prj := Self.Prejezdy.Data[symbols[i].symbol_index];
-     prj.PanelProp := PrjPanelProp;
-     Self.Prejezdy.Data[symbols[i].symbol_index] := prj;
-    end;
-end;//procedure
-
-procedure TRelief.ORUvazkaChange(Sender:string; BlokID:integer; UvazkaPanelProp:TUvazkaPanelProp; UvazkaSprPanelProp:TUvazkaSprPanelProp);
-var i, j:Integer;
-    tmp:TUvazkaSprPanelProp;
-    symbols:TList<TTechBlokToSymbol>;
-    uv:TPUvazka;
-    uvs:TPUvazkaSpr;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
-
- for i := 0 to symbols.Count-1 do
-  begin
-   case (symbols[i].blk_type) of
      _BLK_UVAZKA: begin
-       if (Sender = Self.myORs[Self.Uvazky.Data[symbols[i].symbol_index].OblRizeni].id) then
-        begin
-         uv := Self.Uvazky.data[symbols[i].symbol_index];
-         uv.PanelProp := UvazkaPanelProp;
-         Self.Uvazky.data[symbols[i].symbol_index] := uv;
-        end;
-     end;
+       if ((symbols[i].blk_type = _BLK_UVAZKA) and
+           (Sender = Self.myORs[Self.Uvazky.Data[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Uvazky[symbols[i].symbol_index].PanelProp.Change(parsed);
 
-     _BLK_UVAZKA_SPR: begin
-       if (Sender = Self.myORs[Self.UvazkySpr.Data[symbols[i].symbol_index].OblRizeni].id) then
-        begin
-         uvs := Self.UvazkySpr.Data[symbols[i].symbol_index];
-         tmp := uvs.PanelProp;
-         uvs.PanelProp := UvazkaSprPanelProp;
-         Self.UvazkySpr.Data[symbols[i].symbol_index] := uvs;
-
-         // uvolnime pamet
-         for j := 0 to tmp.spr.Count-1 do
-           tmp.spr[j].strings.Free();
-         tmp.spr.Free();
-        end;
+       if ((symbols[i].blk_type = _BLK_UVAZKA_SPR) and
+           (Sender = Self.myORs[Self.UvazkySpr.Data[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.UvazkySpr[symbols[i].symbol_index].PanelProp.Change(parsed);
      end;
    end;//case
-  end;//for i
-end;//procedure
+  end;//for
 
-procedure TRelief.ORZamekChange(Sender:string; BlokID:integer; ZamekPanelProp:TZamekPanelProp);
-var i:Integer;
-    symbols:TList<TTechBlokToSymbol>;
-    zam:TPZamek;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
-
- for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_ZAMEK) and (Sender = Self.myORs[Self.Zamky.Data[symbols[i].symbol_index].OblRizeni].id)) then
-    begin
-     zam := Self.Zamky.Data[symbols[i].symbol_index];
-     zam.PanelProp := ZamekPanelProp;
-     Self.Zamky.Data[symbols[i].symbol_index] := zam;
-    end;
-end;//procedure
-
-procedure TRelief.ORRozpChange(Sender:string; BlokID:integer; RozpPanelProp:TRozpPanelProp);
-var i:Integer;
-    rozp:TPRozp;
-    symbols:TList<TTechBlokToSymbol>;
-begin
- // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
- if (not Self.Tech_blok.ContainsKey(BlokID)) then Exit();
- symbols := Self.Tech_blok[BlokID];
-
- for i := 0 to symbols.Count-1 do
-   if ((symbols[i].blk_type = _BLK_ROZP) and (Sender = Self.myORs[Self.Rozp[symbols[i].symbol_index].OblRizeni].id)) then
-    begin
-     rozp := Self.Rozp[symbols[i].symbol_index];
-     rozp.PanelProp := RozpPanelProp;
-     Self.Rozp.data[symbols[i].symbol_index] := rozp;
-    end;
-end;//procedure
+ if (BlokTyp = _BLK_SCOM) then
+   Self.Navestidla.UpdateStartJC();
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

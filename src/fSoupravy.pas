@@ -6,9 +6,8 @@ unit fSoupravy;
 
 interface
 
-uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, StdCtrls, ExtCtrls;
+uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+     Dialogs, ComCtrls, StdCtrls, ExtCtrls;
 
 type
   TF_SprList = class(TForm)
@@ -38,7 +37,7 @@ var
 
 implementation
 
-uses RPConst, TCPClientPanel, ORList;
+uses TCPClientPanel, ORList, parseHelper;
 
 {$R *.dfm}
 

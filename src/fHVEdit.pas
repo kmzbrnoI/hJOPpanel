@@ -88,7 +88,7 @@ var
 
 implementation
 
-uses fHVPomEdit, commctrl;
+uses fHVPomEdit, commctrl, parseHelper;
 
 {$R *.dfm}
 

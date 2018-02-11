@@ -59,6 +59,8 @@ begin
  count := ini.ReadInteger('P', 'V', 0);
  for i := 0 to count-1 do
   begin
+   vyh := TPVyhybka.Create();
+
    vyh.Blok        := ini.ReadInteger('V'+IntToStr(i),'B',-1);
    vyh.SymbolID    := ini.ReadInteger('V'+IntToStr(i),'S',0);
    vyh.PolohaPlus  := ini.ReadInteger('V'+IntToStr(i),'P',0);

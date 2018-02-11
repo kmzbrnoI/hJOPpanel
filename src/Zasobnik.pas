@@ -76,7 +76,7 @@ type
 
 implementation
 
-uses TCPCLientPanel, Symbols, PanelPainter;
+uses TCPCLientPanel, Symbols, PanelPainter, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

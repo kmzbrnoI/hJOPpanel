@@ -45,7 +45,7 @@ var
 
 implementation
 
-uses fMain, RPConst, GlobalConfig, Panel, TCPClientPanel;
+uses fMain, GlobalConfig, Panel, TCPClientPanel, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -74,7 +74,7 @@ type
 
 implementation
 
-uses Panel, Symbols, RPConst, PanelPainter;
+uses Panel, Symbols, parseHelper, PanelPainter;
 
 { format souboru hintu:
    csv soubor, kde na kazdem radku je jeden hint

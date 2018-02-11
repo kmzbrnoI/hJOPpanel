@@ -37,7 +37,8 @@ var
 
 implementation
 
-uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot, RPConst;
+uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot,
+     parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -86,7 +86,7 @@ var
 
 implementation
 
-uses fMain, Verze, BottomErrors, Sounds, RPConst;
+uses fMain, Verze, BottomErrors, Sounds, parseHelper;
 
 {$R *.dfm}
 ////////////////////////////////////////////////////////////////////////////////

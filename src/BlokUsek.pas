@@ -8,7 +8,7 @@ unit BlokUsek;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, RPConst, Symbols;
+uses Classes, Graphics, Types, Generics.Collections, RPConst, Symbols, SysUtils;
 
 const
   _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)
@@ -21,11 +21,17 @@ type
   posindex:Integer;               // index pozice, na ktere je umistena tato konkretni souprava
  end;
 
- TUsekPanelProp = record
+ TUsekPanelProp = class
   blikani:boolean;
   Symbol,Pozadi,nebarVetve:TColor;
   KonecJC:TJCType;
   soupravy:TList<TUsekSouprava>;
+
+   constructor Create();
+   destructor Destroy(); override;
+   procedure Change(parsed:TStrings);
+   procedure InitDefault();
+   procedure InitUA();
  end;
 
  // useku rozdeleny na vetve je reprezentovan takto:
@@ -40,7 +46,7 @@ type
  end;
 
  //vetev useku
- TVetev=record             //vetev useku
+ TVetev = record             //vetev useku
 
   node1:TVetevEnd;           // reference na 1. vyhybku, ktera ukoncuje tuto vetev
   node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
@@ -57,7 +63,7 @@ type
  TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
 
  // 1 usek na reliefu
- TPUsek=record
+ TPUsek = class
   Blok:Integer;
 
   OblRizeni:Integer;
@@ -78,24 +84,113 @@ type
 
 
  // program si duplikuje ulozena data - po rozdeleni useku na vetve uklada usek jak nerozdeleny tak rozdeleny
+
+   constructor Create();
+   destructor Destroy(); override;
  end;
 
-const
-  _Def_Usek_Prop:TUsekPanelProp = (
-      blikani: false;
-      Symbol: clFuchsia;
-      Pozadi: clBlack;
-      nebarVetve: $A0A0A0;
-      KonecJC: no);
-
-  _UA_Usek_Prop:TUsekPanelProp = (
-      blikani: false;
-      Symbol: $A0A0A0;
-      Pozadi: clBlack;
-      nebarVetve: $A0A0A0;
-      KonecJC: no);
-
 implementation
+
+uses parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TPUsek.Create();
+begin
+ inherited;
+ Self.PanelProp := TUsekPanelProp.Create();
+end;
+
+destructor TPUsek.Destroy();
+begin
+ Self.PanelProp.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TUsekPanelProp.Create();
+begin
+ inherited;
+ Self.InitDefault();
+ Self.soupravy := TList<TUsekSouprava>.Create();
+end;
+
+destructor TUsekPanelProp.Destroy();
+begin
+ Self.soupravy.Free();
+ inherited;
+end;
+
+procedure TUsekPanelProp.InitDefault();
+begin
+ Self.blikani := false;
+ Self.Symbol := clFuchsia;
+ Self.Pozadi := clBlack;
+ Self.nebarVetve := $A0A0A0;
+ Self.KonecJC := no;
+end;
+
+procedure TUsekPanelProp.InitUA();
+begin
+ Self.blikani := false;
+ Self.Symbol := $A0A0A0;
+ Self.Pozadi := clBlack;
+ Self.nebarVetve := $A0A0A0;
+ Self.KonecJC := no;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TUsekPanelProp.Change(parsed:TStrings);
+var soupravy, souprava:TStrings;
+    i: Integer;
+    us:TUsekSouprava;
+begin
+  Symbol  := StrToColor(parsed[4]);
+  Pozadi  := StrToColor(parsed[5]);
+  blikani := StrToBool(parsed[6]);
+  KonecJC := TJCType(StrToInt(parsed[7]));
+  nebarVetve := strToColor(parsed[8]);
+
+  Self.soupravy.Clear();
+
+  if (parsed.Count > 9) then
+   begin
+    soupravy := TStringList.Create();
+    souprava := TStringList.Create();
+
+    try
+      ExtractStringsEx([')'], ['('], parsed[9], soupravy);
+
+      for i := 0 to soupravy.Count-1 do
+       begin
+        souprava.Clear();
+        ExtractStringsEx([';'], [], soupravy[i], souprava);
+
+        us.nazev := souprava[0];
+        us.sipkaL := ((souprava[1] <> '') and (souprava[1][1] = '1'));
+        us.sipkaS := ((souprava[1] <> '') and (souprava[1][2] = '1'));
+        us.fg := strToColor(souprava[2]);
+        us.bg := strToColor(souprava[3]);
+        us.posindex := -1;
+
+        if (souprava.Count > 4) then
+          us.ramecek := strToColor(souprava[4])
+        else
+          us.ramecek := clBlack;
+
+        Self.soupravy.Add(us);
+       end;
+
+    finally
+      soupravy.Free();
+      souprava.Free();
+    end;
+   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.
 

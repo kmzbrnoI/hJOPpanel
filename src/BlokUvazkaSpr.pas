@@ -11,52 +11,107 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
- TUvazkaSpr = record
+ TUvazkaSpr = class
   strings:TStrings;
   show_index:Integer;
   time:string;
   color:TColor;
+
+  constructor Create();
+  destructor Destroy(); override;
  end;
 
- TUvazkaSprPanelProp = record
+ TUvazkaSprPanelProp = class
   spr:TList<TUvazkaSpr>;
+
+  constructor Create();
+  destructor Destroy(); override;
+  procedure Change(parsed:TStrings);
  end;
 
  TUvazkaSprVertDir = (top = 0, bottom = 1);
 
- TPUvazkaSpr=record
+ TPUvazkaSpr = class
   Blok:Integer;
   Pos:TPoint;
   vertical_dir:TUvazkaSprVertDir;
   spr_cnt:Integer;
   OblRizeni:Integer;
   PanelProp:TUvazkaSprPanelProp;
+
+  constructor Create();
+  destructor Destroy(); override;
  end;
 
  TPUvazkySpr = class
   private
    change_time:TDateTime;
 
+    function GetItem(index:Integer):TPUvazkaSpr;
+    function GetCount():Integer;
+
   public
    data:TList<TPUvazkaSpr>;
 
-   constructor Create();
-   destructor Destroy(); override;
+    constructor Create();
+    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw);
-   procedure Reset(orindex:Integer = -1);
+    procedure Load(ini:TMemIniFile);
+    procedure Show(obj:TDXDraw);
+    procedure Reset(orindex:Integer = -1);
+
+    property Items[index : integer] : TPUvazkaSpr read GetItem; default;
+    property Count : integer read GetCount;
  end;
 
 const
-  _Def_UvazkaSpr_Prop:TUvazkaSprPanelProp = (
-      );
-
   _UVAZKY_BLIK_PERIOD = 1500;      // perioda blikani soupravy u uvazky v ms
 
 implementation
 
-uses PanelPainter;
+uses PanelPainter, parseHelper, StrUtils;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TPUvazkaSpr.Create();
+begin
+ inherited;
+ Self.PanelProp := TUvazkaSprPanelProp.Create();
+end;
+
+destructor TPUvazkaSpr.Destroy();
+begin
+ Self.PanelProp.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TUvazkaSprPanelProp.Create();
+begin
+ inherited;
+ Self.spr := TList<TuvazkaSpr>.Create();
+end;
+
+destructor TUvazkaSprPanelProp.Destroy();
+begin
+ Self.spr.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TUvazkaSpr.Create();
+begin
+ inherited;
+ Self.strings := TStringList.Create();
+end;
+
+destructor TUvazkaSpr.Destroy();
+begin
+ Self.strings.Free();
+ inherited;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -84,13 +139,15 @@ begin
  count := ini.ReadInteger('P', 'UvS', 0);
  for i := 0 to count-1 do
   begin
+   uvs := TPUvazkaSpr.Create();
+
    uvs.Blok         := ini.ReadInteger('UvS'+IntToStr(i), 'B', -1);
    uvs.OblRizeni    := ini.ReadInteger('UvS'+IntToStr(i), 'OR', -1);
    uvs.Pos.X        := ini.ReadInteger('UvS'+IntToStr(i), 'X', 0);
    uvs.Pos.Y        := ini.ReadInteger('UvS'+IntToStr(i), 'Y', 0);
    uvs.vertical_dir := TUvazkaSprVertDir(ini.ReadInteger('UvS'+IntToStr(i), 'VD', 0));
    uvs.spr_cnt      := ini.ReadInteger('UvS'+IntToStr(i), 'C', 1);
-   uvs.PanelProp    := _Def_UvazkaSpr_Prop;
+   uvs.PanelProp    := TUvazkaSprPanelProp.Create();
    uvs.PanelProp.spr := TList<TUvazkaSpr>.Create();
 
    Self.data.Add(uvs);
@@ -148,24 +205,67 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPUvazkySpr.Reset(orindex:Integer = -1);
-var i, j:Integer;
-    uvs:TPUvazkaSpr;
+var uvs:TPUvazkaSpr;
 begin
- for i := 0 to Self.data.Count-1 do
+ for uvs in Self.data do
+   if (((orindex < 0) or (uvs.OblRizeni = orindex)) and (uvs.Blok > -2)) then
+     uvs.PanelProp.spr.Clear();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUvazkySpr.GetItem(index:Integer):TPUvazkaSpr;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUvazkySpr.GetCount():Integer;
+begin
+ Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TUvazkaSprPanelProp.Change(parsed:TStrings);
+var j:Integer;
+    sprs_data:TStrings;
+    str:string;
+    uvazkaSpr:TUvazkaSpr;
+begin
+ if (parsed.Count >= 9) then
   begin
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-    begin
-     uvs := Self.data[i];
+   Self.spr.Clear();
+   sprs_data := TStringList.Create();
 
-     for j := 0 to uvs.PanelProp.spr.Count-1 do
-       uvs.PanelProp.spr[j].strings.Free();
-     uvs.PanelProp.spr.Free();
+   try
+     ExtractStringsEx([','], [], parsed[8], sprs_data);
 
-     uvs.PanelProp     := _Def_UvazkaSpr_Prop;
-     uvs.PanelProp.spr := TList<TUvazkaSpr>.Create();
+     for str in sprs_data do
+      begin
+       uvazkaSpr := TUvazkaSpr.Create();
 
-     Self.data[i] := uvs;
-    end;
+       ExtractStringsEx(['|'], [], str, uvazkaSpr.strings);
+       if (LeftStr(str, 1) = '$') then
+        begin
+         uvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0])-1);
+         uvazkaSpr.color := clYellow;
+        end else begin
+         uvazkaSpr.color := clWhite;
+        end;
+       uvazkaSpr.time := '';
+
+       // kontrola preteceni textu
+       for j := 0 to uvazkaSpr.strings.Count-1 do
+         if (Length(uvazkaSpr.strings[j]) > 8) then
+           uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 7) + '.';
+
+       Self.spr.Add(UvazkaSpr);
+      end;
+   finally
+     sprs_data.Free();
+   end;
   end;
 end;
 

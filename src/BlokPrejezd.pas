@@ -20,6 +20,8 @@ type
  TPrjPanelProp = record
   Symbol,Pozadi:TColor;
   stav:TBlkPrjPanelStav;
+
+  procedure Change(data:TStrings);
  end;
 
  // jeden blikajici blok prejezdu
@@ -30,7 +32,7 @@ type
  end;
 
  // 1 blok prejezdu na reliefu:
- TPPrejezd=record
+ TPPrejezd = class
   Blok:Integer;
 
   StaticPositions: record
@@ -48,6 +50,12 @@ type
  end;
 
  TPPrejezdy = class
+  private
+   function GetItem(index:Integer):TPPrejezd;
+   function GetCount():Integer;
+
+  public
+
    data:TList<TPPrejezd>;
 
    constructor Create();
@@ -58,6 +66,9 @@ type
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
    function GetPrj(tech_id:Integer):Integer;
+
+   property Items[index : integer] : TPPrejezd read GetItem; default;
+   property Count : integer read GetCount;
  end;
 
 const
@@ -73,7 +84,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter, Panel;
+uses Symbols, PanelPainter, Panel, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -101,6 +112,8 @@ begin
  count := ini.ReadInteger('P', 'PRJ', 0);
  for i := 0 to count-1 do
   begin
+   prj := TPPrejezd.Create();
+
    prj.Blok        := ini.ReadInteger('PRJ'+IntToStr(i), 'B', -1);
    prj.OblRizeni   := ini.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
 
@@ -240,6 +253,20 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function TPPrejezdy.GetItem(index:Integer):TPPrejezd;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPPrejezdy.GetCount():Integer;
+begin
+ Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
 function TPPrejezdy.GetPrj(tech_id:Integer):Integer;
 var i:Integer;
 begin
@@ -248,6 +275,15 @@ begin
      Exit(i);
 
  Result := -1;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPrjPanelProp.Change(data:TStrings);
+begin
+ Symbol := StrToColor(data[4]);
+ Pozadi := StrToColor(data[5]);
+ stav   := TBlkPrjPanelStav(StrToInt(data[7]));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

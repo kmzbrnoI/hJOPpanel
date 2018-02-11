@@ -7,7 +7,7 @@ unit uLIClient;
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
-     Classes, StrUtils, RPConst, Resuscitation, Windows, HVDb, Forms;
+     Classes, StrUtils, Resuscitation, Windows, HVDb, Forms;
 
 const
   _BRIDGE_DEFAULT_PORT = 5733;                                                  // default port, na ktere bezi bridge server
@@ -82,7 +82,7 @@ var
 
 implementation
 
-uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, fMain;
+uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, fMain, parseHelper;
 
 {
  Jak funguje komunikace ze strany serveru:

@@ -13,9 +13,11 @@ type
  TRozpPanelProp = record
   Symbol,Pozadi:TColor;
   blik:boolean;
+
+  procedure Change(parsed:TStrings);
  end;
 
- TPRozp = record
+ TPRozp = class
   Blok:Integer;
   Pos:TPoint;
   OblRizeni:Integer;
@@ -59,7 +61,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter;
+uses Symbols, PanelPainter, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -86,6 +88,8 @@ begin
  count := ini.ReadInteger('P', 'R', 0);
  for i := 0 to count-1 do
   begin
+   rozp := TPRozp.Create();
+
    rozp.Blok      := ini.ReadInteger('R'+IntToStr(i), 'B', -1);
    rozp.OblRizeni := ini.ReadInteger('R'+IntToStr(i), 'OR', -1);
    rozp.Pos.X     := ini.ReadInteger('R'+IntToStr(i), 'X', 0);
@@ -153,6 +157,15 @@ end;
 function TPRozpojovace.GetCount():Integer;
 begin
  Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRozpPanelProp.Change(parsed:TStrings);
+begin
+ Symbol := StrToColor(parsed[4]);
+ Pozadi := StrToColor(parsed[5]);
+ blik   := StrToBool(parsed[6]);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -50,15 +50,6 @@ type
      procedure ParseOR();
      procedure ParseORChange();
 
-     // parsovani Change jednotlivych typu bloku:
-     procedure ParseORChangeVyh();
-     procedure ParseORChangeUsek();
-     procedure ParseORChangeSCom();
-     procedure ParseORChangePrejezd();
-     procedure ParseORChangeUvazka();
-     procedure ParseORChangeZamek();
-     procedure ParseORChangeRozp();
-
      procedure OsvListParse(oblr:string; data:string);
 
      procedure ConnetionResusced(Sender:TObject);
@@ -114,7 +105,7 @@ uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprE
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
       BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokVyhybka, BlokUsek, BlokNavestidlo,
-      BlokPrejezd, BlokRozp;
+      BlokPrejezd, BlokRozp, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -558,186 +549,15 @@ end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// zaciname Parsed[2], kde je ulozen typ bloku jako cislo
+// zmena stavu bloku
 procedure TPanelTCPClient.ParseORChange();
 begin
  try
-//  or;CHANGE;typ_blk;tech_blk_id;barva_popredi;barva_pozadi;blikani; dalsi argumenty u konkretnich typu bloku:
-//    typ_blk = cislo podle typu bloku na serveru
-//      usek : konec_jc;[souprava;barva_soupravy;sipkaLsipkaS;barva_pozadi] -  posledni 3 argumenty jsou nepovinne
-//      vyhybka : poloha (cislo odpovidajici poloze na serveru - [disabled = -5, none = -1, plus = 0, minus = 1, both = 2])
-//      navestidlo: ab (false = 0, true = 1)
-//      pjejezd: stav (otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3)
-//      uvazka: smer (-5 = disabled, 0 = bez smeru, 1 = zakladni, 2 = opacny); soupravy - cisla souprav oddelene carkou
-//         prvni souprava je vzdy ta, ktere do trati prisla prvni
-
-
-  case (StrToInt(parsed[2])) of
-   _BLK_VYH     : Self.ParseORChangeVyh();
-   _BLK_USEK    : Self.ParseORChangeUsek();
-   _BLK_SCOM    : Self.ParseORChangeSCom();
-   _BLK_PREJEZD : Self.ParseORChangePrejezd();
-   _BLK_UVAZKA  : Self.ParseORChangeUvazka();
-   _BLK_ZAMEK   : Self.ParseORChangeZamek();
-   _BLK_ROZP    : Self.ParseORChangeRozp();
-  end;//case
-
+  Relief.ORBlkChange(parsed[0], StrToInt(parsed[3]), StrToInt(parsed[2]), parsed);
  except
   Exit();   // pokud nastane nejaky problem s parsovanim, data proste zahodime
  end;
 end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TPanelTCPClient.ParseORChangeVyh();
-var VyhPanelProp:TVyhPanelProp;
-begin
-  VyhPanelProp.Symbol  := StrToColor(parsed[4]);
-  VyhPanelProp.Pozadi  := StrToColor(parsed[5]);
-  VyhPanelProp.blikani := StrToBool(parsed[6]);
-  VyhPanelProp.Poloha  := TVyhPoloha(StrToInt(parsed[7]));
-
-  Relief.ORVyhChange(parsed[0], StrToInt(parsed[3]), VyhPanelProp);
-end;
-
-procedure TPanelTCPClient.ParseORChangeUsek();
-var UsekPanelProp:TUsekPanelProp;
-    soupravy, souprava:TStrings;
-    i: Integer;
-    us:TUsekSouprava;
-begin
-  UsekPanelProp.Symbol  := StrToColor(parsed[4]);
-  UsekPanelProp.Pozadi  := StrToColor(parsed[5]);
-  UsekPanelProp.blikani := StrToBool(parsed[6]);
-  UsekPanelProp.KonecJC := TJCType(StrToInt(parsed[7]));
-  UsekPanelProp.nebarVetve := strToColor(parsed[8]);
-
-  UsekPanelProp.soupravy := TList<TUsekSouprava>.Create();
-
-  if (parsed.Count > 9) then
-   begin
-    soupravy := TStringList.Create();
-    souprava := TStringList.Create();
-
-    try
-      ExtractStringsEx([')'], ['('], parsed[9], soupravy);
-
-      for i := 0 to soupravy.Count-1 do
-       begin
-        souprava.Clear();
-        ExtractStringsEx([';'], [], soupravy[i], souprava);
-
-        us.nazev := souprava[0];
-        us.sipkaL := ((souprava[1] <> '') and (souprava[1][1] = '1'));
-        us.sipkaS := ((souprava[1] <> '') and (souprava[1][2] = '1'));
-        us.fg := strToColor(souprava[2]);
-        us.bg := strToColor(souprava[3]);
-        us.posindex := -1;
-
-        if (souprava.Count > 4) then
-          us.ramecek := strToColor(souprava[4])
-        else
-          us.ramecek := clBlack;
-
-        UsekPanelProp.soupravy.Add(us);
-       end;
-
-    finally
-      soupravy.Free();
-      souprava.Free();
-    end;
-   end;
-
-  Relief.ORUsekChange(parsed[0], StrToInt(parsed[3]), UsekPanelProp);
-end;
-
-procedure TPanelTCPClient.ParseORChangeSCom();
-var NavPanelProp:TNavPanelProp;
-begin
-  NavPanelProp.Symbol  := StrToColor(parsed[4]);
-  NavPanelProp.Pozadi  := StrToColor(parsed[5]);
-  NavPanelProp.blikani := StrToBool(parsed[6]);
-  NavPanelProp.AB      := StrToBool(parsed[7]);
-
-  Relief.ORNavChange(parsed[0], StrToInt(parsed[3]), NavPanelProp);
-end;
-
-procedure TPanelTCPClient.ParseORChangePrejezd();
-var PrjPanelProp:TPrjPanelProp;
-begin
-  PrjPanelProp.Symbol  := StrToColor(parsed[4]);
-  PrjPanelProp.Pozadi  := StrToColor(parsed[5]);
-  PrjPanelProp.stav    := TBlkPrjPanelStav(StrToInt(parsed[7]));
-
-  Relief.ORPrjChange(parsed[0], StrToInt(parsed[3]), PrjPanelProp);
-end;//procedure
-
-procedure TPanelTCPClient.ParseORChangeUvazka();
-var UvazkaPanelProp:TUvazkaPanelProp;
-    UvazkaSprPanelProp:TUvazkaSprPanelProp;
-    UvazkaSpr:TUvazkaSpr;
-    i, j:Integer;
-    data:TStrings;
-begin
-  UvazkaPanelProp.Symbol  := StrToColor(parsed[4]);
-  UvazkaPanelProp.Pozadi  := StrToColor(parsed[5]);
-  UvazkaPanelProp.blik    := StrToBool(parsed[6]);
-  UvazkaPanelProp.smer    := TUvazkaSmer(StrToInt(parsed[7]));
-
-  UvazkaSprPanelProp.spr := TList<TUvazkaSpr>.Create();
-
-  if (parsed.Count >= 9) then
-   begin
-    data := TStringList.Create();
-    ExtractStringsEx([','], [], parsed[8], data);
-
-    for i := 0 to data.Count-1 do
-     begin
-      UvazkaSpr.strings := TStringList.Create();
-      ExtractStringsEx(['|'], [], data[i], UvazkaSpr.strings);
-
-      if (LeftStr(data[i], 1) = '$') then
-       begin
-        UvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0])-1);
-        UvazkaSpr.color      := clYellow;
-       end else begin
-        UvazkaSpr.color      := clWhite;
-       end;
-      UvazkaSpr.time := '';
-
-      // kontrola preteceni textu
-      for j := 0 to UvazkaSpr.strings.Count-1 do
-        if (Length(UvazkaSpr.strings[j]) > 8) then
-          UvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 7) + '.';
-
-      UvazkaSprPanelProp.spr.Add(UvazkaSpr);
-     end;
-    data.Free;
-   end;
-
-  Relief.ORUvazkaChange(parsed[0], StrToInt(parsed[3]), UvazkaPanelProp, UvazkaSprPanelProp);
-end;
-
-procedure TPanelTCPClient.ParseORChangeZamek();
-var ZamekPanelProp:TZamekPanelProp;
-begin
-  ZamekPanelProp.Symbol  := StrToColor(parsed[4]);
-  ZamekPanelProp.Pozadi  := StrToColor(parsed[5]);
-  ZamekPanelProp.blik    := StrToBool(parsed[6]);
-
-  Relief.ORZamekChange(parsed[0], StrToInt(parsed[3]), ZamekPanelProp);
-end;
-
-procedure TPanelTCPClient.ParseORChangeRozp();
-var RozpPanelProp:TRozpPanelProp;
-begin
-  RozpPanelProp.Symbol  := StrToColor(parsed[4]);
-  RozpPanelProp.Pozadi  := StrToColor(parsed[5]);
-  RozpPanelProp.blik    := StrToBool(parsed[6]);
-
-  Relief.ORRozpChange(parsed[0], StrToInt(parsed[3]), RozpPanelProp);
-end;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // udalosti z panelu:

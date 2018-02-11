@@ -95,6 +95,8 @@ begin
  count := ini.ReadInteger('P', 'U', 0);
  for i := 0 to count-1 do
   begin
+   usek := TPUsek.Create();
+
    usek.Blok      := ini.ReadInteger('U'+IntToStr(i),'B',-1);
    usek.OblRizeni := ini.ReadInteger('U'+IntToStr(i),'OR',-1);
    usek.root      := GetPos(ini.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
@@ -199,9 +201,9 @@ begin
 
    //default settings:
    if (usek.Blok = -2) then
-     usek.PanelProp := _UA_Usek_Prop
+     usek.PanelProp.InitUA()
    else
-     usek.PanelProp := _Def_Usek_Prop;
+     usek.PanelProp.InitDefault();
 
    usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
 
@@ -256,7 +258,7 @@ begin
     begin
      usek := Self.data[i];
      usek.PanelProp.soupravy.Free();
-     usek.PanelProp := _Def_Usek_Prop;
+     usek.PanelProp.InitDefault();
      usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
      Self.data[i] := usek;
     end;

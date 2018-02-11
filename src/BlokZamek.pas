@@ -13,26 +13,35 @@ type
  TZamekPanelProp = record
   Symbol,Pozadi:TColor;
   blik:boolean;
+
+  procedure Change(parsed:TStrings);
  end;
 
- TPZamek=record
+ TPZamek = class
   Blok:Integer;
   Pos:TPoint;
   OblRizeni:Integer;
   PanelProp:TZamekPanelProp;
  end;
 
-
  TPZamky = class
+  private
+    function GetItem(index:Integer):TPZamek;
+    function GetCount():Integer;
+
+  public
    data:TList<TPZamek>;
 
-   constructor Create();
-   destructor Destroy(); override;
+    constructor Create();
+    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw; blik:boolean);
-   function GetIndex(Pos:TPoint):Integer;
-   procedure Reset(orindex:Integer = -1);
+    procedure Load(ini:TMemIniFile);
+    procedure Show(obj:TDXDraw; blik:boolean);
+    function GetIndex(Pos:TPoint):Integer;
+    procedure Reset(orindex:Integer = -1);
+
+    property Items[index : integer] : TPZamek read GetItem; default;
+    property Count : integer read GetCount;
  end;
 
 const
@@ -50,7 +59,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols;
+uses PanelPainter, Symbols, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +86,8 @@ begin
  count := ini.ReadInteger('P', 'Z',   0);
  for i := 0 to count-1 do
   begin
+   zam := TPZamek.Create();
+
    zam.Blok         := ini.ReadInteger('Z'+IntToStr(i), 'B', -1);
    zam.OblRizeni    := ini.ReadInteger('Z'+IntToStr(i), 'OR', -1);
    zam.Pos.X        := ini.ReadInteger('Z'+IntToStr(i), 'X', 0);
@@ -137,6 +148,29 @@ begin
      Self.data[i] := zam;
     end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPZamky.GetItem(index:Integer):TPZamek;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPZamky.GetCount():Integer;
+begin
+ Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TZamekPanelProp.Change(parsed:TStrings);
+begin
+ Symbol := StrToColor(parsed[4]);
+ Pozadi := StrToColor(parsed[5]);
+ blik   := StrToBool(parsed[6]);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

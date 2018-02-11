@@ -8,7 +8,7 @@ unit BlokVyhybka;
 
 interface
 
-uses Classes, Graphics, Types;
+uses Classes, Graphics, Types, SysUtils;
 
 type
  TVyhPoloha  = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
@@ -18,10 +18,12 @@ type
   blikani:boolean;
   Symbol,Pozadi:TColor;
   Poloha:TVyhPoloha;
+
+  procedure Change(parsed:TStrings);
  end;
 
  // 1 vyhybka na reliefu
- TPVyhybka=record
+ TPVyhybka = class
   Blok:Integer;
   PolohaPlus:Byte;
   Position:TPoint;
@@ -47,6 +49,20 @@ const
       Poloha: TVyhPoloha.both);
 
 implementation
+
+uses parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TVyhPanelProp.Change(parsed:TStrings);
+begin
+ Symbol  := StrToColor(parsed[4]);
+ Pozadi  := StrToColor(parsed[5]);
+ blikani := StrToBool(parsed[6]);
+ Poloha  := TVyhPoloha(StrToInt(parsed[7]));
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.
 

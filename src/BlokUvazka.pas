@@ -7,7 +7,7 @@ unit BlokUvazka;
 
 interface
 
-uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws;
+uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws, Classes;
 
 type
  TUvazkaSmer = (disabled = -1, zadny = 0, zakladni = 1, opacny = 2);
@@ -16,9 +16,11 @@ type
   Symbol,Pozadi:TColor;
   blik:boolean;
   smer:TUvazkaSmer;
+
+  procedure Change(parsed:TStrings);
  end;
 
- TPUvazka = record
+ TPUvazka = class
   Blok:Integer;
   Pos:TPoint;
   defalt_dir:Integer;
@@ -27,15 +29,23 @@ type
  end;
 
  TPUvazky = class
+  private
+    function GetItem(index:Integer):TPUvazka;
+    function GetCount():Integer;
+
+  public
    data:TList<TPUvazka>;
 
-   constructor Create();
-   destructor Destroy(); override;
+    constructor Create();
+    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw; blik:boolean);
-   function GetIndex(Pos:TPoint):Integer;
-   procedure Reset(orindex:Integer = -1);
+    procedure Load(ini:TMemIniFile);
+    procedure Show(obj:TDXDraw; blik:boolean);
+    function GetIndex(Pos:TPoint):Integer;
+    procedure Reset(orindex:Integer = -1);
+
+    property Items[index : integer] : TPUvazka read GetItem; default;
+    property Count : integer read GetCount;
  end;
 
 const
@@ -55,7 +65,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols;
+uses PanelPainter, Symbols, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -82,6 +92,8 @@ begin
  count := ini.ReadInteger('P', 'Uv', 0);
  for i := 0 to count-1 do
   begin
+   uv := TPUvazka.Create();
+
    uv.Blok        := ini.ReadInteger('Uv'+IntToStr(i), 'B', -1);
    uv.OblRizeni   := ini.ReadInteger('Uv'+IntToStr(i), 'OR', -1);
    uv.Pos.X       := ini.ReadInteger('Uv'+IntToStr(i), 'X', 0);
@@ -168,6 +180,30 @@ begin
      Self.data[i] := uv;
     end;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUvazky.GetItem(index:Integer):TPUvazka;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUvazky.GetCount():Integer;
+begin
+ Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TUvazkaPanelProp.Change(parsed:TStrings);
+begin
+ Symbol := StrToColor(parsed[4]);
+ Pozadi := StrToColor(parsed[5]);
+ blik   := StrToBool(parsed[6]);
+ smer   := TUvazkaSmer(StrToInt(parsed[7]));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

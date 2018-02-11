@@ -84,6 +84,8 @@ type
 
 implementation
 
+uses parseHelper;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor TORPanel.Create(line:string; Graphics:TPanelGraphics);
