@@ -14,7 +14,7 @@ const
  _MAX_PRJ_LEN = 64;
 
 type
- TBlkPrjPanelStav = (err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
+ TBlkPrjPanelStav = (disabled = -5, err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
 
  // data pro vykreslovani
  TPrjPanelProp = record
@@ -160,7 +160,8 @@ begin
        prj.PanelProp.Symbol, prj.PanelProp.Pozadi, obj);
 
    // vykreslit blikajici pozice podle stavu prejezdu:
-   if ((prj.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
+   if ((prj.PanelProp.stav = TBlkPrjPanelStav.disabled) or
+      (prj.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
       (prj.PanelProp.stav = TBlkPrjPanelStav.anulace) or
       (prj.PanelProp.stav = TBlkPrjPanelStav.err) or
       ((prj.PanelProp.stav = TBlkPrjPanelStav.vystraha) and (blik))) then
