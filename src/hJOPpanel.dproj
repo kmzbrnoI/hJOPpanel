@@ -148,6 +148,7 @@
 			<DCCReference Include="BlokRozp.pas"/>
 			<DCCReference Include="BlokPopisek.pas"/>
 			<DCCReference Include="BlokPomocny.pas"/>
+			<DCCReference Include="BlokTypes.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

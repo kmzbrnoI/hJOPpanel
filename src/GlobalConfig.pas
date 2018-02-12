@@ -9,6 +9,10 @@ interface
 uses IniFiles, SysUtils, RPConst, Types, Generics.Collections, Classes, PanelOR,
      Symbols;
 
+const
+  _MOUSE_PANEL = 0;
+  _MOUSE_OS    = 1;
+
 type
   TSoundsConfig = record
     sndRizikovaFce:string;

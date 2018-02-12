@@ -8,7 +8,7 @@ interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
      Symbols, RPConst, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, IBUtils,
-     BlokUsek;
+     BlokUsek, BlokTypes;
 
 const
   _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)

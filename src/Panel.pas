@@ -9,7 +9,7 @@ interface
 uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, StdCtrls,
      ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
      StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO, IBUtils,
-     Hash, PngImage, DirectX, PanelOR,
+     Hash, PngImage, DirectX, PanelOR, BlokTypes,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
      BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek,
      BlokPomocny;

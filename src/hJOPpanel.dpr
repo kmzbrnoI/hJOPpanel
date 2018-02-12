@@ -64,7 +64,8 @@ uses
   BlokVykolejka in 'BlokVykolejka.pas',
   BlokRozp in 'BlokRozp.pas',
   BlokPopisek in 'BlokPopisek.pas',
-  BlokPomocny in 'BlokPomocny.pas';
+  BlokPomocny in 'BlokPomocny.pas',
+  BlokTypes in 'BlokTypes.pas';
 
 {$R *.res}
 

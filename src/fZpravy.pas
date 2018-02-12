@@ -13,6 +13,7 @@ uses
 
 const
   _MAX_CLIENTS = 32;
+  _MAX_OR = 16;
 
 type
   TF_Messages = class(TForm)

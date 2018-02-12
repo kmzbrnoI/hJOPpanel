@@ -93,6 +93,8 @@ type
 
       procedure PanelMessage(senderid:string; recepientid:string; msg:string);
 
+      function PanelButtonToString(button:TPanelButton):string;
+
       property status:TPanelConnectionStatus read fstatus;
   end;//TPanelTCPClient
 
@@ -755,6 +757,20 @@ begin
      Self.SendLn('-;PING');
  except
 
+ end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPanelTCPClient.PanelButtonToString(button:TPanelButton):string;
+begin
+ case (button) of
+   TPanelButton.F1 : Result := 'F1';
+   TPanelButton.F2 : Result := 'F2';
+   TPanelButton.ENTER : Result := 'ENTER';
+   TPanelButton.ESCAPE : Result := 'ESCAPE';
+ else
+   Result := '';
  end;
 end;
 
