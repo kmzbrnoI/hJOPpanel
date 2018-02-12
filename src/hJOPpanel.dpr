@@ -65,7 +65,8 @@ uses
   BlokRozp in 'BlokRozp.pas',
   BlokPopisek in 'BlokPopisek.pas',
   BlokPomocny in 'BlokPomocny.pas',
-  BlokTypes in 'BlokTypes.pas';
+  BlokTypes in 'BlokTypes.pas',
+  fOdlozeniOdjezdu in 'fOdlozeniOdjezdu.pas' {F_OOdj};
 
 {$R *.res}
 
@@ -95,6 +96,7 @@ begin
   Application.CreateForm(TF_HV_Pom, F_HV_Pom);
   Application.CreateForm(TF_HVSearch, F_HVSearch);
   Application.CreateForm(TF_SprToSlot, F_SprToSlot);
+  Application.CreateForm(TF_OOdj, F_OOdj);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))
   else
