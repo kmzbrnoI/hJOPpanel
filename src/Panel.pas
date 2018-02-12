@@ -817,7 +817,7 @@ begin
  if (index <> -1) then
   begin
    if (Self.Popisky.Data[index].Blok < 0) then goto EscCheck;
-//   PanelTCPClient.PanelClick(Self.myORs[Self.Popisky.Data[index].OblRizeni].id, Button, Self.Popisky.Data[index].Blok);
+   PanelTCPClient.PanelClick(Self.myORs[Self.Popisky.Data[index].OblRizeni].id, Button, Self.Popisky.Data[index].Blok);
    goto EscCheck;
   end;
 
@@ -1441,8 +1441,8 @@ begin
      end;
 
      _BLK_SH: begin
-       if (symbols[i].blk_type = _BLK_SH) then
-//       TODO    (Sender = Self.myORs[Self.Popisky[symbols[i].symbol_index].OblRizeni].id)) then
+       if ((symbols[i].blk_type = _BLK_SH) and
+           (Sender = Self.myORs[Self.Popisky[symbols[i].symbol_index].OblRizeni].id)) then
          Self.Popisky[symbols[i].symbol_index].PanelProp.Change(parsed);
      end;
 

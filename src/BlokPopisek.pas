@@ -25,6 +25,7 @@ type
   Position:TPoint;
   Color:Integer;
   Blok:Integer;
+  OblRizeni:Integer;
   PanelProp: TPopisekPanelProp;
  end;
 
@@ -94,6 +95,7 @@ begin
    popisek.Position.Y  := ini.ReadInteger('T'+IntToStr(i),'Y',0);
    popisek.Color       := ini.ReadInteger('T'+IntToStr(i),'C',0);
    popisek.Blok        := ini.ReadInteger('T'+IntToStr(i),'B', -1);
+   popisek.OblRizeni   := ini.ReadInteger('V'+IntToStr(i),'OR',-1);
 
    popisek.PanelProp := _Def_Popisek_Prop;
 
