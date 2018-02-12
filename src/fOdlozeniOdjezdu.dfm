@@ -60,6 +60,7 @@ object F_OOdj: TF_OOdj
     Height = 17
     Caption = 'Odjet (nejd'#345#237've) v:'
     TabOrder = 0
+    OnClick = CHB_AbsoluteClick
   end
   object CHB_Relative: TCheckBox
     Left = 8
@@ -68,8 +69,9 @@ object F_OOdj: TF_OOdj
     Height = 17
     Caption = 'Vy'#269'kat nejm'#233'n'#283':'
     TabOrder = 2
+    OnClick = CHB_RelativeClick
   end
-  object ME_absolute: TMaskEdit
+  object ME_Absolute: TMaskEdit
     Left = 154
     Top = 56
     Width = 125
@@ -123,6 +125,7 @@ object F_OOdj: TF_OOdj
     Caption = 'Pou'#382#237't'
     Default = True
     TabOrder = 4
+    OnClick = B_OKClick
   end
   object B_Storno: TButton
     Left = 125
@@ -131,5 +134,6 @@ object F_OOdj: TF_OOdj
     Height = 25
     Caption = 'Storno'
     TabOrder = 5
+    OnClick = B_StornoClick
   end
 end

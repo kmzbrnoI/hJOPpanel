@@ -107,7 +107,7 @@ uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprE
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
       BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokVyhybka, BlokUsek, BlokNavestidlo,
-      BlokPrejezd, BlokRozp, parseHelper;
+      BlokPrejezd, BlokRozp, parseHelper, fOdlozeniOdjezdu;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -269,7 +269,8 @@ begin
  if (F_PotvrSekv.Showing) then F_PotvrSekv.Close();
  if (F_SprList.Showing) then F_SprList.Close();
  if (F_HVSearch.Showing) then F_HVSearch.Close();
- if (F_Auth.showing) then F_Auth.Close();
+ if (F_Auth.Showing) then F_Auth.Close();
+ if (F_OOdj.Showing) then F_OOdj.Close();
 
  SoundsPlay.DeleteAll();
  ModCas.Reset();
@@ -457,8 +458,10 @@ begin
   F_HVSearch.LokoFound(THV.Create(parsed[4]))
 
  else if ((parsed[1] = 'LOK') and (parsed[3] = 'NOT-FOUND')) then
-  F_HVSearch.LokoNotFound();
+  F_HVSearch.LokoNotFound()
 
+ else if (parsed[1] = 'PODJ') then
+  F_OOdj.OpenForm(parsed);
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
