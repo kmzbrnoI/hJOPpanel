@@ -3,6 +3,7 @@ program hJOPpanel;
 
 uses
   Forms,
+  SysUtils,
   fMain in 'fMain.pas' {F_Main},
   GlobalConfig in 'GlobalConfig.pas',
   Panel in 'Panel.pas',
@@ -72,6 +73,7 @@ uses
 
 begin
   Randomize();
+  DecimalSeparator := '.';
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
