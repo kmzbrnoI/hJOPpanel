@@ -378,6 +378,9 @@ begin
    obj.Surface.Canvas.Pen.Mode := pmCopy;
   end;
 
+ if (fg = clBlack) then
+   fg := bg;
+
  if (sipkaLeft) then
    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y-1), _Spr_Sipka_Start+1,
              fg, clNone, obj, true);
