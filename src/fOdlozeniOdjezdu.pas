@@ -42,6 +42,61 @@ uses ModelovyCas, TCPClientPanel;
 procedure TF_OOdj.B_OKClick(Sender: TObject);
 var rel, abs:string;
 begin
+ try
+  if (Self.CHB_Absolute.Checked) then
+   begin
+    if ((StrToInt(Copy(Self.ME_Absolute.Text, 1, 2)) < 0) or
+        (StrToInt(Copy(Self.ME_Absolute.Text, 1, 2)) >= 24)) then
+     begin
+      Application.MessageBox('Špatnì zadané hodiny!',
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
+
+    if ((StrToInt(Copy(Self.ME_Absolute.Text, 4, 2)) < 0) or
+        (StrToInt(Copy(Self.ME_Absolute.Text, 4, 2)) >= 60)) then
+     begin
+      Application.MessageBox('Špatnì zadané minuty!',
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
+
+    if ((StrToInt(Copy(Self.ME_Absolute.Text, 7, 2)) < 0) or
+        (StrToInt(Copy(Self.ME_Absolute.Text, 7, 2)) >= 60)) then
+     begin
+      Application.MessageBox('Špatnì zadané sekundy!',
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
+   end;
+
+  if (Self.CHB_Relative.Checked) then
+   begin
+    if ((StrToInt(Copy(Self.ME_Relative.Text, 1, 2)) < 0) or
+        (StrToInt(Copy(Self.ME_Relative.Text, 1, 2)) >= 60)) then
+     begin
+      Application.MessageBox('Špatnì zadané minuty!',
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
+
+    if ((StrToInt(Copy(Self.ME_Relative.Text, 4, 2)) < 0) or
+        (StrToInt(Copy(Self.ME_Relative.Text, 4, 2)) >= 60)) then
+     begin
+      Application.MessageBox('Špatnì zadané sekundy!',
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
+   end;
+ except
+  on E:Exception do
+   begin
+    Application.MessageBox(PChar('Neplatný formát dat!'+#13#10+E.Message),
+                           'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Exit();
+   end;
+ end;
+
  if (CHB_Absolute.Checked) then
    abs := Self.ME_Absolute.Text
  else
@@ -89,11 +144,23 @@ end;
 procedure TF_OOdj.OpenForm(parsed:TStrings);
 begin
  if (ModCas.used) then
-  begin
-   Self.L_Time.Caption := 'modelový èas';
-  end else begin
-   Self.L_Time.Caption := 'skuteèný èas';
-  end;
+   Self.L_Time.Caption := 'modelovém èasu'
+  else
+   Self.L_Time.Caption := 'skuteèném èasu';
+
+ Self.CHB_Absolute.Checked := parsed[2] <> '';
+ Self.ME_Absolute.Enabled := Self.CHB_Absolute.Checked;
+ if (Self.CHB_Absolute.Checked) then
+   Self.ME_Absolute.Text := parsed[2]
+ else
+   Self.ME_Absolute.Text := '__:__:__';
+
+ Self.CHB_Relative.Checked := parsed[3] <> '';
+ Self.ME_Relative.Enabled := Self.CHB_Relative.Checked;
+ if (Self.CHB_Relative.Checked) then
+   Self.ME_Relative.Text := parsed[3]
+ else
+   Self.ME_Relative.Text := '__:__';
 
  Self.ActiveControl := Self.CHB_Absolute;
  Self.Show();

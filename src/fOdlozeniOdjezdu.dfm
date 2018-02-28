@@ -4,7 +4,7 @@ object F_OOdj: TF_OOdj
   BorderStyle = bsToolWindow
   Caption = 'Upravit odlo'#382'en'#237' odjezdu vlaku'
   ClientHeight = 209
-  ClientWidth = 289
+  ClientWidth = 297
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -28,7 +28,7 @@ object F_OOdj: TF_OOdj
     Left = 8
     Top = 27
     Width = 273
-    Height = 13
+    Height = 18
     Alignment = taCenter
     AutoSize = False
     Caption = 'modelov'#233'm '#269'asu'
@@ -74,13 +74,14 @@ object F_OOdj: TF_OOdj
   object ME_Absolute: TMaskEdit
     Left = 154
     Top = 56
-    Width = 125
+    Width = 136
     Height = 45
     Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
+    Alignment = taCenter
     EditMask = '00:00:00;1;_'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -95,15 +96,16 @@ object F_OOdj: TF_OOdj
     Text = '  :  :  '
   end
   object ME_Relative: TMaskEdit
-    Left = 192
-    Top = 114
-    Width = 87
+    Left = 197
+    Top = 110
+    Width = 93
     Height = 45
     Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
+    Alignment = taCenter
     EditMask = '00:00;1;_'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -118,7 +120,7 @@ object F_OOdj: TF_OOdj
     Text = '  :  '
   end
   object B_OK: TButton
-    Left = 206
+    Left = 214
     Top = 176
     Width = 75
     Height = 25
@@ -128,7 +130,7 @@ object F_OOdj: TF_OOdj
     OnClick = B_OKClick
   end
   object B_Storno: TButton
-    Left = 125
+    Left = 133
     Top = 176
     Width = 75
     Height = 25
