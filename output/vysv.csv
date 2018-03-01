@@ -67,6 +67,7 @@ PŘESUŇ vlak<;Ukončit přesouvání vlaku
 JEĎ vlak;Odjet s vlakem ze zastávky
 RUČ vlak;Převzít vlak do ručního ovladače
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
+PODJ;Editovat předvídaný odjezd
 
 NOVÁ loko;Vytvořit novou lokomotivu
 EDIT loko;Editovat lokomotivu
