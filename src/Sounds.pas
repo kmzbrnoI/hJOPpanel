@@ -10,13 +10,15 @@ uses SysUtils, SoundsThread, Classes, mmsystem;
 
 // vyssi cislo zvuku ma vzdy vetsi prioritu na prehrani
 const
-  _SND_TRAT_ZADOST  = 4;
-  _SND_PRIVOLAVACKA = 5;
-  _SND_TIMEOUT      = 6;
-  _SND_PRETIZENI    = 7;
-  _SND_POTVR_SEKV   = 8;
-  _SND_ZPRAVA       = 9;
-  _SND_CHYBA        = 10;
+  _SND_TRAT_ZADOST   = 4;
+  _SND_PRIVOLAVACKA  = 5;
+  _SND_TIMEOUT       = 6;
+  _SND_PRETIZENI     = 7;
+  _SND_POTVR_SEKV    = 8;
+  _SND_ZPRAVA        = 9;
+  _SND_CHYBA         = 10;
+  _SND_STAVENI_VYZVA = 11;
+  _SND_NENI_JC       = 12;
 
   _SND_BUF_LEN     = 8;
 
@@ -150,13 +152,15 @@ end;//procedure
 function TSoundsPlay.ResolveSndFilename(code:Integer):string;
 begin
  case (code) of
-  _SND_TRAT_ZADOST  : Result := GlobConfig.data.sounds.sndTratSouhlas;
-  _SND_POTVR_SEKV   : Result := GlobConfig.data.sounds.sndRizikovaFce;
-  _SND_CHYBA        : Result := GlobConfig.data.sounds.sndChyba;
-  _SND_PRETIZENI    : Result := GlobConfig.data.sounds.sndPretizeni;
-  _SND_ZPRAVA       : Result := GlobConfig.data.sounds.sndPrichoziZprava;
-  _SND_PRIVOLAVACKA : Result := GlobConfig.data.sounds.sndPrivolavacka;
-  _SND_TIMEOUT      : Result := GlobConfig.data.sounds.sndTimeout;
+  _SND_TRAT_ZADOST   : Result := GlobConfig.data.sounds.sndTratSouhlas;
+  _SND_POTVR_SEKV    : Result := GlobConfig.data.sounds.sndRizikovaFce;
+  _SND_CHYBA         : Result := GlobConfig.data.sounds.sndChyba;
+  _SND_PRETIZENI     : Result := GlobConfig.data.sounds.sndPretizeni;
+  _SND_ZPRAVA        : Result := GlobConfig.data.sounds.sndPrichoziZprava;
+  _SND_PRIVOLAVACKA  : Result := GlobConfig.data.sounds.sndPrivolavacka;
+  _SND_TIMEOUT       : Result := GlobConfig.data.sounds.sndTimeout;
+  _SND_STAVENI_VYZVA : Result := GlobConfig.data.sounds.sndStaveniVyzva;
+  _SND_NENI_JC       : Result := GlobConfig.data.sounds.sndNeniJC;
  else
   Result := '';
  end;

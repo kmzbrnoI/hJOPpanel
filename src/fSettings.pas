@@ -113,6 +113,14 @@ type
     E_Snd_Timeout: TEdit;
     Label20: TLabel;
     Label21: TLabel;
+    TS_Sounds2: TTabSheet;
+    Label22: TLabel;
+    Label23: TLabel;
+    E_Snd_NeniJC: TEdit;
+    E_Snd_StaveniVyzva: TEdit;
+    B_Proch8: TButton;
+    B_Proch9: TButton;
+    CHB_Relative2: TCheckBox;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -196,6 +204,8 @@ begin
  GlobConfig.data.sounds.sndPrichoziZprava  := Self.E_Snd_Zprava.Text;
  GlobConfig.data.sounds.sndPrivolavacka    := Self.E_Snd_Privolavacka.Text;
  GlobConfig.data.sounds.sndTimeout         := Self.E_Snd_Timeout.Text;
+ GlobConfig.data.sounds.sndStaveniVyzva    := Self.E_Snd_StaveniVyzva.Text;
+ GlobConfig.data.sounds.sndNeniJC          := Self.E_Snd_NeniJC.Text;
 
  GlobConfig.data.guest.allow := Self.CHB_Guest_Enable.Checked;
  if (Self.CHB_Guest_Enable.Checked) then
@@ -286,14 +296,24 @@ begin
   5: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Zprava.Text));
   6: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Privolavacka.Text));
   7: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_Timeout.Text));
+  8: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_StaveniVyzva.Text));
+  9: Self.OD_Snd.InitialDir := ExtractFileDir(ExpandFileName(Self.E_Snd_NeniJC.Text));
  end;
 
  if (Self.OD_Snd.Execute(Self.Handle)) then
   begin
-   if (Self.CHB_Relative.Checked) then
-    fn := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_Snd.FileName)
-   else
-    fn := Self.OD_Snd.FileName;
+   if ((Sender as TButton).Tag < 8) then
+    begin
+     if (Self.CHB_Relative.Checked) then
+      fn := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_Snd.FileName)
+     else
+      fn := Self.OD_Snd.FileName;
+    end else begin
+     if (Self.CHB_Relative2.Checked) then
+      fn := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_Snd.FileName)
+     else
+      fn := Self.OD_Snd.FileName;
+    end;
 
    case (Sender as TButton).Tag of
     1: Self.E_Snd_Trat.Text         := fn;
@@ -302,7 +322,9 @@ begin
     4: Self.E_Snd_Pretizeni.Text    := fn;
     5: Self.E_Snd_Zprava.Text       := fn;
     6: Self.E_Snd_Privolavacka.Text := fn;
-    7: Self.E_Snd_Timeout.Text := fn;
+    7: Self.E_Snd_Timeout.Text      := fn;
+    8: Self.E_Snd_StaveniVyzva.Text := fn;
+    9: Self.E_Snd_NeniJC.Text       := fn;
    end;
   end;
 end;
@@ -541,6 +563,8 @@ begin
  Self.E_Snd_Zprava.Text       := data.sounds.sndPrichoziZprava;
  Self.E_Snd_Privolavacka.Text := data.sounds.sndPrivolavacka;
  Self.E_Snd_Timeout.Text      := data.sounds.sndTimeout;
+ Self.E_Snd_StaveniVyzva.Text := data.sounds.sndStaveniVyzva;
+ Self.E_Snd_NeniJC.Text       := data.sounds.sndNeniJC;
 
  Self.CHB_Guest_Enable.Checked := data.guest.allow;
  Self.CHB_Guest_EnableClick(Self.CHB_Guest_Enable);

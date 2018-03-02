@@ -22,6 +22,8 @@ type
     sndPrichoziZprava:string;
     sndPrivolavacka:string;
     sndTimeout:string;
+    sndStaveniVyzva:string;
+    sndNeniJC:string;
   end;
 
   TServerConfig = record
@@ -141,6 +143,8 @@ begin
  Self.data.sounds.sndPrichoziZprava := ini.ReadString('sounds', 'prichozi-zprava', '');
  Self.data.sounds.sndPrivolavacka   := ini.ReadString('sounds', 'privolavacka', '');
  Self.data.sounds.sndTimeout        := ini.ReadString('sounds', 'timeout', '');
+ Self.data.sounds.sndStaveniVyzva   := ini.ReadString('sounds', 'staveniVyzva', '');
+ Self.data.sounds.sndNeniJC         := ini.ReadString('sounds', 'neniJC', '');
 
  Self.data.symbolSet := TSymbolSetType(ini.ReadInteger('global', 'symbolset', 0));
 
@@ -217,6 +221,8 @@ begin
  ini.WriteString('sounds', 'prichozi-zprava', Self.data.sounds.sndPrichoziZprava);
  ini.WriteString('sounds', 'privolavacka', Self.data.sounds.sndPrivolavacka);
  ini.WriteString('sounds', 'timeout', Self.data.sounds.sndTimeout);
+ ini.WriteString('sounds', 'staveniVyzva', Self.data.sounds.sndStaveniVyzva);
+ ini.WriteString('sounds', 'neniJC', Self.data.sounds.sndNeniJC);
 
  ini.WriteInteger('global', 'symbolset', Integer(Self.data.symbolSet));
 
