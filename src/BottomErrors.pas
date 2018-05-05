@@ -6,7 +6,8 @@ unit BottomErrors;
 
 interface
 
-uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws;
+uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws,
+     Generics.Collections;
 
 const
   _MAX_ERR = 128;
@@ -26,10 +27,10 @@ type
 
   TErrors = class
     private
-      buf:array [0.._MAX_ERR] of TError;
-      buf_len:Integer;
-
+      errors: TList<TError>;
       Graphics:TPanelGraphics;
+
+       function GetCount():Cardinal;
 
     public
 
@@ -38,10 +39,11 @@ type
 
        procedure Show(obj:TDXDraw);
 
-       procedure writeerror(error:string;system:string;Stanice:string);
-       procedure removeerror();
+       procedure WriteError(error:string;system:string;Stanice:string);
+       procedure RemoveVisibleErrors();
+       procedure RemoveAllErrors();
 
-       property Count:Integer read buf_len;
+       property Count:Cardinal read GetCount;
   end;
 
 var
@@ -54,39 +56,40 @@ uses fMain, Sounds, PanelPainter;
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor TErrors.Create(Graphics:TPanelGraphics);
-var i:Integer;
 begin
  inherited Create();
 
- Self.buf_len := 0;
  Self.Graphics := Graphics;
-
- for i := 0 to _MAX_ERR do
-  Self.buf[i] := nil;
-
-end;//ctor
+ Self.errors := TList<TError>.Create();
+end;
 
 destructor TErrors.Destroy();
-var i:Integer;
 begin
- for i := 0 to _MAX_ERR do
-  if Assigned(Self.buf[i]) then FreeAndNil(Self.buf[i]);
+ Self.errors.Free(); // will destroy all error automatically
 
- inherited Destroy();
-end;//dtor
+ inherited;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.writeerror(error:string; system:string; Stanice:string);
+function TErrors.GetCount():Cardinal;
+begin
+ Result := Self.errors.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TErrors.WriteError(error:string; system:string; Stanice:string);
 var len:Integer;
     msg:string;
+    err:TError;
 begin
- if (Self.buf_len > _MAX_ERR) then Exit();
+ if (Self.errors.Count > _MAX_ERR) then Exit();
 
- Self.buf[Self.buf_len]         := TError.Create();
- Self.buf[Self.buf_len].err     := error;
- Self.buf[Self.buf_len].tech    := system;
- Self.buf[Self.buf_len].stanice := stanice;
+ err         := TError.Create();
+ err.err     := error;
+ err.tech    := system;
+ err.stanice := stanice;
 
  system := '! '+system+' !';
  if (Length(system) > _TECH_WIDTH) then
@@ -95,30 +98,35 @@ begin
  len := (_TECH_WIDTH - Length(system)) div 2;
  msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
  if (Length(msg) < _TECH_WIDTH) then msg := msg + ' ';
- Self.buf[Self.buf_len].techStr := msg;
+ err.techStr := msg;
 
- Self.buf_len := Self.buf_len + 1;
+ Self.errors.Add(err);
 
  Self.Graphics.DrawObject.Enabled := false;
 
  SoundsPlay.Play(_SND_CHYBA);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.removeerror();
+procedure TErrors.RemoveVisibleErrors();
 var i:Integer;
 begin
- if (Self.buf_len <= 0) then Exit();
+ for i := 0 to _ERR_SHOW_CNT-1 do
+   if (Self.errors.Count > 0) then
+     Self.errors.Delete(0);
 
- for i := 0 to Self.buf_len-2 do
-  Self.buf[i] := Self.buf[i+1];
- Self.buf[Self.buf_len-1] := nil;
- Self.buf_len := Self.buf_len - 1;
+ if (Self.errors.Count = 0) then
+   Self.Graphics.DrawObject.Enabled := true;
+end;
 
- if (Self.buf_len = 0) then
-  Self.Graphics.DrawObject.Enabled := true;
-end;//procedure
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TErrors.RemoveAllErrors();
+begin
+ Self.errors.Clear();
+ Self.Graphics.DrawObject.Enabled := true;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -126,35 +134,35 @@ procedure TErrors.Show(obj:TDXDraw);
 var i, top, left, len:Integer;
     msg:string;
 begin
- if (Self.buf_len <= 0) then Exit();
+ if (Self.errors.Count = 0) then Exit();
 
  // vypsani zdroje chyby (napr. "TECHNOLOGIE")
  if (Self.Graphics.blik) then
-  msg := Self.buf[0].techStr
+  msg := Self.errors[0].techStr
  else
   msg := StringOfChar(' ', _TECH_WIDTH);
 
  PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
 
  // vypsani poctu chyb
- msg := Format('%2d', [Self.buf_len]);
+ msg := Format('%2d', [Self.errors.Count]);
  PanelPainter.TextOutput(Point(_TECH_LEFT+_TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
 
  // vypsani samotnych chyb
- len := Min(_ERR_SHOW_CNT, Self.buf_len);
+ len := Min(_ERR_SHOW_CNT, Self.errors.Count);
  top  := Relief.PanelHeight - 1;
  left := (Relief.PanelWidth div 2) - (_ERR_WIDTH div 2) + 10;
 
  for i := 0 to len-1 do
   begin
-   msg := ' '+Self.buf[i].stanice + ' : ' + Self.buf[i].err;
+   msg := ' '+Self.errors[i].stanice + ' : ' + Self.errors[i].err;
    msg := Format('%-'+IntToStr(_ERR_WIDTH)+'s', [msg]);
 
    PanelPainter.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
 
    top := top - 1;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

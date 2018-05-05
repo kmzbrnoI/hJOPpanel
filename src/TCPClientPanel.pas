@@ -728,7 +728,7 @@ end;//procedure
 procedure TPanelTCPClient.ConnetionResusced(Sender:TObject);
 begin
  Self.Connect(GlobConfig.data.server.host, GlobConfig.data.server.port);
- while (Errors.Count > 0) do Errors.removeerror();
+ Errors.RemoveAllErrors();
  Self.recusc_destroy := true;
 end;
 

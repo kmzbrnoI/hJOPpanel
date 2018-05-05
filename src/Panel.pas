@@ -1066,7 +1066,7 @@ begin
    if (Errors.Count > 0) then
     begin
      case  (msg.wParam) of
-       VK_BACK, VK_RETURN: Errors.removeerror();
+       VK_BACK, VK_RETURN: Errors.RemoveVisibleErrors();
      end;// case msg.wParam
      Exit();
     end;
@@ -1094,7 +1094,7 @@ begin
      VK_F2 : Self.ObjectMouseClick(Self.CursorDraw.Pos, F2);
      VK_ESCAPE: Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.ESCAPE);
      VK_RETURN: Self.ObjectMouseClick(Self.CursorDraw.Pos, ENTER);
-     VK_BACK: Errors.removeerror();
+     VK_BACK: Errors.RemoveVisibleErrors();
 
      VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:begin
       GetCursorPos(mouse);
