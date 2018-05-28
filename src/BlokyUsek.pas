@@ -324,8 +324,7 @@ begin
    // (cislo soupravy muze byt kratsi nez cislo koleje)
    if ((usek.Soupravy.Count > 0) and (usek.KPopisek.Count > 0)) then
     begin
-     if (((usek.Soupravy[0].X = usek.KPopisek[0].X) and (usek.Soupravy[0].Y = usek.KPopisek[0].Y)) and
-         (usek.PanelProp.soupravy.Count > 0)) then
+     if (usek.SprPaintsOnRailNum() and (usek.PanelProp.soupravy.Count > 0)) then
       begin
        for j := 1 to usek.KPopisek.Count-1 do // na nulte pozici je cislo soupravy
          PaintCisloKoleje(usek.KPopisek[j], usek, obj, fg = clBlack);
@@ -424,7 +423,7 @@ begin
    Exit()
 
  else if (usek.PanelProp.soupravy.Count = 1) then begin
-   PaintSouprava(usek.Soupravy[usek.Soupravy.Count div 2], usek, 0, myORs, obj, blik);
+   PaintSouprava(usek.Soupravy[usek.Soupravy.Count div 2], usek, 0, myORs, obj, blik, usek.SprPaintsOnRailNum());
 
    if (usek.PanelProp.soupravy[0].posindex <> 0) then
     begin

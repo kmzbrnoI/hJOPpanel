@@ -88,6 +88,8 @@ type
 
    constructor Create();
    destructor Destroy(); override;
+
+   function SprPaintsOnRailNum():boolean;
  end;
 
 implementation
@@ -106,6 +108,14 @@ destructor TPUsek.Destroy();
 begin
  Self.PanelProp.Free();
  inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUsek.SprPaintsOnRailNum():boolean;
+begin
+ Result := (Self.Soupravy.Count = 1) and (Self.KPopisek.Count > 0) and
+           ((Self.Soupravy[0].X = Self.KPopisek[0].X) and (Self.Soupravy[0].Y = Self.KPopisek[0].Y));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
