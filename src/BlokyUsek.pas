@@ -166,7 +166,7 @@ begin
    if (myORs[usek.OblRizeni].Lichy = 1) then
      usek.Soupravy.Reverse();
 
-   // pokud nejsou pozice na soupravu, kreslime soupravu na cisle koleje
+   // pokud nejsou pozice na soupravu, kreslime soupravu na cislo koleje
    if ((usek.Soupravy.Count = 0) and (usek.KpopisekStr <> '') and (usek.KPopisek.Count <> 0)) then
      usek.Soupravy.Add(usek.KPopisek[0]);
 
@@ -320,8 +320,20 @@ begin
     end;
 
    // vykresleni cisla koleje
-   for p in usek.KPopisek do
-     PaintCisloKoleje(p, usek, obj, fg = clBlack);
+   // kdyz by mela cislo koleje prekryt souprava, nevykreslovat cislo koleje
+   // (cislo soupravy muze byt kratsi nez cislo koleje)
+   if ((usek.Soupravy.Count > 0) and (usek.KPopisek.Count > 0)) then
+    begin
+     if (((usek.Soupravy[0].X = usek.KPopisek[0].X) and (usek.Soupravy[0].Y = usek.KPopisek[0].Y)) and
+         (usek.PanelProp.soupravy.Count > 0)) then
+      begin
+       for j := 1 to usek.KPopisek.Count-1 do // na nulte pozici je cislo soupravy
+         PaintCisloKoleje(usek.KPopisek[j], usek, obj, fg = clBlack);
+      end else begin
+       for p in usek.KPopisek do
+         PaintCisloKoleje(p, usek, obj, fg = clBlack);
+      end;
+    end;
 
    // vykresleni souprav
    ShowUsekSoupravy(usek, obj, blik, myORs);
