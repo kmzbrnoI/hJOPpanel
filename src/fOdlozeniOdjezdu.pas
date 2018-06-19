@@ -134,7 +134,7 @@ procedure TF_OOdj.CHB_RelativeClick(Sender: TObject);
 begin
  Self.ME_Relative.Enabled := Self.CHB_Relative.Checked;
  if (Self.CHB_Relative.Checked) then
-   Self.ME_Relative.Text := '00:30'
+   Self.ME_Relative.Text := '00:20'
  else
    Self.ME_Relative.Text := '';
 end;
