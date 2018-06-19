@@ -13,8 +13,9 @@ const
 
   //barvy symbolu
   //zde jsou definovany jednotlive barvy
-  _Symbol_Colors: array [0..12] of TColor =
-    ($FF00FF,$A0A0A0,$0000FF,$00FF00,$FFFFFF,$FFFF00,$FF0000,$00FFFF,$000000,$808000,$008080,clPurple,clMaroon);
+  _Symbol_Colors: array [0..13] of TColor =
+    ($FF00FF,$A0A0A0,$0000FF,$00FF00,$FFFFFF,$FFFF00,$FF0000,$00FFFF,$000000,
+     $808000,$008080,clPurple,clMaroon,$707070);
 
   _Usek_Start      = 12;
   _Usek_End        = 23;
