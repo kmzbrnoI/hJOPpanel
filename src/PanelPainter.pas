@@ -83,7 +83,7 @@ begin
 
    SymbolSet.IL_Text.BkColor := bg;
    SymbolSet.IL_Text.Draw(obj.Surface.Canvas, Pos.X*SymbolSet._Symbol_Sirka+(j*SymbolSet._Symbol_Sirka),
-                          Pos.Y*SymbolSet._Symbol_Vyska,(TextIndex*_Symbol_ColorsCount)+GetColorIndex(fg));
+                          Pos.Y*SymbolSet._Symbol_Vyska,(TextIndex*Length(_Symbol_Colors))+GetColorIndex(fg));
   end;//for j
 
  if (underline) then

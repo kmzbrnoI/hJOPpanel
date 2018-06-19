@@ -12,10 +12,8 @@ const
    _Symbols_DefColor = clBlack; //barva pro nacitani souboru
 
   //barvy symbolu
-  //zde je definovan pocet barev
-  _Symbol_ColorsCount = 13;
   //zde jsou definovany jednotlive barvy
-  _Symbol_Colors: array [0..(_Symbol_ColorsCount-1)] of TColor =
+  _Symbol_Colors: array [0..12] of TColor =
     ($FF00FF,$A0A0A0,$0000FF,$00FF00,$FFFFFF,$FFFF00,$FF0000,$00FFFF,$000000,$808000,$008080,clPurple,clMaroon);
 
   _Usek_Start      = 12;
@@ -183,11 +181,11 @@ begin
  ColouredImages.PixelFormat := pf32Bit;
 
  IL.SetSize(PartWidth,PartHeight);
- ColouredImages.SetSize(PartWidth*_Symbol_ColorsCount,PartHeight);
+ ColouredImages.SetSize(PartWidth*Length(_Symbol_Colors),PartHeight);
 
  for symbol := 0 to (AllImages.Width div PartWidth)-1 do
   begin
-   for i := 0 to _Symbol_ColorsCount-1 do
+   for i := 0 to Length(_Symbol_Colors)-1 do
     begin
      ColouredImages.Canvas.CopyRect(Rect(i*PartWidth, 0, (i*PartWidth)+PartWidth,PartHeight), AllImages.Canvas, Rect(symbol*PartWidth, 0, (symbol*PartWidth)+PartWidth,PartHeight));
      Self.ReplaceColor(ColouredImages, _Symbols_DefColor, _Symbol_Colors[i], Rect(i*PartWidth, 0, (i*PartWidth)+PartWidth, PartHeight));
@@ -287,7 +285,7 @@ function GetColorIndex(Color:TColor):integer;
 var i:Integer;
 begin
  Result := 0;
- for i := 0 to _Symbol_ColorsCount-1 do
+ for i := 0 to Length(_Symbol_Colors)-1 do
   begin
    if (_Symbol_Colors[i] = Color) then
     begin
@@ -301,7 +299,7 @@ end;//function
 
 function GetSymbolIndex(SymbolID:Integer; Color:TColor):integer;
 begin
- Result := (SymbolID * _Symbol_ColorsCount) + GetColorIndex(Color);
+ Result := (SymbolID * Length(_Symbol_Colors)) + GetColorIndex(Color);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
