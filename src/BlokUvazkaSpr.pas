@@ -22,7 +22,7 @@ type
  end;
 
  TUvazkaSprPanelProp = class
-  spr:TList<TUvazkaSpr>;
+  spr:TObjectList<TUvazkaSpr>;
 
   constructor Create();
   destructor Destroy(); override;
@@ -90,7 +90,7 @@ end;
 constructor TUvazkaSprPanelProp.Create();
 begin
  inherited;
- Self.spr := TList<TuvazkaSpr>.Create();
+ Self.spr := TObjectList<TuvazkaSpr>.Create();
 end;
 
 destructor TUvazkaSprPanelProp.Destroy();
@@ -148,7 +148,7 @@ begin
    uvs.vertical_dir := TUvazkaSprVertDir(ini.ReadInteger('UvS'+IntToStr(i), 'VD', 0));
    uvs.spr_cnt      := ini.ReadInteger('UvS'+IntToStr(i), 'C', 1);
    uvs.PanelProp    := TUvazkaSprPanelProp.Create();
-   uvs.PanelProp.spr := TList<TUvazkaSpr>.Create();
+   uvs.PanelProp.spr := TObjectList<TUvazkaSpr>.Create();
 
    Self.data.Add(uvs);
   end;//for i
@@ -157,8 +157,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPUvazkySpr.Show(obj:TDXDraw);
-var j:Integer;
-    top,incr:Integer;
+var top,incr:Integer;
     change:boolean;
     UvazkaSpr:TUvazkaSpr;
     uvs:TPUvazkaSpr;
@@ -180,11 +179,9 @@ begin
     else
      incr := 1;
 
-   for j := 0 to uvs.PanelProp.spr.Count-1 do
+   for UvazkaSpr in uvs.PanelProp.spr do
     begin
-     UvazkaSpr := uvs.PanelProp.spr[j];
-
-     if (not Assigned(uvs.PanelProp.spr[j].strings)) then continue;
+     if (not Assigned(UvazkaSpr.strings)) then continue;
 
      // kontrola preblikavani
      if ((change) and (UvazkaSpr.strings.Count > 1)) then
@@ -193,11 +190,14 @@ begin
        UvazkaSpr.show_index := 0;
 
      PanelPainter.TextOutput(Point(uvs.Pos.X, top),
-          uvs.PanelProp.spr[j].strings[UvazkaSpr.show_index],
-          uvs.PanelProp.spr[j].color, clBlack, obj, UvazkaSpr.show_index = 0);
-     top := top + incr;
+          UvazkaSpr.strings[UvazkaSpr.show_index],
+          UvazkaSpr.color, clBlack, obj, UvazkaSpr.show_index = 0);
 
-     uvs.PanelProp.spr[j] := UvazkaSpr;
+     if (UvazkaSpr.show_index = 0) then
+       PanelPainter.TextOutput(Point(uvs.Pos.X+7, top),
+            UvazkaSpr.time, clAqua, clBlack, obj);
+
+     top := top + incr;
     end;//for j
   end;//for i
 end;
@@ -254,12 +254,13 @@ begin
         end else begin
          uvazkaSpr.color := clWhite;
         end;
-       uvazkaSpr.time := '';
+       uvazkaSpr.time := uvazkaSpr.strings[1];
+       uvazkaSpr.strings.Delete(1);
 
        // kontrola preteceni textu
        for j := 0 to uvazkaSpr.strings.Count-1 do
-         if (Length(uvazkaSpr.strings[j]) > 8) then
-           uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 7) + '.';
+         if (Length(uvazkaSpr.strings[j]) > 9) then
+           uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 8) + '.';
 
        Self.spr.Add(UvazkaSpr);
       end;
