@@ -74,6 +74,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure A_ReAuthExecute(Sender: TObject);
     procedure SB_uLIdaemonClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
 
    mute_time:TDateTime;
@@ -210,6 +211,11 @@ begin
 // JclAppInstances.SendString(ClassName, _IPC_MYID, 'testi', Handle);
 // Self.SB_Main.Panels[2].Text := IntToStr(JclAppInstances.MessageID);
 // SendMessage(Handle, WM_COPYDATA, Integer(Handle), 4855);
+end;
+
+procedure TF_Main.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+ Self.T_Main.Enabled := false;
 end;
 
 procedure TF_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);

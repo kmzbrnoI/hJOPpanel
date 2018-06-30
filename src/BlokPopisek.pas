@@ -36,7 +36,7 @@ type
     function GetCount():Integer;
 
   public
-   data:TList<TPPopisek>;
+   data:TObjectList<TPPopisek>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -68,7 +68,7 @@ uses PanelPainter, Symbols, parseHelper;
 constructor TPPopisky.Create();
 begin
  inherited;
- Self.data := TList<TPPopisek>.Create();
+ Self.data := TObjectList<TPPopisek>.Create();
 end;
 
 destructor TPPopisky.Destroy();

@@ -56,7 +56,7 @@ type
 
   public
 
-   data:TList<TPPrejezd>;
+   data:TObjectList<TPPrejezd>;
 
    constructor Create();
    destructor Destroy(); override;
@@ -91,7 +91,7 @@ uses Symbols, PanelPainter, Panel, parseHelper;
 constructor TPPrejezdy.Create();
 begin
  inherited;
- Self.data := TList<TPPrejezd>.Create();
+ Self.data := TObjectList<TPPrejezd>.Create();
 end;
 
 destructor TPPrejezdy.Destroy();
@@ -239,17 +239,10 @@ end;
 
 procedure TPPrejezdy.Reset(orindex:Integer = -1);
 var i:Integer;
-    prj:TPPrejezd;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-    begin
-     prj := Self.data[i];
-     prj.PanelProp := _Def_Prj_Prop;
-     Self.data[i] := prj;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Prj_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

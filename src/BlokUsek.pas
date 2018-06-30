@@ -107,6 +107,11 @@ end;
 destructor TPUsek.Destroy();
 begin
  Self.PanelProp.Free();
+ Self.Symbols.Free();
+ Self.JCClick.Free();
+ Self.KPopisek.Free();
+ Self.Soupravy.Free();
+ Self.Vetve.Free();
  inherited;
 end;
 

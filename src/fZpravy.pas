@@ -46,7 +46,7 @@ type
 
     // databaze otevrenych zalozek se stanicemi
     // pozor> poradi nemusi odpovidat poradi na okynku !! (diky umozneni prehazovani)
-    clients: TList<TF_Message>;
+    clients: TObjectList<TF_Message>;
 
     FCloseButtonMouseDownTab: TCloseTabSheet;
     FCloseButtonShowPushed: Boolean;
@@ -91,7 +91,7 @@ uses Sounds, ORList;
 constructor TF_Messages.Create(name:string; id:string);
 begin
  inherited Create(nil);
- Self.clients := TList<TF_Message>.Create();
+ Self.clients := TObjectList<TF_Message>.Create();
  Self.fname := name;
  Self.fid   := id;
 end;//ctor
@@ -217,9 +217,6 @@ end;
 procedure TF_Messages.RemoveClients();
 var i:Integer;
 begin
- for i := 0 to Self.clients.Count-1 do
-  if (Assigned(Self.clients[i])) then
-   Self.clients[i].Free();
  Self.clients.Clear();
 
  for i := Self.PC_Clients.PageCount-1 downto 0 do
@@ -502,7 +499,6 @@ begin
  for i := 0 to Self.clients.Count-1 do
   if (Self.clients[i].Parent = Sender) then
    begin
-    Self.clients[i].Free();
     Self.clients.Delete(i);
     Sender.Free();
     Self.PC_Clients.Repaint();

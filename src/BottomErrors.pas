@@ -27,7 +27,7 @@ type
 
   TErrors = class
     private
-      errors: TList<TError>;
+      errors: TObjectList<TError>;
       Graphics:TPanelGraphics;
 
        function GetCount():Cardinal;
@@ -60,7 +60,7 @@ begin
  inherited Create();
 
  Self.Graphics := Graphics;
- Self.errors := TList<TError>.Create();
+ Self.errors := TObjectList<TError>.Create();
 end;
 
 destructor TErrors.Destroy();

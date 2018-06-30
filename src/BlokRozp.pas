@@ -31,7 +31,7 @@ type
     function GetCount():Integer;
 
   public
-   data:TList<TPRozp>;
+   data:TObjectList<TPRozp>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -68,7 +68,7 @@ uses Symbols, PanelPainter, parseHelper;
 constructor TPRozpojovace.Create();
 begin
  inherited;
- Self.data := TList<TPRozp>.Create();
+ Self.data := TObjectList<TPRozp>.Create();
 end;
 
 destructor TPRozpojovace.Destroy();
@@ -131,18 +131,11 @@ end;
 
 procedure TPRozpojovace.Reset(orindex:Integer = -1);
 var i:Integer;
-    rozp:TPRozp;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
        (Self.data[i].Blok > -2)) then
-    begin
-     rozp := Self.data[i];
-     rozp.PanelProp := _Def_Rozp_Prop;
-     Self.data[i] := rozp;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Rozp_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

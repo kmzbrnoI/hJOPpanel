@@ -34,7 +34,7 @@ type
     function GetCount():Integer;
 
   public
-   data:TList<TPUvazka>;
+   data:TObjectList<TPUvazka>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -72,7 +72,7 @@ uses PanelPainter, Symbols, parseHelper;
 constructor TPUvazky.Create();
 begin
  inherited;
- Self.data := TList<TPUvazka>.Create();
+ Self.data := TObjectList<TPUvazka>.Create();
 end;
 
 destructor TPUvazky.Destroy();
@@ -169,17 +169,10 @@ end;
 
 procedure TPUvazky.Reset(orindex:Integer = -1);
 var i:Integer;
-    uv:TPUvazka;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-    begin
-     uv := Self.data[i];
-     uv.PanelProp := _Def_Uvazka_Prop;
-     Self.data[i] := uv;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Uvazka_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

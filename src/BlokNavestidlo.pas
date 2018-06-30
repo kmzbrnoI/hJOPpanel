@@ -38,7 +38,7 @@ type
    function GetCount():Integer;
 
   public
-   data:TList<TPNavestidlo>;
+   data:TObjectList<TPNavestidlo>;
    startJC:TList<TStartJC>;
 
    constructor Create();
@@ -78,7 +78,7 @@ uses PanelPainter, Symbols, parseHelper;
 constructor TPNavestidla.Create();
 begin
  inherited;
- Self.data := TList<TPNavestidlo>.Create();
+ Self.data := TObjectList<TPNavestidlo>.Create();
  Self.startJC := TList<TStartJC>.Create();
 end;
 
@@ -160,18 +160,11 @@ end;
 
 procedure TPNavestidla.Reset(orindex:Integer = -1);
 var i:Integer;
-    nav:TPNavestidlo;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
        (Self.data[i].Blok > -2)) then
-    begin
-     nav := Self.data[i];
-     nav.PanelProp := _Def_Nav_Prop;
-     Self.data[i] := nav;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Nav_Prop;
 
  Self.startJC.Clear();
 end;

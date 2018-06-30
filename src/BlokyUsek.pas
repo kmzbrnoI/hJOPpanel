@@ -37,7 +37,7 @@ type
 
   public
 
-   data:TList<TPUsek>;
+   data:TObjectList<TPUsek>;
 
    constructor Create();
    destructor Destroy(); override;
@@ -62,22 +62,11 @@ uses ParseHelper, PanelPainter;
 constructor TPUseky.Create();
 begin
  inherited;
- Self.data := TList<TPUsek>.Create();
+ Self.data := TObjectList<TPUsek>.Create();
 end;
 
 destructor TPUseky.Destroy();
-var i:Integer;
 begin
- for i := 0 to Self.data.Count-1 do
-  begin
-   Self.data[i].PanelProp.soupravy.Free();
-   Self.data[i].Symbols.Free();
-   Self.data[i].JCClick.Free();
-   Self.data[i].KPopisek.Free();
-   Self.data[i].Soupravy.Free();
-   Self.data[i].Vetve.Free();
-  end;
-
  Self.data.Free();
  inherited;
 end;
@@ -260,7 +249,6 @@ begin
      usek.PanelProp.soupravy.Free();
      usek.PanelProp.InitDefault();
      usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
-     Self.data[i] := usek;
     end;
   end;
 end;
@@ -552,8 +540,6 @@ begin
      vyh.PanelProp.Pozadi := bg;
     end;
 
-   vyhybky[vetev.node1.vyh] := vyh;
-
    case (vyh.PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
        ShowUsekVetve(usek, vetev.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
@@ -585,8 +571,6 @@ begin
      vyh.PanelProp.Pozadi := bg;
     end;
 
-   vyhybky[vetev.node2.vyh] := vyh;
-
    case (vyh.PanelProp.Poloha) of
     TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:begin
        ShowUsekVetve(usek, vetev.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
@@ -617,7 +601,6 @@ var polLeft, polRight: TVyhPoloha;
     leftHidden, rightHidden: boolean;
     leftCross, rightCross: boolean;
     fg: TColor;
-    vyh:TPVyhybka;
 begin
  if (usek.Vetve.Count < 3) then Exit();
  if (usek.Vetve[0].node1.vyh < 0) then Exit();
@@ -642,13 +625,8 @@ begin
  if (usek.Vetve.Count > 3) then ShowUsekVetve(usek, 3, not leftHidden, showed, myORs, blik, obj, startJC, vyhybky);
  if (usek.Vetve.Count > 4) then ShowUsekVetve(usek, 4, not rightHidden, showed, myORs, blik, obj, startJC, vyhybky);
 
- vyh := vyhybky[usek.Vetve[0].node1.vyh];
- vyh.visible := not leftHidden;
- vyhybky[usek.Vetve[0].node1.vyh] := vyh;
-
- vyh := vyhybky[usek.Vetve[1].node1.vyh];
- vyh.visible := not rightHidden;
- vyhybky[usek.Vetve[1].node1.vyh] := vyh;
+ vyhybky[usek.Vetve[0].node1.vyh].visible := not leftHidden;
+ vyhybky[usek.Vetve[1].node1.vyh].visible := not rightHidden;
 
  // 3) vykreslime stredovy kriz
  if (((usek.PanelProp.blikani) or ((usek.PanelProp.soupravy.Count > 0) and

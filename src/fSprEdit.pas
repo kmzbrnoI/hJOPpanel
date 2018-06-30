@@ -64,7 +64,7 @@ type
     procedure SB_st_changeClick(Sender: TObject);
   private
     OblR:string;
-    HVs:TList<TF_SprHVEdit>;
+    HVs:TObjectList<TF_SprHVEdit>;
     HVDb:THVDb;
     sprHVs:THVDb;
 
@@ -178,8 +178,6 @@ begin
  Self.CB_Cilova.ItemIndex := 0;
 
  // smazat vsechny zalozky
- for i := 0 to Self.HVs.Count-1 do
-   Self.HVs[i].Free();
  Self.HVs.Clear();
 
  for i := Self.PC_HVs.PageCount-1 downto 0 do
@@ -247,8 +245,6 @@ begin
  end;
 
  // smazat vsechny zalozky
- for i := 0 to Self.HVs.Count-1 do
-   Self.HVs[i].Free();
  Self.HVs.Clear();
 
  for i := Self.PC_HVs.PageCount-1 downto 0 do
@@ -379,7 +375,7 @@ end;
 
 procedure TF_SoupravaEdit.FormCreate(Sender: TObject);
 begin
- Self.HVs := TList<TF_SprHVEdit>.Create();
+ Self.HVs := TObjectList<TF_SprHVEdit>.Create();
 
  Self.PC_HVs.TabWidth := 60;
  Self.PC_HVs.OwnerDraw := True;
@@ -391,8 +387,6 @@ procedure TF_SoupravaEdit.FormDestroy(Sender: TObject);
 var i:Integer;
 begin
  // smazeme zalozky pro hnaci vozidla
- for i := 0 to Self.HVs.Count-1 do
-   Self.HVs[i].Free();
  Self.HVs.Free();
 
  for i := Self.PC_HVs.PageCount-1 downto 0 do
@@ -586,7 +580,6 @@ begin
   begin
    if (Self.PC_HVs.Pages[i] = Sender) then
     begin
-     Self.HVs[i].Free();
      Self.HVs.Delete(i);
 
      // preradime HV ze soupravy do obecneho seznamu HV

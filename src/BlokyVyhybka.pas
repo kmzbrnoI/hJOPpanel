@@ -16,7 +16,7 @@ type
    function GetCount():Integer;
 
   public
-   data:TList<TPVyhybka>;
+   data:TObjectList<TPVyhybka>;
 
    constructor Create();
    destructor Destroy(); override;
@@ -39,7 +39,7 @@ uses PanelPainter, Symbols;
 constructor TPVyhybky.Create();
 begin
  inherited;
- Self.data := TList<TPVyhybka>.Create();
+ Self.data := TObjectList<TPVyhybka>.Create();
 end;
 
 destructor TPVyhybky.Destroy();
@@ -156,17 +156,10 @@ end;
 
 procedure TPVyhybky.Reset(orindex:Integer = -1);
 var i:Integer;
-    vyh:TPVyhybka;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-    begin
-     vyh := Self.data[i];
-     vyh.PanelProp := _Def_Vyh_Prop;
-     Self.data[i] := vyh;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Vyh_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

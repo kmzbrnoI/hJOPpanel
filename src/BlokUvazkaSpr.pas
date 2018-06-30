@@ -51,7 +51,7 @@ type
     function GetCount():Integer;
 
   public
-   data:TList<TPUvazkaSpr>;
+   data:TObjectList<TPUvazkaSpr>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -118,7 +118,7 @@ end;
 constructor TPUvazkySpr.Create();
 begin
  inherited;
- Self.data := TList<TPUvazkaSpr>.Create();
+ Self.data := TObjectList<TPUvazkaSpr>.Create();
  Self.change_time := Now;
 end;
 

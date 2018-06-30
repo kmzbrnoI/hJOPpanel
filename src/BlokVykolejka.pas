@@ -11,7 +11,7 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
      BlokVyhybka, BlokUsek;
 
 type
- TPVykolejka = record
+ TPVykolejka = class
   Blok:Integer;
   Pos:TPoint;
   OblRizeni:Integer;
@@ -28,7 +28,7 @@ type
    function GetCount():Integer;
 
   public
-   data:TList<TPVykolejka>;
+   data:TObjectList<TPVykolejka>;
 
    constructor Create();
    destructor Destroy(); override;
@@ -51,7 +51,7 @@ uses PanelPainter, Symbols;
 constructor TPVykolejky.Create();
 begin
  inherited;
- Self.data := TList<TPVykolejka>.Create();
+ Self.data := TObjectList<TPVykolejka>.Create();
 end;
 
 destructor TPVykolejky.Destroy();
@@ -71,6 +71,8 @@ begin
  count := ini.ReadInteger('P', 'Vyk', 0);
  for i := 0 to count-1 do
   begin
+   vykol := TPVykolejka.Create();
+
    vykol.Blok      := ini.ReadInteger('Vyk'+IntToStr(i), 'B', -1);
    vykol.OblRizeni := ini.ReadInteger('Vyk'+IntToStr(i), 'OR', -1);
    vykol.Pos.X     := ini.ReadInteger('Vyk'+IntToStr(i), 'X', 0);
@@ -147,18 +149,11 @@ end;
 
 procedure TPVykolejky.Reset(orindex:Integer = -1);
 var i:Integer;
-    vykol:TPVykolejka;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
        (Self.data[i].Blok > -2)) then
-    begin
-     vykol := Self.data[i];
-     vykol.PanelProp := _Def_Vyh_Prop;
-     Self.data[i] := vykol;
-   end;
-  end;
+     Self.data[i].PanelProp := _Def_Vyh_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

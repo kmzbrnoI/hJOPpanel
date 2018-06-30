@@ -30,7 +30,7 @@ type
     function GetCount():Integer;
 
   public
-   data:TList<TPZamek>;
+   data:TObjectList<TPZamek>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -66,7 +66,7 @@ uses PanelPainter, Symbols, parseHelper;
 constructor TPZamky.Create();
 begin
  inherited;
- Self.data := TList<TPZamek>.Create();
+ Self.data := TObjectList<TPZamek>.Create();
 end;
 
 destructor TPZamky.Destroy();
@@ -137,17 +137,10 @@ end;
 
 procedure TPZamky.Reset(orindex:Integer = -1);
 var i:Integer;
-    zam:TPZamek;
 begin
  for i := 0 to Self.data.Count-1 do
-  begin
    if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-    begin
-     zam := Self.data[i];
-     zam.PanelProp := _Def_Zamek_Prop;
-     Self.data[i] := zam;
-    end;
-  end;
+     Self.data[i].PanelProp := _Def_Zamek_Prop;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
