@@ -660,7 +660,7 @@ begin
  try
    if (not Self.tcpClient.Connected) then Exit;
  except
-
+   Exit();
  end;
 
  try
