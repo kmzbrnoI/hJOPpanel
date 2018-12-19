@@ -47,6 +47,9 @@ type
 
   OblRizeni:Integer;
   PanelProp:TPrjPanelProp;
+
+  procedure Reset();
+  procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
  end;
 
  TPPrejezdy = class
@@ -85,6 +88,79 @@ const
 implementation
 
 uses Symbols, PanelPainter, Panel, parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPPrejezd.Reset();
+begin
+ if (Self.Blok > -2) then
+   Self.PanelProp := _Def_Prj_Prop
+ else
+   Self.PanelProp := _UA_Prj_Prop;
+end;
+
+procedure TPPrejezd.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
+var j:Integer;
+    usek:Integer;
+    sym:TReliefSym;
+begin
+ // vykreslit staticke pozice:
+ for j := 0 to Self.StaticPositions.Count-1 do
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Self.StaticPositions.data[j], _Prj_Start,
+     Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+
+ // vykreslit blikajici pozice podle stavu prejezdu:
+ if ((Self.PanelProp.stav = TBlkPrjPanelStav.disabled) or
+    (Self.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
+    (Self.PanelProp.stav = TBlkPrjPanelStav.anulace) or
+    (Self.PanelProp.stav = TBlkPrjPanelStav.err) or
+    ((Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) and (blik))) then
+  begin
+   // nestaticke pozice proste vykreslime:
+   for j := 0 to Self.BlikPositions.Count-1 do
+    begin
+     // musime smazat pripadne useky navic:
+
+     if (Self.BlikPositions.data[j].PanelUsek > -1) then
+      begin
+       // porovname, pokud tam uz nahodou neni
+       usek := Self.BlikPositions.data[j].PanelUsek;
+       if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X = Self.BlikPositions.data[j].Pos.X)
+       and (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y = Self.BlikPositions.data[j].Pos.Y) then
+        begin
+         // pokud je, odebereme
+         Useky[usek].Symbols.Count := Useky[usek].Symbols.Count - 1;
+        end;
+      end;
+
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.BlikPositions.data[j].Pos,
+       _Prj_Start, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+    end;
+  end else begin
+   // na nestatickych pozicich vykreslime usek
+   // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
+
+   if (Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) then Exit();
+
+   for j := 0 to Self.BlikPositions.Count-1 do
+    begin
+     if (Self.BlikPositions.data[j].PanelUsek > -1) then
+      begin
+       // porovname, pokud tam uz nahodou neni
+       usek := Self.BlikPositions.data[j].PanelUsek;
+       if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X <> Self.BlikPositions.data[j].Pos.X)
+          or (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y <> Self.BlikPositions.data[j].Pos.Y) then
+        begin
+         // pokud neni, pridame:
+         sym.Position := Self.BlikPositions.data[j].Pos;
+         sym.SymbolID := 12;
+         Useky[usek].Symbols.Add(sym);
+        end;
+      end;
+
+    end;// for j
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -147,71 +223,10 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPPrejezdy.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
-var j:Integer;
-    usek:Integer;
-    sym:TReliefSym;
-    prj:TPPrejezd;
+var prj:TPPrejezd;
 begin
  for prj in Self.data do
-  begin
-   // vykreslit staticke pozice:
-   for j := 0 to prj.StaticPositions.Count-1 do
-     PanelPainter.Draw(SymbolSet.IL_Symbols, prj.StaticPositions.data[j], _Prj_Start,
-       prj.PanelProp.Symbol, prj.PanelProp.Pozadi, obj);
-
-   // vykreslit blikajici pozice podle stavu prejezdu:
-   if ((prj.PanelProp.stav = TBlkPrjPanelStav.disabled) or
-      (prj.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
-      (prj.PanelProp.stav = TBlkPrjPanelStav.anulace) or
-      (prj.PanelProp.stav = TBlkPrjPanelStav.err) or
-      ((prj.PanelProp.stav = TBlkPrjPanelStav.vystraha) and (blik))) then
-    begin
-       // nestaticke pozice proste vykreslime:
-       for j := 0 to prj.BlikPositions.Count-1 do
-        begin
-         // musime smazat pripadne useky navic:
-
-         if (prj.BlikPositions.data[j].PanelUsek > -1) then
-          begin
-           // porovname, pokud tam uz nahodou neni
-           usek := prj.BlikPositions.data[j].PanelUsek;
-           if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X = prj.BlikPositions.data[j].Pos.X)
-           and (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y = prj.BlikPositions.data[j].Pos.Y) then
-            begin
-             // pokud je, odebereme
-             Useky[usek].Symbols.Count := Useky[usek].Symbols.Count - 1;
-            end;
-          end;
-
-         PanelPainter.Draw(SymbolSet.IL_Symbols, prj.BlikPositions.data[j].Pos,
-           _Prj_Start, prj.PanelProp.Symbol, prj.PanelProp.Pozadi, obj);
-        end;
-    end else begin
-
-       // na nestatickych pozicich vykreslime usek
-       // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
-
-       if (prj.PanelProp.stav = TBlkPrjPanelStav.vystraha) then continue;
-
-       for j := 0 to prj.BlikPositions.Count-1 do
-        begin
-         if (prj.BlikPositions.data[j].PanelUsek > -1) then
-          begin
-           // porovname, pokud tam uz nahodou neni
-           usek := prj.BlikPositions.data[j].PanelUsek;
-           if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X <> prj.BlikPositions.data[j].Pos.X)
-           or (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y <> prj.BlikPositions.data[j].Pos.Y) then
-            begin
-             // pokud neni, pridame:
-             sym.Position := prj.BlikPositions.data[j].Pos;
-             sym.SymbolID := 12;
-             Useky[usek].Symbols.Add(sym);
-            end;
-          end;
-
-        end;// for j
-    end;
-  end;//for i
+   prj.Show(obj, blik, useky);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -241,15 +256,8 @@ procedure TPPrejezdy.Reset(orindex:Integer = -1);
 var prj:TPPrejezd;
 begin
  for prj in Self.data do
-  begin
    if ((orindex < 0) or (prj.OblRizeni = orindex)) then
-    begin
-     if (prj.Blok > -2) then
-       prj.PanelProp := _Def_Prj_Prop
-     else
-       prj.PanelProp := _UA_Prj_Prop;
-    end;
-  end;
+     prj.Reset();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

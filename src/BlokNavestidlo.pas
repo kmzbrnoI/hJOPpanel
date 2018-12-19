@@ -25,6 +25,9 @@ type
 
   OblRizeni:Integer;
   PanelProp:TNavPanelProp;
+
+  procedure Reset();
+  procedure Show(obj:TDXDraw; blik:boolean);
  end;
 
  TStartJC=record
@@ -72,6 +75,34 @@ const
 implementation
 
 uses PanelPainter, Symbols, parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPNavestidlo.Reset();
+begin
+ if (Self.Blok > -2) then
+   Self.PanelProp := _Def_Nav_Prop
+ else
+   Self.PanelProp := _UA_Nav_Prop;
+end;
+
+procedure TPNavestidlo.Show(obj:TDXDraw; blik:boolean);
+var fg:TColor;
+begin
+ if ((Self.PanelProp.blikani) and (blik)) then
+   fg := clBlack
+ else
+   fg := Self.PanelProp.Symbol;
+
+ if (Self.PanelProp.AB) then
+  begin
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _SCom_Start+Self.SymbolID+2,
+             fg, Self.PanelProp.Pozadi, obj);
+  end else begin
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _SCom_Start+Self.SymbolID,
+             fg, Self.PanelProp.Pozadi, obj);
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -124,24 +155,9 @@ end;
 
 procedure TPNavestidla.Show(obj:TDXDraw; blik:boolean);
 var nav:TPNavestidlo;
-    fg:TColor;
 begin
  for nav in Self.data do
-  begin
-   if ((nav.PanelProp.blikani) and (blik)) then
-     fg := clBlack
-   else
-     fg := nav.PanelProp.Symbol;
-
-   if (nav.PanelProp.AB) then
-    begin
-     PanelPainter.Draw(SymbolSet.IL_Symbols, nav.Position, _SCom_Start+nav.SymbolID+2,
-               fg, nav.PanelProp.Pozadi, obj);
-    end else begin
-     PanelPainter.Draw(SymbolSet.IL_Symbols, nav.Position, _SCom_Start+nav.SymbolID,
-               fg, nav.PanelProp.Pozadi, obj);
-    end;
-  end;//for i
+   nav.Show(obj, blik);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,15 +178,8 @@ procedure TPNavestidla.Reset(orindex:Integer = -1);
 var nav:TPNavestidlo;
 begin
  for nav in Self.data do
-  begin
    if ((orindex < 0) or (nav.OblRizeni = orindex)) then
-    begin
-     if (nav.Blok > -2) then
-       nav.PanelProp := _Def_Nav_Prop
-     else
-       nav.PanelProp := _UA_Nav_Prop;
-    end;
-  end;
+     nav.Reset();
 
  Self.startJC.Clear();
 end;

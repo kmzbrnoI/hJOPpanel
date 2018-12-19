@@ -22,6 +22,9 @@ type
   Pos:TPoint;
   OblRizeni:Integer;
   PanelProp:TRozpPanelProp;
+
+  procedure Show(obj:TDXDraw);
+  procedure Reset();
  end;
 
 
@@ -62,6 +65,22 @@ const
 implementation
 
 uses Symbols, PanelPainter, parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPRozp.Show(obj:TDXDraw);
+begin
+ PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _Rozp_Start+1, Self.PanelProp.Symbol,
+    clBlack, obj, true);
+end;
+
+procedure TPRozp.Reset();
+begin
+ if (Self.Blok > -2) then
+   Self.PanelProp := _Def_Rozp_Prop
+ else
+   Self.PanelProp := _UA_Rozp_Prop;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -111,8 +130,7 @@ procedure TPRozpojovace.Show(obj:TDXDraw);
 var rozp:TPRozp;
 begin
  for rozp in Self.data do
-   PanelPainter.Draw(SymbolSet.IL_Symbols, rozp.Pos, _Rozp_Start+1, rozp.PanelProp.Symbol,
-      clBlack, obj, true);
+   rozp.Show(obj);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,15 +151,8 @@ procedure TPRozpojovace.Reset(orindex:Integer = -1);
 var rozp: TPRozp;
 begin
  for rozp in Self.data do
-  begin
    if ((orindex < 0) or (rozp.OblRizeni = orindex)) then
-    begin
-     if (rozp.Blok > -2) then
-       rozp.PanelProp := _Def_Rozp_Prop
-     else
-       rozp.PanelProp := _UA_Rozp_Prop;
-    end;
-  end;
+     rozp.Reset();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

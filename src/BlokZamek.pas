@@ -22,6 +22,8 @@ type
   Pos:TPoint;
   OblRizeni:Integer;
   PanelProp:TZamekPanelProp;
+
+  procedure Reset();
  end;
 
  TPZamky = class
@@ -60,6 +62,16 @@ const
 implementation
 
 uses PanelPainter, Symbols, parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPZamek.Reset();
+begin
+ if (Self.Blok > -2) then
+   Self.PanelProp := _Def_Zamek_Prop
+ else
+   Self.PanelProp := _UA_Zamek_Prop;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,15 +151,8 @@ procedure TPZamky.Reset(orindex:Integer = -1);
 var zamek: TPZamek;
 begin
  for zamek in Self.data do
-  begin
    if ((orindex < 0) or (zamek.OblRizeni = orindex)) then
-    begin
-     if (zamek.Blok > -2) then
-       zamek.PanelProp := _Def_Zamek_Prop
-     else
-       zamek.PanelProp := _UA_Zamek_Prop;
-    end;
-  end;
+     zamek.Reset();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

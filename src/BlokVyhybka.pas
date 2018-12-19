@@ -8,7 +8,7 @@ unit BlokVyhybka;
 
 interface
 
-uses Classes, Graphics, Types, SysUtils;
+uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlokUsek;
 
 type
  TVyhPoloha  = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
@@ -33,6 +33,9 @@ type
   OblRizeni:Integer;
   PanelProp:TVyhPanelProp;
   visible:boolean;      // na zaklade viditelnosti ve vetvich je rekonstruovana viditelnost vyhybky
+
+  procedure Reset();
+  procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
  end;//Navestidlo
 
 const
@@ -50,7 +53,7 @@ const
 
 implementation
 
-uses parseHelper;
+uses parseHelper, PanelPainter, Symbols;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -60,6 +63,70 @@ begin
  Pozadi  := StrToColor(parsed[5]);
  blikani := StrToBool(parsed[6]);
  Poloha  := TVyhPoloha(StrToInt(parsed[7]));
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPVyhybka.Reset();
+begin
+ if (Self.Blok > -2) then
+   Self.PanelProp := _Def_Vyh_Prop
+ else
+   Self.PanelProp := _UA_Vyh_Prop;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPVyhybka.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
+var fg:Integer;
+    bkcol:TColor;
+begin
+ if ((Self.PanelProp.blikani) and (blik) and (Self.visible)) then
+   fg := clBlack
+ else begin
+   if ((Self.visible) or (Self.PanelProp.Symbol = clAqua)) then
+    fg := Self.PanelProp.Symbol
+   else
+    fg := useky[Self.obj].PanelProp.nebarVetve;
+ end;
+
+ if (Self.PanelProp.Pozadi = clBlack) then
+   bkcol := useky[Self.obj].PanelProp.Pozadi
+ else
+   bkcol := Self.PanelProp.Pozadi;
+
+ if (Self.Blok = -2) then
+  begin
+   // blok zamerne neprirazen
+   PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position,
+             Self.SymbolID, fg, bkcol, obj);
+  end else begin
+   case (Self.PanelProp.Poloha) of
+    TVyhPoloha.disabled:begin
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position,
+               Self.SymbolID, useky[Self.obj].PanelProp.Pozadi, clFuchsia, obj);
+    end;
+    TVyhPoloha.none:begin
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID,
+               bkcol, fg, obj);
+    end;
+    TVyhPoloha.plus:begin
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position,
+               (Self.SymbolID)+4+(4*Self.PolohaPlus),
+               fg, bkcol, obj);
+    end;
+    TVyhPoloha.minus:begin
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position,
+               (Self.SymbolID)+8-(4*Self.PolohaPlus),
+               fg, bkcol, obj);
+    end;
+    TVyhPoloha.both:begin
+     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID,
+               bkcol, clBlue, obj);
+    end;
+   end;//case
+  end;//else blok zamerne neprirazn
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

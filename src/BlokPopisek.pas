@@ -27,6 +27,9 @@ type
   Blok:Integer;
   OblRizeni:Integer;
   PanelProp: TPopisekPanelProp;
+
+  procedure Reset();
+  procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
  end;
 
 
@@ -62,6 +65,39 @@ const
 implementation
 
 uses PanelPainter, Symbols, parseHelper;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPPopisek.Reset();
+begin
+ Self.PanelProp.Reset();
+end;
+
+procedure TPPopisek.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+begin
+ if (Self.Blok > -1) then
+  begin
+   // popisek ma referenci na souctovou hlasku
+
+   obj.Surface.Canvas.Brush.Color := Self.PanelProp.left;
+   obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
+   obj.Surface.Canvas.Rectangle((Self.Position.X-1)*SymbolSet._Symbol_Sirka,
+     Self.Position.Y*SymbolSet._Symbol_Vyska, (Self.Position.X)*SymbolSet._Symbol_Sirka,
+     (Self.Position.Y+1)*SymbolSet._Symbol_Vyska);
+
+   obj.Surface.Canvas.Brush.Color := Self.PanelProp.right;
+   obj.Surface.Canvas.Pen.Color   := obj.Surface.Canvas.Brush.Color;
+   obj.Surface.Canvas.Rectangle((Self.Position.X+1)*SymbolSet._Symbol_Sirka,
+     Self.Position.Y*SymbolSet._Symbol_Vyska, (Self.Position.X+2)*SymbolSet._Symbol_Sirka,
+     (Self.Position.Y+1)*SymbolSet._Symbol_Vyska);
+
+   PanelPainter.TextOutput(Self.Position, Self.Text,
+      Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+  end else begin
+   PanelPainter.TextOutput(Self.Position, Self.Text,
+      _Symbol_Colors[Self.Color], clBlack, obj);
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -109,11 +145,8 @@ procedure TPPopisky.Reset(orindex:Integer = -1);
 var popisek:TPPopisek;
 begin
  for popisek in Self.data do
-  begin
-   if (((orindex < 0) {or (Self.data[i].OblRizeni = orindex)}) and
-       (popisek.Blok > -2)) then
-     popisek.PanelProp.Reset();
-  end;
+   if ((orindex < 0) or (popisek.OblRizeni = orindex)) then
+     popisek.Reset();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,30 +169,7 @@ procedure TPPopisky.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
 var popisek:TPPopisek;
 begin
  for popisek in Self.data do
-  begin
-   if (popisek.Blok > -1) then
-    begin
-     // popisek ma referenci na souctovou hlasku
-
-     obj.Surface.Canvas.Brush.Color := popisek.PanelProp.left;
-     obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
-     obj.Surface.Canvas.Rectangle((popisek.Position.X-1)*SymbolSet._Symbol_Sirka,
-       popisek.Position.Y*SymbolSet._Symbol_Vyska, (popisek.Position.X)*SymbolSet._Symbol_Sirka,
-       (popisek.Position.Y+1)*SymbolSet._Symbol_Vyska);
-
-     obj.Surface.Canvas.Brush.Color := popisek.PanelProp.right;
-     obj.Surface.Canvas.Pen.Color   := obj.Surface.Canvas.Brush.Color;
-     obj.Surface.Canvas.Rectangle((popisek.Position.X+1)*SymbolSet._Symbol_Sirka,
-       popisek.Position.Y*SymbolSet._Symbol_Vyska, (popisek.Position.X+2)*SymbolSet._Symbol_Sirka,
-       (popisek.Position.Y+1)*SymbolSet._Symbol_Vyska);
-
-     PanelPainter.TextOutput(popisek.Position, popisek.Text,
-        popisek.PanelProp.Symbol, popisek.PanelProp.Pozadi, obj);
-    end else begin
-     PanelPainter.TextOutput(popisek.Position, popisek.Text,
-        _Symbol_Colors[popisek.Color], clBlack, obj);
-    end;
-  end;//for i
+   popisek.Show(obj, prejezdy);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

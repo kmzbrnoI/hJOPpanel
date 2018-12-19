@@ -85,59 +85,10 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPVyhybky.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
-var fg:Integer;
-    bkcol:TColor;
-    vyh:TPVyhybka;
+var vyh:TPVyhybka;
 begin
- //vyhybky
  for vyh in Self.data do
-  begin
-   if ((vyh.PanelProp.blikani) and (blik) and (vyh.visible)) then
-     fg := clBlack
-   else begin
-     if ((vyh.visible) or (vyh.PanelProp.Symbol = clAqua)) then
-      fg := vyh.PanelProp.Symbol
-     else
-      fg := useky[vyh.obj].PanelProp.nebarVetve;
-   end;
-
-   if (vyh.PanelProp.Pozadi = clBlack) then
-     bkcol := useky[vyh.obj].PanelProp.Pozadi
-   else
-     bkcol := vyh.PanelProp.Pozadi;
-
-   if (vyh.Blok = -2) then
-    begin
-     // blok zamerne neprirazen
-     PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-               vyh.SymbolID, fg, bkcol, obj);
-    end else begin
-     case (vyh.PanelProp.Poloha) of
-      TVyhPoloha.disabled:begin
-       PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 vyh.SymbolID, useky[vyh.obj].PanelProp.Pozadi, clFuchsia, obj);
-      end;
-      TVyhPoloha.none:begin
-       PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
-                 bkcol, fg, obj);
-      end;
-      TVyhPoloha.plus:begin
-       PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+4+(4*vyh.PolohaPlus),
-                 fg, bkcol, obj);
-      end;
-      TVyhPoloha.minus:begin
-       PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+8-(4*vyh.PolohaPlus),
-                 fg, bkcol, obj);
-      end;
-      TVyhPoloha.both:begin
-       PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position, vyh.SymbolID,
-                 bkcol, clBlue, obj);
-      end;
-     end;//case
-    end;//else blok zamerne neprirazn
-  end;//for i
+   vyh.Show(obj, blik, useky);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,15 +109,8 @@ procedure TPVyhybky.Reset(orindex:Integer = -1);
 var vyh:TPVyhybka;
 begin
  for vyh in Self.data do
-  begin
    if (((orindex < 0) or (vyh.OblRizeni = orindex))) then
-    begin
-     if (vyh.Blok > -2) then
-       vyh.PanelProp := _Def_Vyh_Prop
-     else
-       vyh.PanelProp := _UA_Vyh_Prop;
-    end;
-  end;
+     vyh.Reset();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
