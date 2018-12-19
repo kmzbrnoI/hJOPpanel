@@ -159,12 +159,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPNavestidla.Reset(orindex:Integer = -1);
-var i:Integer;
+var nav:TPNavestidlo;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
-       (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Nav_Prop;
+ for nav in Self.data do
+  begin
+   if ((orindex < 0) or (nav.OblRizeni = orindex)) then
+    begin
+     if (nav.Blok > -2) then
+       nav.PanelProp := _Def_Nav_Prop
+     else
+       nav.PanelProp := _UA_Nav_Prop;
+    end;
+  end;
 
  Self.startJC.Clear();
 end;

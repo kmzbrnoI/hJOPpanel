@@ -130,12 +130,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPRozpojovace.Reset(orindex:Integer = -1);
-var i:Integer;
+var rozp: TPRozp;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
-       (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Rozp_Prop;
+ for rozp in Self.data do
+  begin
+   if ((orindex < 0) or (rozp.OblRizeni = orindex)) then
+    begin
+     if (rozp.Blok > -2) then
+       rozp.PanelProp := _Def_Rozp_Prop
+     else
+       rozp.PanelProp := _UA_Rozp_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

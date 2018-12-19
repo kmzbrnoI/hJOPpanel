@@ -238,11 +238,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPPrejezdy.Reset(orindex:Integer = -1);
-var i:Integer;
+var prj:TPPrejezd;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Prj_Prop;
+ for prj in Self.data do
+  begin
+   if ((orindex < 0) or (prj.OblRizeni = orindex)) then
+    begin
+     if (prj.Blok > -2) then
+       prj.PanelProp := _Def_Prj_Prop
+     else
+       prj.PanelProp := _UA_Prj_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

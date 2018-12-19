@@ -123,12 +123,12 @@ begin
       end;
       TVyhPoloha.plus:begin
        PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+4+(4*(vyh.PolohaPlus xor 0)),
+                 (vyh.SymbolID)+4+(4*vyh.PolohaPlus),
                  fg, bkcol, obj);
       end;
       TVyhPoloha.minus:begin
        PanelPainter.Draw(SymbolSet.IL_Symbols, vyh.Position,
-                 (vyh.SymbolID)+8-(4*(vyh.PolohaPlus xor 0)),
+                 (vyh.SymbolID)+8-(4*vyh.PolohaPlus),
                  fg, bkcol, obj);
       end;
       TVyhPoloha.both:begin
@@ -155,11 +155,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPVyhybky.Reset(orindex:Integer = -1);
-var i:Integer;
+var vyh:TPVyhybka;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Vyh_Prop;
+ for vyh in Self.data do
+  begin
+   if (((orindex < 0) or (vyh.OblRizeni = orindex))) then
+    begin
+     if (vyh.Blok > -2) then
+       vyh.PanelProp := _Def_Vyh_Prop
+     else
+       vyh.PanelProp := _UA_Vyh_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

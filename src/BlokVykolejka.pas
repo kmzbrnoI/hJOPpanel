@@ -148,12 +148,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPVykolejky.Reset(orindex:Integer = -1);
-var i:Integer;
+var vyk:TPVykolejka;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and
-       (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Vyh_Prop;
+ for vyk in Self.data do
+  begin
+   if ((orindex < 0) or (vyk.OblRizeni = orindex)) then
+    begin
+     if (vyk.Blok > -2) then
+       vyk.PanelProp := _Def_Vyh_Prop
+     else
+       vyk.PanelProp := _UA_Vyh_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

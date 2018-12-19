@@ -136,11 +136,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPZamky.Reset(orindex:Integer = -1);
-var i:Integer;
+var zamek: TPZamek;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Zamek_Prop;
+ for zamek in Self.data do
+  begin
+   if ((orindex < 0) or (zamek.OblRizeni = orindex)) then
+    begin
+     if (zamek.Blok > -2) then
+       zamek.PanelProp := _Def_Zamek_Prop
+     else
+       zamek.PanelProp := _UA_Zamek_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

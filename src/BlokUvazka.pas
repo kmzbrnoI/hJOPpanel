@@ -168,11 +168,18 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPUvazky.Reset(orindex:Integer = -1);
-var i:Integer;
+var uvazka: TPUvazka;
 begin
- for i := 0 to Self.data.Count-1 do
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
-     Self.data[i].PanelProp := _Def_Uvazka_Prop;
+ for uvazka in Self.data do
+  begin
+   if ((orindex < 0) or (uvazka.OblRizeni = orindex)) then
+    begin
+     if (uvazka.Blok > -2) then
+       uvazka.PanelProp := _Def_Uvazka_Prop
+     else
+       uvazka.PanelProp := _UA_Uvazka_Prop;
+    end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

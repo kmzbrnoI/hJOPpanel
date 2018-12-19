@@ -238,17 +238,17 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPUseky.Reset(orindex:Integer = -1);
-var i:Integer;
-    usek:TPUsek;
+var usek:TPUsek;
 begin
- for i := 0 to Self.data.Count-1 do
+ for usek in Self.data do
   begin
-   if (((orindex < 0) or (Self.data[i].OblRizeni = orindex)) and (Self.data[i].Blok > -2)) then
+   if ((orindex < 0) or (usek.OblRizeni = orindex)) then
     begin
-     usek := Self.data[i];
-     usek.PanelProp.soupravy.Free();
-     usek.PanelProp.InitDefault();
-     usek.PanelProp.soupravy := TList<TUsekSouprava>.Create();
+     usek.PanelProp.soupravy.Clear();
+     if (usek.Blok > -2) then
+       usek.PanelProp.InitDefault()
+     else
+       usek.PanelProp.InitUA();
     end;
   end;
 end;
