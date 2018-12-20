@@ -316,6 +316,13 @@ begin
    Exit();
   end;
 
+ if ((Self.CHB_report.Checked) and (Self.CB_Typ.Text = '')) then
+  begin
+   Application.MessageBox('Pro stanièní hlášení musí být vyplnìn typ soupravy!',
+                          'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
+
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' +
             Self.M_Poznamka.Text + '};';
 
@@ -617,7 +624,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.OnTabClose(Sender:TObject);
-var i:Integer;
+var i, j:Integer;
     HV:THV;
 begin
  for i := 0 to Self.PC_HVs.PageCount-1 do
@@ -629,9 +636,11 @@ begin
      // preradime HV ze soupravy do obecneho seznamu HV
      if (i < Self.sprHVs.count) then
       begin
-       HV := Self.sprHVs.HVs[i];
-       HV.Souprava := '-';
-       Self.HVDb.Add(HV);
+       for j := 0 to HVDb.count-1 do
+         if (HVDb.HVs[j].Adresa = Self.sprHVs.HVs[i].Adresa) then
+           HVDb.HVs[j].Souprava := '-';
+
+       Self.sprHVs.HVs[i].Free();
        Self.sprHVs.Delete(i);
       end;
 
