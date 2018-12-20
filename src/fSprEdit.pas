@@ -14,6 +14,10 @@ uses
 const
   _MAX_HV_CNT = 4;
 
+  _HLASENI_SPRTYP_FORBIDDEN: array [0..5] of string = (
+    'Pn', 'Mn', 'Vn', 'Lv', 'Vle', 'Slu'
+  );
+
 type
 
   TF_SoupravaEdit = class(TForm)
@@ -42,6 +46,7 @@ type
     Label6: TLabel;
     CB_Cilova: TComboBox;
     SB_st_change: TSpeedButton;
+    CHB_report: TCheckBox;
     procedure E_SprDelkaKeyPress(Sender: TObject; var Key: Char);
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
@@ -62,6 +67,7 @@ type
     procedure PageControlCloseButtonMouseUp(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SB_st_changeClick(Sender: TObject);
+    procedure CB_TypChange(Sender: TObject);
   private
     OblR:string;
     HVs:TObjectList<TF_SprHVEdit>;
@@ -173,6 +179,8 @@ begin
  Self.SE_Delka.Value  := 0;
  Self.CB_Typ.Text     := '';
  Self.M_Poznamka.Text := '';
+ Self.CHB_report.Enabled := true;
+ Self.CHB_report.Checked := false;
 
  Self.FillORs(sender, '');
  Self.CB_Cilova.ItemIndex := 0;
@@ -237,6 +245,12 @@ begin
      Self.CB_Vychozi.ItemIndex := 0;
      Self.CB_Cilova.ItemIndex := 0;
    end;
+
+   Self.CHB_report.Enabled := (parsed.Count > 11);
+   if (parsed.Count > 11) then
+     Self.CHB_report.Checked := (parsed[11] = '1')
+   else
+     Self.CHB_report.Checked := false;
 
    Self.sprHVs.ParseHVs(parsed[8]);
  except
@@ -347,6 +361,11 @@ begin
    sprstr := sprstr + ORDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
  sprstr := sprstr + ';';
 
+ if (Self.CHB_report.Checked) then
+  sprstr := sprstr + '1;'
+ else
+  sprstr := sprstr + '0;';
+
  PanelTCPClient.PanelSprChange(Self.OblR, sprstr);
 
  Screen.Cursor := crHourGlass;
@@ -359,6 +378,24 @@ procedure TF_SoupravaEdit.B_StornoClick(Sender: TObject);
 begin
  Relief.Escape();
  Self.Close();
+end;
+
+procedure TF_SoupravaEdit.CB_TypChange(Sender: TObject);
+var s:string;
+begin
+ if (not Self.CHB_report.Enabled) then
+   Exit();
+
+ for s in _HLASENI_SPRTYP_FORBIDDEN do
+  begin
+   if (Self.CB_Typ.Text = s) then
+    begin
+     CHB_report.Checked := false;
+     Exit();
+    end;
+  end;
+
+ CHB_report.Checked := true;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

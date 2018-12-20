@@ -73,13 +73,13 @@ object F_SoupravaEdit: TF_SoupravaEdit
   object Label2: TLabel
     Left = 113
     Top = 55
-    Width = 83
+    Width = 54
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'D'#233'lka vlaku (cm):'
+    Caption = 'D'#233'lka (cm):'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -89,14 +89,14 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object Label3: TLabel
     Left = 224
-    Top = 7
-    Width = 50
+    Top = 5
+    Width = 67
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Typ vlaku:'
+    Caption = 'Typ soupravy:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -174,7 +174,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     OnKeyPress = E_SprDelkaKeyPress
   end
   object B_Save: TButton
-    Left = 6
+    Left = 313
     Top = 531
     Width = 89
     Height = 25
@@ -184,11 +184,11 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 10
+    TabOrder = 11
     OnClick = B_SaveClick
   end
   object B_Storno: TButton
-    Left = 113
+    Left = 216
     Top = 531
     Width = 89
     Height = 25
@@ -197,12 +197,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Storno'
-    TabOrder = 11
+    TabOrder = 12
     OnClick = B_StornoClick
   end
   object B_Help: TButton
-    Left = 327
-    Top = 21
+    Left = 326
+    Top = 22
     Width = 75
     Height = 21
     Margins.Left = 2
@@ -225,7 +225,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object GB_Sipky: TGroupBox
     Left = 224
-    Top = 47
+    Top = 49
     Width = 177
     Height = 47
     Caption = ' Ozna'#269'en'#237' sm'#283'ru '
@@ -239,7 +239,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       TabOrder = 0
     end
     object CHB_Sipka_S: TCheckBox
-      Left = 107
+      Left = 99
       Top = 18
       Width = 33
       Height = 17
@@ -294,7 +294,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     ParentDoubleBuffered = False
-    TabOrder = 12
+    TabOrder = 13
     OnClick = BB_HV_AddClick
   end
   object SE_Delka: TSpinEdit
@@ -309,11 +309,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object CB_Typ: TComboBox
     Left = 224
-    Top = 20
-    Width = 87
+    Top = 22
+    Width = 96
     Height = 21
     ItemHeight = 13
     TabOrder = 1
+    OnChange = CB_TypChange
     Items.Strings = (
       ''
       'Sc'
@@ -351,7 +352,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 175
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 6
   end
   object CB_Cilova: TComboBox
@@ -360,8 +361,16 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 177
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 7
+  end
+  object CHB_report: TCheckBox
+    Left = 8
+    Top = 533
+    Width = 108
+    Height = 17
+    Caption = 'Stani'#269'n'#237' hl'#225#353'en'#237
+    TabOrder = 10
   end
   object T_Timeout: TTimer
     Enabled = False
