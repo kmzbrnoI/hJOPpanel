@@ -309,6 +309,13 @@ begin
         Exit();
        end;
 
+ if ((Self.CHB_report.Checked) and ((Self.CB_Vychozi.ItemIndex < 1) or (Self.CB_Cilova.ItemIndex < 1))) then
+  begin
+   Application.MessageBox('Pro stanièní hlášení musí být vyplnìna výchozí a cílová stanice!',
+                          'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
+
  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' +
             Self.M_Poznamka.Text + '};';
 
