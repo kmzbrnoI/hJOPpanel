@@ -12,11 +12,6 @@ uses
   Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation, ShellApi, RPConst;
 
 const
-  _open_file_errors: array [1..3] of string =
-    ('Soubor panelu neexistuje',
-     'Verze souboru panelu není podporována',
-     'Soubor panelu se nepodařilo otevřít');
-
   _MUTE_MIN = 3;    // ztisit zvuky je mozne maximalne na 3 minuty, pak se znovu zapnou
   _ULIAUTH_TIMEOUT_SEC = 5;
 
