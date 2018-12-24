@@ -15,7 +15,6 @@ type
     Label6: TLabel;
     E_Adresa: TEdit;
     B_OK: TButton;
-    procedure E_AdresaKeyPress(Sender: TObject; var Key: Char);
     procedure FormShow(Sender: TObject);
     procedure B_OKClick(Sender: TObject);
   private
@@ -45,15 +44,6 @@ begin
 
  PanelTCPClient.SendLn('-;LOK;'+Self.E_Adresa.Text+';ASK');
  Self.Close();
-end;
-
-procedure TF_HVSearch.E_AdresaKeyPress(Sender: TObject; var Key: Char);
-begin
-  case Key of
-   '0'..'9',#9,#8:;
-   else
-    Key := #0;
-  end;//else case
 end;
 
 procedure TF_HVSearch.FormShow(Sender: TObject);

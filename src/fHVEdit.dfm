@@ -31,7 +31,7 @@ object F_HVEdit: TF_HVEdit
     Width = 641
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 0
     OnChange = CB_HVChange
   end
@@ -66,9 +66,9 @@ object F_HVEdit: TF_HVEdit
     object Label6: TLabel
       Left = 15
       Top = 108
-      Width = 38
+      Width = 61
       Height = 13
-      Caption = 'Adresa:'
+      Caption = 'DCC adresa:'
     end
     object Label7: TLabel
       Left = 262
@@ -310,9 +310,9 @@ object F_HVEdit: TF_HVEdit
       Width = 121
       Height = 21
       MaxLength = 4
+      NumbersOnly = True
       TabOrder = 3
       Text = 'E_Adresa'
-      OnKeyPress = E_AdresaKeyPress
     end
     object RG_Trida: TRadioGroup
       Left = 239

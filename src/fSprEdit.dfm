@@ -170,8 +170,8 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Right = 2
     Margins.Bottom = 2
     MaxLength = 6
+    NumbersOnly = True
     TabOrder = 0
-    OnKeyPress = E_SprDelkaKeyPress
   end
   object B_Save: TButton
     Left = 313
@@ -352,7 +352,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 175
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 6
   end
   object CB_Cilova: TComboBox
@@ -361,7 +361,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 177
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 7
   end
   object CHB_report: TCheckBox

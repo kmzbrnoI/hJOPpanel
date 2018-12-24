@@ -45,7 +45,6 @@ type
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
-    procedure E_AdresaKeyPress(Sender: TObject; var Key: Char);
     procedure M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
     procedure SB_Take_RemoveClick(Sender: TObject);
     procedure SB_Rel_RemoveClick(Sender: TObject);
@@ -315,15 +314,6 @@ begin
   end;
 
 end;//procedure
-
-procedure TF_HVEdit.E_AdresaKeyPress(Sender: TObject; var Key: Char);
-begin
-  case Key of
-   '0'..'9',#9,#8:;
-   else
-    Key := #0;
-  end;//else case
-end;
 
 procedure TF_HVEdit.FormCreate(Sender: TObject);
 begin

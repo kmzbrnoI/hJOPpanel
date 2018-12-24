@@ -47,7 +47,6 @@ type
     CB_Cilova: TComboBox;
     SB_st_change: TSpeedButton;
     CHB_report: TCheckBox;
-    procedure E_SprDelkaKeyPress(Sender: TObject; var Key: Char);
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure B_SaveClick(Sender: TObject);
@@ -114,17 +113,6 @@ begin
       Exit();
      end;
 end;
-
-procedure TF_SoupravaEdit.E_SprDelkaKeyPress(Sender: TObject;
-  var Key: Char);
- begin
-  case Key of
-   '0'..'9',#9,#8:begin
-                  end else begin
-                   Key := #0;
-                  end;
-   end;//case
- end;//procedure
 
 procedure TF_SoupravaEdit.BB_HV_AddClick(Sender: TObject);
 var ts:TCloseTabSheet;

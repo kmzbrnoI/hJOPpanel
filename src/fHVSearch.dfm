@@ -29,9 +29,9 @@ object F_HVSearch: TF_HVSearch
     Width = 121
     Height = 21
     MaxLength = 4
+    NumbersOnly = True
     TabOrder = 0
     Text = 'E_Adresa'
-    OnKeyPress = E_AdresaKeyPress
   end
   object B_OK: TButton
     Left = 158
