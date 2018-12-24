@@ -292,7 +292,7 @@ begin
 
  GlobConfig.LoadFile(config_fn);
 
- Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' - hJOPpanel - v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
+ Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' – hJOPpanel – v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
 
  F_splash.AddStav('Vytvářím plátno...');
 
