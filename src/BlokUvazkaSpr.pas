@@ -15,6 +15,7 @@ type
   strings:TStrings;
   show_index:Integer;
   time:string;
+  time_color:TColor;
   color:TColor;
 
   constructor Create();
@@ -195,7 +196,7 @@ begin
 
      if (UvazkaSpr.show_index = 0) then
        PanelPainter.TextOutput(Point(uvs.Pos.X+7, top),
-            UvazkaSpr.time, clAqua, clBlack, obj);
+            UvazkaSpr.time, UvazkaSpr.time_color, clBlack, obj);
 
      top := top + incr;
     end;//for j
@@ -234,40 +235,48 @@ var j:Integer;
     str:string;
     uvazkaSpr:TUvazkaSpr;
 begin
- if (parsed.Count >= 9) then
-  begin
-   Self.spr.Clear();
-   sprs_data := TStringList.Create();
+ if (parsed.Count < 9) then Exit();
 
-   try
-     ExtractStringsEx([','], [], parsed[8], sprs_data);
+ Self.spr.Clear();
+ sprs_data := TStringList.Create();
 
-     for str in sprs_data do
+ try
+   ExtractStringsEx([','], [], parsed[8], sprs_data);
+
+   for str in sprs_data do
+    begin
+     uvazkaSpr := TUvazkaSpr.Create();
+
+     ExtractStringsEx(['|'], [], str, uvazkaSpr.strings);
+     if (LeftStr(str, 1) = '$') then
       begin
-       uvazkaSpr := TUvazkaSpr.Create();
-
-       ExtractStringsEx(['|'], [], str, uvazkaSpr.strings);
-       if (LeftStr(str, 1) = '$') then
-        begin
-         uvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0])-1);
-         uvazkaSpr.color := clYellow;
-        end else begin
-         uvazkaSpr.color := clWhite;
-        end;
-       uvazkaSpr.time := uvazkaSpr.strings[1];
-       uvazkaSpr.strings.Delete(1);
-
-       // kontrola preteceni textu
-       for j := 0 to uvazkaSpr.strings.Count-1 do
-         if (Length(uvazkaSpr.strings[j]) > 9) then
-           uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 8) + '.';
-
-       Self.spr.Add(UvazkaSpr);
+       uvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0])-1);
+       uvazkaSpr.color := clYellow;
+      end else begin
+       uvazkaSpr.color := clWhite;
       end;
-   finally
-     sprs_data.Free();
-   end;
-  end;
+
+     if (LeftStr(uvazkaSpr.strings[1], 1) = '$') then
+      begin
+       uvazkaSpr.time := RightStr(uvazkaSpr.strings[1], Length(uvazkaSpr.strings[1])-1);
+       uvazkaSpr.time_color := clYellow;
+      end else begin
+       uvazkaSpr.time := uvazkaSpr.strings[1];
+       uvazkaSpr.time_color := clAqua;
+      end;
+
+     uvazkaSpr.strings.Delete(1);
+
+     // kontrola preteceni textu
+     for j := 0 to uvazkaSpr.strings.Count-1 do
+       if (Length(uvazkaSpr.strings[j]) > 9) then
+         uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 8) + '.';
+
+     Self.spr.Add(UvazkaSpr);
+    end;
+ finally
+   sprs_data.Free();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -625,7 +625,6 @@ end;
 
 procedure TF_SoupravaEdit.OnTabClose(Sender:TObject);
 var i, j:Integer;
-    HV:THV;
 begin
  for i := 0 to Self.PC_HVs.PageCount-1 do
   begin
