@@ -13,15 +13,16 @@ uses
 
 type
   TFinishedEvent = procedure (Sender:TObject) of object;
+  PBytes = ^TBytes;
 
   TSndThread = class(TThread)
   private
 
-   ffilename:string;
-   priority:string;
+   fdata:PBytes;
+   priority:PBytes;
    changed:boolean;
 
-   procedure SetFN(new:string);
+   procedure SetData(new:PBytes);
 
   protected
    FinishedEvent: TFinishedEvent;
@@ -30,8 +31,8 @@ type
 
   public
 
-   property filename:string read ffilename write SetFN;
-   procedure PriorityPlay(fn:string);
+   property data:PBytes read fdata write SetData;
+   procedure PriorityPlay(data: PBytes);
 
   end;
 
@@ -45,13 +46,13 @@ procedure TSndThread.Execute;
     begin
      if (Self.changed) then
       begin
-       if (Self.priority <> '') then
+       if (Self.priority <> nil) then
         begin
-         sndPlaySound(PChar(Self.priority), 0);
-         Self.priority := '';
+         sndPlaySound(PChar(Self.priority), SND_MEMORY);
+         Self.priority := nil;
         end else begin
-         if (Self.filename <> '') then
-           sndPlaySound(PChar(Self.filename), SND_ASYNC or SND_LOOP)
+         if (Self.data <> nil) then
+           sndPlaySound(PChar(Self.data), SND_ASYNC or SND_LOOP OR SND_MEMORY)
          else
            sndPlaySound(nil, 0);
 
@@ -63,15 +64,15 @@ procedure TSndThread.Execute;
     end;//while
  end;//procedure
 
-procedure TSndThread.SetFN(new:string);
+procedure TSndThread.SetData(new: PBytes);
 begin
- Self.ffilename := new;
+ Self.fdata := new;
  Self.changed := true;
 end;
 
-procedure TSndThread.PriorityPlay(fn:string);
+procedure TSndThread.PriorityPlay(data: PBytes);
 begin
- Self.priority := fn;
+ Self.priority := data;
  Self.changed := true;
 end;
 

@@ -355,6 +355,9 @@ begin
  BridgeClient.toLogin.server := GlobConfig.data.server.host;
  BridgeClient.toLogin.port := GlobConfig.data.server.port;
 
+ F_splash.AddStav('Načítám zvuky...');
+ SoundsPlay.PreloadSounds();
+
  if (GlobConfig.data.uLI.path <> '') then
   begin
    F_splash.AddStav('Spouštím uLI-daemon...');

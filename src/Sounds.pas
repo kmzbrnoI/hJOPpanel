@@ -6,7 +6,7 @@ unit Sounds;
 
 interface
 
-uses SysUtils, SoundsThread, Classes, mmsystem;
+uses SysUtils, SoundsThread, Classes, mmsystem, Types, Generics.Collections;
 
 // vyssi cislo zvuku ma vzdy vetsi prioritu na prehrani
 const
@@ -27,10 +27,11 @@ type
    code:Integer;
  end;
 
- TSoundsPlay=class                                  // prehravani zvuku
+ TSoundsPlay=class
   private
-    buffer:array[0.._SND_BUF_LEN-1] of TSound;                    // z bufferu vzdy vyberu zvuk z nejvyssim 'code' a ten prehraji
-                                                     // pokud repeat_delay < -1, prehravam porad dokola a prodlevou repeat_delay sekund
+    buffer:array[0.._SND_BUF_LEN-1] of TSound; // z bufferu vzdy vyberu zvuk z nejvyssim 'code' a ten prehraji
+                                               // pokud repeat_delay < -1, prehravam porad dokola a prodlevou repeat_delay sekund
+    memorySounds:TDictionary<string, PBytes>;  // mapping filename: data (preloaded in memory)
 
     thread:TSndThread;
     fmuted:boolean;
@@ -39,6 +40,7 @@ type
     function GetHighestSound():Integer;   // vrati zvuk, ktery aktualne prehrat na zaklade bufferu - vybere ten s nejvyssi prioritou; vraci index v bufferu
 
     procedure SetMute(state:boolean);
+    procedure PreloadSound(const filename: string);
 
   public
     constructor Create();
@@ -48,6 +50,8 @@ type
     procedure DeleteSound(code:Integer);
     procedure DeleteAll();
     function IsPlaying(code:integer):boolean;
+    function LoadFile(const FileName: string): PBytes;
+    procedure PreloadSounds();
 
     property muted:boolean read fmuted write SetMute;
 
@@ -67,6 +71,8 @@ var i:Integer;
 begin
  inherited;
 
+ Self.memorySounds := TDictionary<string, PBytes>.Create();
+
  thread := TSndThread.Create(true);
  thread.Suspended := false;
 
@@ -75,9 +81,14 @@ begin
 end;//ctor
 
 destructor TSoundsPlay.Destroy();
+var sound: PBytes;
 begin
  thread.Terminate();
  FreeAndNil(thread);
+
+ for sound in Self.memorySounds.Values do
+   FreeMem(sound);
+ Self.memorySounds.Free();
 
  inherited;
 end;//dtor
@@ -86,14 +97,27 @@ end;//dtor
 
 procedure TSoundsPlay.Play(code:integer; loop:boolean = false);
 var i, highest:integer;
+    filename: string;
  begin
+  filename := Self.ResolveSndFilename(code);
+  if (filename = '') then
+    Exit();
+
+  try
+    if (not Self.memorySounds.ContainsKey(filename)) then
+      Self.LoadFile(Self.ResolveSndFilename(code));
+  except
+    // Ignore load exceptions
+    Exit();
+  end;
+
   if (not loop) then
    begin
     // neopakujici se zvuky pustime hned
     if (not muted) then
-      Self.thread.PriorityPlay(Self.ResolveSndFilename(code));
+      Self.thread.PriorityPlay(Self.memorySounds[filename]);
    end else begin
-    // opakujici se zvuky pustime v smostatnem vlakne, kde hledime na prioritu
+    // opakujici se zvuky pustime v samostatnem vlakne, kde hledime na prioritu
     for i := 0 to _SND_BUF_LEN-1 do
      if (Self.buffer[i].code < 0) then
       begin
@@ -103,15 +127,15 @@ var i, highest:integer;
 
     if (Self.muted) then Exit();
 
-    if (Self.thread.filename = '') then
+    if (Self.thread.data = nil) then
      begin
       // no sounds playing
-      Self.thread.filename := Self.ResolveSndFilename(code);
+      Self.thread.data := Self.memorySounds[filename];
      end else begin
       // sound already playing
       highest := Self.GetHighestSound();
-      if (Self.thread.filename <> Self.ResolveSndFilename(Self.buffer[highest].code)) then
-        Self.thread.filename := Self.ResolveSndFilename(code);
+      if (Self.thread.data <> Self.memorySounds[Self.ResolveSndFilename(Self.buffer[highest].code)]) then
+        Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(code)];
      end;
    end;// else repeat_delay = -1
  end;//procedure
@@ -128,12 +152,12 @@ begin
     Break;
    end;
 
- if (Self.thread.filename = Self.ResolveSndFilename(code)) then
-   Self.thread.filename := '';
+ if (Self.thread.data = Self.memorySounds[Self.ResolveSndFilename(code)]) then
+   Self.thread.data := nil;
 
  i := Self.GetHighestSound();
  if (i > -1) then
-   Self.thread.filename := Self.ResolveSndFilename(Self.buffer[i].code);
+   Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(Self.buffer[i].code)];
 end;//procedure
 
 procedure TSoundsPlay.DeleteAll();
@@ -143,8 +167,8 @@ begin
   if (Self.buffer[i].code > -1) then
     Self.buffer[i].code := -1;
 
- if (Self.thread.filename <> '') then
-   Self.thread.filename := '';
+ if (Self.thread.data <> nil) then
+   Self.thread.data := nil;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,14 +213,14 @@ end;//fuctnion
 procedure TSoundsPlay.SetMute(state:boolean);
 var highest:Integer;
 begin
- if ((not Self.fmuted) and (state) and (Self.thread.filename <> '')) then
-   Self.thread.filename := '';
+ if ((not Self.fmuted) and (state) and (Self.thread.data <> nil)) then
+   Self.thread.data := nil;
 
  if ((Self.muted) and (not state)) then
   begin
    highest := Self.GetHighestSound();
    if (highest > -1) then
-     Self.thread.filename := Self.ResolveSndFilename(Self.buffer[highest].code);
+     Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(Self.buffer[highest].code)];
   end;
 
  Self.fmuted := state;
@@ -212,6 +236,56 @@ begin
    Exit(true);
  Exit(false);
 end;//function
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TSoundsPlay.LoadFile(const FileName: string): PBytes;
+var SZ: Int64;
+    data: PBytes;
+    S: TFileStream;
+begin
+  S := TFileStream.Create(FileName, fmOpenRead);
+  try
+    SZ := S.Size;
+    GetMem(data, SZ);
+    S.Read(data^, SZ);
+
+    if (Self.memorySounds.ContainsKey(filename)) then
+      FreeMem(Self.memorySounds[filename]);
+    Self.memorySounds.AddOrSetValue(filename, data);
+
+    Result := data;
+  finally
+    FreeAndNil(S);
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TSoundsPlay.PreloadSounds();
+begin
+ Self.PreloadSound(GlobConfig.data.sounds.sndTratSouhlas);
+ Self.PreloadSound(GlobConfig.data.sounds.sndRizikovaFce);
+ Self.PreloadSound(GlobConfig.data.sounds.sndChyba);
+ Self.PreloadSound(GlobConfig.data.sounds.sndPretizeni);
+ Self.PreloadSound(GlobConfig.data.sounds.sndPrichoziZprava);
+ Self.PreloadSound(GlobConfig.data.sounds.sndPrivolavacka);
+ Self.PreloadSound(GlobConfig.data.sounds.sndTimeout);
+ Self.PreloadSound(GlobConfig.data.sounds.sndStaveniVyzva);
+ Self.PreloadSound(GlobConfig.data.sounds.sndNeniJC);
+end;
+
+procedure TSoundsPlay.PreloadSound(const filename: string);
+begin
+ if (filename = '') then
+   Exit();
+
+ try
+   Self.LoadFile(filename);
+ except
+   // Ignore load exceptions
+ end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
