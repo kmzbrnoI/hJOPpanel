@@ -449,7 +449,10 @@ begin
   DCC.Parse(parsed)
 
  else if (parsed[1] = 'SPR-LIST') then
-  F_SprList.ParseLoko(parsed[2])
+  if (Parsed.Count > 2) then
+    F_SprList.ParseLoko(parsed[2])
+  else
+    F_SprList.ParseLoko('')
 
  else if ((parsed[1] = 'F-VYZN-LIST') and (parsed.Count > 2)) then
   F_HVEdit.ParseVyznamy(parsed[2])
