@@ -11,6 +11,11 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
+ TPUvazkaID = record
+  index:Integer;
+  soupravaI:Integer;
+ end;
+
  TUvazkaSpr = class
   strings:TStrings;
   show_index:Integer;
@@ -59,6 +64,7 @@ type
 
     procedure Load(ini:TMemIniFile);
     procedure Show(obj:TDXDraw);
+    function GetIndex(Pos:TPoint):TPUvazkaID;
     procedure Reset(orindex:Integer = -1);
 
     property Items[index : integer] : TPUvazkaSpr read GetItem; default;
@@ -67,6 +73,7 @@ type
 
 const
   _UVAZKY_BLIK_PERIOD = 1500;      // perioda blikani soupravy u uvazky v ms
+  _UVAZKY_WIDTH = 9;
 
 implementation
 
@@ -229,6 +236,40 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function TPUvazkySpr.GetIndex(Pos:TPoint):TPUvazkaID;
+var i, spr_index, incr, top:Integer;
+    uvs:TPUvazkaSpr;
+begin
+ Result.index := -1;
+
+ for i := 0 to Self.data.Count-1 do
+  begin
+   uvs := Self.data[i];
+
+   if ((Pos.X < uvs.Pos.X) or (Pos.X >= uvs.Pos.X+_UVAZKY_WIDTH)) then
+     continue;
+
+   top  := uvs.Pos.Y;
+   if (uvs.vertical_dir = TUvazkaSprVertDir.top) then
+     incr := -1
+    else
+     incr := 1;
+
+   for spr_index := 0 to uvs.PanelProp.spr.Count-1 do
+    begin
+     if (Pos.Y = top) then
+      begin
+       Result.index := i;
+       Result.soupravaI := spr_index;
+       Exit();
+      end;
+     top := top + incr;
+    end;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
 procedure TUvazkaSprPanelProp.Change(parsed:TStrings);
 var j:Integer;
     sprs_data:TStrings;
@@ -269,7 +310,7 @@ begin
 
      // kontrola preteceni textu
      for j := 0 to uvazkaSpr.strings.Count-1 do
-       if (Length(uvazkaSpr.strings[j]) > 9) then
+       if (Length(uvazkaSpr.strings[j]) > _UVAZKY_WIDTH) then
          uvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 8) + '.';
 
      Self.spr.Add(UvazkaSpr);

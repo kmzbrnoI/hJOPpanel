@@ -763,6 +763,7 @@ procedure TRelief.ObjectMouseClick(Position:TPoint; Button:TPanelButton);
 var i, index:Integer;
     handled:boolean;
     uid:TPUsekID;
+    uvid:TPUvazkaID;
 label
     EscCheck;
 begin
@@ -894,6 +895,16 @@ begin
   begin
    if (Self.Uvazky.Data[index].Blok < 0) then goto EscCheck;
    PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Button, Self.Uvazky.Data[index].Blok);
+   goto EscCheck;
+  end;
+
+ //uvazka soupravy
+ uvid := Self.UvazkySpr.GetIndex(Position);
+ if (uvid.index <> -1) then
+  begin
+   if (Self.UvazkySpr.Data[uvid.index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.UvazkySpr.Data[uvid.index].OblRizeni].id, Button,
+                             Self.UvazkySpr.Data[uvid.index].Blok, IntToStr(uvid.soupravaI));
    goto EscCheck;
   end;
 
