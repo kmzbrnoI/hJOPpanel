@@ -77,7 +77,7 @@ const
 
 implementation
 
-uses PanelPainter, parseHelper, StrUtils;
+uses PanelPainter, parseHelper, StrUtils, TCPClientPanel;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -275,9 +275,11 @@ var j:Integer;
     sprs_data:TStrings;
     str:string;
     uvazkaSpr:TUvazkaSpr;
+    new_version:Boolean;
 begin
  if (parsed.Count < 9) then Exit();
 
+ new_version := PanelTCPClient.IsServerVersionAtLeast('1.1');
  Self.spr.Clear();
  sprs_data := TStringList.Create();
 
@@ -294,7 +296,12 @@ begin
        uvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0])-1);
        uvazkaSpr.color := clYellow;
       end else begin
-       uvazkaSpr.color := clWhite;
+       if (new_version) then
+        begin
+         uvazkaSpr.color := StrToColor(UvazkaSpr.strings[1]);
+         uvazkaSpr.strings.Delete(1);
+        end else
+         uvazkaSpr.color := clWhite;
       end;
 
      if (LeftStr(uvazkaSpr.strings[1], 1) = '$') then
@@ -303,7 +310,12 @@ begin
        uvazkaSpr.time_color := clYellow;
       end else begin
        uvazkaSpr.time := uvazkaSpr.strings[1];
-       uvazkaSpr.time_color := clAqua;
+       if (new_version) then
+        begin
+         uvazkaSpr.time_color := StrToColor(uvazkaSpr.strings[2]);
+         uvazkaSpr.strings.Delete(2);
+        end else
+         uvazkaSpr.time_color := clAqua;
       end;
 
      uvazkaSpr.strings.Delete(1);

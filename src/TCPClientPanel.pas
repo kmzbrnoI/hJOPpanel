@@ -17,10 +17,10 @@ const
   _DEFAULT_PORT = 5896;
   _PING_TIMER_PERIOD_MS = 20000;
 
-  // tady jsou vyjmenovane vsechny verze protokoluk pripojeni k serveru, ktere klient podporuje
-  protocol_version_accept : array[0..0] of string =
+  // tady jsou vyjmenovane vsechny verze protokolu k pripojeni k serveru, ktere klient podporuje
+  protocol_version_accept : array[0..1] of string =
     (
-      '1.0'
+      '1.0', '1.1'
     );
 
 type
@@ -28,7 +28,7 @@ type
 
   TPanelTCPClient = class
    private const
-    _PROTOCOL_VERSION = '1.1';
+    _PROTOCOL_VERSION_CLIENT = '1.1';
 
    private
     rthread: TReadingThread;
@@ -39,6 +39,7 @@ type
     control_disconnect:boolean;       // je true, pokud disconnect plyne ode me
     recusc_destroy:boolean;
     pingTimer:TTimer;
+    mServerVersion:Integer;
 
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
@@ -54,6 +55,7 @@ type
 
      procedure ConnetionResusced(Sender:TObject);
      procedure SendPing(Sedner:TObject);
+     function GetServerVersionStr():string;
 
    public
 
@@ -94,8 +96,13 @@ type
       procedure PanelMessage(senderid:string; recepientid:string; msg:string);
 
       function PanelButtonToString(button:TPanelButton):string;
+      function VersionToInt(version:string):Integer;
+      function VersionToString(version:Integer):string;
+      function IsServerVersionAtLeast(version:string):Boolean;
 
       property status:TPanelConnectionStatus read fstatus;
+      property serverVersionStr:string read GetServerVersionStr;
+      property serverVersionInt:Integer read mServerVersion;
   end;//TPanelTCPClient
 
 var
@@ -116,6 +123,7 @@ begin
  inherited;
 
  Self.parsed := TStringList.Create;
+ Self.mServerVersion := 0;
 
  Self.pingTimer := TTimer.Create(nil);
  Self.pingTimer.Enabled := false;
@@ -255,7 +263,7 @@ begin
  Self.pingTimer.Enabled := true;
 
  // send handshake
- Self.SendLn('-;HELLO;'+Self._PROTOCOL_VERSION+';');
+ Self.SendLn('-;HELLO;'+Self._PROTOCOL_VERSION_CLIENT+';');
 end;//procedure
 
 procedure TPanelTCPClient.OnTcpClientDisconnected(Sender: TObject);
@@ -366,6 +374,7 @@ begin
      Application.MessageBox(PChar('Verze protokolu, kterou požívá server ('+Self.parsed[2]+') není podporována'),
        'Upozornìní', MB_OK OR MB_ICONWARNING);
 
+   Self.mServerVersion := Self.VersionToInt(Self.parsed[2]);
    Self.fstatus := TPanelConnectionStatus.opened;
    Self.SendLn('-;OR-LIST;');
    PanelTCPClient.SendLn('-;F-VYZN-GET;');
@@ -778,6 +787,35 @@ begin
  else
    Result := '';
  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPanelTCPClient.VersionToInt(version:string):Integer;
+var strs:TStrings;
+begin
+ strs := TStringList.Create();
+ try
+   ExtractStringsEx(['.'], [], version, strs);
+   Result := StrToInt(strs[0])*1000 + StrToInt(strs[1]);
+ finally
+   strs.Free();
+ end;
+end;
+
+function TPanelTCPClient.IsServerVersionAtLeast(version:string):Boolean;
+begin
+ Result := (Self.serverVersionInt >= Self.VersionToInt(version));
+end;
+
+function TPanelTCPClient.VersionToString(version:Integer):string;
+begin
+ Result := IntToStr(version div 1000) + '.' + IntToStr(version mod 1000);
+end;
+
+function TPanelTCPClient.GetServerVersionStr():string;
+begin
+ Result := Self.VersionToString(Self.serverVersionInt);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
