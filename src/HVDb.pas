@@ -28,6 +28,8 @@ type
     data:Byte;                                         // dat, ktera se maji do CV zapsat.
   end;
 
+  THVFuncType = (permanent = 0, momentary = 1);
+
   THV = class
    private
      procedure DefaultData();
@@ -52,6 +54,7 @@ type
      POMrelease : TList<THVPomCV>;                                              // seznam POM pri uvolneni to rucniho rizeni
 
      funcVyznam:array[0.._MAX_FUNC] of string;                                  // seznam popisu funkci hnaciho vozidla
+     funcType:array[0.._MAX_FUNC] of THVFuncType;                               // typy funkci hnaciho vozidla
 
      procedure ParseFromToken(data:string);
      procedure ParseData(data:string);
@@ -61,6 +64,9 @@ type
      destructor Destroy(); override;
 
      function GetPanelLokString(mode:TLokStringMode = normal):string;
+
+     class function CharToHVFuncType(c:char):THVFuncType;
+     class function HVFuncTypeToChar(t:THVFuncType):char;
   end;
 
   THVDb = class
@@ -220,7 +226,7 @@ var str, str2, str3:TStrings;
 begin
  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|
  //   rychlost_kmph|smer|or_id{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
- //   {vyznam-F0;vyznam-F1;...}|
+ //   {vyznam-F0;vyznam-F1;...}|typy_funkci
 
  // souprava je bud cislo soupravy, nebo znak '-'
  str  := TStringList.Create();
@@ -293,6 +299,19 @@ begin
     end else begin
      for i := 0 to _MAX_FUNC do
        Self.funcVyznam[i] := '';
+    end;
+
+   // typy funkci
+   if (str.Count > 16) then
+    begin
+     for i := 0 to _MAX_FUNC do
+       if (i < Length(str[16])) then
+        Self.funcType[i] := CharToHVFuncType(str[16][i+1])
+       else
+        Self.funcType[i] := THVFuncType.permanent;
+    end else begin
+     for i := 0 to _MAX_FUNC do
+       Self.funcType[i] := THVFuncType.permanent;
     end;
  except
 
@@ -377,6 +396,7 @@ begin
    Result := Result + '}|';
   end;// if pom
 
+ // vyznam funkci
  Result := Result + '{';
  for i := 0 to _MAX_FUNC do
   begin
@@ -386,6 +406,11 @@ begin
      Result := Result + ';';
   end;
  Result := Result + '}|';
+
+ // typy funkci
+ for i := 0 to _MAX_FUNC do
+   Result := Result + HVFuncTypeToChar(Self.funcType[i]);
+ Result := Result + '|';
 end;//function
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -455,6 +480,24 @@ begin
    Self.HVs[i] := Self.HVs[i+1];
 
  Dec(Self.count);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function THV.CharToHVFuncType(c:char):THVFuncType;
+begin
+ if (UpperCase(c) = 'M') then
+   Result := THVFuncType.momentary
+ else
+   Result := THVFuncType.permanent;
+end;
+
+class function THV.HVFuncTypeToChar(t:THVFuncType):char;
+begin
+ if (t = THVFuncType.momentary) then
+   Result := 'M'
+ else
+   Result := 'P';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -5,7 +5,7 @@ object F_HVEdit: TF_HVEdit
   BorderStyle = bsToolWindow
   Caption = 'Edtiovat hnac'#237' vozidlo'
   ClientHeight = 497
-  ClientWidth = 657
+  ClientWidth = 689
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -28,7 +28,7 @@ object F_HVEdit: TF_HVEdit
   object CB_HV: TComboBox
     Left = 8
     Top = 24
-    Width = 641
+    Width = 673
     Height = 21
     Style = csDropDownList
     ItemHeight = 13
@@ -38,7 +38,7 @@ object F_HVEdit: TF_HVEdit
   object GB_HV: TGroupBox
     Left = 8
     Top = 51
-    Width = 643
+    Width = 673
     Height = 406
     Caption = ' Hnac'#237' vozidlo '
     TabOrder = 1
@@ -381,7 +381,7 @@ object F_HVEdit: TF_HVEdit
     object LV_Funkce: TListView
       Left = 397
       Top = 39
-      Width = 236
+      Width = 268
       Height = 354
       Checkboxes = True
       Columns = <
@@ -395,6 +395,10 @@ object F_HVEdit: TF_HVEdit
           MaxWidth = 150
           MinWidth = 150
           Width = 150
+        end
+        item
+          Caption = 'P / M'
+          Width = 36
         end>
       ColumnClick = False
       Font.Charset = DEFAULT_CHARSET
@@ -418,8 +422,8 @@ object F_HVEdit: TF_HVEdit
     end
   end
   object B_Apply: TButton
-    Left = 574
-    Top = 463
+    Left = 606
+    Top = 464
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -428,8 +432,8 @@ object F_HVEdit: TF_HVEdit
     OnClick = B_ApplyClick
   end
   object B_Cancel: TButton
-    Left = 493
-    Top = 463
+    Left = 525
+    Top = 464
     Width = 75
     Height = 25
     Caption = 'Storno'

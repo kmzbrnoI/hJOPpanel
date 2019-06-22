@@ -67,6 +67,9 @@ type
     new:boolean;
     sender_or:string;
     CB_funkce:array[0.._MAX_FUNC] of TComboBox;
+    RB_P:array[0.._MAX_FUNC] of TRadioButton;
+    RB_M:array[0.._MAX_FUNC] of TRadioButton;
+    P_types:array[0.._MAX_FUNC] of TPanel;
     FOldListviewWindowProc: TWndMethod;
 
     procedure InitFunkce();
@@ -172,7 +175,13 @@ begin
 
  // parse func vyznam
  for i := 0 to _MAX_FUNC do
+  begin
    HV.funcVyznam[i] := Self.CB_funkce[i].Text;
+   if (Self.RB_M[i].Checked) then
+     HV.funcType[i] := THVFuncType.momentary
+   else
+     HV.funcType[i] := THVFuncType.permanent;
+  end;
 
  if (Self.new) then
   begin
@@ -241,7 +250,11 @@ begin
 
    Self.LV_Funkce.Enabled := true;
    for i := 0 to _MAX_FUNC do
+    begin
      Self.CB_funkce[i].Enabled := true;
+     Self.RB_P[i].Enabled := true;
+     Self.RB_M[i].Enabled := true;
+    end;
 
    if (not Self.new) then
     begin
@@ -272,7 +285,13 @@ begin
       end;
 
      for i := 0 to _MAX_FUNC do
+      begin
        Self.CB_funkce[i].Text := HV.funcVyznam[i];
+       if (HV.funcType[i] = THVFuncType.permanent) then
+         Self.RB_P[i].Checked := true
+       else
+         Self.RB_M[i].Checked := true;
+      end;
 
     end;//if not New
 
@@ -309,6 +328,10 @@ begin
     begin
      Self.CB_funkce[i].Enabled := false;
      Self.CB_funkce[i].Text    := '';
+     Self.RB_P[i].Enabled := false;
+     Self.RB_P[i].Checked := false;
+     Self.RB_M[i].Enabled := false;
+     Self.RB_M[i].Enabled := false;
     end;
 
   end;
@@ -356,7 +379,10 @@ begin
  Self.SB_Rel_Remove.Enabled  := false;
 
  for i := 0 to _MAX_FUNC do
+  begin
    Self.CB_funkce[i].Text := '';
+   Self.RB_P[i].Checked := true;
+  end;
 
  Self.B_Search.Visible := true;
 
@@ -498,7 +524,6 @@ begin
    LI.Caption := 'F'+IntToStr(i);
 
    Self.CB_funkce[i] := TComboBox.Create(Self);
-
    with (Self.CB_funkce[i]) do
     begin
      Parent := Self.LV_Funkce;
@@ -507,6 +532,31 @@ begin
      BevelKind  := bkFlat;
      MaxLength  := 32;
      OnKeyPress := Self.M_PoznamkaKeyPress;
+    end;
+
+   Self.P_types[i] := TPanel.Create(Self);
+   with (Self.P_types[i]) do
+    begin
+     Parent := Self.LV_Funkce;
+     BevelOuter := bvNone;
+     Color := LV_Funkce.Color;
+     ParentBackground := false;
+    end;
+
+   Self.RB_P[i] := TRadioButton.Create(Self.P_types[i]);
+   with (Self.RB_P[i]) do
+    begin
+     Parent := Self.P_types[i];
+     Left := 5;
+     Top := 2;
+    end;
+
+   Self.RB_M[i] := TRadioButton.Create(Self.P_types[i]);
+   with (Self.RB_M[i]) do
+    begin
+     Parent := Self.P_types[i];
+     Left := 20;
+     Top := 2;
     end;
   end;//for
 
@@ -519,7 +569,10 @@ procedure TF_HVEdit.FreeFunkce();
 var i:Integer;
 begin
  for i := 0 to _MAX_FUNC do
+  begin
    FreeAndNil(Self.CB_funkce[i]);
+   FreeAndNil(Self.P_types[i]);
+  end;
 end;//procedure
 
 procedure TF_HVEdit.RepaintFunkce();
@@ -540,7 +593,14 @@ begin
      ListView_GetSubItemRect(Self.LV_Funkce.Handle, i, 1, LVIR_BOUNDS, @r);
      BoundsRect := r;
      Visible := (i >= top_index);
-    end;//with
+    end;
+
+   with (Self.P_types[i]) do
+    begin
+     ListView_GetSubItemRect(Self.LV_Funkce.Handle, i, 2, LVIR_BOUNDS, @r);
+     BoundsRect := r;
+     Visible := (i >= top_index);
+    end;
   end;
 end;//procedure
 
