@@ -126,13 +126,12 @@ begin
  HV := THV.Create();
 
  // kontrola M_Poznamka
- for i := 1 to Length(Self.M_Poznamka.Text) do
-   for j := 0 to Length(_forbidden_chars)-1 do
-     if (_forbidden_chars[j] = Self.M_Poznamka.Text[i]) then
-       begin
-        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
-        Exit();
-       end;
+ for j := 0 to Length(_forbidden_chars)-1 do
+   if (strscan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
+     begin
+      Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
 
  HV.Nazev       := Self.E_Name.Text;
  HV.Majitel     := Self.E_Majitel.Text;
@@ -144,7 +143,7 @@ begin
  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
 
  for i := 0 to _MAX_FUNC do
-  HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
+   HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
 
  HV.POMtake.Clear();
  HV.POMrelease.Clear();
@@ -176,6 +175,18 @@ begin
  // parse func vyznam
  for i := 0 to _MAX_FUNC do
   begin
+   if (StrScan(PChar(Self.CB_funkce[i].Text), ':') <> nil) then
+    begin
+     Application.MessageBox(PChar('Význam funkce obsahuje zakázaný znak ":" (dvojteèka)!'), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+     Exit();
+    end;
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (strscan(PChar(Self.CB_funkce[i].Text), _forbidden_chars[j]) <> nil) then
+       begin
+        Application.MessageBox(PChar('Význam funkce obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
+
    HV.funcVyznam[i] := Self.CB_funkce[i].Text;
    if (Self.RB_M[i].Checked) then
      HV.funcType[i] := THVFuncType.momentary
