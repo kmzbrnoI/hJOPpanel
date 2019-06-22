@@ -208,10 +208,17 @@ begin
  for i := 0 to _MAX_FUNC do
   begin
    if ((Self.CB_funkce[i].Text <> '') and (Self.CB_funkce[i].Items.IndexOf(Self.CB_funkce[i].Text) = -1)) then
-     newVyznamy := newVyznamy + '{' + Self.CB_funkce[i].Text + '};';
+    begin
+     newVyznamy := newVyznamy + '{' + Self.CB_funkce[i].Text + ':';
+     if (Self.RB_M[i].Checked) then
+       newVyznamy := newVyznamy + 'M'
+     else
+       newVyznamy := newVyznamy + 'P';
+     newVyznamy := newVyznamy + '};';
+    end;
   end;//for i
  if (newVyznamy <> '') then
-  PanelTCPClient.SendLn('-;F-VYZN-ADD;{'+newVyznamy+'}');
+   PanelTCPClient.SendLn('-;F-VYZN-ADD;{'+newVyznamy+'}');
 
  HV.Free();
  Self.Close();
