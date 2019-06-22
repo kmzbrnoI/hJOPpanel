@@ -556,6 +556,8 @@ begin
      OnKeyPress := Self.M_PoznamkaKeyPress;
      OnChange   := Self.CB_VyznamChange;
      Tag        := i;
+     Sorted     := true;
+     DropDownCount := 12;
     end;
 
    Self.P_types[i] := TPanel.Create(Self);
