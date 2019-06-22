@@ -71,11 +71,13 @@ type
     RB_M:array[0.._MAX_FUNC] of TRadioButton;
     P_types:array[0.._MAX_FUNC] of TPanel;
     FOldListviewWindowProc: TWndMethod;
+    vyznType:TDictionary<string, THVFuncType>;
 
     procedure InitFunkce();
     procedure FreeFunkce();
     procedure RepaintFunkce();
     procedure LV_FunkceWindowproc(var Message: TMessage);
+    procedure CB_VyznamChange(Sender: TObject);
 
   public
     { Public declarations }
@@ -351,12 +353,14 @@ end;//procedure
 
 procedure TF_HVEdit.FormCreate(Sender: TObject);
 begin
+ Self.vyznType := TDictionary<string, THVFuncType>.Create();
  Self.InitFunkce();
 end;
 
 procedure TF_HVEdit.FormDestroy(Sender: TObject);
 begin
  Self.FreeFunkce();
+ Self.vyznType.Free();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -543,6 +547,8 @@ begin
      BevelKind  := bkFlat;
      MaxLength  := 32;
      OnKeyPress := Self.M_PoznamkaKeyPress;
+     OnChange   := Self.CB_VyznamChange;
+     Tag        := i;
     end;
 
    Self.P_types[i] := TPanel.Create(Self);
@@ -629,19 +635,50 @@ end;
 
 procedure TF_HVEdit.ParseVyznamy(vyznamy:string);
 var i:Integer;
-    sl:TStrings;
+    sl, sl2, vyznamySl:TStrings;
+    str:string;
 begin
+ Self.vyznType.Clear();
  sl := TStringList.Create();
- ExtractStringsEx([';'], [], vyznamy, sl);
+ sl2 := TStringList.Create();
+ vyznamySl := TStringList.Create();
+ try
+   ExtractStringsEx([';'], [], vyznamy, sl);
+   for str in sl do
+    begin
+     sl2.Clear();
+     ExtractStringsEx([':'], [], str, sl2);
+     vyznamySl.Add(sl2[0]);
+     if (sl2.Count > 1) then
+       Self.vyznType.AddOrSetValue(sl2[0], THV.CharToHVFuncType(sl2[1][1]));
+    end;
 
- for i := 0 to _MAX_FUNC do
-  begin
-   Self.CB_funkce[i].Items.Clear();
-   Self.CB_funkce[i].Items.AddStrings(sl);
-  end;//for i
-
- sl.Free();
+   for i := 0 to _MAX_FUNC do
+    begin
+     Self.CB_funkce[i].Items.Clear();
+     Self.CB_funkce[i].Items.AddStrings(vyznamySl);
+    end;
+ finally
+   sl.Free();
+   sl2.Free();
+   vyznamySl.Free();
+ end;
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.CB_VyznamChange(Sender: TObject);
+var func:Integer;
+begin
+ func := TComboBox(Sender).Tag;
+ if (Self.vyznType.ContainsKey(TComboBox(Sender).Text)) then
+  begin
+   if (Self.vyznType[TComboBox(Sender).Text] = THVFuncType.momentary) then
+     Self.RB_M[func].Checked := true
+   else
+     Self.RB_P[func].Checked := true;
+  end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
