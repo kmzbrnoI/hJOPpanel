@@ -67,6 +67,7 @@ end;//procedure
 procedure TF_SprHVEdit.CB_HV1_HVChange(Sender: TObject);
 var HV:THV;
     i:Integer;
+    str:string;
 begin
  if (Self.CB_HV1_HV.ItemIndex < 0) then
   begin
@@ -92,12 +93,14 @@ begin
    for i := 0 to _MAX_FUNC do
     begin
      Self.CHB_funkce[i].Visible := true;
-     Self.CHB_funkce[i].Enabled := true;
+     Self.CHB_funkce[i].Enabled := ((HV.funcType[i] = THVFuncType.permanent) or (HV.funkce[i]));
      Self.CHB_funkce[i].Checked := HV.funkce[i];
+     str := 'F'+IntToStr(i);
+     if (HV.funcType[i] = THVFuncType.momentary) then
+       str := str + ' [M]';
      if (HV.funcVyznam[i] <> '') then
-       Self.CHB_funkce[i].Caption := 'F'+IntToStr(i)+': '+HV.funcVyznam[i]
-     else
-       Self.CHB_funkce[i].Caption := 'F'+IntToStr(i);
+       str := str+': '+HV.funcVyznam[i];
+     Self.CHB_funkce[i].Caption := str;
     end;
 
    Self.RG_HV1_dir.ItemIndex   := Integer(HV.StanovisteA);
