@@ -279,14 +279,14 @@ end;
 
 procedure TF_Messages.FormShow(Sender: TObject);
 var LI:TListItem;
-    id:string;
+    name:string;
 begin
  Self.LV_ORs.Clear();
- for id in ORDb.db.Keys do
+ for name in ORDb.names_sorted do
   begin
    LI := Self.LV_ORs.Items.Add;
-   LI.Caption := ORDb.db[id];
-   LI.SubItems.Add(id);
+   LI.Caption := name;
+   LI.SubItems.Add(ORDb.db_reverse[name]);
   end;
 
  Self.Caption := Self.name + ' - zprávy';

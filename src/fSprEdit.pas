@@ -663,7 +663,7 @@ end;//procedure
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.FillORs(vychoziId:string; cilovaId:string);
-var id:string;
+var name:string;
 begin
  Self.CB_Vychozi.Clear();
  Self.CB_Cilova.Clear();
@@ -671,15 +671,15 @@ begin
  Self.CB_Vychozi.Items.Add('Nevyplnìno');
  Self.CB_Cilova.Items.Add('Nevyplnìno');
 
- for id in ORDb.db.Keys do
+ for name in ORDb.names_sorted do
   begin
-   Self.CB_Vychozi.Items.Add(ORDb.db[id]);
-   Self.CB_Cilova.Items.Add(ORDb.db[id]);
+   Self.CB_Vychozi.Items.Add(name);
+   Self.CB_Cilova.Items.Add(name);
 
-   if (id = vychoziId) then
+   if (ORDb.db_reverse[name] = vychoziId) then
      Self.CB_Vychozi.ItemIndex := Self.CB_Vychozi.Items.Count - 1;
 
-   if (id = cilovaId) then
+   if (ORDb.db_reverse[name] = cilovaId) then
      Self.CB_Cilova.ItemIndex := Self.CB_Cilova.Items.Count - 1;
   end;
 

@@ -52,7 +52,8 @@ begin
    Exit();
   end;
 
- PanelTCPClient.PanelLokMove(Self.sender_id, hv_indexes[Self.CB_HV.ItemIndex], ORDb.db_reverse[Self.CB_Stanice.Items[Self.CB_Stanice.ItemIndex]]);
+ PanelTCPClient.PanelLokMove(Self.sender_id, hv_indexes[Self.CB_HV.ItemIndex],
+                             ORDb.db_reverse[Self.CB_Stanice.Text]);
 
  Self.Close();
 end;//procedure
@@ -73,7 +74,7 @@ begin
    HVs.FillHVs(Self.CB_HV, Self.hv_indexes);
 
  Self.CB_Stanice.Clear();
- for name in ORDb.db.Values do
+ for name in ORDb.names_sorted do
    Self.CB_Stanice.Items.Add(name);
 
  Self.ActiveControl := Self.CB_HV;

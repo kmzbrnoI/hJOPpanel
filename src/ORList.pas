@@ -7,7 +7,7 @@ unit ORList;
 
 interface
 
-uses SysUtils, StrUtils, Classes, Generics.Collections;
+uses SysUtils, StrUtils, Classes, Generics.Collections, Generics.Defaults;
 
 type
   TORDb = class
@@ -16,11 +16,13 @@ type
 
     db: TDictionary<string, string>;
     db_reverse: TDictionary<string, string>;
+    names_sorted: TList<string>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Parse(data:string);
+    class function StrComparer():IComparer<string>;
 
   end;//class
 
@@ -38,12 +40,14 @@ begin
  inherited;
  Self.db := TDictionary<string, string>.Create();
  Self.db_reverse := TDictionary<string, string>.Create();
+ Self.names_sorted := TList<string>.Create(Self.StrComparer());
 end;//ctor
 
 destructor TORDb.Destroy();
 begin
  Self.db.Free();
- Self.db_reverse.Clear();
+ Self.db_reverse.Free();
+ Self.names_sorted.Free();
  inherited;
 end;//dtor
 
@@ -56,31 +60,48 @@ begin
  try
    list1 := TStringList.Create();
    list2 := TStringList.Create();
+   try
+     ExtractStringsEx([']'], ['['], data, list1);
 
-   ExtractStringsEx([']'], ['['], data, list1);
+     Self.db.Clear();
+     Self.db_reverse.Clear();
+     Self.names_sorted.Clear();
 
-   Self.db.Clear();
-   Self.db_reverse.Clear();
+     for i := 0 to list1.Count-1 do
+      begin
+       list2.Clear();
+       ExtractStringsEx([','], [], list1[i], list2);
 
-   for i := 0 to list1.Count-1 do
-    begin
-     list2.Clear();
-     ExtractStringsEx([','], [], list1[i], list2);
+       try
+         Self.db.Add(list2[0], list2[1]);
+         Self.db_reverse.Add(list2[1], list2[0]);
+         Self.names_sorted.Add(list2[1]);
+       except
 
-     try
-       Self.db.Add(list2[0], list2[1]);
-       Self.db_reverse.Add(list2[1], list2[0]);
-     except
+       end;
+      end;
 
-     end;
-    end;
-
-   list1.Free();
-   list2.Free();
+     Self.names_sorted.Sort();
+   finally
+     list1.Free();
+     list2.Free();
+   end;
  except
 
  end;
 end;//procedure
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TORDb.StrComparer():IComparer<string>;
+begin
+ Result := TComparer<string>.Construct(
+  function(const Left, Right: string): Integer
+   begin
+    Result := CompareStr(Left, Right, loUserLocale);
+   end
+ );
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
