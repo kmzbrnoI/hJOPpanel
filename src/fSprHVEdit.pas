@@ -28,18 +28,19 @@ type
     sprHV:THV;
 
     Indexes: TWordAr;
-    CHB_funkce:array [0.._MAX_FUNC] of TCheckBox;
 
     function GetHV(addr:Word):THV;
+    function GetCurrentHV():THV;
 
     procedure CreateCHBFunkce();
     procedure DestroyCHBFunkce();
 
   public
+    CHB_funkce:array [0.._MAX_FUNC] of TCheckBox;
 
     procedure FillHV(HVs:THVDb; sprHV:THV);
     function GetHVString():string;
-
+    property HV:THV read GetCurrentHV;
   end;
 
 var
@@ -169,6 +170,14 @@ begin
 
  Exit(nil);
 end;//function
+
+function TF_SprHVEdit.GetCurrentHV():THV;
+begin
+ if (Self.CB_HV1_HV.ItemIndex < 0) then
+   Result := nil
+ else
+   Result := Self.GetHV(Self.Indexes[Self.CB_HV1_HV.ItemIndex]);
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -280,22 +280,23 @@ end;//procedure
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.B_SaveClick(Sender: TObject);
 var sprstr:string;
-    i, j, k:Integer;
+    i, j:Integer;
+    err:string;
 begin
  if (Self.E_Nazev.Text = '') then
   begin
-   Application.MessageBox('Vyplòte název soupravy', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyplòte název soupravy!', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
    Exit;
   end;
 
  // kontrola M_Poznamka
- for i := 1 to Length(Self.M_Poznamka.Text) do
-   for j := 0 to Length(_forbidden_chars)-1 do
-     if (_forbidden_chars[j] = Self.M_Poznamka.Text[i]) then
-       begin
-        Application.MessageBox(PChar('Poznámka k soupravì obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
-        Exit();
-       end;
+ for j := 0 to Length(_forbidden_chars)-1 do
+   if (StrScan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
+     begin
+      Application.MessageBox(PChar('Poznámka k soupravì obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()),
+                             'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+      Exit();
+     end;
 
  if ((Self.CHB_report.Checked) and ((Self.CB_Vychozi.ItemIndex < 1) or (Self.CB_Cilova.ItemIndex < 1))) then
   begin
@@ -328,30 +329,41 @@ begin
 
  sprstr := sprstr + '{';
 
+ err := '';
  for i := 0 to Self.PC_HVs.PageCount-1 do
   begin
-   if (Self.HVs[i].CB_HV1_HV.ItemIndex < 0) then
+   if (Self.HVs[i].HV = nil) then
     begin
-     Application.MessageBox(PChar('Vyberte hnací vozidlo soupravy na záložce '+Self.PC_HVs.Pages[i].Caption), 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
-     Exit;
+     Application.MessageBox(PChar('Vyberte hnací vozidlo soupravy na záložce '+Self.PC_HVs.Pages[i].Caption),
+                            'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+     Exit();
     end;
    if (Self.HVs[i].RG_HV1_dir.ItemIndex < 0) then
     begin
-     Application.MessageBox(PChar('Vyberte orientaci stanovištì A hnacího vozidla na záložce '+Self.PC_HVs.Pages[i].Caption), 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
-     Exit;
+     Application.MessageBox(PChar('Vyberte orientaci stanovištì A hnacího vozidla na záložce '+Self.PC_HVs.Pages[i].Caption),
+                            'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+     Exit();
     end;
+   for j := 0 to Length(_forbidden_chars)-1 do
+     if (StrScan(PChar(Self.HVs[i].M_HV1_Notes.Text), _forbidden_chars[j]) <> nil) then
+       begin
+        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+
+                               GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Exit();
+       end;
 
-   // kontrola M_Poznamka
-   for j := 1 to Length(Self.HVs[i].M_HV1_Notes.Text) do
-     for k := 0 to Length(_forbidden_chars)-1 do
-       if (_forbidden_chars[k] = Self.HVs[i].M_HV1_Notes.Text[j]) then
-         begin
-          Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
-          Exit();
-         end;
+   for j := 0 to _MAX_FUNC do
+     if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
+       err := err + Self.PC_HVs.Pages[i].Caption+' má aktivovanou funkci '+IntToStr(j) +
+              ' ('+Self.HVs[i].HV.funcVyznam[j]+'), která je momentary.'+#13#10;
 
    sprstr := sprstr + Self.HVs[i].GetHVString();
   end;
+
+ if (err <> '') then
+   if (Application.MessageBox(PChar(err+'Skuteènì chcete pokraèovat?'),
+                              'Pokraèovat?', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
+     Exit();
 
  sprstr := sprstr + '};';
 
