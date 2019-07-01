@@ -550,15 +550,15 @@ begin
 
    Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
+   if (Self.ShowDetails) then
+     Self.PopiskyBloku.Show(Self.DrawObject);
+   Self.Texty.Show(Self.DrawObject);
    Self.UvazkySpr.Show(Self.DrawObject);
    Self.Uvazky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Navestidla.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.PomocneObj.Show(Self.DrawObject);
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
-   Self.Texty.Show(Self.DrawObject);
-   if (Self.ShowDetails) then
-     Self.PopiskyBloku.Show(Self.DrawObject);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Rozp.Show(Self.DrawObject);
