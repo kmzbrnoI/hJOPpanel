@@ -117,6 +117,7 @@ type
    Vykol : TPVykolejky;
    Rozp : TPRozpojovace;
    Texty : TPTexty;
+   PopiskyBloku : TPTexty;
    PomocneObj : TPPomocneObj;
 
   SystemOK:record
@@ -132,6 +133,7 @@ type
 
   FOnMove  : TMoveEvent;
   FOnLoginChange : TLoginChangeEvent;
+  fShowDetails : boolean;
 
    procedure PaintKurzor();
    procedure PaintKurzorBg(Pos:TPoint);
@@ -201,6 +203,7 @@ type
    procedure AuthWriteCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
    procedure OnMouseTimer(Sender:TObject);
+   procedure SetShowDetails(show:boolean);
 
   public
 
@@ -231,6 +234,7 @@ type
    property PozadiColor:TColor read Colors.Pozadi write Colors.Pozadi;
    property KurzorRamecek:TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
    property KurzorObsah:TColor read CursorDraw.KurzorObsah write CursorDraw.KurzorObsah;
+   property ShowDetails:boolean read fShowDetails write SetShowDetails;
 
    property PanelWidth:SmallInt read GetPanelWidth;
    property PanelHeight:SmallInt read GetPanelHeight;
@@ -286,6 +290,7 @@ begin
  Self.Rozp  := TPRozpojovace.Create();
  Self.Prejezdy := TPPrejezdy.Create();
  Self.Texty := TPTexty.Create();
+ Self.PopiskyBloku := TPTexty.Create();
  Self.Uvazky := TPUvazky.Create();
  Self.UvazkySpr := TPUvazkySpr.Create();
  Self.Zamky := TPZamky.Create();
@@ -367,6 +372,7 @@ begin
  Self.UvazkySpr.Free();
  Self.Zamky.Free();
  Self.Texty.Free();
+ Self.PopiskyBloku.Free();
  Self.PomocneObj.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
@@ -547,7 +553,8 @@ begin
    Self.PomocneObj.Show(Self.DrawObject);
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
    Self.Texty.Show(Self.DrawObject);
-   // TODO zobrazit popisky bloku pokud jsou aktivni
+   if (Self.ShowDetails) then
+     Self.PopiskyBloku.Show(Self.DrawObject);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Rozp.Show(Self.DrawObject);
@@ -1860,6 +1867,7 @@ begin
  Self.Vykol.Reset(orindex);
  Self.Rozp.Reset(orindex);
  Self.Texty.Reset(orindex);
+ Self.PopiskyBloku.Reset(orindex);
 
  for i := 0 to Self.myORs.Count-1 do
   begin
@@ -2333,6 +2341,16 @@ begin
    if ((Self.special_menu = hlaseni) and (not Self.ORs[i].hlaseni)) then
      Self.HideMenu();
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.SetShowDetails(show:boolean);
+begin
+ if (Self.fShowDetails = show) then
+   Exit();
+ Self.fShowDetails := show;
+ Self.Show();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

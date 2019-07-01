@@ -51,6 +51,7 @@ type
     SB_uLIdaemon: TSpeedButton;
     P_Time_modelovy: TPanel;
     P_Zrychleni: TPanel;
+    SB_Details: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -70,6 +71,7 @@ type
     procedure A_ReAuthExecute(Sender: TObject);
     procedure SB_uLIdaemonClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure SB_DetailsClick(Sender: TObject);
   private
 
    mute_time:TDateTime;
@@ -393,6 +395,13 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.SB_DetailsClick(Sender: TObject);
+begin
+ Self.SB_Details.AllowAllUp := not Self.SB_Details.AllowAllUp;
+ Self.SB_Details.Down := not Self.SB_Details.Down;
+ Relief.ShowDetails := Self.SB_Details.Down;
+end;
 
 procedure TF_Main.SB_MuteClick(Sender: TObject);
 begin
