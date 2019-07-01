@@ -11,7 +11,7 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
      BlokPrejezd;
 
 type
- TPopisekPanelProp = record
+ TTextPanelProp = record
   Symbol, Pozadi: TColor;
   left, right: TColor;
   blikani:boolean;
@@ -20,26 +20,26 @@ type
   procedure Reset();
  end;
 
- TPPopisek = class
+ TPText = class
   Text:string;
   Position:TPoint;
   Color:Integer;
   Blok:Integer;
   OblRizeni:Integer;
-  PanelProp: TPopisekPanelProp;
+  PanelProp: TTextPanelProp;
 
   procedure Reset();
   procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
  end;
 
 
- TPPopisky = class
+ TPTexty = class
   private
-    function GetItem(index:Integer):TPPopisek;
+    function GetItem(index:Integer):TPText;
     function GetCount():Integer;
 
   public
-   data:TObjectList<TPPopisek>;
+   data:TObjectList<TPText>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -49,12 +49,12 @@ type
     function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
 
-    property Items[index : integer] : TPPopisek read GetItem; default;
+    property Items[index : integer] : TPText read GetItem; default;
     property Count : integer read GetCount;
  end;
 
 const
-  _Def_Popisek_Prop:TPopisekPanelProp = (
+  _Def_Popisek_Prop:TTextPanelProp = (
       Symbol: $A0A0A0;
       Pozadi: clBlack;
       left: clFuchsia;
@@ -68,12 +68,12 @@ uses PanelPainter, Symbols, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPopisek.Reset();
+procedure TPText.Reset();
 begin
  Self.PanelProp.Reset();
 end;
 
-procedure TPPopisek.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+procedure TPText.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
 begin
  if (Self.Blok > -1) then
   begin
@@ -101,13 +101,13 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-constructor TPPopisky.Create();
+constructor TPTexty.Create();
 begin
  inherited;
- Self.data := TObjectList<TPPopisek>.Create();
+ Self.data := TObjectList<TPText>.Create();
 end;
 
-destructor TPPopisky.Destroy();
+destructor TPTexty.Destroy();
 begin
  Self.data.Free();
  inherited;
@@ -115,16 +115,16 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPopisky.Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
+procedure TPTexty.Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
 var i, count: Integer;
-    popisek:TPPopisek;
+    popisek:TPText;
 begin
  Self.data.Clear();
 
  count := ini.ReadInteger('P', key, 0);
  for i := 0 to count-1 do
   begin
-   popisek := TPPopisek.Create();
+   popisek := TPText.Create();
 
    popisek.Text        := ini.ReadString(key+IntToStr(i),'T','0');
    popisek.Position.X  := ini.ReadInteger(key+IntToStr(i),'X',0);
@@ -141,8 +141,8 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPopisky.Reset(orindex:Integer = -1);
-var popisek:TPPopisek;
+procedure TPTexty.Reset(orindex:Integer = -1);
+var popisek:TPText;
 begin
  for popisek in Self.data do
    if ((orindex < 0) or (popisek.OblRizeni = orindex)) then
@@ -151,22 +151,22 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPPopisky.GetItem(index:Integer):TPPopisek;
+function TPTexty.GetItem(index:Integer):TPText;
 begin
  Result := Self.data[index];
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPPopisky.GetCount():Integer;
+function TPTexty.GetCount():Integer;
 begin
  Result := Self.data.Count;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPopisky.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
-var popisek:TPPopisek;
+procedure TPTexty.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+var popisek:TPText;
 begin
  for popisek in Self.data do
    popisek.Show(obj, prejezdy);
@@ -174,7 +174,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPPopisky.GetIndex(Pos:TPoint):Integer;
+function TPTexty.GetIndex(Pos:TPoint):Integer;
 var i:Integer;
 begin
  for i := 0 to Self.data.Count-1 do
@@ -189,7 +189,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPopisekPanelProp.Change(parsed:TStrings);
+procedure TTextPanelProp.Change(parsed:TStrings);
 begin
  Self.Symbol := StrToColor(parsed[4]);
  Self.Pozadi := StrToColor(parsed[5]);
@@ -200,7 +200,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPopisekPanelProp.Reset();
+procedure TTextPanelProp.Reset();
 begin
  Self := _Def_Popisek_Prop;
 end;

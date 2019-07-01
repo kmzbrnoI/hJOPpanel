@@ -116,7 +116,7 @@ type
    Prejezdy : TPPrejezdy;
    Vykol : TPVykolejky;
    Rozp : TPRozpojovace;
-   Popisky : TPPopisky;
+   Texty : TPTexty;
    PomocneObj : TPPomocneObj;
 
   SystemOK:record
@@ -285,7 +285,7 @@ begin
  Self.Vykol := TPVykolejky.Create();
  Self.Rozp  := TPRozpojovace.Create();
  Self.Prejezdy := TPPrejezdy.Create();
- Self.Popisky := TPPopisky.Create();
+ Self.Texty := TPTexty.Create();
  Self.Uvazky := TPUvazky.Create();
  Self.UvazkySpr := TPUvazkySpr.Create();
  Self.Zamky := TPZamky.Create();
@@ -366,7 +366,7 @@ begin
  Self.Uvazky.Free();
  Self.UvazkySpr.Free();
  Self.Zamky.Free();
- Self.Popisky.Free();
+ Self.Texty.Free();
  Self.PomocneObj.Free();
 
  if (Assigned(Self.infoTimers)) then FreeAndNil(Self.infoTimers);
@@ -546,7 +546,7 @@ begin
    Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.PomocneObj.Show(Self.DrawObject);
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
-   Self.Popisky.Show(Self.DrawObject, Self.Prejezdy.data);
+   Self.Texty.Show(Self.DrawObject, Self.Prejezdy.data);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Rozp.Show(Self.DrawObject);
@@ -814,11 +814,11 @@ begin
   end;
 
  //souctova hlaska
- index := Self.Popisky.GetIndex(Position);
+ index := Self.Texty.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Popisky.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Popisky.Data[index].OblRizeni].id, Button, Self.Popisky.Data[index].Blok);
+   if (Self.Texty.Data[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Texty.Data[index].OblRizeni].id, Button, Self.Texty.Data[index].Blok);
    goto EscCheck;
   end;
 
@@ -1016,7 +1016,7 @@ begin
    Self.UvazkySpr.Load(inifile);
    Self.Zamky.Load(inifile);
    Self.Rozp.Load(inifile);
-   Self.Popisky.Load(inifile, Self.Prejezdy, 'T');
+   Self.Texty.Load(inifile, Self.Prejezdy, 'T');
    Self.PomocneObj.Load(inifile);
 
    Self.Tech_blok.Clear();
@@ -1048,9 +1048,9 @@ begin
    for i := 0 to Self.Rozp.data.Count-1 do
      Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
 
-   for i := 0 to Self.Popisky.Count-1 do
-     if (Self.Popisky[i].Blok > -1) then
-       Self.AddToTechBlk(_BLK_SH, Self.Popisky[i].Blok, i);
+   for i := 0 to Self.Texty.Count-1 do
+     if (Self.Texty[i].Blok > -1) then
+       Self.AddToTechBlk(_BLK_SH, Self.Texty[i].Blok, i);
 
  finally
    inifile.Free;
@@ -1453,8 +1453,8 @@ begin
 
      _BLK_SH: begin
        if ((symbols[i].blk_type = _BLK_SH) and
-           (Sender = Self.myORs[Self.Popisky[symbols[i].symbol_index].OblRizeni].id)) then
-         Self.Popisky[symbols[i].symbol_index].PanelProp.Change(parsed);
+           (Sender = Self.myORs[Self.Texty[symbols[i].symbol_index].OblRizeni].id)) then
+         Self.Texty[symbols[i].symbol_index].PanelProp.Change(parsed);
      end;
 
    end;//case
@@ -1857,7 +1857,7 @@ begin
  Self.Zamky.Reset(orindex);
  Self.Vykol.Reset(orindex);
  Self.Rozp.Reset(orindex);
- Self.Popisky.Reset(orindex);
+ Self.Texty.Reset(orindex);
 
  for i := 0 to Self.myORs.Count-1 do
   begin
