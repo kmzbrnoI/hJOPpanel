@@ -1016,7 +1016,7 @@ begin
    Self.UvazkySpr.Load(inifile);
    Self.Zamky.Load(inifile);
    Self.Rozp.Load(inifile);
-   Self.Popisky.Load(inifile, Self.Prejezdy);
+   Self.Popisky.Load(inifile, Self.Prejezdy, 'T');
    Self.PomocneObj.Load(inifile);
 
    Self.Tech_blok.Clear();

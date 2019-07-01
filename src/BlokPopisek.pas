@@ -44,7 +44,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini:TMemIniFile; prejezdy:TPPrejezdy);
+    procedure Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
     procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
     function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
@@ -115,23 +115,23 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPopisky.Load(ini:TMemIniFile; prejezdy:TPPrejezdy);
+procedure TPPopisky.Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
 var i, count: Integer;
     popisek:TPPopisek;
 begin
  Self.data.Clear();
 
- count := ini.ReadInteger('P', 'T',   0);
+ count := ini.ReadInteger('P', key, 0);
  for i := 0 to count-1 do
   begin
    popisek := TPPopisek.Create();
 
-   popisek.Text        := ini.ReadString('T'+IntToStr(i),'T','0');
-   popisek.Position.X  := ini.ReadInteger('T'+IntToStr(i),'X',0);
-   popisek.Position.Y  := ini.ReadInteger('T'+IntToStr(i),'Y',0);
-   popisek.Color       := ini.ReadInteger('T'+IntToStr(i),'C',0);
-   popisek.Blok        := ini.ReadInteger('T'+IntToStr(i),'B', -1);
-   popisek.OblRizeni   := ini.ReadInteger('V'+IntToStr(i),'OR',-1);
+   popisek.Text        := ini.ReadString(key+IntToStr(i),'T','0');
+   popisek.Position.X  := ini.ReadInteger(key+IntToStr(i),'X',0);
+   popisek.Position.Y  := ini.ReadInteger(key+IntToStr(i),'Y',0);
+   popisek.Color       := ini.ReadInteger(key+IntToStr(i),'C',0);
+   popisek.Blok        := ini.ReadInteger(key+IntToStr(i),'B', -1);
+   popisek.OblRizeni   := ini.ReadInteger(key+IntToStr(i),'OR',-1);
 
    popisek.PanelProp := _Def_Popisek_Prop;
 
