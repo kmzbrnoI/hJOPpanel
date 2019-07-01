@@ -29,7 +29,7 @@ type
   PanelProp: TTextPanelProp;
 
   procedure Reset();
-  procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+  procedure Show(obj:TDXDraw);
  end;
 
 
@@ -44,8 +44,8 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
-    procedure Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+    procedure Load(ini:TMemIniFile; key:string);
+    procedure Show(obj:TDXDraw);
     function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
 
@@ -73,7 +73,7 @@ begin
  Self.PanelProp.Reset();
 end;
 
-procedure TPText.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+procedure TPText.Show(obj:TDXDraw);
 begin
  if (Self.Blok > -1) then
   begin
@@ -115,7 +115,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Load(ini:TMemIniFile; prejezdy:TPPrejezdy; key:string);
+procedure TPTexty.Load(ini:TMemIniFile; key:string);
 var i, count: Integer;
     popisek:TPText;
 begin
@@ -165,11 +165,11 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Show(obj:TDXDraw; prejezdy:TList<TPPrejezd>);
+procedure TPTexty.Show(obj:TDXDraw);
 var popisek:TPText;
 begin
  for popisek in Self.data do
-   popisek.Show(obj, prejezdy);
+   popisek.Show(obj);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

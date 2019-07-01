@@ -546,7 +546,8 @@ begin
    Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.PomocneObj.Show(Self.DrawObject);
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
-   Self.Texty.Show(Self.DrawObject, Self.Prejezdy.data);
+   Self.Texty.Show(Self.DrawObject);
+   // TODO zobrazit popisky bloku pokud jsou aktivni
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Rozp.Show(Self.DrawObject);
@@ -1016,7 +1017,8 @@ begin
    Self.UvazkySpr.Load(inifile);
    Self.Zamky.Load(inifile);
    Self.Rozp.Load(inifile);
-   Self.Texty.Load(inifile, Self.Prejezdy, 'T');
+   Self.Texty.Load(inifile, 'T');
+   Self.PopiskyBloku.Load(inifile, 'TP');
    Self.PomocneObj.Load(inifile);
 
    Self.Tech_blok.Clear();
