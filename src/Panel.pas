@@ -18,7 +18,9 @@ const
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
 
-  _FileVersion = '1.1';
+  _FileVersion_accept : array[0..1] of string = (
+     '1.1', '1.2'
+  );
 
 type
  ///////////////////////////////////////////////////////////////////////////////
@@ -269,6 +271,8 @@ type
    procedure OROsvChange(Sender:string; code:string; state:boolean);
    procedure ORStackMsg(Sender:string; data:TStrings);
    procedure ORHlaseniMsg(Sender:string; data:TStrings);
+
+   class function FileSupportedVersionsStr():string;
 
  end;
 
@@ -981,6 +985,7 @@ var i:Integer;
     inifile:TMemIniFile;
     sect_str:TStrings;
     ver:string;
+    versionOk:boolean;
 begin
  if (not FileExists(aFile)) then
    raise Exception.Create('Soubor panelu ' + aFile + ' neexistuje!');
@@ -992,12 +997,23 @@ begin
    Self.Graphics.PanelHeight := inifile.ReadInteger('P', 'H', 20);
 
    //kontrola verze
-   ver := inifile.ReadString('G','ver',_FileVersion);
-   if (_FileVersion <> ver) then
+   ver := inifile.ReadString('G', 'ver', 'invalid');
+   versionOk := false;
+   for i := 0 to Length(_FileVersion_accept)-1 do
     begin
-     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+'Aplikace momentálnì podporuje verzi '+
-        _FileVersion+#13#10+'Chcete pokraèovat?'), 'Varování', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-       Exit;
+     if (ver = _FileVersion_accept[i]) then
+      begin
+       versionOk := true;
+       Break;
+      end;
+    end;
+
+   if (not versionOk) then
+    begin
+     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+
+         'Aplikace momentálnì podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraèovat?'),
+         'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+       Exit();
     end;
 
    // Oblasti rizeni
@@ -2351,6 +2367,17 @@ begin
    Exit();
  Self.fShowDetails := show;
  Self.Show();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TRelief.FileSupportedVersionsStr():string;
+var i: Integer;
+begin
+ Result := '';
+ for i := 0 to Length(_FileVersion_accept)-1 do
+   Result := Result + _FileVersion_accept[i] + ', ';
+ Result := LeftStr(Result, Length(Result)-2);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
