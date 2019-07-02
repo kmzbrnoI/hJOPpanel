@@ -48,108 +48,108 @@
 			<DelphiCompile Include="hJOPpanel.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="fMain.pas">
+			<DCCReference Include="forms\fMain.pas">
 				<Form>F_Main</Form>
 			</DCCReference>
 			<DCCReference Include="GlobalConfig.pas"/>
-			<DCCReference Include="Panel.pas"/>
-			<DCCReference Include="fPotvrSekv.pas"/>
+			<DCCReference Include="panel\Panel.pas"/>
+			<DCCReference Include="forms\fPotvrSekv.pas"/>
 			<DCCReference Include="RPConst.pas"/>
-			<DCCReference Include="BottomErrors.pas"/>
+			<DCCReference Include="panel\BottomErrors.pas"/>
 			<DCCReference Include="Sounds.pas"/>
 			<DCCReference Include="SoundsThread.pas"/>
-			<DCCReference Include="TCPClientPanel.pas"/>
-			<DCCReference Include="ListeningThread.pas"/>
-			<DCCReference Include="fStitVyl.pas"/>
-			<DCCReference Include="MenuPanel.pas"/>
-			<DCCReference Include="Symbols.pas"/>
-			<DCCReference Include="Debug.pas">
+			<DCCReference Include="net\TCPClientPanel.pas"/>
+			<DCCReference Include="net\ListeningThread.pas"/>
+			<DCCReference Include="forms\fStitVyl.pas"/>
+			<DCCReference Include="panel\MenuPanel.pas"/>
+			<DCCReference Include="panel\Symbols.pas"/>
+			<DCCReference Include="forms\Debug.pas">
 				<Form>F_Debug</Form>
 			</DCCReference>
-			<DCCReference Include="PGraphics.pas"/>
-			<DCCReference Include="fSettings.pas">
+			<DCCReference Include="panel\PGraphics.pas"/>
+			<DCCReference Include="forms\fSettings.pas">
 				<Form>F_Settings</Form>
 			</DCCReference>
-			<DCCReference Include="fSplash.pas">
+			<DCCReference Include="forms\fSplash.pas">
 				<Form>F_splash</Form>
 			</DCCReference>
-			<DCCReference Include="fSprEdit.pas">
+			<DCCReference Include="forms\fSprEdit.pas">
 				<Form>F_SoupravaEdit</Form>
 			</DCCReference>
-			<DCCReference Include="fSprHelp.pas">
+			<DCCReference Include="forms\fSprHelp.pas">
 				<Form>F_SprHelp</Form>
 			</DCCReference>
-			<DCCReference Include="fZpravy.pas">
+			<DCCReference Include="forms\fZpravy.pas">
 				<Form>F_Messages</Form>
 			</DCCReference>
 			<DCCReference Include="ORList.pas"/>
-			<DCCReference Include="fZprava.pas">
+			<DCCReference Include="forms\fZprava.pas">
 				<Form>F_Message</Form>
 			</DCCReference>
 			<DCCReference Include="HVDb.pas"/>
-			<DCCReference Include="fHVMoveSt.pas">
+			<DCCReference Include="forms\fHVMoveSt.pas">
 				<Form>F_HV_Move</Form>
 			</DCCReference>
-			<DCCReference Include="fSprHVEdit.pas">
+			<DCCReference Include="forms\fSprHVEdit.pas">
 				<Form>F_SprHVEdit</Form>
 			</DCCReference>
 			<DCCReference Include="CloseTabSheet.pas"/>
-			<DCCReference Include="fAuth.pas">
+			<DCCReference Include="forms\fAuth.pas">
 				<Form>F_Auth</Form>
 			</DCCReference>
-			<DCCReference Include="fHVEdit.pas">
+			<DCCReference Include="forms\fHVEdit.pas">
 				<Form>F_HVEdit</Form>
 			</DCCReference>
-			<DCCReference Include="fHVDelete.pas">
+			<DCCReference Include="forms\fHVDelete.pas">
 				<Form>F_HVDelete</Form>
 			</DCCReference>
-			<DCCReference Include="Zasobnik.pas"/>
-			<DCCReference Include="UPO.pas"/>
+			<DCCReference Include="panel\Zasobnik.pas"/>
+			<DCCReference Include="panel\UPO.pas"/>
 			<DCCReference Include="ModelovyCas.pas"/>
-			<DCCReference Include="fNastaveni_Casu.pas">
+			<DCCReference Include="forms\fNastaveni_Casu.pas">
 				<Form>F_ModCasSet</Form>
 			</DCCReference>
 			<DCCReference Include="DCC_Icons.pas"/>
-			<DCCReference Include="fSoupravy.pas">
+			<DCCReference Include="forms\fSoupravy.pas">
 				<Form>F_SprList</Form>
 			</DCCReference>
 			<DCCReference Include="LokoRuc.pas"/>
-			<DCCReference Include="Resuscitation.pas"/>
+			<DCCReference Include="net\Resuscitation.pas"/>
 			<DCCReference Include="Verze.pas"/>
-			<DCCReference Include="fRegReq.pas">
+			<DCCReference Include="forms\fRegReq.pas">
 				<Form>F_RegReq</Form>
 			</DCCReference>
-			<DCCReference Include="fHVPomEdit.pas">
+			<DCCReference Include="forms\fHVPomEdit.pas">
 				<Form>F_HV_Pom</Form>
 			</DCCReference>
 			<DCCReference Include="Hash.pas"/>
-			<DCCReference Include="fHVSearch.pas">
+			<DCCReference Include="forms\fHVSearch.pas">
 				<Form>F_HVSearch</Form>
 			</DCCReference>
-			<DCCReference Include="uLIclient.pas"/>
+			<DCCReference Include="net\uLIclient.pas"/>
 			<DCCReference Include="LokTokens.pas"/>
-			<DCCReference Include="fSprToSlot.pas">
+			<DCCReference Include="forms\fSprToSlot.pas">
 				<Form>F_SprToSlot</Form>
 			</DCCReference>
 			<DCCReference Include="InterProcessCom.pas"/>
-			<DCCReference Include="parseHelper.pas"/>
-			<DCCReference Include="PanelPainter.pas"/>
-			<DCCReference Include="BlokUvazka.pas"/>
-			<DCCReference Include="BlokUvazkaSpr.pas"/>
-			<DCCReference Include="BlokZamek.pas"/>
-			<DCCReference Include="BlokPrejezd.pas"/>
-			<DCCReference Include="BlokUsek.pas"/>
+			<DCCReference Include="net\parseHelper.pas"/>
+			<DCCReference Include="panel\PanelPainter.pas"/>
+			<DCCReference Include="bloky\BlokUvazka.pas"/>
+			<DCCReference Include="bloky\BlokUvazkaSpr.pas"/>
+			<DCCReference Include="bloky\BlokZamek.pas"/>
+			<DCCReference Include="bloky\BlokPrejezd.pas"/>
+			<DCCReference Include="bloky\BlokUsek.pas"/>
 			<DCCReference Include="PanelOR.pas"/>
-			<DCCReference Include="BlokVyhybka.pas"/>
-			<DCCReference Include="BlokNavestidlo.pas"/>
-			<DCCReference Include="BlokyUsek.pas"/>
-			<DCCReference Include="BlokyVyhybka.pas"/>
-			<DCCReference Include="BlokVykolejka.pas"/>
-			<DCCReference Include="BlokRozp.pas"/>
-			<DCCReference Include="BlokPopisek.pas"/>
-			<DCCReference Include="BlokPomocny.pas"/>
-			<DCCReference Include="BlokTypes.pas"/>
-			<DCCReference Include="fOdlozeniOdjezdu.pas">
+			<DCCReference Include="bloky\BlokVyhybka.pas"/>
+			<DCCReference Include="bloky\BlokNavestidlo.pas"/>
+			<DCCReference Include="bloky\BlokyUsek.pas"/>
+			<DCCReference Include="bloky\BlokyVyhybka.pas"/>
+			<DCCReference Include="bloky\BlokVykolejka.pas"/>
+			<DCCReference Include="bloky\BlokRozp.pas"/>
+			<DCCReference Include="bloky\BlokPopisek.pas"/>
+			<DCCReference Include="bloky\BlokPomocny.pas"/>
+			<DCCReference Include="bloky\BlokTypes.pas"/>
+			<DCCReference Include="forms\fOdlozeniOdjezdu.pas">
 				<Form>F_OOdj</Form>
 			</DCCReference>
 			<BuildConfiguration Include="Base">
