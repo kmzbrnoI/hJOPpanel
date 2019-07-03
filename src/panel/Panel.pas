@@ -1035,6 +1035,7 @@ begin
    Self.Useky.Load(inifile, Self.myORs);
    Self.Navestidla.Load(inifile);
    Self.Vyhybky.Load(inifile);
+   Self.Vykol.Load(inifile);
    Self.Prejezdy.Load(inifile, Self.Useky);
    Self.Uvazky.Load(inifile);
    Self.UvazkySpr.Load(inifile);
@@ -1434,9 +1435,7 @@ begin
        if ((symbols[i].blk_type = _BLK_VYH) and
            (Sender = Self.myORs[Vyhybky.data[symbols[i].symbol_index].OblRizeni].id)) then
         Self.Vyhybky[symbols[i].symbol_index].PanelProp.Change(parsed);
-     end;
 
-     _BLK_VYKOL: begin
       if ((symbols[i].blk_type = _BLK_VYKOL) and
           (Sender = Self.myORs[Self.Vykol[symbols[i].symbol_index].OblRizeni].id)) then
          Self.Vykol[symbols[i].symbol_index].PanelProp.Change(parsed);
