@@ -332,6 +332,10 @@ begin
  F_Debug.Log('GET: '+data);
 
  try
+   if (Self.parsed.Count < 2) then
+     Exit();
+   Self.parsed[1] := UpperCase(Self.parsed[1]);
+
    // zakladni rozdeleni parsovani - na data, ktera jsou obecna a na data pro konkretni oblast rizeni
    if (Self.parsed[0] = '-') then
     Self.ParseGlobal()
@@ -385,8 +389,9 @@ begin
    F_Main.SB_Soupravy.Enabled := true;
   end
 
-//  -;STIT;blk_name;stitek;                - pozadavek na zobrazeni vstupu pro stitek
-//  -;VYL;blk_name;vyluka;                 - pozadavek na zobrazeni vstupu pro vyluku
+ else if ((parsed[1] = 'PING') and (parsed.Count > 1) and (UpperCase(parsed[2]) = 'REQ-RESP')) then
+   Self.SendLn('-;PONG')
+
  else if (parsed[1] = 'STIT') then
   begin
    if (parsed.Count > 3) then
@@ -426,10 +431,10 @@ begin
 
  else if (parsed[1] = 'SND') then
   begin
-   if (parsed[2] = 'PLAY') then
+   if (UpperCase(parsed[2]) = 'PLAY') then
      SoundsPlay.Play(StrToInt(parsed[3]), (parsed.Count > 4) and (parsed[4] = 'L'));
 
-   if (parsed[2] = 'STOP') then
+   if (UpperCase(parsed[2]) = 'STOP') then
      SoundsPlay.DeleteSound(StrToInt(parsed[3]));
   end
 
@@ -497,9 +502,9 @@ begin
 
  else if (parsed[1] = 'CAS') then
   begin
-   if (parsed[2] = 'START') then
+   if (UpperCase(parsed[2]) = 'START') then
      Relief.AddMereniCasu(parsed[0], EncodeTime(0, 0, StrToInt(parsed[4]), 0), StrToInt(parsed[3]));
-   if (parsed[2] = 'STOP') then
+   if (UpperCase(parsed[2]) = 'STOP') then
      Relief.StopMereniCasu(parsed[0], StrToInt(parsed[3]));
   end
 
