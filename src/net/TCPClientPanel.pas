@@ -390,7 +390,12 @@ begin
   end
 
  else if ((parsed[1] = 'PING') and (parsed.Count > 2) and (UpperCase(parsed[2]) = 'REQ-RESP')) then
-   Self.SendLn('-;PONG')
+  begin
+   if (parsed.Count >= 4) then
+     Self.SendLn('-;PONG;'+parsed[3])
+   else
+     Self.SendLn('-;PONG');
+  end
 
  else if (parsed[1] = 'STIT') then
   begin
