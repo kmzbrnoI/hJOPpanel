@@ -389,7 +389,7 @@ begin
    F_Main.SB_Soupravy.Enabled := true;
   end
 
- else if ((parsed[1] = 'PING') and (parsed.Count > 1) and (UpperCase(parsed[2]) = 'REQ-RESP')) then
+ else if ((parsed[1] = 'PING') and (parsed.Count > 2) and (UpperCase(parsed[2]) = 'REQ-RESP')) then
    Self.SendLn('-;PONG')
 
  else if (parsed[1] = 'STIT') then
