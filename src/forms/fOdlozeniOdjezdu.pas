@@ -123,7 +123,7 @@ begin
  if (Self.CHB_Absolute.Checked) then
   begin
    if (ModCas.used) then
-     Self.ME_Absolute.Text := FormatDateTime('hh:nn', ModCas.time+EncodeTime(0, 1, 0, 0)) + ':00'
+     Self.ME_Absolute.Text := FormatDateTime('hh:nn', ModCas.time+EncodeTime(0, 3, 0, 0)) + ':00'
    else
      Self.ME_Absolute.Text := FormatDateTime('hh:nn', Now+EncodeTime(0, 1, 0, 0)) + ':00';
   end else
@@ -134,8 +134,12 @@ procedure TF_OOdj.CHB_RelativeClick(Sender: TObject);
 begin
  Self.ME_Relative.Enabled := Self.CHB_Relative.Checked;
  if (Self.CHB_Relative.Checked) then
-   Self.ME_Relative.Text := '00:20'
- else
+  begin
+   if (ModCas.used) then
+     Self.ME_Relative.Text := '01:20'
+   else
+     Self.ME_Relative.Text := '00:20';
+  end else
    Self.ME_Relative.Text := '';
 end;
 
