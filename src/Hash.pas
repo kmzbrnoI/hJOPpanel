@@ -27,6 +27,6 @@ begin
  for i := 0 to 31 do
    Result := Result + IntToHex(Digest[i], 2);
  Result := LowerCase(Result);
-end;//function
+end;
 
 end.//unit

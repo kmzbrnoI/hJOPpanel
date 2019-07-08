@@ -51,7 +51,7 @@ begin
    PanelTCPClient.PanelHVRemove(Self.sender_or, Self.HVIndexes[Self.CB_HV.ItemIndex]);
    Self.Close();
   end;
-end;//procedure
+end;
 
 procedure TF_HVDelete.B_StornoClick(Sender: TObject);
 begin
@@ -65,6 +65,6 @@ begin
  HVs.FillHVs(Self.CB_HV, Self.HVIndexes);
 
  Self.Show();
-end;//procedure
+end;
 
 end.//unit

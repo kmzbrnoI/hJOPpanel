@@ -62,7 +62,7 @@ procedure TSndThread.Execute;
 
      Sleep(1);
     end;//while
- end;//procedure
+ end;
 
 procedure TSndThread.SetData(new: PBytes);
 begin

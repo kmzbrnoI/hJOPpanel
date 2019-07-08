@@ -138,7 +138,7 @@ var i, highest:integer;
         Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(code)];
      end;
    end;// else repeat_delay = -1
- end;//procedure
+ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -158,7 +158,7 @@ begin
  i := Self.GetHighestSound();
  if (i > -1) then
    Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(Self.buffer[i].code)];
-end;//procedure
+end;
 
 procedure TSoundsPlay.DeleteAll();
 var i:Integer;
@@ -169,7 +169,7 @@ begin
 
  if (Self.thread.data <> nil) then
    Self.thread.data := nil;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +188,7 @@ begin
  else
   Result := '';
  end;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -235,7 +235,7 @@ begin
   if (Self.buffer[i].code = code) then
    Exit(true);
  Exit(false);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

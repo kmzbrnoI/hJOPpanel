@@ -69,7 +69,7 @@ procedure TF_ModCasSet.B_OKClick(Sender: TObject);
    Application.MessageBox('Zadána neplatná data', 'Nelze nasatvit èas', MB_OK OR MB_ICONWARNING);
   end;
 
- end;//procedure
+ end;
 
 procedure TF_ModCasSet.B_StornoClick(Sender: TObject);
 begin
@@ -91,7 +91,7 @@ begin
                Key := #0;
               end;
   end;//case
-end;//procedure
+end;
 
 procedure TF_ModCasSet.OpenForm;
  begin
@@ -103,7 +103,7 @@ procedure TF_ModCasSet.OpenForm;
 
   Self.ActiveControl := Self.CHB_Used;
   Self.Show();
- end;//procedure
+ end;
 
 
 end.//unix

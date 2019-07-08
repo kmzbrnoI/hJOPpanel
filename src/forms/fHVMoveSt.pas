@@ -56,7 +56,7 @@ begin
                              ORDb.db_reverse[Self.CB_Stanice.Text]);
 
  Self.Close();
-end;//procedure
+end;
 
 procedure TF_HV_Move.B_StornoClick(Sender: TObject);
 begin
@@ -79,7 +79,7 @@ begin
 
  Self.ActiveControl := Self.CB_HV;
  Self.Show();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

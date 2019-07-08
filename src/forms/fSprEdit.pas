@@ -145,7 +145,7 @@ end;
 procedure TF_SoupravaEdit.B_HelpClick(Sender: TObject);
  begin
   F_SprHelp.Show();
- end;//procedure
+ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -273,7 +273,7 @@ begin
  Self.ActiveControl := Self.E_Nazev;
  Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' – ' + owner;
  Self.Show();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -384,7 +384,7 @@ begin
 
  Screen.Cursor := crHourGlass;
  Self.T_Timeout.Enabled := true;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -432,7 +432,7 @@ begin
  Self.PC_HVs.OwnerDraw := True;
 
  Self.sprHVs := THVDb.Create();
-end;//procedure
+end;
 
 procedure TF_SoupravaEdit.FormDestroy(Sender: TObject);
 var i:Integer;
@@ -460,7 +460,7 @@ begin
  Self.T_Timeout.Enabled := false;
  Screen.Cursor := crDefault;
  Application.MessageBox('Technologický server neodpovìdìl na požadavek o editaci soupravy', 'Varování', MB_OK OR MB_ICONWARNING);
-end;//procedure
+end;
 
 procedure TF_SoupravaEdit.TechACK();
 begin
@@ -468,7 +468,7 @@ begin
  Relief.ORInfoMsg('Souprava uložena');
  Self.T_Timeout.Enabled := false;
  Self.Close();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -658,7 +658,7 @@ begin
    else
      Self.HVs[i].FillHV(Self.HVDb, nil);
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

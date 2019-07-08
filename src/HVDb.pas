@@ -117,7 +117,7 @@ begin
  for i := 0 to Self.count-1 do
   if (Assigned(Self.HVs[i])) then
     FreeAndNil(Self.HVs[i]);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -136,7 +136,7 @@ begin
    Self.HVs[i] := THV.Create(str[i]);
 
  str.Free();
-end;//procedure
+end;
 
 procedure THVDb.ParseHVsFromToken(data:string);
 var str:TStrings;
@@ -153,7 +153,7 @@ begin
    Self.HVs[i] := THV.CreateFromToken(str[i]);
 
  str.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -184,7 +184,7 @@ begin
      index := index + 1;
     end;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -320,7 +320,7 @@ begin
  str.Free();
  str2.Free();
  str3.Free();
-end;//procedure
+end;
 
 procedure THV.ParseFromToken(data:string);
 var str:TStrings;
@@ -339,7 +339,7 @@ begin
  end;
 
  str.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -356,7 +356,7 @@ begin
 
  for i := 0 to _MAX_FUNC do
    Self.funkce[i] := false;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -411,7 +411,7 @@ begin
  for i := 0 to _MAX_FUNC do
    Result := Result + HVFuncTypeToChar(Self.funcType[i]);
  Result := Result + '|';
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -444,7 +444,7 @@ begin
  if (res < 32) then
    raise Exception.Create('Nelze spustit regulator - chyba '+IntToStr(res));
 
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

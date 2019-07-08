@@ -60,7 +60,7 @@ begin
       Key := #0;
       Exit();
      end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -153,7 +153,7 @@ begin
    HV.funkce[i] := Self.CHB_funkce[i].Checked;
 
  Result := '[{' + HV.GetPanelLokString() + '}]';
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -172,7 +172,7 @@ begin
       Exit(Self.HVs.HVs[i]);
 
  Exit(nil);
-end;//function
+end;
 
 function TF_SprHVEdit.GetCurrentHV():THV;
 begin
@@ -211,14 +211,14 @@ begin
      if (i = 14) then aTop := 16;
     end;//with
   end;//for i
-end;//procedure
+end;
 
 procedure TF_SprHVEdit.DestroyCHBFunkce();
 var i:Integer;
 begin
  for i := 0 to _MAX_FUNC do
    Self.CHB_funkce[i].Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

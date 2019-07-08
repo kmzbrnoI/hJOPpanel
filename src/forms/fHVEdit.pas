@@ -222,7 +222,7 @@ begin
 
  HV.Free();
  Self.Close();
-end;//procedure
+end;
 
 procedure TF_HVEdit.B_CancelClick(Sender: TObject);
 begin
@@ -356,7 +356,7 @@ begin
 
   end;
 
-end;//procedure
+end;
 
 procedure TF_HVEdit.FormCreate(Sender: TObject);
 begin
@@ -411,7 +411,7 @@ begin
  Self.Caption := 'Nové hnací vozidlo';
  Self.Show();
  Self.ActiveControl := Self.E_Name;
-end;//procedure
+end;
 
 procedure TF_HVEdit.HVEdit(sender_or:string; HVs:THVDb);
 begin
@@ -530,7 +530,7 @@ procedure TF_HVEdit.SB_Take_RemoveClick(Sender: TObject);
 begin
  if (Self.LV_Pom_Load.Selected <> nil) then
   Self.LV_Pom_Load.Items.Delete(Self.LV_Pom_Load.ItemIndex);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -589,7 +589,7 @@ begin
  Self.FOldListviewWindowProc := Self.LV_Funkce.WindowProc;
  Self.LV_Funkce.WindowProc := LV_FunkceWindowproc;
  Self.RepaintFunkce();
-end;//procedure
+end;
 
 procedure TF_HVEdit.FreeFunkce();
 var i:Integer;
@@ -599,7 +599,7 @@ begin
    FreeAndNil(Self.CB_funkce[i]);
    FreeAndNil(Self.P_types[i]);
   end;
-end;//procedure
+end;
 
 procedure TF_HVEdit.RepaintFunkce();
 var i:Integer;
@@ -628,7 +628,7 @@ begin
      Visible := (i >= top_index);
     end;
   end;
-end;//procedure
+end;
 
 procedure TF_HVEdit.LV_FunkceWindowproc(var Message: TMessage);
 begin
@@ -672,7 +672,7 @@ begin
    sl2.Free();
    vyznamySl.Free();
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

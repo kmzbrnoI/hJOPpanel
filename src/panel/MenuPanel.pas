@@ -119,7 +119,7 @@ begin
               absoluteLeftTop.Y + (SymbolSet._Symbol_Vyska*(i+1))+SymbolSet._Symbol_Vyska+(SymbolSet._Symbol_Vyska div 2));
 
  Self.fshowing  := true;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -221,7 +221,7 @@ begin
    str := Format(' %-'+IntToStr(_HINT_WIDTH)+'s', [str]);
    PanelPainter.TextOutput(Point(1, 0), str, clYellow, clTeal, obj);
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -270,7 +270,7 @@ begin
   end;//for i
 
  sl.Free;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -281,7 +281,7 @@ begin
  Self.showing := false;
  if (Assigned(Self.OnClick)) then
   Self.OnClick(Self, Self.Items.data[Self.fselected].plain_text, Self.fobl_r, Self.fselected);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -318,7 +318,7 @@ begin
 
  parsed.Free();
  CloseFile(f);
-end;//procedure
+end;
 
 procedure TPanelMenu.KeyPress(key:Integer; var handled:boolean);
 var mouse:TPoint;
@@ -384,7 +384,7 @@ begin
  else
   handled := false;
  end;
-end;//procedure
+end;
 
 function TPanelMenu.GetFirstItemIndex():Integer;
 var i:Integer;
@@ -393,7 +393,7 @@ begin
    if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-')) then
     Exit(i);
  Exit(0);
-end;//procedure
+end;
 
 function TPanelMenu.GetLastItemIndex():Integer;
 var i:Integer;
@@ -402,7 +402,7 @@ begin
    if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-')) then
     Exit(i);
  Exit(0);
-end;//function
+end;
 
 function TPanelMenu.GetItemIndex(starting:char):Integer;
 var i:Integer;
@@ -429,7 +429,7 @@ begin
     Exit(i);
 
  Exit(0);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -452,7 +452,7 @@ begin
   end;
 
  Result := false;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

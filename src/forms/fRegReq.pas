@@ -110,7 +110,7 @@ begin
 
  Self.Show();
  Self.LV_Lokos.SetFocus();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -175,7 +175,7 @@ begin
 
  Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenù...';
  Self.token_req_sent := true;
-end;//procedure
+end;
 
 procedure TF_RegReq.B_RemoteClick(Sender: TObject);
 var str:string;
@@ -209,14 +209,14 @@ procedure TF_RegReq.ServerResponseOK();
 begin
  Self.token_req_sent := false;
  Self.Close();
-end;//procedure
+end;
 
 procedure TF_RegReq.ServerResponseErr(err:string);
 begin
  Self.token_req_sent := false;
  Self.L_Stav.Font.Color := clRed;
  Self.L_Stav.Caption := err;
-end;//procedure
+end;
 
 procedure TF_RegReq.ServerCanceled();
 begin
@@ -225,7 +225,7 @@ begin
 
  Self.L_Stav.Font.Color := clRed;
  Self.L_Stav.Caption := 'Regulátor zrušil žádost';
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

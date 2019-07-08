@@ -73,7 +73,7 @@ begin
  Result := Point(StrToIntDef(list[0],-1), StrToIntDef(list[1],-1));
 
  list.Free;
-end;//function
+end;
 
 function StrToColor(str:string):TColor;
 begin

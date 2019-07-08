@@ -192,7 +192,7 @@ begin
  F_Main.T_Main.Interval := ini.ReadInteger('global', 'timer', 200);
 
  Result := 1;
-end;//function
+end;
 
 function TGlobConfig.SaveFile(const filename:string):Integer;
 var ini:TMemIniFile;
@@ -259,12 +259,12 @@ begin
  ini.UpdateFile();
 
  Result := 0;
-end;//function
+end;
 
 function TGlobConfig.SaveFile():Integer;
 begin
  Result := Self.SaveFile(Self.filename);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

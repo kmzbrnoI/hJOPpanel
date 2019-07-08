@@ -163,7 +163,7 @@ begin
 
  end;
 
-end;//procedure
+end;
 
 procedure TORStack.SetEnabled(new:boolean);
 begin
@@ -179,7 +179,7 @@ begin
   end;
 
  Self.fenabled := new;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -212,7 +212,7 @@ begin
 
  str2.Free();
  str1.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -237,7 +237,7 @@ begin
      end;
     Exit();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -257,7 +257,7 @@ begin
  end;
 
  str.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -338,7 +338,7 @@ begin
      end;
     end;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -471,7 +471,7 @@ begin
    if (Self.selected > -1) then Self.selected := -1;
    if (Self.EZ <> TOREZVolba.closed) then Self.EZ := TOREZVolba.closed;
   end;
-end;//procedure
+end;
 
 procedure TORStack.MouseUp(Position:TPoint; Button:TPanelButton; var handled:boolean);
 var cmdi:Integer;
@@ -551,7 +551,7 @@ begin
     end;
    end;//case
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

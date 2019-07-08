@@ -213,7 +213,7 @@ begin
  Self.control_disconnect := false;
 
  Result := 0;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -238,7 +238,7 @@ begin
  end;
 
  Result := 0;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 // eventy z IdTCPClient
@@ -264,7 +264,7 @@ begin
 
  // send handshake
  Self.SendLn('-;HELLO;'+Self._PROTOCOL_VERSION_CLIENT+';');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.OnTcpClientDisconnected(Sender: TObject);
 begin
@@ -317,7 +317,7 @@ begin
 
  if (F_Main.close_app) then
    F_Main.Close();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -344,7 +344,7 @@ begin
  except
 
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -352,7 +352,7 @@ procedure TPanelTCPClient.Timeout();
 begin
  Self.OnTcpClientDisconnected(Self);
  Errors.writeerror('Spojení se serverem pøerušeno', 'KLIENT', '-');
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -484,7 +484,7 @@ begin
 
  else if (parsed[1] = 'PODJ') then
   F_OOdj.OpenForm(parsed);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -572,7 +572,7 @@ begin
    data.Free();
  end else if (parsed[1] = 'SHP') then
    Relief.ORHlaseniMsg(parsed[0], parsed);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -584,7 +584,7 @@ begin
  except
   Exit();   // pokud nastane nejaky problem s parsovanim, data proste zahodime
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 // udalosti z panelu:
@@ -592,12 +592,12 @@ end;//procedure
 procedure TPanelTCPClient.PanelAuthorise(Sender:string;rights:TORControlRights; username,password:string);
 begin
  Self.SendLn(Sender+';AUTH;'+IntToStr(Integer(rights))+';{'+username+'};{'+password+'}');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelFirstGet(Sender:string);
 begin
  Self.SendLn(Sender+';GET-ALL;');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1; params:string = '');
 begin
@@ -607,12 +607,12 @@ begin
    Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button))
  else
    Self.SendLn(Sender+';CLICK;'+PanelButtonToString(Button)+';;'+params);
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelMenuClick(item_hint:string; item_index:Integer);
 begin
  Self.SendLn('-;MENUCLICK;'+item_hint+';'+IntToStr(item_index));
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelSetStitVyl(typ:Integer; stitvyl:string);
 begin
@@ -620,52 +620,52 @@ begin
   _STITEK: Self.SendLn('-;STIT;{'+stitvyl+'}');
   _VYLUKA: Self.SendLn('-;VYL;{'+stitvyl+'}');
  end;
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelPotvrSekv(reason:TPSEnd);
 begin
  Self.SendLn('-;PS;'+IntToStr(Integer(reason))+';');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelNUZ(Sender:string);
 begin
  Self.SendLn(Sender+';NUZ;1;');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelNUZCancel(Sender:string);
 begin
  Self.SendLn(Sender+';NUZ;0;');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelMessage(senderid:string; recepientid:string; msg:string);
 begin
  Self.SendLn(senderid+';MSG;'+recepientid+';{'+msg+'}');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelSprChange(Sender:string; msg:string);
 begin
  Self.SendLn(sender+';SPR-CHANGE;'+msg);
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelLokMove(Sender:string; addr:Word; or_id:string);
 begin
  Self.SendLn(sender+';LOK-MOVE-OR;'+IntToStr(addr)+';'+or_id);
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelLokList(Sender:string);
 begin
  Self.SendLn(sender+';HV-LIST;');
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelSetOsv(Sender:string; code:string; state:Integer);
 begin
  Self.SendLn(sender+';OSV;SET;'+code+';'+IntToStr(state));
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelUpdateOsv(Sender:string);
 begin
  Self.SendLn(sender+';OSV;GET;');
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -673,7 +673,7 @@ end;//procedure
 function TPanelTCPClient.StrToColor(str:string):TColor;
 begin
  Result := RGB(StrToInt('$'+LeftStr(str, 2)), StrToInt('$'+Copy(str, 3, 2)), StrToInt('$'+RightStr(str, 2)));
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -693,7 +693,7 @@ begin
  end;
 
  F_Debug.Log('SEND: '+str);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -723,7 +723,7 @@ begin
 
  list.Free();
  list2.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //  or;HV;ADD;data                - pridani hnaciho vozidla
@@ -733,17 +733,17 @@ end;//procedure
 procedure TPanelTCPClient.PanelHVAdd(Sender:string; data:string);
 begin
  Self.SendLn(Sender+';HV;ADD;'+data);
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelHVRemove(Sender:string; addr:Word);
 begin
  Self.SendLn(Sender+';HV;REMOVE;'+IntToStr(addr));
-end;//procedure
+end;
 
 procedure TPanelTCPClient.PanelHVEdit(Sender:string; data:string);
 begin
  Self.SendLn(Sender+';HV;EDIT;'+data);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

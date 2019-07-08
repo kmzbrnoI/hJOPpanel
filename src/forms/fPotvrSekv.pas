@@ -189,7 +189,7 @@ begin
  F_PotvrSekv.Show();
  F_PotvrSekv.B_OK.SetFocus();
  Self.Update(Self);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -203,7 +203,7 @@ begin
    Self.Stop('Pøekroèení èasu potvrzovací sekvence!');
    Errors.writeerror('Pøekroèení èasu potvrzovací sekvence','Potvr. sekvence','');
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -226,7 +226,7 @@ begin
  Self.started := false;
  Self.Timer.Enabled := false;
  F_PotvrSekv.Close();
-end;//procedure
+end;
 
 procedure TPotvrSekv.UpdateForm();
 var i, plus:Integer;
@@ -304,12 +304,12 @@ begin
     L_DateTime.Caption := FormatDateTime('dd.mm.yyyy hh:mm:ss', Now);
     L_Timeout.Caption  := FormatDateTime('nn:ss', (now-Self.StartPotvrSekv));
    end;//with
-end;//procedure
+end;
 
 procedure TF_PotvrSekv.B_OKClick(Sender: TObject);
 begin
  PotvrSek.Stop();
-end;//procedure
+end;
 
 procedure TF_PotvrSekv.B_StornoClick(Sender: TObject);
 begin

@@ -92,7 +92,7 @@ begin
    obj.Surface.Canvas.Rectangle(Pos.X*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska-1,
                                 (Pos.X+Length(Text))*SymbolSet._Symbol_Sirka, (Pos.Y+1)*SymbolSet._Symbol_Vyska);
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                    VYKRESLOVANI KONKRETNICH OBJEKTU                        //

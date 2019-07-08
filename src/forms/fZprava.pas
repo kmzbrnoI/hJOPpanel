@@ -162,7 +162,7 @@ begin
  Self.M_Send.SetFocus();
  (Self.Parent as TTabSheet).ShowHint := false;
  ((Self.Parent as TTabSheet).Parent as TPageControl).Repaint();
-end;//procedure
+end;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -181,7 +181,7 @@ begin
   (Self.Parent as TTabSheet).ShowHint := true;
   ((Self.Parent as TTabSheet).Parent as TPageControl).Repaint();
  end;
-end;//procedure
+end;
 
 procedure TF_Message.ReceiveErr(err:string);
 var LI:TListItem;
@@ -191,7 +191,7 @@ begin
  LI.SubItems.Add('ERR: '+err);
 
  Self.LV_Messages.Scroll(0, 100);
-end;//procedure
+end;
 
 ///////////////////////////////////////////////////////////////////////////
 

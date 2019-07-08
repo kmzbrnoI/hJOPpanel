@@ -127,7 +127,7 @@ begin
      if (form <> nil) then form.ReceiveMsg(msg);
      Exit();
     end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -143,7 +143,7 @@ begin
      form.ReceiveErr(error);
      Exit();
     end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -221,7 +221,7 @@ begin
 
  for i := Self.PC_Clients.PageCount-1 downto 0 do
   Self.PC_Clients.Pages[i].Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -232,7 +232,7 @@ begin
   if (form.M_Send.Text <> '') then
    Exit(true);
  Exit(false);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -249,7 +249,7 @@ begin
     TF_Messages.frm_db[i].MsgReceive(msg, sender);
     Exit();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -301,7 +301,7 @@ end;
 procedure TF_Messages.LV_ORsKeyPress(Sender: TObject; var Key: Char);
 begin
  if (Key = #13) then Self.LV_ORsDblClick(Self.LV_ORs); 
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -311,7 +311,7 @@ begin
  for i := 0 to Self.frm_cnt-1 do
   if (Assigned(Self.frm_db[i])) then
    FreeAndNil(Self.frm_db[i]);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -324,7 +324,7 @@ begin
     Self.frm_db[i].Close();
     Self.frm_db[i].RemoveClients();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -335,7 +335,7 @@ begin
    if (Self.frm_db[i].IsTypin()) then
     Exit(true);
  Exit(false);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////// PAGE CONTROL CLOSE BUTTON DRAWING AND HANDLING ////////////////////
@@ -504,7 +504,7 @@ begin
     Self.PC_Clients.Repaint();
     Exit();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -43,7 +43,7 @@ constructor TDCC.Create();
 begin
  inherited Create();
  Self.status := TDCCStatus.disabled;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +65,7 @@ begin
    F_Main.SB_DCC_Stop.Enabled := true;
   end;
  end;//case
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +76,7 @@ begin
    Self.fstatus := new;
    Self.Show();
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -91,19 +91,19 @@ begin
   Self.status := TDCCStatus.stopped
  else
   Self.status := TDCCStatus.disabled;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TDCC.Go();
 begin
  PanelTCPClient.SendLn('-;DCC;GO');
-end;//procedure
+end;
 
 procedure TDCC.Stop();
 begin
  PanelTCPClient.SendLn('-;DCC;STOP');
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

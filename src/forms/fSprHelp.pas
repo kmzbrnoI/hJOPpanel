@@ -32,7 +32,7 @@ implementation
 procedure TF_SprHelp.B_OKClick(Sender: TObject);
  begin
   F_SprHelp.Close;
- end;//procedure
+ end;
 
 procedure TF_SprHelp.FormCreate(Sender: TObject);
 var LI:TListItem;
@@ -72,6 +72,6 @@ var LI:TListItem;
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '90xxxx';
   LI.SubItems.Add('Zvláštní vlak');
- end;//procedure
+ end;
 
 end.//unit

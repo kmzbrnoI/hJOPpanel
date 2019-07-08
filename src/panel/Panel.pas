@@ -355,7 +355,7 @@ begin
  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth*SymbolSet._Symbol_Sirka, Self.Graphics.PanelHeight*SymbolSet._Symbol_Vyska);
 
  Self.Show();
-end;//function
+end;
 
 destructor TRelief.Destroy();
 var i:Integer;
@@ -433,7 +433,7 @@ begin
         _Kolecko, clYellow, clBlack, Self.DrawObject);
 
   end;//for i
-end;//procedure
+end;
 
 //zobrazeni SystemOK + opravneni
 procedure TRelief.ShowOpravneni();
@@ -488,7 +488,7 @@ begin
   TPanelConnectionStatus.opened    :
     PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Pøipojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
  end;
-end;//procedure
+end;
 
 //vykresleni pasku mereni casu
 procedure TRelief.ShowMereniCasu();
@@ -529,14 +529,14 @@ begin
       Self.myORs[j].MereniCasu.Delete(k);
     end;
   end;//for j
-end;//procedure
+end;
 
 procedure TRelief.ShowMsg();
 begin
  if (Self.msg.show) then
    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1), Self.msg.msg,
      clRed, clWhite, Self.DrawObject);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -594,7 +594,7 @@ begin
  except
 
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -619,7 +619,7 @@ begin
  Self.DrawObject.Surface.Canvas.Pen.Mode    := pmMerge;
  Self.DrawObject.Surface.Canvas.Rectangle((Self.CursorDraw.Pos.X*SymbolSet._Symbol_Sirka)-1,(Self.CursorDraw.Pos.Y*SymbolSet._Symbol_Vyska)-1,((Self.CursorDraw.Pos.X*SymbolSet._Symbol_Sirka)+SymbolSet._Symbol_Sirka)+1,((Self.CursorDraw.Pos.Y*SymbolSet._Symbol_Vyska)+SymbolSet._Symbol_Vyska)+1);
  Self.DrawObject.Surface.Canvas.Pen.Mode    := pmCopy;
-end;//procedure
+end;
 
 // vykresli pozadi pod kurzorem, ktere je ulozeno v Self.CursorDraw.Pozadi
 //     na zadane souradnice (v polickach).
@@ -636,7 +636,7 @@ begin
 
       Rect(0, 0, SymbolSet._Symbol_Sirka+2, SymbolSet._Symbol_Vyska+2)
   );
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -672,7 +672,7 @@ begin
  Self.mouseLastBtn := Button;
 
  Self.Show();
-end;//procedure
+end;
 
 // Tato funkce neni skoro vubec vyuzivana, je pouze na specialni veci.
 // Vsechny kliky mysi se resi pomoci MouseUp
@@ -766,7 +766,7 @@ begin
 
    end;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -940,7 +940,7 @@ EscCheck:
  // ne server (uz byl poslan).
  if (Button = TPanelButton.ESCAPE) then
   Self.Escape(false);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1081,7 +1081,7 @@ begin
  finally
    inifile.Free;
  end;
-end;//procedure LoadFile
+end;
 
 function TRelief.GetDK(Pos:TPoint):Integer;
 var i:Integer;
@@ -1091,7 +1091,7 @@ begin
      Exit(i);
 
  Result := -1;
-end;//function
+end;
 
 procedure TRelief.AEMessage(var Msg: tagMSG;var Handled: Boolean);
 var mouse:TPoint;
@@ -1153,13 +1153,13 @@ begin
      end;
    end;//case
   end;//if
-end;//procedure
+end;
 
 procedure TRelief.T_SystemOKOnTimer(Sender:TObject);
 begin
  Self.SystemOK.Poloha := not Self.SystemOK.Poloha;
  Self.Graphics.blik   := not Self.Graphics.blik;
-end;//procedure
+end;
 
 procedure TRelief.Escape(send:boolean = true);
 var OblR:TORPanel;
@@ -1176,7 +1176,7 @@ begin
 
  if (send) then
    PanelTCPClient.PanelClick('-', TPanelButton.ESCAPE);
-end;//procedure
+end;
 
 function TRelief.AddMereniCasu(Sender:string; Delka:TDateTime; id:Integer):byte;
 var orindex:Integer;
@@ -1193,7 +1193,7 @@ begin
  Self.myORs[orindex].MereniCasu.Add(mc);
 
  Result := 0;
-end;//function
+end;
 
 procedure TRelief.StopMereniCasu(Sender:string; id:Integer);
 var orindex, i:Integer;
@@ -1209,7 +1209,7 @@ begin
      Self.myORs[orindex].MereniCasu.Delete(i);
      break;
     end;
-end;//procedure
+end;
 
 procedure TRelief.Image(filename:string);
 var Bmp:TBitmap;
@@ -1268,7 +1268,7 @@ begin
  end;
 
  FreeAndNil(Bmp);
-end;//procedure
+end;
 
 procedure TRelief.HideCursor();
 begin
@@ -1277,7 +1277,7 @@ begin
    Self.CursorDraw.Pos.X := -2;
    Self.Show();
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //komunikace s oblastmi rizeni:
@@ -1330,13 +1330,13 @@ begin
 
  if (comment <> '') then
   Self.ORInfoMsg(comment);
-end;//procedure
+end;
 
 procedure TRelief.ORInfoMsg(msg:string);
 begin
  Self.msg.msg := msg + StringOfChar(' ', Max(Self._msg_width - Length(msg), 0));
  Self.msg.show := true;
-end;//procedure
+end;
 
 procedure TRelief.ORNUZ(Sender:string; status:TNUZstatus);
 var i,orindex:Integer;
@@ -1352,7 +1352,7 @@ begin
   no_nuz, nuzing: Self.myORs[orindex].dk_blik := false;
   blk_in_nuz: Self.myORs[orindex].dk_blik := true;
  end;
-end;//procedure
+end;
 
 procedure TRelief.ORConnectionOpenned();
 var i, j, cnt:Integer;
@@ -1387,7 +1387,7 @@ begin
   end else begin
    F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, ors, true);
   end;
-end;//procedure
+end;
 
 procedure TRelief.ORConnectionOpenned_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 var i:Integer;
@@ -1499,7 +1499,7 @@ begin
      Self.myORs[i].HVs.ParseHVs(data);
      Exit();
     end;
-end;//procedure
+end;
 
 procedure TRelief.ORSprNew(Sender:string);
 var i, j:Integer;
@@ -1523,7 +1523,7 @@ begin
 
      Exit();
     end;
-end;//procedure
+end;
 
 procedure TRelief.ORSprEdit(Sender:string; parsed:TStrings);
 var i:Integer;
@@ -1534,7 +1534,7 @@ begin
      F_SoupravaEdit.EditSpr(parsed, Self.myORs[i].HVs, Self.myORs[i].id, Self.myORs[i].Name);
      Exit();
     end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1544,7 +1544,7 @@ begin
  Self.menu_lastpos := Self.CursorDraw.Pos;
  Self.special_menu := TSpecialMenu.none;
  Self.Menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1556,7 +1556,7 @@ begin
  bPos := Self.DrawObject.ClientToScreen(Point(0,0));
  SetCursorPos(Self.menu_lastpos.X*SymbolSet._Symbol_Sirka + bPos.X, Self.menu_lastpos.Y*SymbolSet._Symbol_Vyska + bPos.Y);
  Self.Show();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //DKMenu popup:
@@ -1623,7 +1623,7 @@ begin
  Self.menu_lastpos := Self.CursorDraw.Pos;
 
  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //DKMenu clicks:
@@ -1649,7 +1649,7 @@ begin
    else
      F_Auth.OpenForm('Vyžadována autorizace', Self.AuthReadCallback, ors, true)
   end;
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickNUZ(Sender:Integer; item:string);
 begin
@@ -1657,7 +1657,7 @@ begin
    PanelTCPClient.PanelNUZ(Self.myORs[Sender].id)
  else
    PanelTCPClient.PanelNUZCancel(Self.myORs[Sender].id);
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickOSV(Sender:Integer; item:string);
 var menu_str:string;
@@ -1675,7 +1675,7 @@ begin
 
  Self.special_menu := osv;
  Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickLOKO(Sender:Integer; item:string);
 var menu_str:string;
@@ -1688,7 +1688,7 @@ begin
 
  Self.special_menu := loko;
  Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickSUPERUSER(Sender:Integer; item:string);
 var ors: TIntAr;
@@ -1696,7 +1696,7 @@ begin
  SetLength(ors, 1);
  ors[0] := Sender;
  F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, ors, false);
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 begin
@@ -1713,12 +1713,12 @@ begin
   end else begin
    PanelTCPClient.SendLn('-;MOD-CAS;STOP;');
   end;
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickSetCAS(Sender:Integer; item:string);
 begin
  F_ModCasSet.OpenForm();
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickINFO(Sender:Integer; item:string);
 var lichy, rs:string;
@@ -1759,13 +1759,13 @@ begin
   '>' : PanelTCPClient.PanelSetOsv(Self.ORs[Sender].id, LeftStr(item, Length(item)-1), 1);
   '<' : PanelTCPClient.PanelSetOsv(Self.ORs[Sender].id, LeftStr(item, Length(item)-1), 0);
  end;//case
-end;//procedure
+end;
 
 procedure TRelief.DKMenuClickMSG(Sender:Integer; item:string);
 begin
  TF_Messages.frm_db[Sender].Show();
  TF_Messages.frm_db[Sender].SetFocus();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1785,7 +1785,7 @@ begin
  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
 
  PanelTCPClient.PanelLokList(Self.myORs[obl_rizeni].id);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1803,7 +1803,7 @@ begin
   reg_please : Self.ParseRegMenuClick(item, obl_r);
   hlaseni    : Self.ParseHlaseniMenuClick(item, obl_r);
  end;
-end;//procedure
+end;
 
 procedure TRelief.ParseDKMenuClick(item:string; obl_r:Integer);
 begin
@@ -1817,7 +1817,7 @@ begin
  else if (item = 'CAS') then Self.DKMenuClickSetCAS(obl_r, item)
  else if (item = 'INFO') then Self.DKMenuClickINFO(obl_r, item)
  else if (item = 'HLÁŠENÍ') then Self.DKMenuClickHLASENI(obl_r, item);           
-end;//procedure
+end;
 
 procedure TRelief.ParseLOKOMenuClick(item:string; obl_r:Integer);
 begin
@@ -1836,7 +1836,7 @@ begin
       Self.myORs[obl_r].RegPlease.comment,
       (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.none),
       false, false, (item = 'MAUS loko'));
-end;//procedure
+end;
 
 procedure TRelief.ParseRegMenuClick(item:string; obl_r:Integer);
 begin
@@ -1852,7 +1852,7 @@ begin
       Self.myORs[obl_r].RegPlease.comment,
       true, false, false, false);
   end;
-end;//procedure
+end;
 
 procedure TRelief.ParseHlaseniMenuClick(item:string; obl_r:Integer);
 begin
@@ -1902,7 +1902,7 @@ begin
 
  Self.Show();
  Self.UpdateLoginString();
-end;//procedure
+end;
 
 procedure TRelief.OROsvChange(Sender:string; code:string; state:boolean);
 var i, j:Integer;
@@ -1920,7 +1920,7 @@ begin
        end;
     Exit();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1929,7 +1929,7 @@ var i:Integer;
 begin
  for i := 0 to Self.myORs.Count-1 do
    Self.myORs[i].stack.Show(Self.DrawObject, Self.CursorDraw.Pos);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1939,19 +1939,19 @@ begin
  for i := 0 to Self.ORs.Count-1 do
   if (Self.ORs[i].id = Sender) then
     Self.ORs[i].stack.ParseCommand(data);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 function TRelief.GetPanelWidth():SmallInt;
 begin
  Result := Self.Graphics.PanelWidth;
-end;//function
+end;
 
 function TRelief.GetPanelHeight():SmallInt;
 begin
  Result := Self.Graphics.PanelHeight;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1969,7 +1969,7 @@ begin
    PanelPainter.TextOutput(Point(Self.PanelWidth-_INFOTIMER_WIDTH, Self.PanelHeight-i-1),
      str, clRed, clWhite, Self.DrawObject);
   end;//for i
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1989,7 +1989,7 @@ begin
  tmr.id := id;
 
  Self.infoTimers.Add(tmr);
-end;//procedure
+end;
 
 procedure TRelief.ORInfoTimerRemove(id:Integer);
 var i:Integer;
@@ -2000,7 +2000,7 @@ begin
     Self.infoTimers.Delete(i);
     Exit();
    end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2010,7 +2010,7 @@ begin
  for i := 0 to Self.myORs.Count-1 do
   if (Self.myORs[i].id = Sender) then
     Self.myORs[i].dk_click_server := enable;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2018,7 +2018,7 @@ class function TRelief.GetTechBlk(typ:Integer; symbol_index:Integer):TTechBlokTo
 begin
  Result.blk_type      := typ;
  Result.symbol_index  := symbol_index;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2036,7 +2036,7 @@ begin
    symbols.Add(val);
 
  Self.Tech_blok.AddOrSetValue(blok_id, symbols);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2108,7 +2108,7 @@ begin
   begin
    Self.ORInfoMsg(parsed[3]);
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

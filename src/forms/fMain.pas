@@ -380,7 +380,7 @@ begin
 
  if (GlobConfig.data.server.autoconnect) then
   Self.A_ConnectExecute(Self);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -470,7 +470,7 @@ begin
    Self.SB_Mute.Down := not Self.SB_Mute.Down;
    SoundsPlay.muted := false;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -486,7 +486,7 @@ begin
  Application.MessageBox(PChar('hJOPpanel v'+NactiVerzi(Application.ExeName)+#13#10+
   'build '+GetLastBuildDate()+' '+GetLastBuildTime()+#13#10+
   'Vytvořil Jan Horáček (c) 2014–2019 pro KMŽ Brno I'), 'Info', MB_OK OR MB_ICONINFORMATION);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

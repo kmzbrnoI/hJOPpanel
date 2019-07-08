@@ -91,7 +91,7 @@ procedure TF_Debug.E_SendKeyPress(Sender: TObject; var Key: Char);
 begin
  if (Key = #13) then
   Self.B_SendClick(Self);
-end;//procedure
+end;
 
 procedure TF_Debug.Log(msg:string);
 var LI:TListItem;
@@ -103,6 +103,6 @@ begin
  LI := Self.LV_Log.Items.Insert(0);
  LI.Caption := FormatDateTime('hh:nn:ss,zzz', Now);
  LI.SubItems.Add(msg);
-end;//procedure
+end;
 
 end.//unit

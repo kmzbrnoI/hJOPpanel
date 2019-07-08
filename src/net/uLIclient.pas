@@ -195,7 +195,7 @@ begin
  Self.control_disconnect := false;
 
  Result := 0;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -220,7 +220,7 @@ begin
  end;
 
  Result := 0;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 // eventy z IdTCPClient
@@ -239,7 +239,7 @@ begin
   (Sender as TIdTCPClient).Disconnect;
   raise;
  end;
-end;//procedure
+end;
 
 procedure TBridgeClient.OnTcpClientDisconnected(Sender: TObject);
 begin
@@ -261,7 +261,7 @@ begin
   end;
 
  if (Assigned(Self.OnAuthStatushanged)) then Self.OnAuthStatushanged(Self);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -281,14 +281,14 @@ begin
  except
 
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TBridgeClient.Timeout();
 begin
  Self.OnTcpClientDisconnected(Self);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -336,7 +336,7 @@ begin
        Application.MessageBox(PChar(parsed[3]), 'uLI-daemon', MB_OK OR MB_ICONWARNING);
    end;
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -353,7 +353,7 @@ begin
  except
    Self.OnTcpClientDisconnected(Self);
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

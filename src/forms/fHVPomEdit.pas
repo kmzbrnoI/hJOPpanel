@@ -67,6 +67,6 @@ begin
   #13 : Self.B_OKClick(Self);
   #$1B: Self.B_StornoClick(Self);
  end;//case
-end;//procedure
+end;
 
 end.//unit

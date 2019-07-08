@@ -357,7 +357,7 @@ begin
 
    Self.E_Regulator.Text := fn;
   end;
-end;//procedure
+end;
 
 procedure TF_Settings.B_StornoClick(Sender: TObject);
 begin
@@ -454,7 +454,7 @@ begin
  if ((Key = ';') or (Key = ',')) then Key := #0;
 end;
 
-//procedure
+
 
 procedure TF_Settings.FormClose(Sender: TObject; var Action: TCloseAction);
 begin

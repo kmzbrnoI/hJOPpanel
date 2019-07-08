@@ -59,7 +59,7 @@ begin
  Self.E_Popisek.Text := stit;
 
  Self.Show();
-end;//procedure
+end;
 
 procedure TF_StitVyl.OpenFormVyl(callback:TStitVylCallback; blk,vyl:string);
 begin
@@ -73,7 +73,7 @@ begin
  Self.E_Popisek.Text := vyl;
 
  Self.Show();
-end;//procedure
+end;
 
 procedure TF_StitVyl.B_OKClick(Sender: TObject);
 var i, j:Integer;
@@ -89,7 +89,7 @@ var i, j:Integer;
 
   Self.Close;
   Self.callback(Self.OpenStitVyl, Self.E_Popisek.Text);
- end;//procedure
+ end;
 
 procedure TF_StitVyl.E_PopisekKeyPress(Sender: TObject; var Key: Char);
 var i:Integer;
@@ -108,7 +108,7 @@ var i:Integer;
       Key := #0;
       Exit();
      end;
- end;//procedure
+ end;
 
 procedure TF_StitVyl.E_PopisekChange(Sender: TObject);
  begin
@@ -118,7 +118,7 @@ procedure TF_StitVyl.E_PopisekChange(Sender: TObject);
    end else begin
     Self.E_Popisek.Color := clWhite;
    end;//else E_popisek.Text = ''
- end;//procedure
+ end;
 
 procedure TF_StitVyl.FormShow(Sender: TObject);
 begin
@@ -128,13 +128,13 @@ begin
    end else begin
     Self.E_Popisek.Color := clWhite;
    end;//else E_popisek.Text = ''
-end;//procedure
+end;
 
 procedure TF_StitVyl.PotvrSekvCallback(reason:TPSEnd);
 begin
  if (PotvrSek.EndReason = TPSEnd.success) or (E_Popisek.Text <> '') then
    Self.callback(1, Self.E_Popisek.Text);
-end;//procedure
+end;
 
 end.//unit
 

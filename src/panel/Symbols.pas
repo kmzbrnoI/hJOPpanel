@@ -1,4 +1,4 @@
-﻿unit Symbols;
+unit Symbols;
 
 {
   Zakladni operace se symboly, definice pozic symbolu v souboru.
@@ -160,7 +160,7 @@ begin
  Self.LoadIL(Self.IL_DK, Self.Sets[Integer(typ)].Names.DK, Self._Symbol_Sirka*_DK_Sirka, Self._Symbol_Vyska*_DK_Vyska);
  F_splash.AddStav('Načítám symboly "trat" ...');
  Self.LoadIL(Self.IL_Trat, Self.Sets[Integer(typ)].Names.Trat, Self._Symbol_Sirka*_Trat_Sirka, Self._Symbol_Vyska*_Trat_Vyska);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -197,7 +197,7 @@ begin
 
  ColouredImages.Free;
  AllImages.Free;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -294,7 +294,7 @@ begin
      Break;
     end;
   end;//for i
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
