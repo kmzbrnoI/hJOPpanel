@@ -22,6 +22,7 @@ type
     Label1: TLabel;
     L_len: TLabel;
     Label2: TLabel;
+    CHB_PingLogging: TCheckBox;
     procedure B_ClearLogClick(Sender: TObject);
     procedure LV_LogChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -96,6 +97,8 @@ procedure TF_Debug.Log(msg:string);
 var LI:TListItem;
 begin
  if (not Self.CHB_DataLogging.Checked) then Exit();
+ if ((not Self.CHB_PingLogging.Checked) and ((ContainsStr(msg, '-;PING')) or (ContainsStr(msg, '-;PONG')))) then
+   Exit();
 
  LI := Self.LV_Log.Items.Insert(0);
  LI.Caption := FormatDateTime('hh:nn:ss,zzz', Now);
