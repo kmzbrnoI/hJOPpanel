@@ -1,4 +1,4 @@
-﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{44A7AE91-162E-45C9-84D4-51A50AB72A6F}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
@@ -63,7 +63,7 @@
 			<DCCReference Include="forms\fStitVyl.pas"/>
 			<DCCReference Include="panel\MenuPanel.pas"/>
 			<DCCReference Include="panel\Symbols.pas"/>
-			<DCCReference Include="forms\Debug.pas">
+			<DCCReference Include="forms\fDebug.pas">
 				<Form>F_Debug</Form>
 			</DCCReference>
 			<DCCReference Include="panel\PGraphics.pas"/>

@@ -1,4 +1,4 @@
-unit Debug;
+unit fDebug;
 
 {
   Debug okno.

@@ -108,7 +108,7 @@ var
 
 implementation
 
-uses Symbols, Debug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
+uses Symbols, fDebug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
   fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient,
   InterProcessCom, JclAppInst;
 

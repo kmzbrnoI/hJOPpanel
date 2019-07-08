@@ -17,7 +17,7 @@ uses
   fStitVyl in 'forms\fStitVyl.pas',
   MenuPanel in 'panel\MenuPanel.pas',
   Symbols in 'panel\Symbols.pas',
-  Debug in 'forms\Debug.pas' {F_Debug},
+  fDebug in 'forms\fDebug.pas' {F_Debug},
   PGraphics in 'panel\PGraphics.pas',
   fSettings in 'forms\fSettings.pas' {F_Settings},
   fSplash in 'forms\fSplash.pas' {F_splash},

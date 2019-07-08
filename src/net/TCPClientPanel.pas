@@ -110,7 +110,7 @@ var
 
 implementation
 
-uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, Debug, fSprEdit,
+uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
       BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokVyhybka, BlokUsek, BlokNavestidlo,
