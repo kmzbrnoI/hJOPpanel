@@ -124,7 +124,7 @@ begin
  else
    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1),
      '  Pokraèovat: ENTER, konec: ESCAPE  ', clBlack, clTeal, obj);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -142,80 +142,83 @@ begin
  lines := TStringList.Create();
  line  := TStringList.Create();
 
- Self.critical := critical;
+ try
+   Self.critical := critical;
 
- Self.items.Clear();
- ExtractStringsEx([']'], ['['], data, items);
+   Self.items.Clear();
+   ExtractStringsEx([']'], ['['], data, items);
 
- for i := 0 to items.Count-1 do
-  begin
-   lines.Clear();
-   ExtractStringsEx([']'], ['['], items[i], lines);
-
-   if (lines.Count = 0) then continue;
-
-   for j := 0 to lines.Count-1 do
+   for i := 0 to items.Count-1 do
     begin
-     if (j > _UPO_HEIGHT-2) then break;
+     lines.Clear();
+     ExtractStringsEx([']'], ['['], items[i], lines);
 
-     line.Clear();
-     ExtractStringsEx(['|'], [], lines[j], line);
+     if (lines.Count = 0) then continue;
 
-     // parsovani zarovnani
-     if (line.Count > 1) then
+     for j := 0 to lines.Count-1 do
       begin
-       case (line[0][1]) of
-        'L' : item.lines[j].align := taLeftJustify;
-        'R' : item.lines[j].align := taRightJustify;
-        'M' : item.lines[j].align := taCenter;
-       end;//case
-      end else begin
-       item.lines[j].align := taCenter;
-      end;
+       if (j > _UPO_HEIGHT-2) then break;
 
-     // parsvani barvy popredi
-     if (line.Count > 2) then
-      item.lines[j].fg := PanelTCPClient.StrToColor(line[1])
-     else begin
-      if (j > 0) then
-        item.lines[j].fg := item.lines[j-1].fg
-      else
-        item.lines[j].fg := clRed;
-     end;
+       line.Clear();
+       ExtractStringsEx(['|'], [], lines[j], line);
 
-     // parsovani barvy pozadi
-     if (line.Count > 3) then
-      item.lines[j].bg := PanelTCPClient.StrToColor(line[2])
-     else begin
-      if (j > 0) then
-        item.lines[j].bg := item.lines[j-1].bg
-      else
-        item.lines[j].bg := clWhite;
-     end;
+       // parsovani zarovnani
+       if (line.Count > 1) then
+        begin
+         case (line[0][1]) of
+          'L' : item.lines[j].align := taLeftJustify;
+          'R' : item.lines[j].align := taRightJustify;
+          'M' : item.lines[j].align := taCenter;
+         end;//case
+        end else begin
+         item.lines[j].align := taCenter;
+        end;
 
-     item.lines[j].str := line[line.Count-1];
-    end;//for j
+       // parsvani barvy popredi
+       if (line.Count > 2) then
+        item.lines[j].fg := PanelTCPClient.StrToColor(line[1])
+       else begin
+        if (j > 0) then
+          item.lines[j].fg := item.lines[j-1].fg
+        else
+          item.lines[j].fg := clRed;
+       end;
 
-   if (lines.Count < _UPO_HEIGHT-1) then
-    begin
-     for j := lines.Count to _UPO_HEIGHT-2 do
+       // parsovani barvy pozadi
+       if (line.Count > 3) then
+        item.lines[j].bg := PanelTCPClient.StrToColor(line[2])
+       else begin
+        if (j > 0) then
+          item.lines[j].bg := item.lines[j-1].bg
+        else
+          item.lines[j].bg := clWhite;
+       end;
+
+       item.lines[j].str := line[line.Count-1];
+      end;//for j
+
+     if (lines.Count < _UPO_HEIGHT-1) then
       begin
-       item.lines[j].str := '';
-       item.lines[j].fg  := item.lines[j-1].fg;
-       item.lines[j].bg  := item.lines[j-1].bg;
-      end;
-    end;//if
+       for j := lines.Count to _UPO_HEIGHT-2 do
+        begin
+         item.lines[j].str := '';
+         item.lines[j].fg  := item.lines[j-1].fg;
+         item.lines[j].bg  := item.lines[j-1].bg;
+         item.lines[j].align := taLeftJustify;
+        end;
+      end;//if
 
-   Self.items.Add(item);
-  end;//for i
+     Self.items.Add(item);
+    end;//for i
 
- Self.showing := true;
- Self.current  := 0;
-
- items.Free();
- lines.Free();
- line.Free();
-end;//procedure
+   Self.showing := true;
+   Self.current  := 0;
+ finally
+   items.Free();
+   lines.Free();
+   line.Free();
+ end;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -242,7 +245,7 @@ begin
    handled := true;
   end;
  end;//case
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -253,7 +256,7 @@ begin
  if ((showing) and (not Self.fshowing)) then
    F_Main.DXD_Main.Enabled := false;
  Self.fshowing := showing;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
