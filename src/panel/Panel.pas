@@ -1497,20 +1497,22 @@ begin
    if (Sender = Self.myORs[i].id) then
     begin
      Self.myORs[i].HVs.ParseHVs(data);
+     Self.myORs[i].HVs.HVs.Sort();
      Exit();
     end;
 end;
 
 procedure TRelief.ORSprNew(Sender:string);
-var i, j:Integer;
+var i:Integer;
+    HV:THV;
     available:boolean;
 begin
  for i := 0 to Self.myORs.Count-1 do
    if (Sender = Self.myORs[i].id) then
     begin
      available := false;
-     for j := 0 to Self.myORs[i].HVs.count-1 do
-       if (Self.myORs[i].HVs.HVs[j].Souprava = '-') then
+     for HV in Self.myORs[i].HVs.HVs do
+       if (HV.Souprava = '-') then
         begin
          available := true;
          break;

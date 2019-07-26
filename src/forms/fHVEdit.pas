@@ -9,7 +9,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
-  Generics.Collections, AppEvnts;
+  Generics.Collections, AppEvnts, Spin;
 
 type
   TF_HVEdit = class(TForm)
@@ -42,6 +42,8 @@ type
     LV_Funkce: TListView;
     Label10: TLabel;
     B_Search: TButton;
+    Label11: TLabel;
+    SE_MaxSpeed: TSpinEdit;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
@@ -143,6 +145,7 @@ begin
  HV.Trida       := THVClass(Self.RG_Trida.ItemIndex);
  HV.Souprava    := '-';
  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
+ HV.maxRychlost := Self.SE_MaxSpeed.Value;
 
  for i := 0 to _MAX_FUNC do
    HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
@@ -262,6 +265,7 @@ begin
    Self.M_Poznamka.Enabled  := true;
    Self.RG_Trida.Enabled    := true;
    Self.RG_StA.Enabled      := true;
+   Self.SE_MaxSpeed.Enabled := true;
 
    Self.SB_Take_Add.Enabled    := true;
    Self.SB_Rel_Add.Enabled     := true;
@@ -286,6 +290,7 @@ begin
      Self.M_Poznamka.Text     := HV.Poznamka;
      Self.RG_Trida.ItemIndex  := Integer(HV.Trida);
      Self.RG_StA.ItemIndex    := Integer(HV.StanovisteA);
+     Self.SE_MaxSpeed.Value   := HV.maxRychlost;
 
      for i := 0 to _MAX_FUNC do
       Self.LV_Funkce.Items[i].Checked := HV.funkce[i];
@@ -325,6 +330,7 @@ begin
    Self.M_Poznamka.Enabled  := false;
    Self.RG_Trida.Enabled    := false;
    Self.RG_StA.Enabled      := false;
+   Self.SE_MaxSpeed.Enabled := false;
 
    Self.E_Name.Text         := '';
    Self.E_Oznaceni.Text     := '';
@@ -392,10 +398,11 @@ begin
  Self.M_Poznamka.Text     := '';
  Self.RG_Trida.ItemIndex  := -1;
  Self.RG_StA.ItemIndex    := -1;
+ Self.SE_MaxSpeed.Value   := _DEFAULT_MAX_SPEED;
 
  Self.LV_Funkce.Items[0].Checked := true;
  for i := 1 to _MAX_FUNC do
-  Self.LV_Funkce.Items[i].Checked := false;
+   Self.LV_Funkce.Items[i].Checked := false;
 
  Self.SB_Take_Remove.Enabled := false;
  Self.SB_Rel_Remove.Enabled  := false;

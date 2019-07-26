@@ -158,7 +158,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 function TF_SprHVEdit.GetHV(addr:Word):THV;
-var i:Integer;
+var HV:THV;
 begin
  // nejdrive hledame lokomotivu ve hnacim vozidle k souprave
  if (Assigned(Self.sprHV)) then
@@ -167,9 +167,9 @@ begin
 
  // pak hledame hnaci vozidlo v HVs, ktere mame k dispozici
  if (Assigned(Self.HVs)) then
-   for i := 0 to Self.HVs.count-1 do
-    if (Self.HVs.HVs[i].Adresa = addr) then
-      Exit(Self.HVs.HVs[i]);
+   for HV in Self.HVs.HVs do
+    if (HV.Adresa = addr) then
+      Exit(HV);
 
  Exit(nil);
 end;

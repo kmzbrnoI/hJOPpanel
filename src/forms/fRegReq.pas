@@ -116,14 +116,14 @@ end;
 
 procedure TF_RegReq.FillHVs(HVDb:THVDb; all_selected:boolean);
 var LI:TListItem;
-    i:Integer;
+    HV:THV;
 begin
  Self.LV_Lokos.Clear();
- for i := 0 to HVDb.count-1 do
+ for HV in HVDb.HVs do
   begin
    LI := Self.LV_Lokos.Items.Add;
-   LI.Caption := IntToStr(HVDb.HVs[i].Adresa);
-   LI.SubItems.Add(HVDb.HVs[i].Nazev + ' (' + HVDb.HVs[i].Oznaceni + ')');
+   LI.Caption := IntToStr(HV.Adresa);
+   LI.SubItems.Add(HV.Nazev + ' (' + HV.Oznaceni + ')');
    LI.Checked := all_selected;
   end;//for i
 end;

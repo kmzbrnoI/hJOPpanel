@@ -253,7 +253,7 @@ begin
    Self.PC_HVs.Pages[i].Free();
 
  // vytvorit zalozky podle poctu HV
- for i := 0 to sprHVs.count-1 do
+ for i := 0 to sprHVs.HVs.Count-1 do
   begin
    ts := TCloseTabSheet.Create(Self.PC_HVs);
    ts.PageControl := Self.PC_HVs;
@@ -268,7 +268,7 @@ begin
    form.FillHV(HVs, sprHVs.HVs[i]);
   end;//for i
 
- Self.BB_HV_Add.Enabled := (Self.sprHVs.count < _MAX_HV_CNT);
+ Self.BB_HV_Add.Enabled := (Self.sprHVs.HVs.Count < _MAX_HV_CNT);
 
  Self.ActiveControl := Self.E_Nazev;
  Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' – ' + owner;
@@ -624,7 +624,8 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.OnTabClose(Sender:TObject);
-var i, j:Integer;
+var i:Integer;
+    HV:THV;
 begin
  for i := 0 to Self.PC_HVs.PageCount-1 do
   begin
@@ -633,13 +634,11 @@ begin
      Self.HVs.Delete(i);
 
      // preradime HV ze soupravy do obecneho seznamu HV
-     if (i < Self.sprHVs.count) then
+     if (i < Self.sprHVs.HVs.Count) then
       begin
-       for j := 0 to HVDb.count-1 do
-         if (HVDb.HVs[j].Adresa = Self.sprHVs.HVs[i].Adresa) then
-           HVDb.HVs[j].Souprava := '-';
-
-       Self.sprHVs.HVs[i].Free();
+       for HV in HVDb.HVs do
+         if (HV.Adresa = Self.sprHVs.HVs[i].Adresa) then
+           HV.Souprava := '-';
        Self.sprHVs.Delete(i);
       end;
 
@@ -653,7 +652,7 @@ begin
  for i := 0 to Self.PC_HVs.PageCount-1 do
   begin
    Self.PC_HVs.Pages[i].Caption := 'HV ' + IntToStr(i+1);
-   if (i < Self.sprHVs.count) then
+   if (i < Self.sprHVs.HVs.Count) then
      Self.HVs[i].FillHV(Self.HVDb, Self.sprHVs.HVs[i])
    else
      Self.HVs[i].FillHV(Self.HVDb, nil);

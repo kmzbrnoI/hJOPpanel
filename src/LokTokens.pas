@@ -61,6 +61,7 @@ var HVs:THVDb;
     i:Integer;
     purpose, gpurpose:TTokenPurpose;
     splitted:TStrings;
+    HV:THV;
 begin
  if (parsed[2] = 'OK') then
   begin
@@ -71,10 +72,11 @@ begin
    HVs.ParseHVsFromToken(parsed[3]);
 
    gpurpose.slot := 0;
-   for i := 0 to HVs.count-1 do
+   for HV in HVs.HVs do
     begin
-     if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, purpose))) then gpurpose := purpose
-     else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HVs.HVs[i].Adresa, purpose)) or (purpose.slot <> gpurpose.slot))) then
+     if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HV.Adresa, purpose))) then
+       gpurpose := purpose
+     else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HV.Adresa, purpose)) or (purpose.slot <> gpurpose.slot))) then
       begin
        gpurpose.slot := 0;
        break;
@@ -97,8 +99,8 @@ begin
 
    end;//case
 
-   for i := 0 to HVs.count-1 do
-     Self.tokenPurpose.Remove(HVs.HVs[i].Adresa);
+   for HV in HVs.HVs do
+     Self.tokenPurpose.Remove(HV.Adresa);
 
    HVs.Free();
   end

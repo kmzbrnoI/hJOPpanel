@@ -8,11 +8,11 @@ unit HVDb;
 interface
 
 uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,
-     Generics.Collections, IBUtils;
+     Generics.Collections, IBUtils, Generics.Defaults, Math;
 
 const
-  _MAX_HV = 128;
   _MAX_FUNC = 28;
+  _DEFAULT_MAX_SPEED = 120;
 
 type
   THVClass = (parni = 0, diesel = 1, motor = 2, elektro = 3);
@@ -49,6 +49,7 @@ type
      smer:Integer;                                                              // aktualni smer
      token:string;
      orid:string;                                                               // id oblasti rizeni, ve ktere se nachazi loko
+     maxRychlost:Cardinal;
 
      POMtake : TList<THVPomCV>;                                                 // seznam POM pri prevzeti do automatu
      POMrelease : TList<THVPomCV>;                                              // seznam POM pri uvolneni to rucniho rizeni
@@ -67,19 +68,18 @@ type
 
      class function CharToHVFuncType(c:char):THVFuncType;
      class function HVFuncTypeToChar(t:THVFuncType):char;
+     class function AddrComparer():IComparer<THV>;
   end;
 
   THVDb = class
    public
-    HVs:array [0.._MAX_HV] of THV;
-    count:Integer;
+    HVs:TObjectList<THV>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure ParseHVs(data:string);
     procedure ParseHVsFromToken(data:string);
-    procedure ClearList();
     procedure Add(HV:THV);
     procedure Delete(index:Integer);
 
@@ -95,64 +95,47 @@ uses GlobalConfig, fMain, TCPClientPanel, parseHelper;
 ////////////////////////////////////////////////////////////////////////////////
 
 constructor THVDb.Create();
-var i:Integer;
 begin
- inherited Create();
-
- for i := 0 to _MAX_HV-1 do
-  Self.HVs[i] := nil; 
+ inherited;
+ Self.HVs := TObjectList<THV>.Create(THV.AddrComparer);
 end;//ctor
 
 destructor THVDb.Destroy();
 begin
- Self.ClearList();
- inherited Destroy();
+ Self.HVs.Free();
+ inherited;
 end;//dtor
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure THVDb.ClearList();
-var i:Integer;
-begin
- for i := 0 to Self.count-1 do
-  if (Assigned(Self.HVs[i])) then
-    FreeAndNil(Self.HVs[i]);
-end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure THVDb.ParseHVs(data:string);
 var str:TStrings;
-    i:Integer;
+    hv:string;
 begin
  str := TStringList.Create();
- ExtractStringsEx([']'], ['['], data, str);
-
- Self.ClearList();
-
- Self.count := str.Count;
-
- for i := 0 to str.Count-1 do
-   Self.HVs[i] := THV.Create(str[i]);
-
- str.Free();
+ try
+   ExtractStringsEx([']'], ['['], data, str);
+   Self.HVs.Clear();
+   for hv in str do
+     Self.HVs.Add(THV.Create(hv));
+ finally
+   str.Free();
+ end;
 end;
 
 procedure THVDb.ParseHVsFromToken(data:string);
 var str:TStrings;
-    i:Integer;
+    hv:string;
 begin
  str := TStringList.Create();
- ExtractStringsEx([']'], ['['], data, str);
-
- Self.ClearList();
-
- Self.count := str.Count;
-
- for i := 0 to str.Count-1 do
-   Self.HVs[i] := THV.CreateFromToken(str[i]);
-
- str.Free();
+ try
+   ExtractStringsEx([']'], ['['], data, str);
+   Self.HVs.Clear();
+   for hv in str do
+     Self.HVs.Add(THV.CreateFromToken(hv));
+ finally
+   str.Free();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,17 +147,17 @@ begin
 
  if (Assigned(special)) then
   begin
-   SetLength(Indexes, Self.count+1);
+   SetLength(Indexes, Self.HVs.Count+1);
    CB.Items.Add(IntToStr(special.Adresa) + ' : ' + special.Nazev + ' (' + special.Oznaceni + ')');
    Indexes[0] := special.Adresa;
    if (special.Adresa = addr) then CB.ItemIndex := 0;
    index := 1;
   end else begin
-   SetLength(Indexes, Self.count);
+   SetLength(Indexes, Self.HVs.Count);
    index := 0;
   end;
 
- for i := 0 to Self.count-1 do
+ for i := 0 to Self.HVs.Count-1 do
   begin
    if ((Self.HVs[i].Souprava = '-') or (with_spr)) then
     begin
@@ -198,9 +181,9 @@ end;//ctor
 
 constructor THV.Create();
 begin
+ inherited;
  Self.POMtake    := TList<THVPomCv>.Create();
  Self.POMrelease := TList<THVPomCv>.Create();
- inherited Create();
 end;//ctor
 
 constructor THV.CreateFromToken(data:string);
@@ -213,7 +196,7 @@ destructor THV.Destroy();
 begin
  Self.POMtake.Free();
  Self.POMrelease.Free();
- inherited Destroy();
+ inherited;
 end;//dtor
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +209,7 @@ var str, str2, str3:TStrings;
 begin
  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|
  //   rychlost_kmph|smer|or_id{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
- //   {vyznam-F0;vyznam-F1;...}|typy_funkci
+ //   {vyznam-F0;vyznam-F1;...}|typy_funkci|max rychlost
 
  // souprava je bud cislo soupravy, nebo znak '-'
  str  := TStringList.Create();
@@ -313,6 +296,10 @@ begin
      for i := 0 to _MAX_FUNC do
        Self.funcType[i] := THVFuncType.permanent;
     end;
+
+   if (str.Count > 17) then
+     Self.maxRychlost := StrToInt(str[17]);
+
  except
 
  end;
@@ -353,6 +340,7 @@ begin
  Self.Adresa    := 0;
  Self.Trida     := THvClass.diesel;
  Self.Souprava  := '-';
+ Self.maxRychlost := _DEFAULT_MAX_SPEED;
 
  for i := 0 to _MAX_FUNC do
    Self.funkce[i] := false;
@@ -411,16 +399,18 @@ begin
  for i := 0 to _MAX_FUNC do
    Result := Result + HVFuncTypeToChar(Self.funcType[i]);
  Result := Result + '|';
+
+ Result := Result + IntToStr(Self.maxRychlost) + '|';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Otevreni regulatoru Jerry pro vsechna loko v seznamu
 procedure THVDb.OpenJerry();
-var i:Integer;
-    args:string;
+var args:string;
     res:Integer;
     f:string;
+    HV:THV;
 begin
  // predame autoconnect, server a port
  args := '-a -s "' + GlobConfig.data.server.host + '" -pt ' + IntToStr(GlobConfig.data.server.port) + ' ';
@@ -430,56 +420,34 @@ begin
    args := args + '-u "' + GlobConfig.data.auth.username + '" -p "' + GlobConfig.data.auth.password + '" ';
 
  // kontrola tokenu
- for i := 0 to Self.count-1 do
-   if (Self.HVs[i].token = '') then
-     raise Exception.Create('Hnaci vozidlo '+IntToStr(Self.HVs[i].Adresa)+' nema token');
+ for HV in Self.HVs do
+   if (HV.token = '') then
+     raise Exception.Create('Hnaci vozidlo '+IntToStr(HV.Adresa)+' nema token');
 
  // predat vozidla
- for i := 0 to Self.count-1 do
-  args := args + IntTostr(Self.HVs[i].Adresa) + ':' + Self.HVs[i].token + ' ';
+ for HV in Self.HVs do
+  args := args + IntTostr(HV.Adresa) + ':' + HV.token + ' ';
 
  // spustit regulator
  f := ExpandFileName(GlobConfig.data.reg.reg_fn);
  res := ShellExecute(F_Main.Handle, 'open', PChar(f), PChar(args), PChar(ExtractFilePath(GlobConfig.data.reg.reg_fn)), SW_SHOWNORMAL);
  if (res < 32) then
    raise Exception.Create('Nelze spustit regulator - chyba '+IntToStr(res));
-
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure THVDb.Add(HV:THV);
-var i:Integer;
 begin
- if (Self.count >=  _MAX_HV) then
-   raise Exception.Create('Maximum number of HVs reached!');
-
- for i := Self.count-1 downto 0 do
-  begin
-   if (HV.Adresa > Self.HVs[i].Adresa) then
-    begin
-     Self.HVs[i+1] := HV;
-     break;
-    end;
-
-   Self.HVs[i+1] := Self.HVs[i];
-  end;
-
- Inc(Self.count);
+ Self.HVs.Add(HV);
+ Self.HVs.Sort();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure THVDb.Delete(index:Integer);
-var i:Integer;
 begin
- if ((index < 0) or (index >= Self.count)) then
-   raise Exception.Create('Invalid index!');
-
- for i := index to Self.count-2 do
-   Self.HVs[i] := Self.HVs[i+1];
-
- Dec(Self.count);
+ Self.HVs.Delete(index);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -498,6 +466,18 @@ begin
    Result := 'M'
  else
    Result := 'P';
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function THV.AddrComparer():IComparer<THV>;
+begin
+ Result := TComparer<THV>.Construct(
+  function(const Left, Right: THV): Integer
+   begin
+    Result := CompareValue(Left.Adresa, Right.Adresa);
+   end
+ );
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

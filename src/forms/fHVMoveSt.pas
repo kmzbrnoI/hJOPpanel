@@ -68,7 +68,7 @@ var name:string;
 begin
  Self.sender_id := sender;
 
- if (HVs.count = 1) then
+ if (HVs.HVs.Count = 1) then
    HVs.FillHVs(Self.CB_HV, Self.hv_indexes, HVs.HVs[0].Adresa)
  else
    HVs.FillHVs(Self.CB_HV, Self.hv_indexes);

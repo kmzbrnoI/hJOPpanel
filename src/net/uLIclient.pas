@@ -443,11 +443,11 @@ end;
 
 procedure TBridgeClient.LoksToSlot(HVs:THVDb; slot:Integer; ruc:boolean);
 var str:string;
-    i:Integer;
+    HV:THV;
 begin
  str := '';
- for i := 0 to HVs.count-1 do
-   str := str + '{' + IntToStr(HVs.HVs[i].Adresa) + ';' + HVs.HVs[i].token + '};';
+ for HV in HVs.HVs do
+   str := str + '{' + IntToStr(HV.Adresa) + ';' + HV.token + '};';
 
  if (ruc) then
    Self.SendLn('LOKO-RUC;'+IntToStr(slot)+';'+str)
