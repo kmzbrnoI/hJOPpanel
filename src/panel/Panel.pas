@@ -210,6 +210,7 @@ type
   public
 
    UPO:TPanelUPO;       // upozorneni v leve dolni oblasti
+   Enabled:boolean;
 
    constructor Create(aParentForm:TForm);
    destructor Destroy; override;
@@ -232,6 +233,7 @@ type
 
    procedure ReAuthorize();
    procedure IPAAuth();
+   procedure UpdateEnabled();
 
    property PozadiColor:TColor read Colors.Pozadi write Colors.Pozadi;
    property KurzorRamecek:TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
@@ -303,6 +305,8 @@ begin
  Self.ParentForm := aParentForm;
  Self.myORs := TList<TORPanel>.Create();
  Self.reAuth.old_ors := TList<Integer>.Create();
+
+ Self.Enabled := true;
 
  Self.mouseTimer := TTimer.Create(nil);
  Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
@@ -641,7 +645,16 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var handled:boolean;
 begin
+ // UPO i kdyz je panel disabled
+ handled := false;
+ if ((Self.UPO.showing) and (Button = TMouseButton.mbRight)) then
+   Self.UPO.KeyPress(VK_ESCAPE, handled);
+
+ if ((not Self.Enabled) or (handled)) then
+   Exit();
+
  Self.CursorDraw.Pos.X := X div SymbolSet._Symbol_Sirka;
  Self.CursorDraw.Pos.Y := Y div SymbolSet._Symbol_Vyska;
 
@@ -679,6 +692,9 @@ end;
 procedure TRelief.DXDMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var myBut:TPanelButton;
 begin
+ if (not Self.Enabled) then
+   Exit();
+
  case (Button) of
   mbLeft   : myBut := TPanelButton.ENTER;
   mbRight  : myBut := TPanelButton.ESCAPE;
@@ -705,6 +721,9 @@ var old:TPoint;
     i:Integer;
     stackDragged:boolean;
 begin
+ if (not Self.Enabled) then
+   Exit();
+
  // pokud se nemeni pozice kurzoru -- ramecku, neni potreba prekreslovat
  if ((X div SymbolSet._Symbol_Sirka = Self.CursorDraw.Pos.X) and (Y div SymbolSet._Symbol_Vyska = Self.CursorDraw.Pos.Y)) then Exit;
 
@@ -2379,6 +2398,13 @@ begin
  for i := 0 to Length(_FileVersion_accept)-1 do
    Result := Result + _FileVersion_accept[i] + ', ';
  Result := LeftStr(Result, Length(Result)-2);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.UpdateEnabled();
+begin
+ Self.Enabled := ((Errors.Count = 0) and (not Self.UPO.showing) and (PotvrSek.EndReason <> TPSEnd.prubeh));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

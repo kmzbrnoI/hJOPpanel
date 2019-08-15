@@ -101,9 +101,7 @@ begin
  err.techStr := msg;
 
  Self.errors.Add(err);
-
- Self.Graphics.DrawObject.Enabled := false;
-
+ Relief.UpdateEnabled();
  SoundsPlay.Play(_SND_CHYBA);
 end;
 
@@ -117,7 +115,7 @@ begin
      Self.errors.Delete(0);
 
  if (Self.errors.Count = 0) then
-   Self.Graphics.DrawObject.Enabled := true;
+   Relief.UpdateEnabled();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +123,7 @@ end;
 procedure TErrors.RemoveAllErrors();
 begin
  Self.errors.Clear();
- Self.Graphics.DrawObject.Enabled := true;
+ Relief.UpdateEnabled();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

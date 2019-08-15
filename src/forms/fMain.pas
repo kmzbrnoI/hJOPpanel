@@ -341,7 +341,7 @@ begin
     begin
      Application.MessageBox(PChar('Při inicializaci reliéfu došlo k chybě:'+#13#10+E.Message),
        'Chyba', MB_OK OR MB_ICONWARNING);
-     Self.DXD_Main.Enabled := false;
+     Relief.Enabled := false;
      Self.P_Connection.Enabled := false;
     end;
  end;

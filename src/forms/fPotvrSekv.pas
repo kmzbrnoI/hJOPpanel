@@ -120,61 +120,63 @@ begin
  str  := TStringList.Create();
  str2 := TStringList.Create();
 
- Self.EndReason := TPSEnd.prubeh;
- Self.FOnEnd    := callback;
+ try
+   Self.EndReason := TPSEnd.prubeh;
+   Self.FOnEnd    := callback;
 
- Self.stanice := parsed[2];
- Self.udalost := parsed[3];
+   Self.stanice := parsed[2];
+   Self.udalost := parsed[3];
 
- Self.senders.Clear();
+   Self.senders.Clear();
 
- if (parsed.Count >= 5) then
-  begin
-   ExtractStringsEx(['|'], [], parsed[4], str);
-   for i := 0 to str.Count-1 do
-    Self.senders.Add(str[i]);
-  end;
-
- Self.podminky.Clear();
- str.Clear();
-
- if (parsed.Count >= 6) then
-  begin
-   ExtractStringsEx([']'], ['['], parsed[5], str);
-   for i := 0 to str.Count-1 do
+   if (parsed.Count >= 5) then
     begin
-     str2.Clear();
-     ExtractStringsEx(['|'], [], str[i], str2);
+     ExtractStringsEx(['|'], [], parsed[4], str);
+     for i := 0 to str.Count-1 do
+      Self.senders.Add(str[i]);
+    end;
 
-     try
-      podm.blok     := str2[0];
-      podm.podminka := str2[1];
-      Self.podminky.Add(podm);
-     except
+   Self.podminky.Clear();
+   str.Clear();
 
-     end;//except
-    end;//for i
-  end;//if parsed.Count >= 6
+   if (parsed.Count >= 6) then
+    begin
+     ExtractStringsEx([']'], ['['], parsed[5], str);
+     for i := 0 to str.Count-1 do
+      begin
+       str2.Clear();
+       ExtractStringsEx(['|'], [], str[i], str2);
+
+       try
+        podm.blok     := str2[0];
+        podm.podminka := str2[1];
+        Self.podminky.Add(podm);
+       except
+
+       end;//except
+      end;//for i
+    end;//if parsed.Count >= 6
 
 
- Self.blik := false;
- if (not Self.started) then
-   Self.StartPotvrSekv := now;
- Self.started := true;
+   Self.blik := false;
+   if (not Self.started) then
+     Self.StartPotvrSekv := now;
+   Self.started := true;
 
- if (not Assigned(Timer)) then
-  begin
-   Timer := TTimer.Create(nil);
-   Timer.Interval := 500;
-   Timer.OnTimer  := Self.Update;
-  end;
- Timer.Enabled := true;
+   if (not Assigned(Timer)) then
+    begin
+     Timer := TTimer.Create(nil);
+     Timer.Interval := 500;
+     Timer.OnTimer  := Self.Update;
+    end;
+   Timer.Enabled := true;
 
- if (not SoundsPlay.IsPlaying(_SND_POTVR_SEKV)) then
-   SoundsPlay.Play(_SND_POTVR_SEKV, true);
-
- str.Free();
- str2.Free();
+   if (not SoundsPlay.IsPlaying(_SND_POTVR_SEKV)) then
+     SoundsPlay.Play(_SND_POTVR_SEKV, true);
+ finally
+   str.Free();
+   str2.Free();
+ end;
 
  with (F_PotvrSekv.PB_SFP_indexes) do
    Canvas.FillRect(Rect(0, 0, Width, Height));
@@ -185,7 +187,7 @@ begin
  with (F_PotvrSekv.PB_Podm) do
    Canvas.FillRect(Rect(0, 0, Width, Height));
 
- F_Main.DXD_Main.Enabled := false;
+ Relief.UpdateEnabled();
  F_PotvrSekv.Show();
  F_PotvrSekv.B_OK.SetFocus();
  Self.Update(Self);
@@ -210,8 +212,6 @@ end;
 //pokud je v reason '', ukonceni se povazuje za ok, pokud ne, ukonceni se povazuje za error
 procedure TPotvrSekv.Stop(reason:string = '');
 begin
- F_Main.DXD_Main.Enabled := true;
-
  if (reason = '') then
   begin
    Self.EndReason := TPSEnd.success;
@@ -221,6 +221,7 @@ begin
   end;
 
  SoundsPlay.DeleteSound(_SND_POTVR_SEKV);
+ Relief.UpdateEnabled();
 
  if (Assigned(Self.FOnEnd)) then Self.FOnEnd(Self.EndReason);
  Self.started := false;

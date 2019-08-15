@@ -250,12 +250,12 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelUPO.SetShowing(showing:boolean);
+var changed:boolean;
 begin
- if ((not showing) and (Self.fshowing)) then
-   F_Main.DXD_Main.Enabled := true;
- if ((showing) and (not Self.fshowing)) then
-   F_Main.DXD_Main.Enabled := false;
+ changed := (showing <> Self.fshowing);
  Self.fshowing := showing;
+ if (changed) then
+   Relief.UpdateEnabled();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
