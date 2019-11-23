@@ -28,7 +28,6 @@ type
     AL_Main: TActionList;
     A_Connect: TAction;
     A_Disconnect: TAction;
-    IL_Menu: TImageList;
     P_Settings: TPanel;
     SB_Mute: TSpeedButton;
     SB_Settings: TSpeedButton;
