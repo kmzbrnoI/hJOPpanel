@@ -1,4 +1,4 @@
-unit fSprToSlot;
+Ôªøunit fSprToSlot;
 
 {
   Okno predavani LOKO do konkretniho slotu uLI-master.
@@ -78,7 +78,7 @@ begin
      Tag := i;
      Width := 70;
      OnClick := Self.ButtonSlotRucClick;
-     Caption := IntToStr(i) + ' ruË.';
+     Caption := IntToStr(i) + ' ruƒç.';
      TabOrder := 2*i + 1;
     end;
   end;
@@ -105,7 +105,7 @@ begin
  cnt := BridgeClient.activeSlotsCount;
 
  if (cnt = 0) then
-   Self.L_Slot.Caption := 'Do slotu: (û·dn˝ slot nenÌ k dispozici)'
+   Self.L_Slot.Caption := 'Do slotu: (≈æ√°dn√Ω slot nen√≠ k dispozici)'
  else
    Self.L_Slot.Caption := 'Do slotu:';
 
@@ -146,7 +146,7 @@ procedure TF_SprToSlot.ButtonSlotClick(Sender:TObject);
 begin
  tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, false);
 
- Self.L_Stav.Caption := 'Odesl·na û·dost o vyd·nÌ token˘...';
+ Self.L_Stav.Caption := 'Odesl√°na ≈æ√°dost o vyd√°n√≠ token≈Ø...';
  Self.token_req_sent := true;
 end;
 
@@ -154,7 +154,7 @@ procedure TF_SprToSlot.ButtonSlotRucClick(Sender:TObject);
 begin
  tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, true);
 
- Self.L_Stav.Caption := 'Odesl·na û·dost o vyd·nÌ token˘...';
+ Self.L_Stav.Caption := 'Odesl√°na ≈æ√°dost o vyd√°n√≠ token≈Ø...';
  Self.token_req_sent := true;
 end;
 

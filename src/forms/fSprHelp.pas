@@ -1,4 +1,4 @@
-unit fSprHelp;
+Ôªøunit fSprHelp;
 
 {
   Okno napovedy k souprave.
@@ -39,7 +39,7 @@ var LI:TListItem;
  begin
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '10xxxx';
-  LI.SubItems.Add('ExpresnÌ vlak');
+  LI.SubItems.Add('Expresn√≠ vlak');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '20xxxx';
@@ -47,31 +47,31 @@ var LI:TListItem;
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '30xxxx';
-  LI.SubItems.Add('RychlÌk');
+  LI.SubItems.Add('Rychl√≠k');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '40xxxx';
-  LI.SubItems.Add('OsobnÌ vlak hlavnÌ traù');
+  LI.SubItems.Add('Osobn√≠ vlak hlavn√≠ tra≈•');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '50xxxx';
-  LI.SubItems.Add('OsobnÌ vlak vedlejöÌ traù');
+  LI.SubItems.Add('Osobn√≠ vlak vedlej≈°√≠ tra≈•');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '60xxxx';
-  LI.SubItems.Add('Pr˘bÏûn˝ n·kladnÌ vlak');
+  LI.SubItems.Add('Pr≈Øbƒõ≈æn√Ω n√°kladn√≠ vlak');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '70xxxx';
-  LI.SubItems.Add('LokomotivnÌ vlak');
+  LI.SubItems.Add('Lokomotivn√≠ vlak');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '80xxxx';
-  LI.SubItems.Add('ManipulaËnÌ vlak');
+  LI.SubItems.Add('Manipulaƒçn√≠ vlak');
 
   LI := LV_SprHelp.Items.Add;
   LI.Caption := '90xxxx';
-  LI.SubItems.Add('Zvl·ötnÌ vlak');
+  LI.SubItems.Add('Zvl√°≈°tn√≠ vlak');
  end;
 
 end.//unit

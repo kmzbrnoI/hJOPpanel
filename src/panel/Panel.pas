@@ -1,4 +1,4 @@
-unit Panel;
+Ôªøunit Panel;
 
 {
   Hlavni logika celeho panelu.
@@ -486,11 +486,11 @@ begin
   TPanelConnectionStatus.closed    :
     PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.DrawObject);
   TPanelConnectionStatus.opening   :
-    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'OtevÌr·m spojenÌ...', clFuchsia, clBlack, Self.DrawObject);
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Otev√≠r√°m spojen√≠...', clFuchsia, clBlack, Self.DrawObject);
   TPanelConnectionStatus.handshake :
-    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'ProbÌh· handshake...', clFuchsia, clBlack, Self.DrawObject);
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'Prob√≠h√° handshake...', clFuchsia, clBlack, Self.DrawObject);
   TPanelConnectionStatus.opened    :
-    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'P¯ipojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
+    PanelPainter.TextOutput(Point(Pos.X+5, Pos.Y+1), 'P≈ôipojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
  end;
 end;
 
@@ -1029,9 +1029,9 @@ begin
 
    if (not versionOk) then
     begin
-     if (Application.MessageBox(PChar('NaËÌt·te soubor s verzÌ '+ver+#13#10+
-         'Aplikace moment·lnÏ podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraËovat?'),
-         'Varov·nÌ', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+     if (Application.MessageBox(PChar('Naƒç√≠t√°te soubor s verz√≠ '+ver+#13#10+
+         'Aplikace moment√°lnƒõ podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraƒçovat?'),
+         'Varov√°n√≠', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
        Exit();
     end;
 
@@ -1394,7 +1394,7 @@ begin
 
  if (GlobConfig.data.auth.autoauth) then
   begin
-   F_Auth.Listen('Vyûadov·na autorizace', GlobConfig.data.auth.username, 2, Self.ORConnectionOpenned_AuthCallback, ors, true);
+   F_Auth.Listen('Vy≈æadov√°na autorizace', GlobConfig.data.auth.username, 2, Self.ORConnectionOpenned_AuthCallback, ors, true);
    Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
 
    if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLiAuthStatus.no) and (not PanelTCPClient.openned_by_ipc)) then
@@ -1404,7 +1404,7 @@ begin
     end;
 
   end else begin
-   F_Auth.OpenForm('Vyûadov·na autorizace', Self.ORConnectionOpenned_AuthCallback, ors, true);
+   F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.ORConnectionOpenned_AuthCallback, ors, true);
   end;
 end;
 
@@ -1540,7 +1540,7 @@ begin
      if (available) then
        F_SoupravaEdit.NewSpr(Self.myORs[i].HVs, Self.myORs[i].id)
      else
-       Self.ORInfoMsg('Nejsou volnÈ loko');
+       Self.ORInfoMsg('Nejsou voln√© loko');
 
      Exit();
     end;
@@ -1635,7 +1635,7 @@ begin
     menu_str := menu_str + 'CAS,';
 
    if (Self.myORs[obl_rizeni].hlaseni) then
-    menu_str := menu_str + 'HL¡äENÕ,';
+    menu_str := menu_str + 'HL√Å≈†EN√ç,';
   end;
 
  menu_str := menu_str + 'INFO,';
@@ -1658,17 +1658,17 @@ begin
  if ((GlobConfig.data.auth.autoauth) and (Self.myORs[Sender].tech_rights < TORCOntrolRights.superuser)) then
   begin
    if (item = 'MP') then begin
-     F_Auth.Listen('Vyûadov·na autorizace', GlobConfig.data.auth.username, 2, Self.AuthWriteCallback, ors, false);
+     F_Auth.Listen('Vy≈æadov√°na autorizace', GlobConfig.data.auth.username, 2, Self.AuthWriteCallback, ors, false);
      Self.AuthWriteCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
    end else begin
-     F_Auth.Listen('Vyûadov·na autorizace', GlobConfig.data.auth.username, 2, Self.AuthReadCallback, ors, true);
+     F_Auth.Listen('Vy≈æadov√°na autorizace', GlobConfig.data.auth.username, 2, Self.AuthReadCallback, ors, true);
      Self.AuthReadCallback(Self, GlobConfig.data.auth.username, GlobConfig.data.auth.password, ors, false);
    end;
   end else begin
    if (item = 'MP') then
-     F_Auth.OpenForm('Vyûadov·na autorizace', Self.AuthWriteCallback, ors, false)
+     F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.AuthWriteCallback, ors, false)
    else
-     F_Auth.OpenForm('Vyûadov·na autorizace', Self.AuthReadCallback, ors, true)
+     F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.AuthReadCallback, ors, true)
   end;
 end;
 
@@ -1684,7 +1684,7 @@ procedure TRelief.DKMenuClickOSV(Sender:Integer; item:string);
 var menu_str:string;
     i:Integer;
 begin
- menu_str := '$'+Self.myORs[Sender].Name+',$OsvÏtlenÌ,-,';
+ menu_str := '$'+Self.myORs[Sender].Name+',$Osvƒõtlen√≠,-,';
 
  for i := 0 to Self.myORs[Sender].Osvetleni.Count-1 do
   begin
@@ -1701,10 +1701,10 @@ end;
 procedure TRelief.DKMenuClickLOKO(Sender:Integer; item:string);
 var menu_str:string;
 begin
- // nejd¯Ìv aktualizuji seznam LOKO
+ // nejd≈ô√≠v aktualizuji seznam LOKO
  PanelTCPClient.PanelLokList(Self.myORs[Sender].id);
 
- menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOV¡ loko,EDIT loko,SMAZAT loko,PÿEDAT loko,HLEDAT loko,RU» loko';
+ menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOV√Å loko,EDIT loko,SMAZAT loko,P≈òEDAT loko,HLEDAT loko,RUƒå loko';
  if (BridgeClient.authStatus = TuLIAuthStatus.yes) then menu_str := menu_str + ',MAUS loko';
 
  Self.special_menu := loko;
@@ -1716,7 +1716,7 @@ var ors: TIntAr;
 begin
  SetLength(ors, 1);
  ors[0] := Sender;
- F_Auth.OpenForm('Vyûadov·na autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, ors, false);
+ F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, ors, false);
 end;
 
 procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
@@ -1748,28 +1748,28 @@ begin
   lichy := 'zleva doprava'
  else if (Self.myORs[Sender].Lichy = 1) then
   lichy := 'zprava doleva'
- else lichy := 'nedefinov·n';
+ else lichy := 'nedefinov√°n';
 
  case (Self.myORs[Sender].tech_rights) of
-  TORControlRights.read      : rs := 'ke ËtenÌ';
-  TORControlRights.write     : rs := 'k z·pisu';
+  TORControlRights.read      : rs := 'ke ƒçten√≠';
+  TORControlRights.write     : rs := 'k z√°pisu';
   TORControlRights.superuser : rs := 'superuser';
  else
-  rs := 'nedefinov·no';
+  rs := 'nedefinov√°no';
  end;
 
- Application.MessageBox(PChar('Oblast ¯ÌzenÌ : ' + Self.myORs[Sender].Name + #13#10 +
+ Application.MessageBox(PChar('Oblast ≈ô√≠zen√≠ : ' + Self.myORs[Sender].Name + #13#10 +
                               'ID : ' + Self.myORs[Sender].id + #13#10 +
-                              'P¯ihl·öen : ' + Self.myORs[Sender].username + #13#10 +
-                              'Lich˝ smÏr : ' + lichy + #13#10 +
-                              'Opr·vnÏnÌ : ' + rs),
+                              'P≈ôihl√°≈°en : ' + Self.myORs[Sender].username + #13#10 +
+                              'Lich√Ω smƒõr : ' + lichy + #13#10 +
+                              'Opr√°vnƒõn√≠ : ' + rs),
       PChar(Self.myORs[Sender].Name), MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TRelief.DKMenuClickHLASENI(Sender:Integer; item:string);
 var menu_str:string;
 begin
- menu_str := '$'+Self.myORs[Sender].Name+',$STANI»NÕ HL¡äENÕ,-,POSUN,NESAHAT,INTRO,SPEC1,SPEC2,SPEC3';
+ menu_str := '$'+Self.myORs[Sender].Name+',$STANIƒåN√ç HL√Å≈†EN√ç,-,POSUN,NESAHAT,INTRO,SPEC1,SPEC2,SPEC3';
  Self.special_menu := hlaseni;
  Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
 end;
@@ -1796,7 +1796,7 @@ begin
  if ((PanelTCPClient.status <> TPanelConnectionStatus.opened) or
      (Self.myORs[obl_rizeni].RegPlease.status = TORRegPleaseStatus.none)) then Exit();
 
- menu_str := '$' + Self.myORs[obl_rizeni].Name + ',$é·dost o loko,-,INFO,ODMÕTNI';
+ menu_str := '$' + Self.myORs[obl_rizeni].Name + ',$≈Ω√°dost o loko,-,INFO,ODM√çTNI';
 
  Self.myORs[obl_rizeni].RegPlease.status := TORRegPleaseStatus.request;
 
@@ -1837,17 +1837,17 @@ begin
  else if ((item = 'CAS>') or (item = 'CAS<')) then Self.DKMenuClickCAS(obl_r, item)
  else if (item = 'CAS') then Self.DKMenuClickSetCAS(obl_r, item)
  else if (item = 'INFO') then Self.DKMenuClickINFO(obl_r, item)
- else if (item = 'HL¡äENÕ') then Self.DKMenuClickHLASENI(obl_r, item);           
+ else if (item = 'HL√Å≈†EN√ç') then Self.DKMenuClickHLASENI(obl_r, item);           
 end;
 
 procedure TRelief.ParseLOKOMenuClick(item:string; obl_r:Integer);
 begin
- if (item = 'NOV¡ loko')   then F_HVEdit.HVAdd(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+ if (item = 'NOV√Å loko')   then F_HVEdit.HVAdd(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'EDIT loko')   then F_HVEdit.HVEdit(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'SMAZAT loko') then F_HVDelete.OpenForm(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
- else if (item = 'PÿEDAT loko') then F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+ else if (item = 'P≈òEDAT loko') then F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'HLEDAT loko') then F_HVSearch.Show()
- else if ((item = 'RU» loko') or (item = 'MAUS loko')) then
+ else if ((item = 'RUƒå loko') or (item = 'MAUS loko')) then
    F_RegReq.Open(
       Self.myORs[obl_r].HVs,
       Self.myORs[obl_r].id,
@@ -1861,7 +1861,7 @@ end;
 
 procedure TRelief.ParseRegMenuClick(item:string; obl_r:Integer);
 begin
- if (item = 'ODMÕTNI') then PanelTCPClient.SendLn(Self.myORs[obl_r].id+';LOK-REQ;DENY')
+ if (item = 'ODM√çTNI') then PanelTCPClient.SendLn(Self.myORs[obl_r].id+';LOK-REQ;DENY')
  else if (item = 'INFO') then
   begin
    F_RegReq.Open(
@@ -2165,7 +2165,7 @@ begin
    if (res = '-') then
      res := Self.myORs[i].username
    else
-     if (Self.myORs[i].username <> res) then Exit('vÌce uûivatel˘');
+     if (Self.myORs[i].username <> res) then Exit('v√≠ce u≈æivatel≈Ø');
 
  if (res = '') then
    res := '-';
@@ -2214,7 +2214,7 @@ begin
        PanelTCPClient.PanelAuthorise(Self.myORs[i].id, TORControlRights.null, '', '');
       end;
 
-     F_Auth.OpenForm('Vyûadov·na autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true);
+     F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true);
      Exit();
     end;
 
@@ -2244,7 +2244,7 @@ begin
     end;
 
    // na OR v seznamu 'Self.reAuth.old_ors' prihlasime hosta
-   F_Auth.Listen('Vyûadov·na autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, fors, true);
+   F_Auth.Listen('Vy≈æadov√°na autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, fors, true);
    Self.AuthReadCallback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, fors, false);
 
    // v pripade povolene IPC odhlasime i zbyle panely
@@ -2271,7 +2271,7 @@ begin
          Inc(j);
         end;
 
-     F_Auth.OpenForm('Vyûadov·na autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true)
+     F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true)
     end else begin
      // OR zapamatovany -> prihlasujeme uzivatele jen na tyto OR
 
@@ -2280,7 +2280,7 @@ begin
      for i := 0 to Self.reAuth.old_ors.Count-1 do fors[i] := Self.reAuth.old_ors[i];
 
      // na OR v seznamu 'Self.reAuth.old_ors' prihlasime skutecneho uzivatele
-     F_Auth.OpenForm('Vyûadov·na autorizace', Self.AuthWriteCallback, fors, false, Self.reAuth.old_login);
+     F_Auth.OpenForm('Vy≈æadov√°na autorizace', Self.AuthWriteCallback, fors, false, Self.reAuth.old_login);
 
      Self.reAuth.old_login := '';
      Self.reAuth.old_ors.Clear();

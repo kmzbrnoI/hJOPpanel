@@ -1,4 +1,4 @@
-unit TCPClientPanel;
+ï»¿unit TCPClientPanel;
 
 {
   TCP klient resici komunikaci s hJOPserverem.
@@ -351,7 +351,7 @@ end;
 procedure TPanelTCPClient.Timeout();
 begin
  Self.OnTcpClientDisconnected(Self);
- Errors.writeerror('Spojení se serverem pøerušeno', 'KLIENT', '-');
+ Errors.writeerror('SpojenÃ­ se serverem pÅ™eruÅ¡eno', 'KLIENT', '-');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -375,8 +375,8 @@ begin
     end;//for i
 
    if (not found) then
-     Application.MessageBox(PChar('Verze protokolu, kterou požívá server ('+Self.parsed[2]+') není podporována'),
-       'Upozornìní', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Verze protokolu, kterou poÅ¾Ã­vÃ¡ server ('+Self.parsed[2]+') nenÃ­ podporovÃ¡na'),
+       'UpozornÄ›nÃ­', MB_OK OR MB_ICONWARNING);
 
    Self.mServerVersion := Self.VersionToInt(Self.parsed[2]);
    Self.fstatus := TPanelConnectionStatus.opened;

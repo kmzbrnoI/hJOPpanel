@@ -1,4 +1,4 @@
-unit fStitVyl;
+ï»¿unit fStitVyl;
 
 {
   Okno editace stitku a vyluky.
@@ -53,8 +53,8 @@ begin
  Self.OpenStitVyl := _STITEK;
  Self.OpenBlk     := blk;
 
- Self.Caption := 'Štítek na bloku '+blk;
- Self.L_What.Caption := 'Štítek :';
+ Self.Caption := 'Å tÃ­tek na bloku '+blk;
+ Self.L_What.Caption := 'Å tÃ­tek :';
  Self.Color := clTeal;
  Self.E_Popisek.Text := stit;
 
@@ -67,8 +67,8 @@ begin
  Self.OpenStitVyl := _VYLUKA;
  Self.OpenBlk     := blk;
 
- Self.Caption := 'Výluka na bloku '+blk;
- Self.L_What.Caption := 'Výluka :';
+ Self.Caption := 'VÃ½luka na bloku '+blk;
+ Self.L_What.Caption := 'VÃ½luka :';
  Self.Color := clOlive;
  Self.E_Popisek.Text := vyl;
 
@@ -83,7 +83,7 @@ var i, j:Integer;
    for j := 0 to Length(_forbidden_chars)-1 do
      if (_forbidden_chars[j] = Self.E_Popisek.Text[i]) then
        begin
-        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+        Application.MessageBox(PChar('PoznÃ¡mka k hnacÃ­mu vozidlu obsahuje zakÃ¡zanÃ© znaky!'+#13#10+'ZakÃ¡zanÃ© znaky: '+GetForbidderChars()), 'Nelze uloÅ¾it data', MB_OK OR MB_ICONWARNING);
         Exit();
        end;
 

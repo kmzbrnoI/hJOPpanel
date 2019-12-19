@@ -1,4 +1,4 @@
-unit fZpravy;
+Ôªøunit fZpravy;
 
 {
   Okynko zprav.
@@ -184,7 +184,7 @@ end;
 
 procedure TF_Messages.PC_ClientsChange(Sender: TObject);
 begin
- Self.Caption := Self.PC_Clients.ActivePage.Caption + ' - ' + Self.name + ' - zpr·vy';
+ Self.Caption := Self.PC_Clients.ActivePage.Caption + ' - ' + Self.name + ' - zpr√°vy';
 end;
 
 procedure TF_Messages.PC_ClientsDragDrop(Sender, Source: TObject; X,
@@ -289,7 +289,7 @@ begin
    LI.SubItems.Add(ORDb.db_reverse[name]);
   end;
 
- Self.Caption := Self.name + ' - zpr·vy';
+ Self.Caption := Self.name + ' - zpr√°vy';
 end;
 
 procedure TF_Messages.LV_ORsDblClick(Sender: TObject);

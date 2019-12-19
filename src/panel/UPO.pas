@@ -1,4 +1,4 @@
-unit UPO;
+Ôªøunit UPO;
 
 {
   Unita resici vykreslovani upozorneni v leve dolni casti reliefu.
@@ -120,10 +120,10 @@ begin
  // vykresleni informaceo pokracovani
  if ((Self.critical) and (Self.current = Self.items.Count-1)) then
    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1),
-     '          UkonËenÌ: ESCAPE          ', clBlack, clTeal, obj)
+     '          Ukonƒçen√≠: ESCAPE          ', clBlack, clTeal, obj)
  else
    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight-1),
-     '  PokraËovat: ENTER, konec: ESCAPE  ', clBlack, clTeal, obj);
+     '  Pokraƒçovat: ENTER, konec: ESCAPE  ', clBlack, clTeal, obj);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

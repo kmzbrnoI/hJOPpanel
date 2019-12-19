@@ -1,4 +1,4 @@
-unit fPotvrSekv;
+ï»¿unit fPotvrSekv;
 
 {
   Okno potvrzovaci sekvence.
@@ -202,8 +202,8 @@ begin
 
  if (Self.StartPotvrSekv+encodetime(0, _POTVR_TIMEOUT_MIN, 0, 0) < now) then
   begin
-   Self.Stop('Pøekroèení èasu potvrzovací sekvence!');
-   Errors.writeerror('Pøekroèení èasu potvrzovací sekvence','Potvr. sekvence','');
+   Self.Stop('PÅ™ekroÄenÃ­ Äasu potvrzovacÃ­ sekvence!');
+   Errors.writeerror('PÅ™ekroÄenÃ­ Äasu potvrzovacÃ­ sekvence','Potvr. sekvence','');
   end;
 end;
 
@@ -314,13 +314,13 @@ end;
 
 procedure TF_PotvrSekv.B_StornoClick(Sender: TObject);
 begin
- PotvrSek.Stop('Stisknuto tlaèítko Nesouhlasím');
+ PotvrSek.Stop('Stisknuto tlaÄÃ­tko NesouhlasÃ­m');
 end;
 
 procedure TF_PotvrSekv.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
  if (PotvrSek.started) then
-  PotvrSek.Stop('Zavøeno okno potvrzovací sekvence');
+  PotvrSek.Stop('ZavÅ™eno okno potvrzovacÃ­ sekvence');
 end;
 
 procedure TF_PotvrSekv.FormKeyPress(Sender: TObject; var Key: Char);

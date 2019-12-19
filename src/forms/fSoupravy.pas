@@ -1,4 +1,4 @@
-unit fSoupravy;
+ï»¿unit fSoupravy;
 
 {
   Okno seznamu vsech souprav.
@@ -109,12 +109,12 @@ begin
    if ((sl.Count > 7) and (ORdb.db.ContainsKey(sl[7]))) then
      LI.SubItems.Add(ORDb.db[sl[7]])
    else
-     LI.SubItems.Add('Nevyplnìno');
+     LI.SubItems.Add('NevyplnÄ›no');
 
    if ((sl.Count > 8) and (ORdb.db.ContainsKey(sl[8]))) then
      LI.SubItems.Add(ORDb.db[sl[8]])
    else
-     LI.SubItems.Add('Nevyplnìno');
+     LI.SubItems.Add('NevyplnÄ›no');
  except
 
  end;
@@ -154,7 +154,7 @@ end;
 procedure TF_SprList.B_RemoveSprClick(Sender: TObject);
 begin
  if (Self.LV_Soupravy.Selected <> nil) then
-  if (Application.MessageBox(PChar('Opravdu smazat soupravu '+Self.LV_Soupravy.Selected.Caption+' z kolejištì?'), 'Otázka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
+  if (Application.MessageBox(PChar('Opravdu smazat soupravu '+Self.LV_Soupravy.Selected.Caption+' z kolejiÅ¡tÄ›?'), 'OtÃ¡zka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
     PanelTCPClient.SendLn('-;SPR-REMOVE;'+Self.LV_Soupravy.Selected.Caption);
 end;
 

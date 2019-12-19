@@ -1,4 +1,4 @@
-unit fHVDelete;
+ï»¿unit fHVDelete;
 
 {
   Okno potrvzeni zadosti o mazani hnaciho vozidla.
@@ -42,11 +42,11 @@ procedure TF_HVDelete.B_RemoveClick(Sender: TObject);
 begin
  if (Self.CB_HV.ItemIndex < 0) then
   begin
-   Application.MessageBox('Vyberte hnací vozdilo', 'Nelz pokraèovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte hnacÃ­ vozdilo', 'Nelz pokraÄovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
- if (Application.MessageBox(PChar('Opravdu odstranit hnací vozidlo '+Self.CB_HV.Items.Strings[Self.CB_HV.ItemIndex]+' z databáze?'), 'Opravdu?', MB_YESNO OR MB_ICONWARNING) = mrYes) then
+ if (Application.MessageBox(PChar('Opravdu odstranit hnacÃ­ vozidlo '+Self.CB_HV.Items.Strings[Self.CB_HV.ItemIndex]+' z databÃ¡ze?'), 'Opravdu?', MB_YESNO OR MB_ICONWARNING) = mrYes) then
   begin
    PanelTCPClient.PanelHVRemove(Self.sender_or, Self.HVIndexes[Self.CB_HV.ItemIndex]);
    Self.Close();

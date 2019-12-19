@@ -1,4 +1,4 @@
-unit fRegReq;
+Ôªøunit fRegReq;
 
 {
   Okno potvrzovani zadost o loko z rucniho regulatoru.
@@ -153,7 +153,7 @@ begin
 
  if (cnt = 0) then
   begin
-   Application.MessageBox('Vyberte alespoÚ jedno hnacÌ vozidlo', 'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte alespo≈à jedno hnac√≠ vozidlo', 'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -173,7 +173,7 @@ begin
  else
    tokens.LokosToReg(Self.or_id, lokos);
 
- Self.L_Stav.Caption := 'Odesl·na û·dost o vyd·nÌ token˘...';
+ Self.L_Stav.Caption := 'Odesl√°na ≈æ√°dost o vyd√°n√≠ token≈Ø...';
  Self.token_req_sent := true;
 end;
 
@@ -194,13 +194,13 @@ begin
 
  if (not one) then
   begin
-   Application.MessageBox('Vyberte alespoÚ jedno hnacÌ vozidlo', 'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte alespo≈à jedno hnac√≠ vozidlo', 'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
  PanelTCPClient.SendLn(Self.or_id+';LOK-REQ;LOK;'+str);
 
- Self.L_Stav.Caption := 'OdesÌl·m seznam lokomotiv na server...';
+ Self.L_Stav.Caption := 'Odes√≠l√°m seznam lokomotiv na server...';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ begin
  Self.B_Local.Default := true;
 
  Self.L_Stav.Font.Color := clRed;
- Self.L_Stav.Caption := 'Regul·tor zruöil û·dost';
+ Self.L_Stav.Caption := 'Regul√°tor zru≈°il ≈æ√°dost';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +256,7 @@ begin
  cnt := BridgeClient.activeSlotsCount;
 
  if (cnt = 0) then
-   Self.L_Slot.Caption := 'Do slotu: (û·dn˝ slot nenÌ k dispozici)'
+   Self.L_Slot.Caption := 'Do slotu: (≈æ√°dn√Ω slot nen√≠ k dispozici)'
  else
    Self.L_Slot.Caption := 'Do slotu:';
 

@@ -1,4 +1,4 @@
-unit Symbols;
+﻿unit Symbols;
 
 {
   Zakladni operace se symboly, definice pozic symbolu v souboru.

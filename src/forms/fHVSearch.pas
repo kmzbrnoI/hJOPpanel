@@ -1,4 +1,4 @@
-unit fHVSearch;
+Ôªøunit fHVSearch;
 
 {
   Okno zadani parametru ke hledani lokomotivy na kolejisti.
@@ -38,7 +38,7 @@ procedure TF_HVSearch.B_OKClick(Sender: TObject);
 begin
  if (Self.E_Adresa.Text = '') then
   begin
-   Application.MessageBox('VyplÚte adresu hnacÌho vozidla!', 'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vypl≈àte adresu hnac√≠ho vozidla!', 'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -56,9 +56,9 @@ procedure TF_HVSearch.LokoFound(HV:THV);
 var str:string;
 begin
  str := 'Lokomotiva nalezena!' + #13#10 +
-        'N·zev : ' + HV.Nazev + #13#10 +
+        'N√°zev : ' + HV.Nazev + #13#10 +
         'Majitel : ' + HV.Majitel + #13#10 +
-        'OznaËenÌ : ' + HV.Oznaceni + #13#10 +
+        'Oznaƒçen√≠ : ' + HV.Oznaceni + #13#10 +
         'Adresa : ' + IntToStr(HV.Adresa) + #13#10 +
         'Souprava : ' + HV.Souprava + #13#10 +
         'Stanice : ' + HV.orid + ' (' + ORDb.db[HV.orid] + ')' + #13#10;
@@ -67,7 +67,7 @@ end;
 
 procedure TF_HVSearch.LokoNotFound();
 begin
- Application.MessageBox('Lokomotiva nebyla nalezena v datab·zi hnacÌch vozidel serveru.', 'Loko nenalezeno', MB_OK OR MB_ICONINFORMATION);
+ Application.MessageBox('Lokomotiva nebyla nalezena v datab√°zi hnac√≠ch vozidel serveru.', 'Loko nenalezeno', MB_OK OR MB_ICONINFORMATION);
 end;
 
 end.//unit

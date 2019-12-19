@@ -1,4 +1,4 @@
-unit fHVMoveSt;
+ï»¿unit fHVMoveSt;
 
 {
   Okno presunu lokomotivy do jine oblasti rizeni.
@@ -43,12 +43,12 @@ procedure TF_HV_Move.B_OKClick(Sender: TObject);
 begin
  if (Self.CB_HV.ItemIndex < 0) then
   begin
-   Application.MessageBox('Vyberte HV!', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte HV!', 'Nelze pokraÄovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
  if (Self.CB_Stanice.ItemIndex < 0) then
   begin
-   Application.MessageBox('Vyberte stanici!', 'Nelze pokraèovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte stanici!', 'Nelze pokraÄovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 

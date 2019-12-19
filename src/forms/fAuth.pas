@@ -1,4 +1,4 @@
-unit fAuth;
+ï»¿unit fAuth;
 
 {
   Autorizacni okno.
@@ -19,23 +19,23 @@ const
   _AUTH_DESC : array [0..2] of TAuthLevelDesc =
   (
     (
-      short:     'Paranoidní';
-      save:      'Heslo nebude uloeno.';
-      use:       'Pøi zmìnì oprávnìní oblasti øízení, otevøení regulátoru apod. budete vdy vyzvání k zadání uivatelského jména a hesla.';
+      short:     'ParanoidnÃ­';
+      save:      'Heslo nebude uloÅ¾eno.';
+      use:       'PÅ™i zmÄ›nÄ› oprÃ¡vnÄ›nÃ­ oblasti Å™Ã­zenÃ­, otevÅ™enÃ­ regulÃ¡toru apod. budete vÅ¾dy vyzvÃ¡nÃ­ k zadÃ¡nÃ­ uÅ¾ivatelskÃ©ho jmÃ©na a hesla.';
       save_hint: '';
     ),
 
     (
-      short:     'Vıchozí';
-      save:      'Heslo bude uloeno pouze pro toto spojení, po odpojení od serveru bude heslo smazáno.';
-      use:       'Pøi zmìnì oprávnìní oblasti øízení, otevøení regulátoru apod. bude pouito toto heslo, nemusíte jej tedy znovu zadávat.';
-      save_hint: 'Heslo je uloeno pouze v pamìti programu, ádnı jinı program k nìmu nemá pøístup, ve formì hashe SHA 256.';
+      short:     'VÃ½chozÃ­';
+      save:      'Heslo bude uloÅ¾eno pouze pro toto spojenÃ­, po odpojenÃ­ od serveru bude heslo smazÃ¡no.';
+      use:       'PÅ™i zmÄ›nÄ› oprÃ¡vnÄ›nÃ­ oblasti Å™Ã­zenÃ­, otevÅ™enÃ­ regulÃ¡toru apod. bude pouÅ¾ito toto heslo, nemusÃ­te jej tedy znovu zadÃ¡vat.';
+      save_hint: 'Heslo je uloÅ¾eno pouze v pamÄ›ti programu, Å¾Ã¡dnÃ½ jinÃ½ program k nÄ›mu nemÃ¡ pÅ™Ã­stup, ve formÄ› hashe SHA 256.';
     ),
 
     (
-      short:     'Uloit heslo dlouhodobì';
-      save:      'Heslo bude uloeno, dokud uloení v oknì Nastavení nezrušíte.';
-      use:       'Pøi jakémkoliv budoucím poadavku o autorizaci, dokonce i po restartování programu, bude pouito toto heslo.';
+      short:     'UloÅ¾it heslo dlouhodobÄ›';
+      save:      'Heslo bude uloÅ¾eno, dokud uloÅ¾enÃ­ v oknÄ› NastavenÃ­ nezruÅ¡Ã­te.';
+      use:       'PÅ™i jakÃ©mkoliv budoucÃ­m poÅ¾adavku o autorizaci, dokonce i po restartovÃ¡nÃ­ programu, bude pouÅ¾ito toto heslo.';
       save_hint: '';
     )
   );

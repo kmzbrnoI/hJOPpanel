@@ -1,4 +1,4 @@
-unit MenuPanel;
+ï»¿unit MenuPanel;
 
 {
   TPanelMenu
@@ -79,7 +79,7 @@ uses Panel, Symbols, parseHelper, PanelPainter;
 { format souboru hintu:
    csv soubor, kde na kazdem radku je jeden hint
    prvni je vzdy zkratka v menu, druha je vysvetlivka
-   napr. V+;Pøestavit výhybku do polohy plus
+   napr. V+;PÅ™estavit vÃ½hybku do polohy plus
    soubor je v UTF8
 }
 

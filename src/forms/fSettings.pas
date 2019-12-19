@@ -1,4 +1,4 @@
-unit fSettings;
+ï»¿unit fSettings;
 
 {
   Okynko nastaveni.
@@ -261,7 +261,7 @@ begin
      on E:Exception do
       begin
        GlobConfig.data.symbolSet := oldss;
-       Application.MessageBox(PChar('Zmìna velikosti symbolù se nezdaøila'+#13#10+E.ToString), 'Chyba', MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('ZmÄ›na velikosti symbolÅ¯ se nezdaÅ™ila'+#13#10+E.ToString), 'Chyba', MB_OK OR MB_ICONWARNING);
       end;
    end;
   end;

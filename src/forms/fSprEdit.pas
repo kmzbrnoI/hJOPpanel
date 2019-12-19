@@ -1,4 +1,4 @@
-unit fSprEdit;
+Ôªøunit fSprEdit;
 
 {
   Okno editace soupravy.
@@ -120,7 +120,7 @@ var ts:TCloseTabSheet;
 begin
  if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
   begin
-   Application.MessageBox('VÌce HV nelze p¯idat', 'Nelze p¯idat dalöÌ HV', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('V√≠ce HV nelze p≈ôidat', 'Nelze p≈ôidat dal≈°√≠ HV', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -193,7 +193,7 @@ begin
  form.FillHV(HVs, nil);
 
  Self.ActiveControl := Self.E_Nazev;
- Self.Caption := 'Nov· souprava';
+ Self.Caption := 'Nov√° souprava';
  Self.Show();
 end;
 
@@ -242,7 +242,7 @@ begin
 
    Self.sprHVs.ParseHVs(parsed[8]);
  except
-  Application.MessageBox('Neplatn˝ form·t dat soupravy !', 'Nelze editovat soupravu', MB_OK OR MB_ICONWARNING);
+  Application.MessageBox('Neplatn√Ω form√°t dat soupravy !', 'Nelze editovat soupravu', MB_OK OR MB_ICONWARNING);
   Exit();
  end;
 
@@ -271,7 +271,7 @@ begin
  Self.BB_HV_Add.Enabled := (Self.sprHVs.HVs.Count < _MAX_HV_CNT);
 
  Self.ActiveControl := Self.E_Nazev;
- Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' ñ ' + owner;
+ Self.Caption := 'Souprava '+Self.E_Nazev.Text + ' ‚Äì ' + owner;
  Self.Show();
 end;
 
@@ -285,7 +285,7 @@ var sprstr:string;
 begin
  if (Self.E_Nazev.Text = '') then
   begin
-   Application.MessageBox('VyplÚte n·zev soupravy!', 'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vypl≈àte n√°zev soupravy!', 'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit;
   end;
 
@@ -293,22 +293,22 @@ begin
  for j := 0 to Length(_forbidden_chars)-1 do
    if (StrScan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
      begin
-      Application.MessageBox(PChar('Pozn·mka k soupravÏ obsahuje zak·zanÈ znaky!'+#13#10+'Zak·zanÈ znaky: '+GetForbidderChars()),
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox(PChar('Pozn√°mka k soupravƒõ obsahuje zak√°zan√© znaky!'+#13#10+'Zak√°zan√© znaky: '+GetForbidderChars()),
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
 
  if ((Self.CHB_report.Checked) and ((Self.CB_Vychozi.ItemIndex < 1) or (Self.CB_Cilova.ItemIndex < 1))) then
   begin
-   Application.MessageBox('Pro staniËnÌ hl·öenÌ musÌ b˝t vyplnÏna v˝chozÌ a cÌlov· stanice!',
-                          'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Pro staniƒçn√≠ hl√°≈°en√≠ mus√≠ b√Ωt vyplnƒõna v√Ωchoz√≠ a c√≠lov√° stanice!',
+                          'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
  if ((Self.CHB_report.Checked) and (Self.CB_Typ.Text = '')) then
   begin
-   Application.MessageBox('Pro staniËnÌ hl·öenÌ musÌ b˝t vyplnÏn typ soupravy!',
-                          'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Pro staniƒçn√≠ hl√°≈°en√≠ mus√≠ b√Ωt vyplnƒõn typ soupravy!',
+                          'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -334,35 +334,35 @@ begin
   begin
    if (Self.HVs[i].HV = nil) then
     begin
-     Application.MessageBox(PChar('Vyberte hnacÌ vozidlo soupravy na z·loûce '+Self.PC_HVs.Pages[i].Caption),
-                            'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Vyberte hnac√≠ vozidlo soupravy na z√°lo≈æce '+Self.PC_HVs.Pages[i].Caption),
+                            'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
      Exit();
     end;
    if (Self.HVs[i].RG_HV1_dir.ItemIndex < 0) then
     begin
-     Application.MessageBox(PChar('Vyberte orientaci stanoviötÏ A hnacÌho vozidla na z·loûce '+Self.PC_HVs.Pages[i].Caption),
-                            'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Vyberte orientaci stanovi≈°tƒõ A hnac√≠ho vozidla na z√°lo≈æce '+Self.PC_HVs.Pages[i].Caption),
+                            'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
      Exit();
     end;
    for j := 0 to Length(_forbidden_chars)-1 do
      if (StrScan(PChar(Self.HVs[i].M_HV1_Notes.Text), _forbidden_chars[j]) <> nil) then
        begin
-        Application.MessageBox(PChar('Pozn·mka k hnacÌmu vozidlu obsahuje zak·zanÈ znaky!'+#13#10+'Zak·zanÈ znaky: '+
-                               GetForbidderChars()), 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+        Application.MessageBox(PChar('Pozn√°mka k hnac√≠mu vozidlu obsahuje zak√°zan√© znaky!'+#13#10+'Zak√°zan√© znaky: '+
+                               GetForbidderChars()), 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
         Exit();
        end;
 
    for j := 0 to _MAX_FUNC do
      if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
-       err := err + Self.PC_HVs.Pages[i].Caption+' m· aktivovanou funkci '+IntToStr(j) +
-              ' ('+Self.HVs[i].HV.funcVyznam[j]+'), kter· je momentary.'+#13#10;
+       err := err + Self.PC_HVs.Pages[i].Caption+' m√° aktivovanou funkci '+IntToStr(j) +
+              ' ('+Self.HVs[i].HV.funcVyznam[j]+'), kter√° je momentary.'+#13#10;
 
    sprstr := sprstr + Self.HVs[i].GetHVString();
   end;
 
  if (err <> '') then
-   if (Application.MessageBox(PChar(err+'SkuteËnÏ chcete pokraËovat?'),
-                              'PokraËovat?', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
+   if (Application.MessageBox(PChar(err+'Skuteƒçnƒõ chcete pokraƒçovat?'),
+                              'Pokraƒçovat?', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
      Exit();
 
  sprstr := sprstr + '};';
@@ -452,20 +452,20 @@ procedure TF_SoupravaEdit.TechError(err:string);
 begin
  Screen.Cursor := crDefault;
  Self.T_Timeout.Enabled := false;
- Application.MessageBox(PChar('Technologick˝ server odpovÏdÏl chybou:'+#13#10+err), 'Varov·nÌ', MB_OK OR MB_ICONWARNING);
+ Application.MessageBox(PChar('Technologick√Ω server odpovƒõdƒõl chybou:'+#13#10+err), 'Varov√°n√≠', MB_OK OR MB_ICONWARNING);
 end;
 
 procedure TF_SoupravaEdit.T_TimeoutTimer(Sender: TObject);
 begin
  Self.T_Timeout.Enabled := false;
  Screen.Cursor := crDefault;
- Application.MessageBox('Technologick˝ server neodpovÏdÏl na poûadavek o editaci soupravy', 'Varov·nÌ', MB_OK OR MB_ICONWARNING);
+ Application.MessageBox('Technologick√Ω server neodpovƒõdƒõl na po≈æadavek o editaci soupravy', 'Varov√°n√≠', MB_OK OR MB_ICONWARNING);
 end;
 
 procedure TF_SoupravaEdit.TechACK();
 begin
  Screen.Cursor := crDefault;
- Relief.ORInfoMsg('Souprava uloûena');
+ Relief.ORInfoMsg('Souprava ulo≈æena');
  Self.T_Timeout.Enabled := false;
  Self.Close();
 end;
@@ -667,8 +667,8 @@ begin
  Self.CB_Vychozi.Clear();
  Self.CB_Cilova.Clear();
 
- Self.CB_Vychozi.Items.Add('NevyplnÏno');
- Self.CB_Cilova.Items.Add('NevyplnÏno');
+ Self.CB_Vychozi.Items.Add('Nevyplnƒõno');
+ Self.CB_Cilova.Items.Add('Nevyplnƒõno');
 
  for name in ORDb.names_sorted do
   begin

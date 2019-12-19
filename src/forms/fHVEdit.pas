@@ -1,4 +1,4 @@
-unit fHVEdit;
+Ôªøunit fHVEdit;
 
 {
   Okno editace vlastnosti hnacicho vozidla.
@@ -108,22 +108,22 @@ var HV:THV;
 begin
  if (Self.E_Name.Text = '') then
   begin
-   Application.MessageBox('VyplÚte n·zev lokomotivy!', 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vypl≈àte n√°zev lokomotivy!', 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
  if (Self.E_Adresa.Text = '') then
   begin
-   Application.MessageBox('VyplÚte adresu lokomotivy!', 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vypl≈àte adresu lokomotivy!', 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
  if (Self.RG_Trida.ItemIndex < 0) then
   begin
-   Application.MessageBox('Vyberte t¯Ìdu lokomotivy!', 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte t≈ô√≠du lokomotivy!', 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
  if (Self.RG_StA.ItemIndex < 0) then
   begin
-   Application.MessageBox('Vyberte stanoviötÏ A lokomotivy!', 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte stanovi≈°tƒõ A lokomotivy!', 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -133,7 +133,7 @@ begin
  for j := 0 to Length(_forbidden_chars)-1 do
    if (strscan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
      begin
-      Application.MessageBox(PChar('Pozn·mka k hnacÌmu vozidlu obsahuje zak·zanÈ znaky!'+#13#10+'Zak·zanÈ znaky: '+GetForbidderChars()), 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox(PChar('Pozn√°mka k hnac√≠mu vozidlu obsahuje zak√°zan√© znaky!'+#13#10+'Zak√°zan√© znaky: '+GetForbidderChars()), 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
 
@@ -182,13 +182,13 @@ begin
   begin
    if (StrScan(PChar(Self.CB_funkce[i].Text), ':') <> nil) then
     begin
-     Application.MessageBox(PChar('V˝znam funkce obsahuje zak·zan˝ znak ":" (dvojteËka)!'), 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('V√Ωznam funkce obsahuje zak√°zan√Ω znak ":" (dvojteƒçka)!'), 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
      Exit();
     end;
    for j := 0 to Length(_forbidden_chars)-1 do
      if (strscan(PChar(Self.CB_funkce[i].Text), _forbidden_chars[j]) <> nil) then
        begin
-        Application.MessageBox(PChar('V˝znam funkce obsahuje zak·zanÈ znaky!'+#13#10+'Zak·zanÈ znaky: '+GetForbidderChars()), 'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+        Application.MessageBox(PChar('V√Ωznam funkce obsahuje zak√°zan√© znaky!'+#13#10+'Zak√°zan√© znaky: '+GetForbidderChars()), 'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
         Exit();
        end;
 
@@ -236,7 +236,7 @@ procedure TF_HVEdit.B_SearchClick(Sender: TObject);
 begin
  if (Self.E_Adresa.Text = '') then
   begin
-   Application.MessageBox('VyplÚte adresu hnacÌho vozidla!', 'Nelze pokraËovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vypl≈àte adresu hnac√≠ho vozidla!', 'Nelze pokraƒçovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
 
@@ -388,7 +388,7 @@ begin
  Self.CB_HV.Enabled := false;
  Self.CB_HV.Clear();
  Self.CB_HVChange(Self.CB_HV);
- Self.CB_HV.Items.Add('NovÈ hnacÌ vozidlo');
+ Self.CB_HV.Items.Add('Nov√© hnac√≠ vozidlo');
  Self.CB_HV.ItemIndex := 0;
 
  Self.E_Name.Text         := '';
@@ -415,7 +415,7 @@ begin
 
  Self.B_Search.Visible := true;
 
- Self.Caption := 'NovÈ hnacÌ vozidlo';
+ Self.Caption := 'Nov√© hnac√≠ vozidlo';
  Self.Show();
  Self.ActiveControl := Self.E_Name;
 end;
@@ -432,7 +432,7 @@ begin
 
  Self.B_Search.Visible := false;
 
- Self.Caption := 'Editovat hnacÌ vozidlo';
+ Self.Caption := 'Editovat hnac√≠ vozidlo';
  Self.Show();
  Self.ActiveControl := Self.CB_HV;
 end;

@@ -1,4 +1,4 @@
-unit fOdlozeniOdjezdu;
+Ôªøunit fOdlozeniOdjezdu;
 
 interface
 
@@ -48,24 +48,24 @@ begin
     if ((StrToInt(Copy(Self.ME_Absolute.Text, 1, 2)) < 0) or
         (StrToInt(Copy(Self.ME_Absolute.Text, 1, 2)) >= 24)) then
      begin
-      Application.MessageBox('äpatnÏ zadanÈ hodiny!',
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('≈†patnƒõ zadan√© hodiny!',
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
 
     if ((StrToInt(Copy(Self.ME_Absolute.Text, 4, 2)) < 0) or
         (StrToInt(Copy(Self.ME_Absolute.Text, 4, 2)) >= 60)) then
      begin
-      Application.MessageBox('äpatnÏ zadanÈ minuty!',
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('≈†patnƒõ zadan√© minuty!',
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
 
     if ((StrToInt(Copy(Self.ME_Absolute.Text, 7, 2)) < 0) or
         (StrToInt(Copy(Self.ME_Absolute.Text, 7, 2)) >= 60)) then
      begin
-      Application.MessageBox('äpatnÏ zadanÈ sekundy!',
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('≈†patnƒõ zadan√© sekundy!',
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
    end;
@@ -75,24 +75,24 @@ begin
     if ((StrToInt(Copy(Self.ME_Relative.Text, 1, 2)) < 0) or
         (StrToInt(Copy(Self.ME_Relative.Text, 1, 2)) >= 60)) then
      begin
-      Application.MessageBox('äpatnÏ zadanÈ minuty!',
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('≈†patnƒõ zadan√© minuty!',
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
 
     if ((StrToInt(Copy(Self.ME_Relative.Text, 4, 2)) < 0) or
         (StrToInt(Copy(Self.ME_Relative.Text, 4, 2)) >= 60)) then
      begin
-      Application.MessageBox('äpatnÏ zadanÈ sekundy!',
-                             'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('≈†patnƒõ zadan√© sekundy!',
+                             'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
    end;
  except
   on E:Exception do
    begin
-    Application.MessageBox(PChar('Neplatn˝ form·t dat!'+#13#10+E.Message),
-                           'Nelze uloûit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox(PChar('Neplatn√Ω form√°t dat!'+#13#10+E.Message),
+                           'Nelze ulo≈æit data', MB_OK OR MB_ICONWARNING);
     Exit();
    end;
  end;
@@ -148,9 +148,9 @@ end;
 procedure TF_OOdj.OpenForm(parsed:TStrings);
 begin
  if (ModCas.used) then
-   Self.L_Time.Caption := 'modelovÈm Ëasu'
+   Self.L_Time.Caption := 'modelov√©m ƒçasu'
   else
-   Self.L_Time.Caption := 'skuteËnÈm Ëasu';
+   Self.L_Time.Caption := 'skuteƒçn√©m ƒçasu';
 
  Self.CHB_Absolute.Checked := parsed[2] <> '';
  Self.ME_Absolute.Enabled := Self.CHB_Absolute.Checked;

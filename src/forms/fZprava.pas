@@ -1,4 +1,4 @@
-unit fZprava;
+Ôªøunit fZprava;
 
 {
   Okno jednoho komunikacniho sezeni.
@@ -64,7 +64,7 @@ begin
    for j := 0 to Length(_forbidden_chars)-1 do
      if (_forbidden_chars[j] = Self.M_Send.Text[i]) then
        begin
-        Application.MessageBox(PChar('Zpr·va obsahuje zak·zanÈ znaky!'+#13#10+'Zak·zanÈ znaky: '+GetForbidderChars()), 'Nelze odeslat zpr·vu', MB_OK OR MB_ICONWARNING);
+        Application.MessageBox(PChar('Zpr√°va obsahuje zak√°zan√© znaky!'+#13#10+'Zak√°zan√© znaky: '+GetForbidderChars()), 'Nelze odeslat zpr√°vu', MB_OK OR MB_ICONWARNING);
         Exit();
        end;
 
