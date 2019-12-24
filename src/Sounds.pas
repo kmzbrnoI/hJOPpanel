@@ -152,11 +152,12 @@ begin
     Break;
    end;
 
- if (Self.thread.data = Self.memorySounds[Self.ResolveSndFilename(code)]) then
+ if ((Self.memorySounds.ContainsKey(Self.ResolveSndFilename(code))) and
+     (Self.thread.data = Self.memorySounds[Self.ResolveSndFilename(code)])) then
    Self.thread.data := nil;
 
  i := Self.GetHighestSound();
- if (i > -1) then
+ if ((i > -1) and (Self.memorySounds.ContainsKey(Self.ResolveSndFilename(Self.buffer[i].code)))) then
    Self.thread.data := Self.memorySounds[Self.ResolveSndFilename(Self.buffer[i].code)];
 end;
 
