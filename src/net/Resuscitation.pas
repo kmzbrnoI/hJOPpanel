@@ -9,7 +9,7 @@ unit Resuscitation;
 interface
 
 uses
-  Classes, SysUtils, IdTCPClient, IdIOHandlerSocket;
+  Classes, SysUtils, IdTCPClient;
 
 type
   TResuscitation = class(TThread)

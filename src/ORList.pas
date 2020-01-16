@@ -7,7 +7,7 @@ unit ORList;
 
 interface
 
-uses SysUtils, StrUtils, Classes, Generics.Collections, Generics.Defaults;
+uses SysUtils, Classes, Generics.Collections, Generics.Defaults;
 
 type
   TORDb = class
@@ -31,7 +31,7 @@ var
 
 implementation
 
-uses RPConst, parseHelper;
+uses parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

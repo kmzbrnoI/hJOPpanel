@@ -6,7 +6,7 @@
 
 interface
 
-uses SysUtils, Controls, Graphics, Classes, RPConst, Windows, Forms;
+uses SysUtils, Controls, Graphics, Classes, Windows, Forms;
 
 const
    _Symbols_DefColor = clBlack; //barva pro nacitani souboru

@@ -7,8 +7,7 @@ unit BlokPopisek;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-     BlokPrejezd;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
  TTextPanelProp = record

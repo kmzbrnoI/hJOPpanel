@@ -6,7 +6,7 @@ unit Sounds;
 
 interface
 
-uses SysUtils, SoundsThread, Classes, mmsystem, Types, Generics.Collections;
+uses SysUtils, SoundsThread, Classes, Generics.Collections;
 
 // vyssi cislo zvuku ma vzdy vetsi prioritu na prehrani
 const
@@ -62,7 +62,7 @@ var
 
 implementation
 
-uses GlobalConfig, fMain;
+uses GlobalConfig;
 
 ////////////////////////////////////////////////////////////////////////////////
 

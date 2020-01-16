@@ -6,8 +6,7 @@ unit GlobalConfig;
 
 interface
 
-uses IniFiles, SysUtils, RPConst, Types, Generics.Collections, Classes, PanelOR,
-     Symbols;
+uses IniFiles, SysUtils, Types, Generics.Collections, Classes, PanelOR, Symbols;
 
 const
   _MOUSE_PANEL = 0;

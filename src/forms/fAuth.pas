@@ -7,8 +7,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Hash, ComCtrls, ExtCtrls, Generics.Collections, RPConst;
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Hash, ComCtrls, ExtCtrls, Generics.Collections, RPConst;
 
 type
   TAuthLevelDesc = record

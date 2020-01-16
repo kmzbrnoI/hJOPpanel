@@ -9,7 +9,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DXDraws, ComCtrls, ExtCtrls, ImgList, Panel, AppEvnts, ActnList,
-  Buttons, StdCtrls, GlobalConfig, StrUtils, Resuscitation, ShellApi, RPConst;
+  Buttons, StdCtrls, GlobalConfig, StrUtils, ShellApi, RPConst;
 
 const
   _MUTE_MIN = 3;    // ztisit zvuky je mozne maximalne na 3 minuty, pak se znovu zapnou

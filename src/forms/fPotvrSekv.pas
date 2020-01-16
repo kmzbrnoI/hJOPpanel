@@ -7,7 +7,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Generics.Collections;
 
 const
@@ -86,7 +86,7 @@ var
 
 implementation
 
-uses fMain, Verze, BottomErrors, Sounds, parseHelper;
+uses fMain, BottomErrors, Sounds, parseHelper;
 
 {$R *.dfm}
 ////////////////////////////////////////////////////////////////////////////////

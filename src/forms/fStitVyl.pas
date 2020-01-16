@@ -7,8 +7,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Panel, fPotvrSekv;
+  Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
+  Panel, fPotvrSekv;
 
 //toto okno je primo podrizeno panelu, resp. TRelief
 //nikdo jiny nema opravneni s timto oknem komunikovat

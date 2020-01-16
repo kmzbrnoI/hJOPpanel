@@ -6,7 +6,7 @@ unit parseHelper;
 
 interface
 
-uses Types, Classes, SysUtils, Graphics, Windows, StrUtils;
+uses Classes, SysUtils, Graphics, Windows, StrUtils;
 
 procedure ExtractStringsEx(Separators: TSysCharSet; Ignore: TSysCharSet; Content: string; var Strings: TStrings);
 function GetPos(data:string):TPoint;

@@ -204,7 +204,6 @@ object F_Auth: TF_Auth
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 5
-      ExplicitTop = 373
       object B_Guest: TButton
         Left = 16
         Top = 7

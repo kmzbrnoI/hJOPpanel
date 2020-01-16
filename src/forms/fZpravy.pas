@@ -7,9 +7,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, RPConst, StdCtrls, fZprava, CloseTabSheet, Themes,
-  Generics.Collections;
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
+  ComCtrls, StdCtrls, fZprava, CloseTabSheet, Themes, Generics.Collections;
 
 const
   _MAX_CLIENTS = 32;

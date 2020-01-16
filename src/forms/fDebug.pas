@@ -7,7 +7,7 @@ unit fDebug;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, StrUtils;
 
 type
@@ -42,7 +42,7 @@ var
 
 implementation
 
-uses Sounds, fMain, fPotvrSekv, BottomErrors, TCPClientPanel;
+uses Sounds, fPotvrSekv, BottomErrors, TCPClientPanel;
 
 {$R *.dfm}
 

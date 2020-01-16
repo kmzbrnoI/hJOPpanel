@@ -7,8 +7,8 @@ unit fSprHVEdit;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls, IBUtils;
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls, IBUtils;
 
 type
   TF_SprHVEdit = class(TForm)

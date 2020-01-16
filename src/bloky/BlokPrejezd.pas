@@ -87,7 +87,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter, Panel, parseHelper;
+uses Symbols, PanelPainter, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 

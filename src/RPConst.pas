@@ -6,7 +6,7 @@ unit RPConst;
 
 interface
 
-uses Classes, SysUtils;
+uses Classes;
 
 const
   // zakazane znaky pro pouziti v komentarich; delka tohoto pole musi byt alespon 1

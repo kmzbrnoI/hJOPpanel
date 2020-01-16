@@ -50,7 +50,7 @@ object F_HVDelete: TF_HVDelete
     Width = 225
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
+    ItemHeight = 13
     TabOrder = 2
   end
   object B_Storno: TButton

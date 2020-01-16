@@ -6,7 +6,7 @@
 
 interface
 
-uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+uses Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
      Dialogs, ComCtrls, StdCtrls, ExtCtrls;
 
 type

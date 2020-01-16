@@ -6,10 +6,10 @@
 
 interface
 
-uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, StdCtrls,
+uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms,
      ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
      StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO, IBUtils,
-     Hash, PngImage, DirectX, PanelOR, BlokTypes,
+     PngImage, DirectX, PanelOR, BlokTypes,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
      BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek,
      BlokPomocny;
@@ -283,7 +283,7 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     parseHelper, PanelPainter;
+     PanelPainter;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin

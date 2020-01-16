@@ -38,7 +38,7 @@ type
 
 implementation
 
-uses fMain;
+
 
 procedure TSndThread.Execute;
  begin

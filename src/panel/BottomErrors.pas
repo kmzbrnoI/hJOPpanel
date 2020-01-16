@@ -6,7 +6,7 @@ unit BottomErrors;
 
 interface
 
-uses SysUtils, StdCtrls, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws,
+uses SysUtils, Graphics, PGraphics, IBUtils, Classes, StrUtils, DXDraws,
      Generics.Collections;
 
 const

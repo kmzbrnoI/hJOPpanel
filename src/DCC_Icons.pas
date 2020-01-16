@@ -6,7 +6,7 @@ unit DCC_Icons;
 
 interface
 
-uses Classes, Types, SysUtils;
+uses Classes, SysUtils;
 
 type
   TDCCStatus = (disabled, stopped, running);

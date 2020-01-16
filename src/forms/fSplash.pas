@@ -7,7 +7,7 @@ unit fSplash;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls;
 
 type
@@ -35,7 +35,7 @@ implementation
 
 {$R *.dfm}
 
-uses fMain, Verze, RPConst;
+uses Verze;
 
 procedure TF_splash.FormCreate(Sender: TObject);
  begin

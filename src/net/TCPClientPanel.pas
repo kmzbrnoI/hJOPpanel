@@ -11,7 +11,7 @@ interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal, ExtCtrls,
      Classes, StrUtils, RPConst, Graphics, Windows, fPotvrSekv, Forms, Controls,
-     Generics.Collections, Resuscitation, PanelOR;
+     Resuscitation, PanelOR;
 
 const
   _DEFAULT_PORT = 5896;
@@ -113,8 +113,8 @@ implementation
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
-      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokVyhybka, BlokUsek, BlokNavestidlo,
-      BlokPrejezd, BlokRozp, parseHelper, fOdlozeniOdjezdu;
+
+      parseHelper, fOdlozeniOdjezdu;
 
 ////////////////////////////////////////////////////////////////////////////////
 

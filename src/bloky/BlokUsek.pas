@@ -8,7 +8,7 @@ unit BlokUsek;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, RPConst, Symbols, SysUtils,
+uses Classes, Graphics, Types, Generics.Collections, Symbols, SysUtils,
      BlokTypes, PanelOR, DXDraws, IBUtils;
 
 const

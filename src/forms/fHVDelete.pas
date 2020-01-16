@@ -7,8 +7,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, HVDb, RPConst, TCPClientPanel;
+  Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
+  HVDb, RPConst, TCPClientPanel;
 
 type
   TF_HVDelete = class(TForm)

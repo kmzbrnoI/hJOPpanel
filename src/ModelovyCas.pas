@@ -6,7 +6,7 @@ unit ModelovyCas;
 
 interface
 
-uses Classes, SysUtils, IniFiles, IDContext, Graphics, ExtCtrls, DateUtils;
+uses Classes, SysUtils, Graphics, ExtCtrls;
 
 type
 
