@@ -96,7 +96,13 @@ type
                            obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
    procedure ShowSoupravy(obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
    procedure PaintCisloKoleje(pos:TPoint; obj:TDXDraw; hidden:boolean);
+
+   function IsSecondCross():Boolean;
+   function SecondCrossPos():TPoint;
+
  end;
+
+function InvDKSType(dks:TDKSType):TDKSType;
 
 implementation
 
@@ -367,6 +373,36 @@ begin
       souprava.Free();
     end;
    end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUsek.IsSecondCross():Boolean;
+begin
+ Result := (Self.Vetve[0].node1.ref_minus <> -1) or (Self.Vetve[1].node1.ref_minus <> -1);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUsek.SecondCrossPos():TPoint;
+begin
+ if (Self.DKStype = dksTop) then
+   Result := Point(Self.root.X, Self.root.Y+1)
+ else if (Self.DKStype = dksBottom) then
+   Result := Point(Self.root.X, Self.root.Y-1)
+ else
+   raise Exception.Create('No DKS -> no second cross pos!');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function InvDKSType(dks:TDKSType):TDKSType;
+begin
+ case (dks) of
+  TDKSType.dksNone: Result := dksNone;
+  TDKSType.dksTop: Result := dksBottom;
+  TDKSType.dksBottom: Result := dksTop;
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
