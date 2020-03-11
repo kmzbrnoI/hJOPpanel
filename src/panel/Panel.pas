@@ -18,8 +18,13 @@ const
   _INFOTIMER_WIDTH      = 30;
   _INFOTIMER_TEXT_WIDTH = 22;
 
-  _FileVersion_accept : array[0..1] of string = (
-     '1.1', '1.2'
+  _FILEVERSION_10 = $0100;
+  _FILEVERSION_11 = $0101;
+  _FILEVERSION_12 = $0102;
+  _FILEVERSION_13 = $0103;
+
+  _FileVersion_accept : array[0..2] of string = (
+     '1.1', '1.2', '1.3'
   );
 
 type
@@ -283,7 +288,7 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
      fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
      fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-     PanelPainter;
+     PanelPainter, parseHelper;
 
 constructor TRelief.Create(aParentForm:TForm);
 begin
@@ -1004,7 +1009,9 @@ var i:Integer;
     inifile:TMemIniFile;
     sect_str:TStrings;
     ver:string;
+    verWord: Word;
     versionOk:boolean;
+    strs: TStrings;
 begin
  if (not FileExists(aFile)) then
    raise Exception.Create('Soubor panelu ' + aFile + ' neexistuje!');
@@ -1035,6 +1042,14 @@ begin
        Exit();
     end;
 
+   strs := TStringList.Create();
+   try
+     ExtractStringsEx(['.'], [], ver, strs);
+     verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
+   finally
+     strs.Free();
+   end;
+
    // Oblasti rizeni
    sect_str := TStringList.Create();
    try
@@ -1055,7 +1070,7 @@ begin
    Self.Navestidla.Load(inifile);
    Self.Vyhybky.Load(inifile);
    Self.Vykol.Load(inifile);
-   Self.Prejezdy.Load(inifile, Self.Useky);
+   Self.Prejezdy.Load(inifile, Self.Useky, verWord);
    Self.Uvazky.Load(inifile);
    Self.UvazkySpr.Load(inifile);
    Self.Zamky.Load(inifile);

@@ -64,7 +64,7 @@ type
    constructor Create();
    destructor Destroy(); override;
 
-   procedure Load(ini:TMemIniFile; useky:TPUseky);
+   procedure Load(ini:TMemIniFile; useky:TPUseky; version: Word);
    procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
    function GetIndex(Pos:TPoint):Integer;
    procedure Reset(orindex:Integer = -1);
@@ -87,7 +87,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter, parseHelper;
+uses Symbols, PanelPainter, parseHelper, Panel;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -178,12 +178,18 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Load(ini:TMemIniFile; useky:TPUseky);
+procedure TPPrejezdy.Load(ini:TMemIniFile; useky:TPUseky; version: Word);
 var i, j, count:Integer;
     prj:TPPrejezd;
     obj:string;
+    section_len: Integer;
 begin
  Self.data.Clear();
+
+ if (version >= _FILEVERSION_13) then
+   section_len := 16
+ else
+   section_len := 9;
 
  count := ini.ReadInteger('P', 'PRJ', 0);
  for i := 0 to count-1 do
@@ -194,12 +200,13 @@ begin
    prj.OblRizeni   := ini.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'BP', '');
-   prj.BlikPositions.Count := (Length(obj) div 9);
+   prj.BlikPositions.Count := (Length(obj) div section_len);
+
    for j := 0 to prj.BlikPositions.Count-1 do
     begin
-     prj.BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*9+1, 3), 0);
-     prj.BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*9+4, 3), 0);
-     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*9+7, 3), 0));
+     prj.BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*section_len+1, 3), 0);
+     prj.BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*section_len+4, 3), 0);
+     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, 3), 0));
     end;//for j
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'SP', '');
