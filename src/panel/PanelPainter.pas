@@ -9,7 +9,7 @@ interface
 uses Controls, Types, Graphics, ImgList, DXDraws;
 
 procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; obj:TDXDraw; transparent:boolean = false);
-procedure TextOutput(Pos:TPoint; Text:string; fg, bg:TColor; obj:TDXDraw; underline:boolean = false);
+procedure TextOutput(Pos:TPoint; Text:string; fg, bg:TColor; obj:TDXDraw; underline:boolean = false; transparent: boolean = false);
 
 implementation
 
@@ -18,26 +18,52 @@ uses Symbols;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure Draw(IL:TImageList; pos:TPoint; symbol:Integer; fg:TColor; bg:TColor; obj:TDXDraw; transparent:boolean = false);
+var item: Integer;
 begin
+ // transparent is faster
+
  if (transparent) then
    IL.DrawingStyle := TDrawingStyle.dsTransparent
- else begin
+ else
    IL.DrawingStyle := TDrawingStyle.dsNormal;
-   IL.BkColor := bg;
- end;
 
+ if ((bg <> clBlack) and (not transparent)) then
+  begin
+   // black is default
+   obj.Surface.Canvas.Pen.Color := bg;
+   obj.Surface.Canvas.Brush.Color := bg;
+   obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka,
+                                pos.Y * SymbolSet._Symbol_Vyska,
+                                (pos.X+1) * SymbolSet._Symbol_Sirka,
+                                (pos.Y+1) * SymbolSet._Symbol_Vyska);
+  end;
+
+ item := GetSymbolIndex(symbol, fg);
  IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka,
-         pos.Y * SymbolSet._Symbol_Vyska, GetSymbolIndex(symbol, fg));
+         pos.Y * SymbolSet._Symbol_Vyska, item);
 
  IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TextOutput(Pos:TPoint; Text:string; fg, bg:TColor; obj:TDXDraw; underline:boolean = false);
+procedure TextOutput(Pos:TPoint; Text:string; fg, bg:TColor; obj:TDXDraw; underline:boolean = false; transparent: boolean = false);
 var j:Integer;
     TextIndex:Integer;
+    item: Integer;
 begin
+ // transparent is faster
+
+ if (not transparent) then
+  begin
+   obj.Surface.Canvas.Pen.Color := bg;
+   obj.Surface.Canvas.Brush.Color := bg;
+   obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka,
+                                pos.Y * SymbolSet._Symbol_Vyska,
+                                (pos.X+Length(Text)) * SymbolSet._Symbol_Sirka,
+                                (pos.Y+1) * SymbolSet._Symbol_Vyska);
+  end;
+
  for j := 0 to Length(Text)-1 do
   begin
    //prevedeni textu na indexy v ImageListu
@@ -81,9 +107,9 @@ begin
     TextIndex := 0;
    end;
 
-   SymbolSet.IL_Text.BkColor := bg;
+   item := (TextIndex*Length(_Symbol_Colors))+GetColorIndex(fg);
    SymbolSet.IL_Text.Draw(obj.Surface.Canvas, Pos.X*SymbolSet._Symbol_Sirka+(j*SymbolSet._Symbol_Sirka),
-                          Pos.Y*SymbolSet._Symbol_Vyska,(TextIndex*Length(_Symbol_Colors))+GetColorIndex(fg));
+                          Pos.Y*SymbolSet._Symbol_Vyska, item);
   end;//for j
 
  if (underline) then

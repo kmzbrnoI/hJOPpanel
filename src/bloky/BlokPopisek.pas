@@ -91,10 +91,10 @@ begin
      (Self.Position.Y+1)*SymbolSet._Symbol_Vyska);
 
    PanelPainter.TextOutput(Self.Position, Self.Text,
-      Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+      Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj, false, true);
   end else begin
    PanelPainter.TextOutput(Self.Position, Self.Text,
-      _Symbol_Colors[Self.Color], clBlack, obj);
+      _Symbol_Colors[Self.Color], clBlack, obj, false, true);
   end;
 end;
 

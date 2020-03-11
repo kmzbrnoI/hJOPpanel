@@ -201,6 +201,7 @@ begin
 
    if (Self.Items.data[i].show_text = '-') then
     begin
+     Canvas.Pen.Color := clBlack;
      Canvas.MoveTo(
       Round((_PNL_MENU_ITEM_LEFT_OFFSET*SymbolSet._Symbol_Sirka)-(SymbolSet._Symbol_Sirka/2)),
       (Pos.Y * SymbolSet._Symbol_Vyska)+Round(SymbolSet._Symbol_Vyska/2));
