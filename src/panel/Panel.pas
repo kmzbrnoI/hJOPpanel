@@ -524,7 +524,6 @@ begin
         _Plny_Symbol, clWhite, clBlack, Self.DrawObject);
 
      //vykresleni poloviny symbolu
-     SymbolSet.IL_Symbols.BkColor := clWhite;
      if ((Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) mod 2) = 1) then
        PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X+8+(Round((StrToIntDef(Time1,0)/StrToIntDef(Time2,0))*_delka) div 2),
                  Self.myORs[j].Poss.Time.Y+k), _Plny_Symbol+1, clRed, clWhite, Self.DrawObject);
