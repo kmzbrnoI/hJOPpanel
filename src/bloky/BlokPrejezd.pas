@@ -183,13 +183,18 @@ var i, j, count:Integer;
     prj:TPPrejezd;
     obj:string;
     section_len: Integer;
+    usek_id_length: Integer;
 begin
  Self.data.Clear();
 
  if (version >= _FILEVERSION_13) then
-   section_len := 16
- else
+  begin
+   section_len := 16;
+   usek_id_length := 10;
+  end else begin
    section_len := 9;
+   usek_id_length := 3;
+  end;
 
  count := ini.ReadInteger('P', 'PRJ', 0);
  for i := 0 to count-1 do
@@ -206,7 +211,7 @@ begin
     begin
      prj.BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*section_len+1, 3), 0);
      prj.BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*section_len+4, 3), 0);
-     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, 3), 0));
+     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, usek_id_length), 0));
     end;//for j
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'SP', '');
