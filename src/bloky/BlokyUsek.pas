@@ -72,7 +72,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPUseky.Load(ini:TMemIniFile; myORs:TList<TORPanel>);
-var i, j, k, count, count2:Integer;
+var i, j, k, count, count2, count3:Integer;
     usek:TPUsek;
     obj:string;
     symbol:TReliefSym;
@@ -164,6 +164,7 @@ begin
     begin
      obj := ini.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
 
+     vetev.Symbols := TList<TReliefSym>.Create();
      vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
      vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
      vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
@@ -173,14 +174,13 @@ begin
      vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
 
      obj := RightStr(obj, Length(obj)-14);
-
-     SetLength(vetev.Symbols, Length(obj) div 9);
-
-     for k := 0 to Length(vetev.Symbols)-1 do
+     count3 :=  Length(obj) div 9;
+     for k := 0 to count3-1 do
       begin
-       vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
-       vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
-       vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
+       symbol.Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
+       symbol.Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
+       symbol.SymbolID := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
+       vetev.Symbols.Add(symbol);
       end;
 
      usek.Vetve.Add(vetev);
@@ -329,6 +329,7 @@ var i:Integer;
     sjc:TStartJC;
     p:TPoint;
     vyh:TPVyhybka;
+    symbol:TReliefSym;
 begin
  if (vetevI < 0) then Exit();
  if (showed[vetevI]) then Exit();
@@ -351,21 +352,21 @@ begin
 
  bg := usek.PanelProp.Pozadi;
 
- for i := 0 to Length(vetev.Symbols)-1 do
+ for symbol in vetev.Symbols do
   begin
-   if ((vetev.Symbols[i].SymbolID < _Usek_Start) and (vetev.Symbols[i].SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
+   if ((symbol.SymbolID < _Usek_Start) and (symbol.SymbolID > _Usek_End)) then continue;    // tato situace nastava v pripade vykolejek
 
    bg := usek.PanelProp.Pozadi;
 
    for sjc in startJC do
-     if ((sjc.Pos.X = vetev.Symbols[i].Position.X) and (sjc.Pos.Y = vetev.Symbols[i].Position.Y)) then
+     if ((sjc.Pos.X = symbol.Position.X) and (sjc.Pos.Y = symbol.Position.Y)) then
        bg := sjc.Color;
 
    for p in usek.JCClick do
-     if ((p.X = vetev.Symbols[i].Position.X) and (p.Y = vetev.Symbols[i].Position.Y)) then
+     if ((p.X = symbol.Position.X) and (p.Y = symbol.Position.Y)) then
        if (Integer(usek.PanelProp.KonecJC) > 0) then bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
-   PanelPainter.Draw(SymbolSet.IL_Symbols, vetev.Symbols[i].Position, vetev.Symbols[i].SymbolID, fg, bg, obj);
+   PanelPainter.Draw(SymbolSet.IL_Symbols, symbol.Position, symbol.SymbolID, fg, bg, obj);
   end;//for i
 
 

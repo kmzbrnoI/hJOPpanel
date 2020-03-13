@@ -53,12 +53,7 @@ type
   node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
   visible:boolean;           // pokud je vetve viditelna, je zde true; jinak false
 
-
-
-  Symbols:array of TReliefSym;
-                            // s timto dynamicky alokovanym polem je potreba zachazet opradu opatrne
-                            // realokace trva strasne dlouho !
-                            // presto si myslim, ze se jedna o vyhodne reseni: pole se bude plnit jen jednou
+  Symbols:TList<TReliefSym>;
  end;
 
  TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
@@ -96,9 +91,13 @@ type
                            obj:TDXDraw; blik:boolean; bgZaver:boolean = false);
    procedure ShowSoupravy(obj:TDXDraw; blik:boolean; myORs:TList<TORPanel>);
    procedure PaintCisloKoleje(pos:TPoint; obj:TDXDraw; hidden:boolean);
+   procedure AddSymbolFromPrejezd(pos:TPoint);
+   procedure RemoveSymbolFromPrejezd(pos:TPoint);
 
    function IsSecondCross():Boolean;
    function SecondCrossPos():TPoint;
+   function GetVetev(pos:TPoint):Integer;
+   class function SymbolIndex(pos:TPoint; symbols:TList<TReliefSym>):Integer;
 
  end;
 
@@ -117,7 +116,11 @@ begin
 end;
 
 destructor TPUsek.Destroy();
+var vetev:TVetev;
 begin
+ for vetev in Self.Vetve do
+   vetev.Symbols.Free();
+
  Self.PanelProp.Free();
  Self.Symbols.Free();
  Self.JCClick.Free();
@@ -403,6 +406,75 @@ begin
   TDKSType.dksTop: Result := dksBottom;
   TDKSType.dksBottom: Result := dksTop;
  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPUsek.AddSymbolFromPrejezd(pos:TPoint);
+var sym:TReliefSym;
+    vetevi:Integer;
+begin
+ sym.Position := pos;
+ sym.SymbolID := _Usek_Start;
+
+ if (Self.Vetve.Count > 0) then
+  begin
+   vetevi := Self.GetVetev(Point(pos.X-1, pos.Y));
+   if (vetevi > -1) then
+     if (SymbolIndex(pos, Self.Vetve[vetevi].Symbols) = -1) then
+       Self.Vetve[vetevi].Symbols.Add(sym);
+
+  end else begin
+   if (Self.SymbolIndex(pos, Self.Symbols) = -1) then
+     Self.Symbols.Add(sym);
+  end;
+end;
+
+procedure TPUsek.RemoveSymbolFromPrejezd(pos:TPoint);
+var vetevi:Integer;
+    symboli:Integer;
+begin
+ if (Self.Vetve.Count > 0) then
+  begin
+   vetevi := Self.GetVetev(Point(pos.X-1, pos.Y));
+   if (vetevi > -1) then
+    begin
+     symboli := SymbolIndex(pos, Self.Vetve[vetevi].Symbols);
+     if (symboli > -1) then
+       Self.Vetve[vetevi].Symbols.Delete(symboli);
+    end;
+  end else begin
+   symboli := Self.SymbolIndex(pos, Self.Symbols);
+   if (symboli > -1) then
+     Self.Symbols.Delete(symboli);
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPUsek.GetVetev(pos:TPoint):Integer;
+var vetevi:Integer;
+    i:Integer;
+begin
+ for vetevi := 0 to Self.Vetve.Count-1 do
+  begin
+   for i := 0 to Self.Vetve[vetevi].Symbols.Count-1 do
+     if ((Self.Vetve[vetevi].Symbols[i].Position.X = pos.X) and
+         (Self.Vetve[vetevi].Symbols[i].Position.Y = pos.Y)) then
+       Exit(vetevi);
+  end;
+ Result := -1;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TPUsek.SymbolIndex(pos:TPoint; symbols:TList<TReliefSym>):Integer;
+var i:Integer;
+begin
+ for i := 0 to symbols.Count-1 do
+   if ((symbols[i].Position.X = pos.X) and (symbols[i].Position.Y = pos.Y)) then
+     Exit(i);
+ Result := -1;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

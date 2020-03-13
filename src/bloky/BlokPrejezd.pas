@@ -35,18 +35,14 @@ type
  TPPrejezd = class
   Blok:Integer;
 
-  StaticPositions: record
-   data:array [0.._MAX_PRJ_LEN] of TPoint;
-   Count:Byte;
-  end;
-
-  BlikPositions: record
-   data:array [0.._MAX_PRJ_LEN] of TBlikPoint;
-   Count:Byte;
-  end;
+  StaticPositions: TList<TPoint>;
+  BlikPositions: TList<TBlikPoint>;
 
   OblRizeni:Integer;
   PanelProp:TPrjPanelProp;
+
+  constructor Create();
+  destructor Destroy(); override;
 
   procedure Reset();
   procedure Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
@@ -100,13 +96,12 @@ begin
 end;
 
 procedure TPPrejezd.Show(obj:TDXDraw; blik:boolean; useky:TList<TPUsek>);
-var j:Integer;
-    usek:Integer;
-    sym:TReliefSym;
+var pos:TPoint;
+    blikPoint:TBlikPoint;
 begin
  // vykreslit staticke pozice:
- for j := 0 to Self.StaticPositions.Count-1 do
-   PanelPainter.Draw(SymbolSet.IL_Symbols, Self.StaticPositions.data[j], _Prj_Start,
+ for pos in Self.StaticPositions do
+   PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _Prj_Start,
      Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
 
  // vykreslit blikajici pozice podle stavu prejezdu:
@@ -117,23 +112,11 @@ begin
     ((Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) and (blik))) then
   begin
    // nestaticke pozice proste vykreslime:
-   for j := 0 to Self.BlikPositions.Count-1 do
+   for blikPoint in Self.BlikPositions do
     begin
-     // musime smazat pripadne useky navic:
+     Useky[blikPoint.PanelUsek].RemoveSymbolFromPrejezd(blikPoint.Pos);
 
-     if (Self.BlikPositions.data[j].PanelUsek > -1) then
-      begin
-       // porovname, pokud tam uz nahodou neni
-       usek := Self.BlikPositions.data[j].PanelUsek;
-       if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X = Self.BlikPositions.data[j].Pos.X)
-       and (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y = Self.BlikPositions.data[j].Pos.Y) then
-        begin
-         // pokud je, odebereme
-         Useky[usek].Symbols.Count := Useky[usek].Symbols.Count - 1;
-        end;
-      end;
-
-     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.BlikPositions.data[j].Pos,
+     PanelPainter.Draw(SymbolSet.IL_Symbols, blikPoint.Pos,
        _Prj_Start, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
     end;
   end else begin
@@ -142,23 +125,9 @@ begin
 
    if (Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) then Exit();
 
-   for j := 0 to Self.BlikPositions.Count-1 do
-    begin
-     if (Self.BlikPositions.data[j].PanelUsek > -1) then
-      begin
-       // porovname, pokud tam uz nahodou neni
-       usek := Self.BlikPositions.data[j].PanelUsek;
-       if (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.X <> Self.BlikPositions.data[j].Pos.X)
-          or (Useky[usek].Symbols[Useky[usek].Symbols.Count-1].Position.Y <> Self.BlikPositions.data[j].Pos.Y) then
-        begin
-         // pokud neni, pridame:
-         sym.Position := Self.BlikPositions.data[j].Pos;
-         sym.SymbolID := 12;
-         Useky[usek].Symbols.Add(sym);
-        end;
-      end;
-
-    end;// for j
+   for blikPoint in Self.BlikPositions do
+     if (blikPoint.PanelUsek > -1) then
+       Useky[blikPoint.PanelUsek].AddSymbolFromPrejezd(blikPoint.Pos);
   end;
 end;
 
@@ -184,6 +153,8 @@ var i, j, count:Integer;
     obj:string;
     section_len: Integer;
     usek_id_length: Integer;
+    posCount: Integer;
+    blikPoint: TBlikPoint;
 begin
  Self.data.Clear();
 
@@ -205,22 +176,22 @@ begin
    prj.OblRizeni   := ini.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'BP', '');
-   prj.BlikPositions.Count := (Length(obj) div section_len);
-
-   for j := 0 to prj.BlikPositions.Count-1 do
+   posCount := (Length(obj) div section_len);
+   for j := 0 to posCount-1 do
     begin
-     prj.BlikPositions.Data[j].Pos.X := StrToIntDef(copy(obj, j*section_len+1, 3), 0);
-     prj.BlikPositions.Data[j].Pos.Y := StrToIntDef(copy(obj, j*section_len+4, 3), 0);
-     prj.BlikPositions.Data[j].PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, usek_id_length), 0));
+     blikPoint.Pos.X := StrToIntDef(copy(obj, j*section_len+1, 3), 0);
+     blikPoint.Pos.Y := StrToIntDef(copy(obj, j*section_len+4, 3), 0);
+     blikPoint.PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, usek_id_length), 0));
+     prj.BlikPositions.Add(blikPoint);
     end;//for j
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'SP', '');
-   prj.StaticPositions.Count := (Length(obj) div 6);
-   for j := 0 to prj.StaticPositions.Count-1 do
-    begin
-     prj.StaticPositions.Data[j].X := StrToIntDef(copy(obj, j*6+1, 3), 0);
-     prj.StaticPositions.Data[j].Y := StrToIntDef(copy(obj, j*6+4, 3), 0);
-    end;//for j
+   posCount := (Length(obj) div 6);
+   for j := 0 to posCount-1 do
+     prj.StaticPositions.Add(Point(
+       StrToIntDef(copy(obj, j*6+1, 3), 0),
+       StrToIntDef(copy(obj, j*6+4, 3), 0)
+     ));
 
    //default settings:
    if (prj.Blok = -2) then
@@ -244,21 +215,22 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 function TPPrejezdy.GetIndex(Pos:TPoint):Integer;
-var i, j:Integer;
+var i:Integer;
+    askPos: TPoint;
+    blikPoint: TBlikPoint;
 begin
  Result := -1;
 
  // kontrola prejezdu:
  for i := 0 to Self.data.Count-1 do
   begin
-   for j := 0 to Self.data[i].StaticPositions.Count-1 do
-     if ((Pos.X = Self.data[i].StaticPositions.data[j].X) and (Pos.Y = Self.data[i].StaticPositions.data[j].Y)) then
+   for askPos in Self.data[i].StaticPositions do
+     if ((Pos.X = askPos.X) and (Pos.Y = askPos.Y)) then
        Exit(i);
 
-   for j := 0 to Self.data[i].BlikPositions.Count-1 do
-     if ((Pos.X = Self.data[i].BlikPositions.data[j].Pos.X) and (Pos.Y = Self.data[i].BlikPositions.data[j].Pos.Y)) then
+   for blikPoint in Self.data[i].BlikPositions do
+     if ((Pos.X = blikPoint.Pos.X) and (Pos.Y = blikPoint.Pos.Y)) then
        Exit(i);
-
   end;
 end;
 
@@ -305,6 +277,22 @@ begin
  Symbol := StrToColor(data[4]);
  Pozadi := StrToColor(data[5]);
  stav   := TBlkPrjPanelStav(StrToInt(data[7]));
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TPPrejezd.Create();
+begin
+ inherited;
+ Self.StaticPositions := TList<TPoint>.Create();
+ Self.BlikPositions := TList<TBlikPoint>.Create();
+end;
+
+destructor TPPrejezd.Destroy();
+begin
+ Self.StaticPositions.Free();
+ Self.BlikPositions.Free();
+ inherited;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
