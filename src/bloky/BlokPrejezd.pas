@@ -114,7 +114,8 @@ begin
    // nestaticke pozice proste vykreslime:
    for blikPoint in Self.BlikPositions do
     begin
-     Useky[blikPoint.PanelUsek].RemoveSymbolFromPrejezd(blikPoint.Pos);
+     if (blikPoint.PanelUsek > -1) then
+       Useky[blikPoint.PanelUsek].RemoveSymbolFromPrejezd(blikPoint.Pos);
 
      PanelPainter.Draw(SymbolSet.IL_Symbols, blikPoint.Pos,
        _Prj_Start, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
@@ -151,21 +152,10 @@ procedure TPPrejezdy.Load(ini:TMemIniFile; useky:TPUseky; version: Word);
 var i, j, count:Integer;
     prj:TPPrejezd;
     obj:string;
-    section_len: Integer;
-    usek_id_length: Integer;
     posCount: Integer;
     blikPoint: TBlikPoint;
 begin
  Self.data.Clear();
-
- if (version >= _FILEVERSION_13) then
-  begin
-   section_len := 16;
-   usek_id_length := 10;
-  end else begin
-   section_len := 9;
-   usek_id_length := 3;
-  end;
 
  count := ini.ReadInteger('P', 'PRJ', 0);
  for i := 0 to count-1 do
@@ -176,12 +166,15 @@ begin
    prj.OblRizeni   := ini.ReadInteger('PRJ'+IntToStr(i), 'OR', -1);
 
    obj := ini.ReadString('PRJ'+IntToStr(i), 'BP', '');
-   posCount := (Length(obj) div section_len);
+   posCount := (Length(obj) div 9);
    for j := 0 to posCount-1 do
     begin
-     blikPoint.Pos.X := StrToIntDef(copy(obj, j*section_len+1, 3), 0);
-     blikPoint.Pos.Y := StrToIntDef(copy(obj, j*section_len+4, 3), 0);
-     blikPoint.PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*section_len+7, usek_id_length), 0));
+     blikPoint.Pos.X := StrToIntDef(copy(obj, j*9+1, 3), 0);
+     blikPoint.Pos.Y := StrToIntDef(copy(obj, j*9+4, 3), 0);
+     if (version >= _FILEVERSION_13) then
+       blikPoint.PanelUsek := StrToIntDef(copy(obj, j*9+7, 3), 0)
+     else
+       blikPoint.PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j*9+7, 3), 0));
      prj.BlikPositions.Add(blikPoint);
     end;//for j
 
