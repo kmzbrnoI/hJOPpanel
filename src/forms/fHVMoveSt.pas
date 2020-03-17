@@ -8,20 +8,19 @@ interface
 
 uses
   Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
-  HVDb, RPConst;
+  HVDb, RPConst, ComCtrls, SysUtils;
 
 type
   TF_HV_Move = class(TForm)
     Label1: TLabel;
-    CB_HV: TComboBox;
     Label2: TLabel;
     CB_Stanice: TComboBox;
     B_Storno: TButton;
     B_OK: TButton;
+    LV_HVs: TListView;
     procedure B_StornoClick(Sender: TObject);
     procedure B_OKClick(Sender: TObject);
   private
-    hv_indexes:TWordAr;
     sender_id:string;
 
   public
@@ -40,10 +39,11 @@ uses OrList, TCPClientPanel;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HV_Move.B_OKClick(Sender: TObject);
+var LI: TListItem;
 begin
- if (Self.CB_HV.ItemIndex < 0) then
+ if (Self.LV_HVs.Selected = nil) then
   begin
-   Application.MessageBox('Vyberte HV!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+   Application.MessageBox('Vyberte alespoň jedno hnací vozidlo!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
  if (Self.CB_Stanice.ItemIndex < 0) then
@@ -52,8 +52,10 @@ begin
    Exit();
   end;
 
- PanelTCPClient.PanelLokMove(Self.sender_id, hv_indexes[Self.CB_HV.ItemIndex],
-                             ORDb.db_reverse[Self.CB_Stanice.Text]);
+ for LI in Self.LV_HVs.Items do
+   if (LI.Selected) then
+     PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data),
+                                 ORDb.db_reverse[Self.CB_Stanice.Text]);
 
  Self.Close();
 end;
@@ -64,20 +66,30 @@ begin
 end;
 
 procedure TF_HV_Move.Open(sender:string; HVs:THVDb);
-var name:string;
+var HV: THV;
+    LI: TListItem;
+    name: string;
 begin
  Self.sender_id := sender;
 
- if (HVs.HVs.Count = 1) then
-   HVs.FillHVs(Self.CB_HV, Self.hv_indexes, HVs.HVs[0].Adresa)
- else
-   HVs.FillHVs(Self.CB_HV, Self.hv_indexes);
+ Self.LV_HVs.Clear();
+ for HV in HVs.HVs do
+  begin
+   if (HV.Souprava = '-') then
+    begin
+     LI := Self.LV_HVs.Items.Add();
+     LI.Caption := IntToStr(HV.Adresa);
+     LI.SubItems.Add(HV.Nazev);
+     LI.SubItems.Add(HV.Oznaceni);
+     LI.Data := Pointer(HV.Adresa);
+    end;
+  end;
 
  Self.CB_Stanice.Clear();
  for name in ORDb.names_sorted do
    Self.CB_Stanice.Items.Add(name);
 
- Self.ActiveControl := Self.CB_HV;
+ Self.ActiveControl := Self.LV_HVs;
  Self.Show();
 end;
 
