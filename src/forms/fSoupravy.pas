@@ -7,7 +7,7 @@
 interface
 
 uses Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-     Dialogs, ComCtrls, StdCtrls, ExtCtrls;
+     Dialogs, ComCtrls, StdCtrls, ExtCtrls, Generics.Collections, StrUtils;
 
 type
   TF_SprList = class(TForm)
@@ -152,10 +152,39 @@ begin
 end;
 
 procedure TF_SprList.B_RemoveSprClick(Sender: TObject);
+var toRemove: TList<string>;
+    LI: TListItem;
+    sprs, spr: string;
+    count: Integer;
 begin
- if (Self.LV_Soupravy.Selected <> nil) then
-  if (Application.MessageBox(PChar('Opravdu smazat soupravu '+Self.LV_Soupravy.Selected.Caption+' z kolejiště?'), 'Otázka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
-    PanelTCPClient.SendLn('-;SPR-REMOVE;'+Self.LV_Soupravy.Selected.Caption);
+ if (Self.LV_Soupravy.Selected = nil) then Exit();
+
+ toRemove := TList<string>.Create();
+ try
+   sprs := '';
+   count := 0;
+   for LI in Self.LV_Soupravy.Items do
+    begin
+     if (LI.Selected) then
+      begin
+       toRemove.Add(LI.Caption);
+       sprs := sprs + LI.Caption + ', ';
+       Inc(count);
+      end;
+    end;
+   sprs := LeftStr(sprs, Length(sprs)-2);
+
+   if (count = 1) then
+     sprs := 'soupravu ' + sprs
+   else
+     sprs := 'soupravy ' + sprs;
+
+  if (Application.MessageBox(PChar('Opravdu smazat '+sprs+' z kolejiště?'), 'Otázka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
+    for spr in toRemove do
+      PanelTCPClient.SendLn('-;SPR-REMOVE;'+spr);
+ finally
+   toRemove.Clear();
+ end;
 end;
 
 procedure TF_SprList.FormShow(Sender: TObject);
@@ -169,9 +198,14 @@ procedure TF_SprList.LV_SoupravyChange(Sender: TObject; Item: TListItem;
   Change: TItemChange);
 begin
  if (Self.LV_Soupravy.Selected = nil) then
-  Self.B_RemoveSpr.Enabled := false
+   Self.B_RemoveSpr.Enabled := false
  else
-  Self.B_RemoveSpr.Enabled := true;
+   Self.B_RemoveSpr.Enabled := true;
+
+ if (Self.LV_Soupravy.SelCount > 1) then
+   Self.B_RemoveSpr.Caption := 'Smazat soupravy'
+ else
+   Self.B_RemoveSpr.Caption := 'Smazat soupravu';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

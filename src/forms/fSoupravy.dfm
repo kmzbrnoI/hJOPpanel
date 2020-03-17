@@ -95,6 +95,7 @@ object F_SprList: TF_SprList
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     GridLines = True
+    MultiSelect = True
     ReadOnly = True
     RowSelect = True
     ParentFont = False
