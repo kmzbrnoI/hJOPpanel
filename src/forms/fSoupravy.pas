@@ -20,8 +20,11 @@ type
     procedure LV_SoupravyChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
     procedure B_RemoveSprClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+
+    listRequest: boolean;
 
     procedure AddSpr(str:string);
     function ParseHV(str:string):string;
@@ -52,23 +55,28 @@ begin
  Self.B_RemoveSpr.Enabled := false;
 
  sl := TStringList.Create();
- ExtractStringsEx([']'], ['['], str, sl);
+ try
+   ExtractStringsEx([']'], ['['], str, sl);
 
- for i := 0 to sl.Count-1 do
-  begin
-   try
-     Self.AddSpr(sl[i]);
-   except
+   for i := 0 to sl.Count-1 do
+    begin
+     try
+       Self.AddSpr(sl[i]);
+     except
 
-   end;
-  end;
+     end;
+    end;
 
- sl.Free();
+   if (Self.listRequest) then
+     Application.MessageBox('Tabulka souprav aktualizována.', 'OK', MB_OK OR MB_ICONINFORMATION);
+   Self.listRequest := false;
+ finally
+   sl.Free();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SprList.AddSpr(str:string);
 var sl,slhv:TStrings;
     LI:TListItem;
@@ -147,6 +155,7 @@ procedure TF_SprList.B_RefreshClick(Sender: TObject);
 begin
  Self.LV_Soupravy.Color := clSilver;
  Self.LV_Soupravy.Clear();
+ Self.listRequest := true;
 
  PanelTCPClient.SendLn('-;SPR-LIST;');
 end;
@@ -187,11 +196,18 @@ begin
  end;
 end;
 
+procedure TF_SprList.FormCreate(Sender: TObject);
+begin
+ Self.listRequest := false;
+end;
+
 procedure TF_SprList.FormShow(Sender: TObject);
 begin
- Self.B_RemoveSpr.Enabled   := false;
- Self.LV_Soupravy.ItemIndex := -1;
- Self.B_RefreshClick(Self);
+ Self.LV_Soupravy.Color := clSilver;
+ Self.LV_Soupravy.Clear();
+ Self.B_RemoveSpr.Enabled := false;
+
+ PanelTCPClient.SendLn('-;SPR-LIST;');
 end;
 
 procedure TF_SprList.LV_SoupravyChange(Sender: TObject; Item: TListItem;
