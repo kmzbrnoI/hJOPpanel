@@ -165,6 +165,13 @@ procedure TF_Settings.B_ApplyClick(Sender: TObject);
 var ss, ss2:TSymbolSet;
     oldss:TSymbolSetType;
 begin
+ if ((GlobConfig.data.symbolSet = TSymbolSetType.normal) and (Self.LB_Symbols.ItemIndex = 1) and (not F_Main.LargeSSFitsScreen())) then
+  begin
+   Application.MessageBox('Panel s větším rozměrem symbolů se nevejde na monitor!', 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
+   Screen.Cursor := crDefault;
+   Exit();
+  end;
+
  Screen.Cursor := crHourGlass;
 
  GlobConfig.data.panel_fn                  := Self.E_Panel.Text;
@@ -261,7 +268,7 @@ begin
      on E:Exception do
       begin
        GlobConfig.data.symbolSet := oldss;
-       Application.MessageBox(PChar('Změna velikosti symbolů se nezdařila'+#13#10+E.ToString), 'Chyba', MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('Změna velikosti symbolů se nezdařila+'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
       end;
    end;
   end;

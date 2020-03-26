@@ -59,7 +59,7 @@ type
   end;
 
   TSymbolSet = class
-    private const
+    public const
       // tady jsou nadefinovane Resource nazvy ImageListu jendotlivych setu a rozmery jejich symbolu
       Sets : array [0..1] of TOneSymbolSet = (
        // normal

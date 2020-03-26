@@ -99,6 +99,7 @@ type
 
      procedure OnModTimeChanged();
      procedure CheckTimeSpeedWidth();
+     function LargeSSFitsScreen():Boolean;
   end;
 
 var
@@ -283,6 +284,7 @@ begin
 end;
 
 procedure TF_Main.Init(const config_fn:string);
+var ss, ss2: TSymbolSet;
 begin
  F_splash.AddStav('Načítám konfiguraci...');
 
@@ -350,6 +352,22 @@ begin
   begin
    Self.Left := GlobConfig.data.frmPos.X;
    Self.Top := GlobConfig.data.frmPos.Y;
+  end;
+
+ if ((GlobConfig.data.symbolSet = TSymbolSetType.bigger) and (not Self.LargeSSFitsScreen())) then
+  begin
+   GlobConfig.data.symbolSet := TSymbolSetType.normal;
+
+   try
+     ss := TSymbolSet.Create(GlobConfig.data.symbolSet);
+     ss2 := SymbolSet;
+     SymbolSet := ss;
+     Relief.UpdateSymbolSet();
+     ss2.Free();
+   except
+     on E:Exception do
+       Application.MessageBox(PChar('Změna velikosti symbolů se nezdařila+'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+   end;
   end;
 
  // do prvniho pripojeni jsou tu default hodnoty
@@ -618,6 +636,16 @@ begin
    Self.P_Zrychleni.Width := _LARGE
  else if ((Length(Self.P_Zrychleni.Caption) = 2) and (Self.P_Zrychleni.Width = _LARGE)) then
    Self.P_Zrychleni.Width := _SMALL;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function TF_Main.LargeSSFitsScreen():Boolean;
+begin
+ if (Relief = nil) then Exit(true); 
+ Result := ((Relief.PanelWidth*SymbolSet.Sets[1].symbol_width <= Screen.DesktopWidth) and
+            (Relief.PanelHeight*SymbolSet.Sets[1].symbol_height <= Screen.DesktopHeight));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
