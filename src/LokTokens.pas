@@ -38,7 +38,7 @@ var
 implementation
 
 uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot,
-     parseHelper;
+     parseHelper, GlobalConfig;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -85,12 +85,16 @@ begin
 
    case (gpurpose.slot) of
      0: begin
-         try
-           HVs.OpenJerry();
-         except
-           on E:Exception do
-             Errors.writeerror(E.Message, 'Jerry', '');
-         end;
+         if ((GlobConfig.data.reg.reg_fn <> '') and (FileExists(GlobConfig.data.reg.reg_fn))) then
+          begin
+           try
+             HVs.OpenJerry();
+           except
+             on E:Exception do
+               Errors.writeerror(E.Message, 'Regulátor', '');
+           end;
+          end else
+            Errors.writeerror('Nevyplnìna cesta k regulátoru v nastavení!', 'Regulátor', '');
      end;
 
      1..TBridgeClient._SLOTS_CNT: begin
