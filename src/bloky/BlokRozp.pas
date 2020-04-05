@@ -23,7 +23,7 @@ type
   OblRizeni:Integer;
   PanelProp:TRozpPanelProp;
 
-  procedure Show(obj:TDXDraw);
+  procedure Show(obj:TDXDraw; blik:boolean);
   procedure Reset();
  end;
 
@@ -40,7 +40,7 @@ type
     destructor Destroy(); override;
 
     procedure Load(ini:TMemIniFile);
-    procedure Show(obj:TDXDraw);
+    procedure Show(obj:TDXDraw; blik:boolean);
     function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
 
@@ -68,9 +68,15 @@ uses Symbols, PanelPainter, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozp.Show(obj:TDXDraw);
+procedure TPRozp.Show(obj:TDXDraw; blik:boolean);
+var fg: TColor;
 begin
- PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _Rozp_Start+1, Self.PanelProp.Symbol,
+ if ((Self.PanelProp.blik) and (blik)) then
+   fg := clBlack
+ else
+   fg := Self.PanelProp.Symbol;
+
+ PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _Rozp_Start+1, fg,
     clBlack, obj, true);
 end;
 
@@ -126,11 +132,11 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozpojovace.Show(obj:TDXDraw);
+procedure TPRozpojovace.Show(obj:TDXDraw; blik:boolean);
 var rozp:TPRozp;
 begin
  for rozp in Self.data do
-   rozp.Show(obj);
+   rozp.Show(obj, blik);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

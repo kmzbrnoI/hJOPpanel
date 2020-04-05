@@ -569,7 +569,7 @@ begin
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
-   Self.Rozp.Show(Self.DrawObject);
+   Self.Rozp.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Vykol.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
 
    Self.ShowDK();
