@@ -843,8 +843,8 @@ begin
  index := Self.Prejezdy.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Prejezdy.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy.Data[index].OblRizeni].id, Button, Self.Prejezdy.Data[index].Blok);
+   if (Self.Prejezdy[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy[index].OblRizeni].id, Button, Self.Prejezdy[index].Blok);
    goto EscCheck;
   end;
 
@@ -852,8 +852,8 @@ begin
  index := Self.Texty.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Texty.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Texty.Data[index].OblRizeni].id, Button, Self.Texty.Data[index].Blok);
+   if (Self.Texty[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Texty[index].OblRizeni].id, Button, Self.Texty[index].Blok);
    goto EscCheck;
   end;
 
@@ -879,7 +879,7 @@ begin
  uid := Self.Useky.GetIndex(Position);
  if (uid.index <> -1) then
   begin
-   if (Self.Useky.data[uid.index].Blok < 0) then goto EscCheck;
+   if (Self.Useky[uid.index].Blok < 0) then goto EscCheck;
 
    // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na souprave v tomto useku
    if ((Self.myORs[Self.Useky[uid.index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and
@@ -907,8 +907,8 @@ begin
  index := Self.Vyhybky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Vyhybky.data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Vyhybky.data[index].OblRizeni].id, Button, Vyhybky.data[index].Blok);
+   if (Vyhybky[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Vyhybky[index].OblRizeni].id, Button, Vyhybky[index].Blok);
    goto EscCheck;
   end;
 
@@ -928,8 +928,8 @@ begin
  index := Self.Uvazky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Uvazky.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky.Data[index].OblRizeni].id, Button, Self.Uvazky.Data[index].Blok);
+   if (Self.Uvazky[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky[index].OblRizeni].id, Button, Self.Uvazky[index].Blok);
    goto EscCheck;
   end;
 
@@ -937,9 +937,9 @@ begin
  uvid := Self.UvazkySpr.GetIndex(Position);
  if (uvid.index <> -1) then
   begin
-   if (Self.UvazkySpr.Data[uvid.index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.UvazkySpr.Data[uvid.index].OblRizeni].id, Button,
-                             Self.UvazkySpr.Data[uvid.index].Blok, IntToStr(uvid.soupravaI));
+   if (Self.UvazkySpr[uvid.index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.UvazkySpr[uvid.index].OblRizeni].id, Button,
+                             Self.UvazkySpr[uvid.index].Blok, IntToStr(uvid.soupravaI));
    goto EscCheck;
   end;
 
@@ -947,8 +947,8 @@ begin
  index := Self.Zamky.GetIndex(Position);
  if (index <> -1) then
   begin
-   if (Self.Zamky.Data[index].Blok < 0) then goto EscCheck;
-   PanelTCPClient.PanelClick(Self.myORs[Self.Zamky.Data[index].OblRizeni].id, Button, Self.Zamky.Data[index].Blok);
+   if (Self.Zamky[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.Zamky[index].OblRizeni].id, Button, Self.Zamky[index].Blok);
    goto EscCheck;
   end;
 
@@ -1081,31 +1081,34 @@ begin
    Self.Tech_blok.Clear();
 
    for i := 0 to Self.Useky.data.Count-1 do
-     Self.AddToTechBlk(_BLK_USEK, Self.Useky.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_USEK, Self.Useky[i].Blok, i);
 
    for i := 0 to Self.Vyhybky.data.Count-1 do
-     Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky[i].Blok, i);
 
    for i := 0 to Self.Uvazky.data.Count-1 do
-     Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky[i].Blok, i);
 
    for i := 0 to Self.UvazkySpr.data.Count-1 do
-     Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr[i].Blok, i);
 
    for i := 0 to Self.Zamky.data.Count-1 do
-     Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky[i].Blok, i);
 
    for i := 0 to Self.Prejezdy.data.Count-1 do
-     Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy[i].Blok, i);
 
    for i := 0 to Self.Navestidla.data.Count-1 do
-     Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla[i].Blok, i);
 
    for i := 0 to Self.Vykol.data.Count-1 do
-     Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol[i].Blok, i);
 
    for i := 0 to Self.Rozp.data.Count-1 do
-     Self.AddToTechBlk(_BLK_ROZP, Self.Rozp.data[i].Blok, i);
+     Self.AddToTechBlk(_BLK_ROZP, Self.Rozp[i].Blok, i);
+
+   for i := 0 to Self.PomocneObj.data.Count-1 do
+     Self.AddToTechBlk(_BLK_POMOCNY, Self.PomocneObj[i].Blok, i);
 
    for i := 0 to Self.Texty.Count-1 do
      if (Self.Texty[i].Blok > -1) then
@@ -1466,7 +1469,7 @@ begin
 
      _BLK_VYH: begin
        if ((symbols[i].blk_type = _BLK_VYH) and
-           (Sender = Self.myORs[Vyhybky.data[symbols[i].symbol_index].OblRizeni].id)) then
+           (Sender = Self.myORs[Vyhybky[symbols[i].symbol_index].OblRizeni].id)) then
         Self.Vyhybky[symbols[i].symbol_index].PanelProp.Change(parsed);
 
       if ((symbols[i].blk_type = _BLK_VYKOL) and
@@ -1500,11 +1503,11 @@ begin
 
      _BLK_UVAZKA: begin
        if ((symbols[i].blk_type = _BLK_UVAZKA) and
-           (Sender = Self.myORs[Self.Uvazky.Data[symbols[i].symbol_index].OblRizeni].id)) then
+           (Sender = Self.myORs[Self.Uvazky[symbols[i].symbol_index].OblRizeni].id)) then
          Self.Uvazky[symbols[i].symbol_index].PanelProp.Change(parsed);
 
        if ((symbols[i].blk_type = _BLK_UVAZKA_SPR) and
-           (Sender = Self.myORs[Self.UvazkySpr.Data[symbols[i].symbol_index].OblRizeni].id)) then
+           (Sender = Self.myORs[Self.UvazkySpr[symbols[i].symbol_index].OblRizeni].id)) then
          Self.UvazkySpr[symbols[i].symbol_index].PanelProp.Change(parsed);
      end;
 
@@ -1515,6 +1518,10 @@ begin
      end;
 
    end;//case
+
+   if ((symbols[i].blk_type = _BLK_POMOCNY) and
+       (Sender = Self.myORs[Self.PomocneObj[symbols[i].symbol_index].OblRizeni].id)) then
+     Self.PomocneObj[symbols[i].symbol_index].PanelProp.Change(parsed);
   end;//for
 
  if (BlokTyp = _BLK_SCOM) then
@@ -2060,8 +2067,10 @@ end;
 
 procedure TRelief.AddToTechBlk(typ:Integer; blok_id:Integer; symbol_index:Integer);
 var symbols:TList<TTechBlokToSymbol>;
-    val:TTechBLokToSymbol;
+    val:TTechBlokToSymbol;
 begin
+ if (blok_id = -1) then Exit();
+ 
  if (Self.Tech_blok.ContainsKey(blok_id)) then
    symbols := Self.Tech_blok[blok_id]
  else

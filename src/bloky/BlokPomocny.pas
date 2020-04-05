@@ -34,14 +34,22 @@ type
  end;
 
  TPPomocneObj = class
-   data:TObjectList<TPPomocnyObj>;
+  private
+    function GetItem(index:Integer):TPPomocnyObj;
+    function GetCount():Integer;
 
-   constructor Create();
-   destructor Destroy(); override;
+  public
+    data:TObjectList<TPPomocnyObj>;
 
-   procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw; blik:boolean);
-   procedure Reset(orindex:Integer = -1);
+    constructor Create();
+    destructor Destroy(); override;
+
+    procedure Load(ini:TMemIniFile);
+    procedure Show(obj:TDXDraw; blik:boolean);
+    procedure Reset(orindex:Integer = -1);
+
+    property Items[index : integer] : TPPomocnyObj read GetItem; default;
+    property Count : integer read GetCount;
  end;
 
 const
@@ -178,6 +186,20 @@ begin
  for pomocny in Self.data do
    if ((orindex < 0) or (pomocny.OblRizeni = orindex)) then
      pomocny.Reset();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPPomocneObj.GetItem(index:Integer):TPPomocnyObj;
+begin
+ Result := Self.data[index];
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPPomocneObj.GetCount():Integer;
+begin
+ Result := Self.data.Count;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
