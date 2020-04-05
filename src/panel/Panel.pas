@@ -952,6 +952,15 @@ begin
    goto EscCheck;
   end;
 
+ //pomocny objekt
+ index := Self.PomocneObj.GetIndex(Position);
+ if (index <> -1) then
+  begin
+   if (Self.PomocneObj[index].Blok < 0) then goto EscCheck;
+   PanelTCPClient.PanelClick(Self.myORs[Self.PomocneObj[index].OblRizeni].id, Button, Self.PomocneObj[index].Blok);
+   goto EscCheck;
+  end;
+
  if (Button = TPanelButton.ESCAPE) then
   begin
    Self.Escape();

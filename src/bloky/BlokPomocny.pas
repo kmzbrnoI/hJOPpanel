@@ -46,6 +46,7 @@ type
 
     procedure Load(ini:TMemIniFile);
     procedure Show(obj:TDXDraw; blik:boolean);
+    function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
 
     property Items[index : integer] : TPPomocnyObj read GetItem; default;
@@ -200,6 +201,23 @@ end;
 function TPPomocneObj.GetCount():Integer;
 begin
  Result := Self.data.Count;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TPPomocneObj.GetIndex(Pos:TPoint):Integer;
+var i:Integer;
+    pomPos: TPoint;
+begin
+ Result := -1;
+
+ for i := 0 to Self.data.Count-1 do
+  begin
+   if (Self[i].Blok > -1) then
+     for pomPos in Self[i].Positions do
+       if ((Pos.X = pomPos.X) and (Pos.Y = pomPos.Y)) then
+         Exit(i);
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
