@@ -402,9 +402,10 @@ end;
 function InvDKSType(dks:TDKSType):TDKSType;
 begin
  case (dks) of
-  TDKSType.dksNone: Result := dksNone;
   TDKSType.dksTop: Result := dksBottom;
   TDKSType.dksBottom: Result := dksTop;
+ else
+  Result := dksNone;
  end;
 end;
 
