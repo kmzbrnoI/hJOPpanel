@@ -12,9 +12,11 @@ const
   _BLK_UVAZKA  = 6;
   _BLK_ZAMEK   = 7;
   _BLK_ROZP    = 8;
-  _BLK_UVAZKA_SPR = 9;
-  _BLK_VYKOL   = 10;
   _BLK_SH      = 11;
+
+  _BLK_UVAZKA_SPR = 100;
+  _BLK_VYKOL   = 101;
+  _BLK_POMOCNY = 102;
 
 type
   TJCType = (undefinned = -1, no = 0, vlak = 1, posun = 2, nouz = 3, staveni = 4);
