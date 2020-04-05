@@ -29,7 +29,7 @@ type
 
   constructor Create();
   destructor Destroy(); override;
-  procedure Show(obj:TDXDraw);
+  procedure Show(obj:TDXDraw; blik:boolean);
   procedure Reset();
  end;
 
@@ -40,7 +40,7 @@ type
    destructor Destroy(); override;
 
    procedure Load(ini:TMemIniFile);
-   procedure Show(obj:TDXDraw);
+   procedure Show(obj:TDXDraw; blik:boolean);
    procedure Reset(orindex:Integer = -1);
  end;
 
@@ -86,7 +86,7 @@ begin
  inherited;
 end;
 
-procedure TPPomocnyObj.Show(obj:TDXDraw);
+procedure TPPomocnyObj.Show(obj:TDXDraw; blik:boolean);
 var p:TPoint;
     color:TColor;
 begin
@@ -95,6 +95,9 @@ begin
    color := Self.PanelProp.Symbol;
   end else
    color := _SpecS_DrawColors[Self.Symbol];
+
+ if ((Self.PanelProp.blik) and (blik)) then
+   color := clBlack;
 
  for p in Self.Positions do
    PanelPainter.Draw(SymbolSet.IL_Symbols, p, Self.Symbol, color, Self.PanelProp.Pozadi, obj);
@@ -160,11 +163,11 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPPomocneObj.Show(obj:TDXDraw);
+procedure TPPomocneObj.Show(obj:TDXDraw; blik:boolean);
 var po:TPPomocnyObj;
 begin
  for po in Self.data do
-   po.Show(obj);
+   po.Show(obj, blik);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
