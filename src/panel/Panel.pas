@@ -1918,6 +1918,7 @@ begin
  Self.Rozp.Reset(orindex);
  Self.Texty.Reset(orindex);
  Self.PopiskyBloku.Reset(orindex);
+ Self.PomocneObj.Reset(orindex);
 
  for i := 0 to Self.myORs.Count-1 do
   begin
