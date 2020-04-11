@@ -413,7 +413,7 @@ begin
      F_StitVyl.OpenFormVyl(Self.PanelSetStitVyl, parsed[2], '');
   end
 
- else if (parsed[1] = 'PS') then
+ else if ((parsed[1] = 'PS') or (parsed[1] = 'IS')) then
   F_PotvrSekv.StartOrUpdate(parsed, Self.PanelPotvrSekv)
 
  else if (parsed[1] = 'PS-CLOSE') then

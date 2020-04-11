@@ -102,7 +102,10 @@ begin
  try
    ExtractStringsEx(['|'], [], serverStr, strs);
    block := strs[0];
-   condition := strs[1];
+   if (strs.Count > 1) then
+     condition := strs[1]
+   else
+     condition := '';
  finally
    strs.Free();
  end;
@@ -285,7 +288,8 @@ begin
    for i := 0 to podm_count-1 do
     begin
      TextOut(2*_SYMBOL_WIDTH, (i*_SYMBOL_HEIGHT), Self.m_conditions[podm_start+i].block);
-     TextOut(30*_SYMBOL_WIDTH, (i*_SYMBOL_HEIGHT), '# '+Self.m_conditions[podm_start+i].condition);
+     if (Self.m_conditions[podm_start+i].condition <> '') then
+       TextOut(30*_SYMBOL_WIDTH, (i*_SYMBOL_HEIGHT), '# '+Self.m_conditions[podm_start+i].condition);
     end;
    Font.Color := clWhite;
 
