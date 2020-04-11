@@ -151,10 +151,12 @@ begin
      Self.L_Description.Caption := 'INFORMAČNÍ STRÁNKA';
      Self.L_ListDescription.Caption := 'INFORMACE';
      Self.B_OK.Caption := 'OK';
+     Self.Caption := 'Informační stránka';
     end else begin
      Self.L_Description.Caption := '!!! PROBÍHÁ RIZIKOVÁ FUNKCE !!!';
      Self.L_ListDescription.Caption := 'KONTROLOVANÉ PODMÍNKY';
      Self.B_OK.Caption := 'Souhlasím';
+     Self.Caption := 'Riziková funkce';
     end;
 
    if (parsed.Count >= 5) then
