@@ -132,7 +132,7 @@ end;
 
 procedure TF_StitVyl.PotvrSekvCallback(reason:TPSEnd);
 begin
- if (PotvrSek.EndReason = TPSEnd.success) or (E_Popisek.Text <> '') then
+ if (F_PotvrSekv.EndReason = TPSEnd.success) or (E_Popisek.Text <> '') then
    Self.callback(1, Self.E_Popisek.Text);
 end;
 

@@ -16,6 +16,8 @@ object F_PotvrSekv: TF_PotvrSekv
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
   TextHeight = 13
@@ -54,7 +56,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Height = 331
     Align = alTop
     BevelOuter = bvNone
-    Color = clSilver
+    Color = 10526880
     ParentBackground = False
     TabOrder = 2
     object Label1: TLabel
@@ -160,6 +162,19 @@ object F_PotvrSekv: TF_PotvrSekv
       Font.Style = []
       ParentFont = False
     end
+    object Label5: TLabel
+      Left = 320
+      Top = 127
+      Width = 90
+      Height = 15
+      Caption = #9650'PgUp '#9660'PgDn'
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Fixedsys'
+      Font.Style = []
+      ParentFont = False
+    end
     object P_Header: TPanel
       Left = 16
       Top = 16
@@ -213,5 +228,12 @@ object F_PotvrSekv: TF_PotvrSekv
         ExplicitHeight = 105
       end
     end
+  end
+  object T_Main: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = TimerUpdate
+    Left = 16
+    Top = 328
   end
 end

@@ -1213,7 +1213,7 @@ begin
  if (F_StitVyl.Showing) then F_StitVyl.Close();
  if (F_SoupravaEdit.Showing) then F_SoupravaEdit.Close;
  if (F_Settings.Showing) then F_Settings.Close();
- if (F_PotvrSekv.Showing) then PotvrSek.Stop('escape');
+ if (F_PotvrSekv.running) then F_PotvrSekv.Stop('escape');
 
  for OblR in Self.myORs do
    if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
@@ -2437,7 +2437,7 @@ end;
 
 procedure TRelief.UpdateEnabled();
 begin
- Self.Enabled := ((Errors.Count = 0) and (not Self.UPO.showing) and (PotvrSek.EndReason <> TPSEnd.prubeh));
+ Self.Enabled := ((Errors.Count = 0) and (not Self.UPO.showing) and (F_PotvrSekv.EndReason <> TPSEnd.prubeh));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

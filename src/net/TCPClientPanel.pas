@@ -414,15 +414,15 @@ begin
   end
 
  else if (parsed[1] = 'PS') then
-  PotvrSek.Start(parsed, Self.PanelPotvrSekv)
+  F_PotvrSekv.Start(parsed, Self.PanelPotvrSekv)
 
  else if (parsed[1] = 'PS-CLOSE') then
   begin
-   PotvrSek.OnEnd := nil;
+   F_PotvrSekv.OnEnd := nil;
    if (parsed.Count > 2) then
-     PotvrSek.Stop(parsed[2])
+     F_PotvrSekv.Stop(parsed[2])
    else
-     PotvrSek.Stop();
+     F_PotvrSekv.Stop();
   end
 
  else if (parsed[1] = 'MENU') then
