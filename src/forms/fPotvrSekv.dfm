@@ -4,7 +4,7 @@ object F_PotvrSekv: TF_PotvrSekv
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Potvrzovac'#237' sekvence'
-  ClientHeight = 378
+  ClientHeight = 401
   ClientWidth = 685
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
@@ -23,8 +23,8 @@ object F_PotvrSekv: TF_PotvrSekv
   PixelsPerInch = 96
   TextHeight = 13
   object B_Storno: TButton
-    Left = 592
-    Top = 337
+    Left = 597
+    Top = 366
     Width = 73
     Height = 28
     Margins.Left = 2
@@ -37,8 +37,8 @@ object F_PotvrSekv: TF_PotvrSekv
     OnKeyPress = FormKeyPress
   end
   object B_OK: TButton
-    Left = 513
-    Top = 337
+    Left = 518
+    Top = 366
     Width = 74
     Height = 28
     Margins.Left = 2
@@ -54,7 +54,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Left = 0
     Top = 0
     Width = 685
-    Height = 331
+    Height = 361
     Align = alTop
     BevelOuter = bvNone
     Color = 10526880
@@ -87,8 +87,8 @@ object F_PotvrSekv: TF_PotvrSekv
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 40
-      Top = 316
+      Left = 42
+      Top = 345
       Width = 24
       Height = 15
       Caption = 'SZZ'
@@ -100,8 +100,8 @@ object F_PotvrSekv: TF_PotvrSekv
       ParentFont = False
     end
     object Label4: TLabel
-      Left = 184
-      Top = 316
+      Left = 186
+      Top = 345
       Width = 8
       Height = 15
       Caption = 't'
@@ -113,8 +113,8 @@ object F_PotvrSekv: TF_PotvrSekv
       ParentFont = False
     end
     object L_Timeout: TLabel
-      Left = 198
-      Top = 316
+      Left = 200
+      Top = 345
       Width = 32
       Height = 15
       Caption = '0000'
@@ -126,8 +126,8 @@ object F_PotvrSekv: TF_PotvrSekv
       ParentFont = False
     end
     object L_DateTime: TLabel
-      Left = 550
-      Top = 316
+      Left = 552
+      Top = 345
       Width = 128
       Height = 15
       Alignment = taRightJustify
@@ -155,7 +155,7 @@ object F_PotvrSekv: TF_PotvrSekv
       Left = 0
       Top = 144
       Width = 17
-      Height = 169
+      Height = 201
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -206,7 +206,7 @@ object F_PotvrSekv: TF_PotvrSekv
       Left = 16
       Top = 144
       Width = 669
-      Height = 169
+      Height = 201
       BevelOuter = bvNone
       Color = clBlack
       ParentBackground = False
@@ -215,7 +215,7 @@ object F_PotvrSekv: TF_PotvrSekv
         Left = 0
         Top = 0
         Width = 669
-        Height = 169
+        Height = 201
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -223,10 +223,7 @@ object F_PotvrSekv: TF_PotvrSekv
         Font.Name = 'Fixedsys'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 160
-        ExplicitTop = 16
-        ExplicitWidth = 105
-        ExplicitHeight = 105
+        ExplicitHeight = 166
       end
     end
   end
@@ -235,6 +232,6 @@ object F_PotvrSekv: TF_PotvrSekv
     Interval = 500
     OnTimer = TimerUpdate
     Left = 16
-    Top = 328
+    Top = 352
   end
 end

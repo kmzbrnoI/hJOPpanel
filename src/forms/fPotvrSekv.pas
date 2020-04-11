@@ -12,9 +12,9 @@ uses
 
 const
   _POTVR_TIMEOUT_MIN = 2;
-  _POTVR_ITEMS_PER_PAGE = 14;
+  _POTVR_ITEMS_PER_PAGE = 13;
   _FG_COLOR = $A0A0A0;
-  _SYMBOL_HEIGHT = 12;
+  _SYMBOL_HEIGHT = 15;
   _SYMBOL_WIDTH = 8;
 
 type
@@ -75,6 +75,8 @@ type
      procedure StartOrUpdate(parsed:TStrings; callback:TEndEvent);
      procedure Stop(reason:string = '');
      procedure OnKeyUp(key: Integer; var handled: boolean);
+
+     class procedure FillRectangle(canvas: TCanvas; rect: TRect; color: TColor);
 
      property OnEnd: TEndEvent read m_OnEnd write m_OnEnd;
      property PagesCount: Integer read GetPagesCount;
@@ -191,6 +193,7 @@ begin
 
  Relief.UpdateEnabled();
  Self.Show();
+ Self.ShowTexts();
  Self.B_OK.SetFocus();
  Self.TimerUpdate(Self);
 end;
@@ -294,30 +297,31 @@ begin
    Font.Color := clWhite;
 
    if (podm_start+podm_count >= Self.m_conditions.Count) then
-     TextOut(2*_SYMBOL_WIDTH, (podm_count*12), 'KONEC SEZNAMU')
+     TextOut(2*_SYMBOL_WIDTH, (podm_count*_SYMBOL_HEIGHT), 'KONEC SEZNAMU')
    else
-     TextOut(2*_SYMBOL_WIDTH, (podm_count*12), 'SEZNAM POKRAČUJE');
+     TextOut(2*_SYMBOL_WIDTH, (podm_count*_SYMBOL_HEIGHT), 'SEZNAM POKRAČUJE');
   end;
 end;
 
 procedure TF_PotvrSekv.ShowFlashing();
-var i, plus, podm_start, podm_count:Integer;
+var i, podm_start, podm_count:Integer;
+    first, second: TColor;
 begin
- plus := IfThen(Self.m_flash, 6, 0);
-
  if (F_Main.IL_Ostatni.BkColor <> clBlack) then
    F_Main.IL_Ostatni.BkColor := clBlack;
 
  // stanice, udalost, bloky:
  with (Self.PB_SFP.Canvas) do
   begin
-   if (plus = 6) then
-     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 0, 69);
-   F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, plus, 61);
-   F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 12+plus, 61);
-   for i := 0 to Self.m_senders.Count-1 do
-     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0,
-                            2*_SYMBOL_HEIGHT+plus+(i*_SYMBOL_HEIGHT), 61);
+   for i := 0 to Self.m_senders.Count+1 do
+    begin
+     first := IfThen(Self.m_flash, clBlack, $A0A0A0);
+     second := IfThen(Self.m_flash, $A0A0A0, clBlack);
+     FillRectangle(Self.PB_SFP.Canvas,
+        Rect(0, i*_SYMBOL_HEIGHT, _SYMBOL_WIDTH, i*_SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
+     FillRectangle(Self.PB_SFP.Canvas,
+        Rect(0, i*_SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH, (i+1)*_SYMBOL_HEIGHT - 1), second);
+    end;
   end;
 
  podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE-1));
@@ -326,10 +330,15 @@ begin
  // podminky
  with (Self.PB_Podm.Canvas) do
   begin
-   if (plus = 6) then
-     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, 0, 69);
    for i := 0 to podm_count do
-     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, (i*12)+plus, 61);
+    begin
+     first := IfThen(Self.m_flash, clBlack, $A0A0A0);
+     second := IfThen(Self.m_flash, $A0A0A0, clBlack);
+     FillRectangle(Self.PB_Podm.Canvas,
+        Rect(0, i*_SYMBOL_HEIGHT, _SYMBOL_WIDTH, i*_SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
+     FillRectangle(Self.PB_Podm.Canvas,
+        Rect(0, i*_SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH, (i+1)*_SYMBOL_HEIGHT - 1), second);
+    end;
   end;
 end;
 
@@ -345,7 +354,7 @@ end;
 
 procedure TF_PotvrSekv.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
- if ((Self.running) and (Self.mode = 'PS')) then
+ if (Self.running) then
    Self.Stop('Zavřeno okno potvrzovací sekvence');
 end;
 
@@ -379,6 +388,15 @@ end;
 function TF_PotvrSekv.GetPagesCount():Integer;
 begin
  Result := (Self.m_conditions.Count div (_POTVR_ITEMS_PER_PAGE-1));
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class procedure TF_PotvrSekv.FillRectangle(canvas: TCanvas; rect: TRect; color: TColor);
+begin
+ Canvas.Brush.Color := color;
+ Canvas.Pen.Color := color;
+ Canvas.FillRect(rect);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
