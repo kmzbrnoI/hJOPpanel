@@ -13,6 +13,9 @@ uses
 const
   _POTVR_TIMEOUT_MIN = 2;
   _POTVR_ITEMS_PER_PAGE = 14;
+  _FG_COLOR = $A0A0A0;
+  _SYMBOL_HEIGHT = 12;
+  _SYMBOL_WIDTH = 8;
 
 type
   TPSEnd = (prubeh = 1,  success = 2, error = 3);
@@ -49,6 +52,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure TimerUpdate(Sender:TObject);
+    procedure FormPaint(Sender: TObject);
 
   private
     m_running: Boolean;
@@ -61,13 +65,15 @@ type
     m_end_reason: TPSEnd;
     m_OnEnd: TEndEvent;
 
-     procedure UpdateForm();
+     procedure ShowTexts();
+     procedure ShowFlashing();
      function GetPagesCount():Integer;
 
   public
 
-     procedure Start(parsed:TStrings; callback:TEndEvent);
+     procedure StartOrUpdate(parsed:TStrings; callback:TEndEvent);
      procedure Stop(reason:string = '');
+     procedure OnKeyUp(key: Integer; var handled: boolean);
 
      property OnEnd: TEndEvent read m_OnEnd write m_OnEnd;
      property PagesCount: Integer read GetPagesCount;
@@ -116,7 +122,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TF_PotvrSekv.Start(parsed:TStrings; callback:TEndEvent);
+procedure TF_PotvrSekv.StartOrUpdate(parsed:TStrings; callback:TEndEvent);
 var str: string;
     strs: TStrings;
 begin
@@ -165,18 +171,9 @@ begin
    strs.Free();
  end;
 
- with (F_PotvrSekv.PB_SFP_indexes) do
-   Canvas.FillRect(Rect(0, 0, Width, Height));
- with (F_PotvrSekv.PB_podm_Indexes) do
-   Canvas.FillRect(Rect(0, 0, Width, Height));
- with (F_PotvrSekv.PB_SFP) do
-   Canvas.FillRect(Rect(0, 0, Width, Height));
- with (F_PotvrSekv.PB_Podm) do
-   Canvas.FillRect(Rect(0, 0, Width, Height));
-
  Relief.UpdateEnabled();
- F_PotvrSekv.Show();
- F_PotvrSekv.B_OK.SetFocus();
+ Self.Show();
+ Self.B_OK.SetFocus();
  Self.TimerUpdate(Self);
 end;
 
@@ -184,8 +181,11 @@ end;
 
 procedure TF_PotvrSekv.TimerUpdate(Sender:TObject);
 begin
- Self.UpdateForm();
  Self.m_flash := not Self.m_flash;
+ Self.ShowFlashing();
+
+ Self.L_DateTime.Caption := FormatDateTime('dd.mm.yyyy hh:mm:ss', Now);
+ Self.L_Timeout.Caption := FormatDateTime('nn:ss', (now-Self.m_start_time));
 
  if (Self.m_start_time+encodetime(0, _POTVR_TIMEOUT_MIN, 0, 0) < now) then
   begin
@@ -216,80 +216,101 @@ begin
  Self.Close();
 end;
 
-procedure TF_PotvrSekv.UpdateForm();
-var i, plus, podm_start, podm_count:Integer;
-const FG_COLOR = $A0A0A0;
-      SYMBOL_HEIGHT = 12;
-      SYMBOL_WIDTH = 8;
+procedure TF_PotvrSekv.ShowTexts();
+var i, podm_start, podm_count: Integer;
 begin
-  plus := IfThen(Self.m_flash, 6, 0);
+ Self.PB_SFP_indexes.Canvas.Pen.Color := Self.PB_SFP_indexes.Color;
+ Self.PB_SFP_indexes.Canvas.Brush.Color := Self.PB_SFP_indexes.Color;
+ Self.PB_SFP_indexes.Canvas.FillRect(Rect(0, 0, Self.PB_SFP_indexes.Width, Self.PB_SFP_indexes.Height));
 
-  if (F_Main.IL_Ostatni.BkColor <> clBlack) then
-    F_Main.IL_Ostatni.BkColor := clBlack;
+ Self.PB_SFP.Canvas.Pen.Color := Self.PB_SFP.Color;
+ Self.PB_SFP.Canvas.Brush.Color := Self.PB_SFP.Color;
+ Self.PB_SFP.Canvas.FillRect(Rect(0, 0, Self.PB_SFP.Width, Self.PB_SFP.Height));
 
-  with (F_PotvrSekv.PB_SFP_indexes.Canvas) do
-   begin
-    TextOut(0, 0, 'S:');
-    TextOut(0, SYMBOL_HEIGHT, 'F:');
-    for i := 0 to Self.m_senders.Count-1 do
-      TextOut(0, 2*SYMBOL_HEIGHT+(i*SYMBOL_HEIGHT), 'P'+IntToStr(i+1));
-   end;
+ Self.PB_podm_Indexes.Canvas.Pen.Color := Self.PB_podm_Indexes.Color;
+ Self.PB_podm_Indexes.Canvas.Brush.Color := Self.PB_podm_Indexes.Color;
+ Self.PB_podm_Indexes.Canvas.FillRect(Rect(0, 0, Self.PB_podm_Indexes.Width, Self.PB_podm_Indexes.Height));
 
-  // stanice, udalost, bloky:
-  with (F_PotvrSekv.PB_SFP.Canvas) do
-   begin
-    Font.Color := clWhite;
-    TextOut(2*SYMBOL_WIDTH, 0, Self.m_station);
-    TextOut(2*SYMBOL_WIDTH, SYMBOL_HEIGHT, ' '+Self.m_event);
+ Self.PB_Podm.Canvas.Pen.Color := Self.PB_Podm.Color;
+ Self.PB_Podm.Canvas.Brush.Color := Self.PB_Podm.Color;
+ Self.PB_Podm.Canvas.FillRect(Rect(0, 0, Self.PB_Podm.Width, Self.PB_Podm.Height));
 
-    Font.Color := FG_COLOR;
-    for i := 0 to Self.m_senders.Count-1 do
-     TextOut(2*SYMBOL_WIDTH, 2*SYMBOL_HEIGHT+(i*SYMBOL_HEIGHT), Self.m_senders[i]);
+ with (Self.PB_SFP_indexes.Canvas) do
+  begin
+   Font.Color := clBlack;
+   TextOut(0, 0, 'S:');
+   TextOut(0, _SYMBOL_HEIGHT, 'F:');
+   for i := 0 to Self.m_senders.Count-1 do
+     TextOut(0, 2*_SYMBOL_HEIGHT+(i*_SYMBOL_HEIGHT), 'P'+IntToStr(i+1));
+  end;
 
-    if (plus = 6) then
-      F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 0, 69);
-    F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, plus, 61);
-    F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 12+plus, 61);
-    for i := 0 to Self.m_senders.Count-1 do
-      F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0,
-                             2*SYMBOL_HEIGHT+plus+(i*SYMBOL_HEIGHT), 61);
-   end;
+ with (Self.PB_SFP.Canvas) do
+  begin
+   Font.Color := clWhite;
+   TextOut(2*_SYMBOL_WIDTH, 0, Self.m_station);
+   TextOut(2*_SYMBOL_WIDTH, _SYMBOL_HEIGHT, ' '+Self.m_event);
+   Font.Color := _FG_COLOR;
+   for i := 0 to Self.m_senders.Count-1 do
+     TextOut(2*_SYMBOL_WIDTH, 2*_SYMBOL_HEIGHT+(i*_SYMBOL_HEIGHT), Self.m_senders[i]);
+  end;
 
-  podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE-1));
-  podm_count := Min(_POTVR_ITEMS_PER_PAGE-1, Self.m_conditions.Count);
+ podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE-1));
+ podm_count := Min(_POTVR_ITEMS_PER_PAGE-1, Self.m_conditions.Count-podm_start);
 
-  // indexy kontrolovanych podminek
-  with (F_PotvrSekv.PB_podm_Indexes.Canvas) do
-    for i := 0 to podm_count do
-      TextOut(IfThen(i > 8, 0, 8), (i*SYMBOL_HEIGHT), IntToStr(podm_start+i+1));
+ // indexy kontrolovanych podminek
+ with (Self.PB_podm_Indexes.Canvas) do
+   for i := 0 to podm_count do
+     TextOut(IfThen(i+podm_start > 8, 0, 8), (i*_SYMBOL_HEIGHT), IntToStr(podm_start+i+1));
 
-  // podminky
-  with (F_PotvrSekv.PB_Podm.Canvas) do
-   begin
-    Font.Color := FG_COLOR;
-    for i := 0 to podm_count-1 do
-     begin
-      TextOut(2*SYMBOL_WIDTH, (i*SYMBOL_HEIGHT), Self.m_conditions[podm_start+i].block);
-      TextOut(30*SYMBOL_WIDTH, (i*SYMBOL_HEIGHT), '# '+Self.m_conditions[podm_start+i].condition);
-     end;
-    Font.Color := clWhite;
+ // podminky
+ with (Self.PB_Podm.Canvas) do
+  begin
+   Font.Color := _FG_COLOR;
+   for i := 0 to podm_count-1 do
+    begin
+     TextOut(2*_SYMBOL_WIDTH, (i*_SYMBOL_HEIGHT), Self.m_conditions[podm_start+i].block);
+     TextOut(30*_SYMBOL_WIDTH, (i*_SYMBOL_HEIGHT), '# '+Self.m_conditions[podm_start+i].condition);
+    end;
+   Font.Color := clWhite;
 
-    if (podm_start+podm_count >= Self.m_conditions.Count) then
-      TextOut(2*SYMBOL_WIDTH, ((_POTVR_ITEMS_PER_PAGE-1)*12), 'KONEC SEZNAMU')
-    else
-      TextOut(2*SYMBOL_WIDTH, ((_POTVR_ITEMS_PER_PAGE-1)*12), 'SEZNAM POKRAČUJE');
+   if (podm_start+podm_count >= Self.m_conditions.Count) then
+     TextOut(2*_SYMBOL_WIDTH, (podm_count*12), 'KONEC SEZNAMU')
+   else
+     TextOut(2*_SYMBOL_WIDTH, (podm_count*12), 'SEZNAM POKRAČUJE');
+  end;
+end;
 
-    if (plus = 6) then
-      F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, 0, 69);
-    for i := 0 to podm_count do
-      F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, (i*12)+plus, 61);
-   end;
+procedure TF_PotvrSekv.ShowFlashing();
+var i, plus, podm_start, podm_count:Integer;
+begin
+ plus := IfThen(Self.m_flash, 6, 0);
 
-  with (F_PotvrSekv) do
-   begin
-    L_DateTime.Caption := FormatDateTime('dd.mm.yyyy hh:mm:ss', Now);
-    L_Timeout.Caption := FormatDateTime('nn:ss', (now-Self.m_start_time));
-   end;
+ if (F_Main.IL_Ostatni.BkColor <> clBlack) then
+   F_Main.IL_Ostatni.BkColor := clBlack;
+
+ // stanice, udalost, bloky:
+ with (Self.PB_SFP.Canvas) do
+  begin
+   if (plus = 6) then
+     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 0, 69);
+   F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, plus, 61);
+   F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0, 12+plus, 61);
+   for i := 0 to Self.m_senders.Count-1 do
+     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_SFP.Canvas, 0,
+                            2*_SYMBOL_HEIGHT+plus+(i*_SYMBOL_HEIGHT), 61);
+  end;
+
+ podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE-1));
+ podm_count := Min(_POTVR_ITEMS_PER_PAGE-1, Self.m_conditions.Count-podm_start);
+
+ // podminky
+ with (Self.PB_Podm.Canvas) do
+  begin
+   if (plus = 6) then
+     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, 0, 69);
+   for i := 0 to podm_count do
+     F_Main.IL_Ostatni.Draw(F_PotvrSekv.PB_Podm.Canvas, 0, (i*12)+plus, 61);
+  end;
 end;
 
 procedure TF_PotvrSekv.B_OKClick(Sender: TObject);
@@ -312,10 +333,25 @@ procedure TF_PotvrSekv.FormKeyPress(Sender: TObject; var Key: Char);
 begin
  if (Key = #27) then
   Self.B_StornoClick(Self.B_Storno)
- else if ((Key = #11) and (Self.m_page > 0)) then
-   Dec(Self.m_page)
- else if ((Key = #12) and (Self.m_page < Self.pagesCount)) then
+end;
+
+procedure TF_PotvrSekv.FormPaint(Sender: TObject);
+begin
+ Self.ShowTexts();
+ Self.ShowFlashing();
+end;
+
+procedure TF_PotvrSekv.OnKeyUp(key: Integer; var handled: boolean);
+begin
+ if ((key = VK_PRIOR) and (Self.m_page > 0)) then begin
+   Dec(Self.m_page);
+   Self.ShowTexts();
+   Self.ShowFlashing();
+ end else if ((key = VK_NEXT) and (Self.m_page < Self.pagesCount)) then begin
    Inc(Self.m_page);
+   Self.ShowTexts();
+   Self.ShowFlashing();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@ object F_PotvrSekv: TF_PotvrSekv
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
+  OnPaint = FormPaint
   PixelsPerInch = 96
   TextHeight = 13
   object B_Storno: TButton

@@ -414,7 +414,7 @@ begin
   end
 
  else if (parsed[1] = 'PS') then
-  F_PotvrSekv.Start(parsed, Self.PanelPotvrSekv)
+  F_PotvrSekv.StartOrUpdate(parsed, Self.PanelPotvrSekv)
 
  else if (parsed[1] = 'PS-CLOSE') then
   begin

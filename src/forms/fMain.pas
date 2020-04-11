@@ -110,7 +110,7 @@ implementation
 
 uses Symbols, fDebug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
   fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient,
-  InterProcessCom, JclAppInst;
+  InterProcessCom, JclAppInst, fPotvrSekv;
 
 {$R *.dfm}
 
@@ -121,6 +121,10 @@ procedure TF_Main.AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
 begin
  if (msg.message = WM_KeyDown) then
   begin
+   if (F_PotvrSekv.running) then
+     F_PotvrSekv.OnKeyUp(msg.wParam, Handled);
+   if (Handled) then Exit();
+
    case  msg.wParam of
      VK_F4 : F_Debug.Show();
      VK_F3 : Self.ShowAboutDialog();
