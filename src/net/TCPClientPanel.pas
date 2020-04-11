@@ -80,7 +80,7 @@ type
       procedure PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1; params:string = '');
       procedure PanelMenuClick(item_hint:string; item_index:Integer);
       procedure PanelSetStitVyl(typ:Integer; stitvyl:string);
-      procedure PanelPotvrSekv(reason:TPSEnd);
+      procedure PanelPotvrSekv(Sender: TObject);
       procedure PanelNUZ(Sender:string);
       procedure PanelNUZCancel(Sender:string);
       procedure PanelSprChange(Sender:string; msg:string);
@@ -622,9 +622,9 @@ begin
  end;
 end;
 
-procedure TPanelTCPClient.PanelPotvrSekv(reason:TPSEnd);
+procedure TPanelTCPClient.PanelPotvrSekv(Sender: TObject);
 begin
- Self.SendLn('-;PS;'+IntToStr(Integer(reason))+';');
+ Self.SendLn('-;'+F_PotvrSekv.mode+';'+IntToStr(Integer(F_PotvrSekv.EndReason))+';');
 end;
 
 procedure TPanelTCPClient.PanelNUZ(Sender:string);

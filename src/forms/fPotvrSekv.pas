@@ -19,7 +19,7 @@ const
 
 type
   TPSEnd = (prubeh = 1,  success = 2, error = 3);
-  TEndEvent = procedure(reason:TPSEnd) of object;
+  TEndEvent = procedure(Sender: TObject) of object;
 
   TPSCondition = record
    block: string;
@@ -33,8 +33,8 @@ type
     P_bg: TPanel;
     P_Header: TPanel;
     P_Podminky: TPanel;
-    Label1: TLabel;
-    Label2: TLabel;
+    L_ListDescription: TLabel;
+    L_Description: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     L_Timeout: TLabel;
@@ -64,6 +64,7 @@ type
     m_page: Integer;
     m_end_reason: TPSEnd;
     m_OnEnd: TEndEvent;
+    m_mode: string; // PS/IS
 
      procedure ShowTexts();
      procedure ShowFlashing();
@@ -79,6 +80,7 @@ type
      property PagesCount: Integer read GetPagesCount;
      property EndReason: TPSEnd read m_end_reason;
      property running: boolean read m_running;
+     property mode: string read m_mode;
 
   end;
 
@@ -129,6 +131,7 @@ begin
  strs := TStringList.Create();
 
  try
+   Self.m_mode := parsed[1];
    Self.m_end_reason := TPSEnd.prubeh;
    Self.m_OnEnd := callback;
    Self.m_station := parsed[2];
@@ -136,6 +139,18 @@ begin
    Self.m_page := 0;
    Self.m_senders.Clear();
    Self.m_flash := false;
+
+   Self.B_Storno.Visible := (m_mode <> 'IS');
+   if (m_mode = 'IS') then
+    begin
+     Self.L_Description.Caption := 'INFORMAČNÍ STRÁNKA';
+     Self.L_ListDescription.Caption := 'INFORMACE';
+     Self.B_OK.Caption := 'OK';
+    end else begin
+     Self.L_Description.Caption := '!!! PROBÍHÁ RIZIKOVÁ FUNKCE !!!';
+     Self.L_ListDescription.Caption := 'KONTROLOVANÉ PODMÍNKY';
+     Self.B_OK.Caption := 'Souhlasím';
+    end;
 
    if (parsed.Count >= 5) then
     begin
@@ -165,7 +180,7 @@ begin
    Self.m_running := true;
    Self.T_Main.Enabled := true;
 
-   if (not SoundsPlay.IsPlaying(_SND_POTVR_SEKV)) then
+   if ((Self.mode = 'PS') and (not SoundsPlay.IsPlaying(_SND_POTVR_SEKV))) then
      SoundsPlay.Play(_SND_POTVR_SEKV, true);
  finally
    strs.Free();
@@ -199,7 +214,7 @@ end;
 //pokud je v reason '', ukonceni se povazuje za ok, pokud ne, ukonceni se povazuje za error
 procedure TF_PotvrSekv.Stop(reason:string = '');
 begin
- if (reason = '') then
+ if ((reason = '') or (Self.mode = 'IS')) then
   begin
    Self.m_end_reason := TPSEnd.success;
   end else begin
@@ -208,11 +223,12 @@ begin
   end;
 
  Self.m_running := false;
- SoundsPlay.DeleteSound(_SND_POTVR_SEKV);
+ if (Self.mode = 'PS') then
+   SoundsPlay.DeleteSound(_SND_POTVR_SEKV);
  Relief.UpdateEnabled();
  Self.T_Main.Enabled := false;
  if (Assigned(Self.OnEnd)) then
-   Self.OnEnd(Self.EndReason);
+   Self.OnEnd(Self);
  Self.Close();
 end;
 
@@ -325,8 +341,8 @@ end;
 
 procedure TF_PotvrSekv.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
- if (Self.running) then
-  Self.Stop('Zavřeno okno potvrzovací sekvence');
+ if ((Self.running) and (Self.mode = 'PS')) then
+   Self.Stop('Zavřeno okno potvrzovací sekvence');
 end;
 
 procedure TF_PotvrSekv.FormKeyPress(Sender: TObject; var Key: Char);

@@ -60,7 +60,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Color = 10526880
     ParentBackground = False
     TabOrder = 2
-    object Label1: TLabel
+    object L_ListDescription: TLabel
       Left = 40
       Top = 127
       Width = 168
@@ -73,7 +73,7 @@ object F_PotvrSekv: TF_PotvrSekv
       Font.Style = []
       ParentFont = False
     end
-    object Label2: TLabel
+    object L_Description: TLabel
       Left = 40
       Top = 0
       Width = 248
