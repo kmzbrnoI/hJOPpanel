@@ -351,9 +351,9 @@ begin
     end;
  end;
 
- if ((GlobConfig.data.frmPos.X >= 0) and (GlobConfig.data.frmPos.Y >= 0) and
-   (GlobConfig.data.frmPos.X+100 < Screen.Width) and (GlobConfig.data.frmPos.Y+100 < Screen.Height)) then
+ if ((Abs(GlobConfig.data.frmPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.frmPos.Y) < Screen.DesktopHeight)) then
   begin
+   // Allow negative coordinates for multiple monitors
    Self.Left := GlobConfig.data.frmPos.X;
    Self.Top := GlobConfig.data.frmPos.Y;
   end;
