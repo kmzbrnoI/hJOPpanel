@@ -351,13 +351,6 @@ begin
     end;
  end;
 
- if ((Abs(GlobConfig.data.frmPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.frmPos.Y) < Screen.DesktopHeight)) then
-  begin
-   // Allow negative coordinates for multiple monitors
-   Self.Left := GlobConfig.data.frmPos.X;
-   Self.Top := GlobConfig.data.frmPos.Y;
-  end;
-
  if ((GlobConfig.data.symbolSet = TSymbolSetType.bigger) and (not Self.LargeSSFitsScreen())) then
   begin
    GlobConfig.data.symbolSet := TSymbolSetType.normal;
@@ -398,6 +391,14 @@ begin
  Self.UpdateuLIIcon();
  F_splash.Close();
  Self.Show();
+
+ // Must be after Show() because of multiple monitors
+ if ((Abs(GlobConfig.data.frmPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.frmPos.Y) < Screen.DesktopHeight)) then
+  begin
+   // Allow negative coordinates for multiple monitors
+   Self.Left := GlobConfig.data.frmPos.X;
+   Self.Top := GlobConfig.data.frmPos.Y;
+  end;
 
  if (GlobConfig.data.server.autoconnect) then
   Self.A_ConnectExecute(Self);
