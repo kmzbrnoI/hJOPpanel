@@ -4,7 +4,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Souprava [...]'
-  ClientHeight = 561
+  ClientHeight = 593
   ClientWidth = 409
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -55,7 +55,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object Label1: TLabel
     Left = 7
-    Top = 469
+    Top = 501
     Width = 109
     Height = 13
     Margins.Left = 2
@@ -106,7 +106,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object Label4: TLabel
     Left = 278
-    Top = 469
+    Top = 501
     Width = 123
     Height = 13
     Alignment = taRightJustify
@@ -175,7 +175,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object B_Save: TButton
     Left = 313
-    Top = 531
+    Top = 563
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -184,12 +184,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 11
+    TabOrder = 13
     OnClick = B_SaveClick
   end
   object B_Storno: TButton
     Left = 216
-    Top = 531
+    Top = 563
     Width = 89
     Height = 25
     Margins.Left = 2
@@ -197,7 +197,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Storno'
-    TabOrder = 12
+    TabOrder = 14
     OnClick = B_StornoClick
   end
   object B_Help: TButton
@@ -294,7 +294,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     ParentDoubleBuffered = False
-    TabOrder = 13
+    TabOrder = 15
     OnClick = BB_HV_AddClick
   end
   object SE_Delka: TSpinEdit
@@ -338,12 +338,12 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object M_Poznamka: TMemo
     Left = 8
-    Top = 487
+    Top = 519
     Width = 393
     Height = 39
     MaxLength = 1000
     ScrollBars = ssVertical
-    TabOrder = 9
+    TabOrder = 11
     OnKeyPress = E_PoznamkaKeyPress
   end
   object CB_Vychozi: TComboBox
@@ -366,11 +366,30 @@ object F_SoupravaEdit: TF_SoupravaEdit
   end
   object CHB_report: TCheckBox
     Left = 8
-    Top = 533
+    Top = 565
     Width = 108
     Height = 17
     Caption = 'Stani'#269'n'#237' hl'#225#353'en'#237
+    TabOrder = 12
+  end
+  object CHB_MaxSpeed: TCheckBox
+    Left = 8
+    Top = 470
+    Width = 241
+    Height = 17
+    Caption = 'Omezit maxim'#225'ln'#237' rychlost soupravy na [km/h]:'
+    TabOrder = 9
+    OnClick = CHB_MaxSpeedClick
+  end
+  object SE_MaxSpeed: TSpinEdit
+    Left = 288
+    Top = 470
+    Width = 113
+    Height = 22
+    MaxValue = 200
+    MinValue = 0
     TabOrder = 10
+    Value = 0
   end
   object T_Timeout: TTimer
     Enabled = False

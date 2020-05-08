@@ -47,6 +47,8 @@ type
     CB_Cilova: TComboBox;
     SB_st_change: TSpeedButton;
     CHB_report: TCheckBox;
+    CHB_MaxSpeed: TCheckBox;
+    SE_MaxSpeed: TSpinEdit;
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure B_SaveClick(Sender: TObject);
@@ -67,6 +69,7 @@ type
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SB_st_changeClick(Sender: TObject);
     procedure CB_TypChange(Sender: TObject);
+    procedure CHB_MaxSpeedClick(Sender: TObject);
   private
     OblR:string;
     HVs:TObjectList<TF_SprHVEdit>;
@@ -167,6 +170,8 @@ begin
  Self.SE_Delka.Value  := 0;
  Self.CB_Typ.Text     := '';
  Self.M_Poznamka.Text := '';
+ Self.CHB_MaxSpeed.Checked := false;
+ Self.CHB_MaxSpeedClick(Self);
  Self.CHB_report.Enabled := true;
  Self.CHB_report.Checked := false;
 
@@ -240,6 +245,11 @@ begin
    else
      Self.CHB_report.Checked := false;
 
+   Self.CHB_MaxSpeed.Checked := ((parsed.Count > 12) and (parsed[12] <> ''));
+   Self.CHB_MaxSpeedClick(Self);
+   if ((parsed.Count > 12) and (parsed[12] <> '')) then
+     Self.SE_MaxSpeed.Value := StrToInt(parsed[12]);
+
    Self.sprHVs.ParseHVs(parsed[8]);
  except
   Application.MessageBox('Neplatný formát dat soupravy !', 'Nelze editovat soupravu', MB_OK OR MB_ICONWARNING);
@@ -308,6 +318,12 @@ begin
  if ((Self.CHB_report.Checked) and (Self.CB_Typ.Text = '')) then
   begin
    Application.MessageBox('Pro staniční hlášení musí být vyplněn typ soupravy!',
+                          'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
+ if ((Self.CHB_MaxSpeed.Checked) and (Self.SE_MaxSpeed.Value < 10)) then
+  begin
+   Application.MessageBox('Omezení na maximální rychlost soupravy musí být alespoň 10 km/h!',
                           'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
@@ -380,6 +396,11 @@ begin
  else
   sprstr := sprstr + '0;';
 
+ if (Self.CHB_MaxSpeed.Checked) then
+  sprstr := sprstr + IntToStr(Self.SE_MaxSpeed.Value) + ';'
+ else
+  sprstr := sprstr + ';';
+
  PanelTCPClient.PanelSprChange(Self.OblR, sprstr);
 
  Screen.Cursor := crHourGlass;
@@ -410,6 +431,13 @@ begin
   end;
 
  CHB_report.Checked := true;
+end;
+
+procedure TF_SoupravaEdit.CHB_MaxSpeedClick(Sender: TObject);
+begin
+ Self.SE_MaxSpeed.Enabled := Self.CHB_MaxSpeed.Checked;
+ if (not Self.CHB_MaxSpeed.Checked) then
+   Self.SE_MaxSpeed.Value := 0;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
