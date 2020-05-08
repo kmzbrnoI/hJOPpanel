@@ -14,7 +14,6 @@ object F_SprHelp: TF_SprHelp
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object B_OK: TButton
@@ -26,7 +25,7 @@ object F_SprHelp: TF_SprHelp
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Zavr'#237't'
+    Caption = 'Zav'#345#237't'
     TabOrder = 0
     OnClick = B_OKClick
   end
@@ -43,6 +42,7 @@ object F_SprHelp: TF_SprHelp
     Columns = <
       item
         Caption = 'P'#345'ed'#269#237'sl'#237
+        Width = 60
       end
       item
         Caption = 'Vysv'#283'tlivka'

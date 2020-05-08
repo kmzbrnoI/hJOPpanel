@@ -254,13 +254,18 @@ begin
    data := GlobConfig.data;
    data.frmPos := Point(Self.Left, Self.Top);
    GlobConfig.data := data;
-   GlobConfig.SaveFile();
+   try
+     GlobConfig.SaveFile();
+   except
+     on E:Exception do
+       Application.MessageBox(PChar('Nepodařilo se uložit konfigurační soubor:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+   end;
   end;
 
  if (Assigned(Relief)) then
-  FreeAndNil(Relief);
+   FreeAndNil(Relief);
  if (Assigned(Self.DXD_Main)) then
-  FreeAndNil(Self.DXD_Main);
+   FreeAndNil(Self.DXD_Main);
 end;
 
 procedure TF_Main.FormResize(Sender: TObject);
@@ -292,7 +297,12 @@ var ss, ss2: TSymbolSet;
 begin
  F_splash.AddStav('Načítám konfiguraci...');
 
- GlobConfig.LoadFile(config_fn);
+ try
+   GlobConfig.LoadFile(config_fn);
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Nepodařilo se načíst konfigurační soubor '+config_fn+':'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 
  Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '')+' – hJOPpanel – v'+NactiVerzi(Application.ExeName)+' (build '+GetLastBuildDate+')';
 

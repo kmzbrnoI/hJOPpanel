@@ -8,18 +8,17 @@ interface
 
 uses
   Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
-  ComCtrls;
+  ComCtrls, IniFiles;
 
 type
   TF_SprHelp = class(TForm)
     B_OK: TButton;
     LV_SprHelp: TListView;
     procedure B_OKClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
-    { Public declarations }
+    procedure LoadData(ini: TMemIniFile);
   end;
 
 var
@@ -34,44 +33,25 @@ procedure TF_SprHelp.B_OKClick(Sender: TObject);
   F_SprHelp.Close;
  end;
 
-procedure TF_SprHelp.FormCreate(Sender: TObject);
-var LI:TListItem;
- begin
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '10xxxx';
-  LI.SubItems.Add('Expresní vlak');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '20xxxx';
-  LI.SubItems.Add('');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '30xxxx';
-  LI.SubItems.Add('Rychlík');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '40xxxx';
-  LI.SubItems.Add('Osobní vlak hlavní trať');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '50xxxx';
-  LI.SubItems.Add('Osobní vlak vedlejší trať');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '60xxxx';
-  LI.SubItems.Add('Průběžný nákladní vlak');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '70xxxx';
-  LI.SubItems.Add('Lokomotivní vlak');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '80xxxx';
-  LI.SubItems.Add('Manipulační vlak');
-
-  LI := LV_SprHelp.Items.Add;
-  LI.Caption := '90xxxx';
-  LI.SubItems.Add('Zvláštní vlak');
+procedure TF_SprHelp.LoadData(ini: TMemIniFile);
+const _SECTION: string = 'train-types';
+var strs: TStrings;
+    str: string;
+    LI: TListItem;
+begin
+ strs := TStringList.Create();
+ try
+   ini.ReadSection(_SECTION, strs);
+   Self.LV_SprHelp.Clear();
+   for str in strs do
+    begin
+     LI := Self.LV_SprHelp.Items.Add;
+     LI.Caption := str;
+     LI.SubItems.Add(ini.ReadString(_SECTION, str, ''));
+    end;
+ finally
+   strs.Free();
  end;
+end;
 
 end.//unit
