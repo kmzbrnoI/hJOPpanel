@@ -265,6 +265,7 @@ var HV:THV;
     pomCv:THVPomCv;
     i:Integer;
     j: Cardinal;
+    prechSorted: TList<Cardinal>;
 begin
  Self.SB_Take_Remove.Enabled := false;
  Self.SB_Rel_Remove.Enabled  := false;
@@ -310,18 +311,24 @@ begin
      Self.RG_StA.ItemIndex := Integer(HV.StanovisteA);
      Self.SE_MaxSpeed.Value := HV.maxRychlost;
 
-     Self.CB_Prechodnost.Clear();
-     for j in Self.prechodnost.Keys do
-      begin
-       Self.CB_Prechodnost.Items.Add(IntToStr(j)+': '+Self.prechodnost[j]);
-       if (j = HV.prechodnost) then
+     prechSorted := TList<Cardinal>.Create(Self.prechodnost.Keys);
+     try
+       prechSorted.Sort();
+       Self.CB_Prechodnost.Clear();
+       for j in prechSorted do
+        begin
+         Self.CB_Prechodnost.Items.Add(IntToStr(j)+': '+Self.prechodnost[j]);
+         if (j = HV.prechodnost) then
+           Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count-1;
+        end;
+       if (not Self.prechodnost.ContainsKey(HV.prechodnost)) then
+        begin
+         Self.CB_Prechodnost.Items.Add(IntToStr(HV.prechodnost)+': ?');
          Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count-1;
-      end;
-     if (not Self.prechodnost.ContainsKey(HV.prechodnost)) then
-      begin
-       Self.CB_Prechodnost.Items.Add(IntToStr(HV.prechodnost)+': ?');
-       Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count-1;
-      end;
+        end;
+     finally
+       prechSorted.Free();
+     end;
 
      for i := 0 to _MAX_FUNC do
       Self.LV_Funkce.Items[i].Checked := HV.funkce[i];
@@ -413,6 +420,7 @@ end;
 
 procedure TF_HVEdit.HVAdd(sender_or:string; HVs:THVDb);
 var i: Integer;
+    prechSorted: TList<Cardinal>;
 begin
  Self.sender_or := sender_or;
  Self.HVs  := HVs;
@@ -433,9 +441,15 @@ begin
  Self.RG_StA.ItemIndex := -1;
  Self.SE_MaxSpeed.Value := _DEFAULT_MAX_SPEED;
 
- Self.CB_Prechodnost.Clear();
- for i in Self.prechodnost.Keys do
-   Self.CB_Prechodnost.Items.Add(IntToStr(i)+': '+Self.prechodnost[i]);
+ prechSorted := TList<Cardinal>.Create(Self.prechodnost.Keys);
+ try
+   prechSorted.Sort();
+   Self.CB_Prechodnost.Clear();
+   for i in prechSorted do
+     Self.CB_Prechodnost.Items.Add(IntToStr(i)+': '+Self.prechodnost[i]);
+ finally
+   prechSorted.Free();
+ end;
 
  Self.LV_Funkce.Items[0].Checked := true;
  for i := 1 to _MAX_FUNC do
