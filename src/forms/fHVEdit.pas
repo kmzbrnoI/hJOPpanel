@@ -9,7 +9,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
-  Generics.Collections, AppEvnts, Spin;
+  Generics.Collections, AppEvnts, Spin, IniFiles;
 
 type
   TF_HVEdit = class(TForm)
@@ -44,6 +44,9 @@ type
     B_Search: TButton;
     Label11: TLabel;
     SE_MaxSpeed: TSpinEdit;
+    Label12: TLabel;
+    CB_Prechodnost: TComboBox;
+    Label13: TLabel;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
@@ -74,6 +77,7 @@ type
     P_types:array[0.._MAX_FUNC] of TPanel;
     FOldListviewWindowProc: TWndMethod;
     vyznType:TDictionary<string, THVFuncType>;
+    prechodnost: TDictionary<Cardinal, string>;
 
     procedure InitFunkce();
     procedure FreeFunkce();
@@ -82,11 +86,12 @@ type
     procedure CB_VyznamChange(Sender: TObject);
 
   public
-    { Public declarations }
-
     procedure HVAdd(sender_or:string; HVs:THVDb);
     procedure HVEdit(sender_or:string; HVs:THVDb);
     procedure ParseVyznamy(vyznamy:string);
+
+    procedure LoadPrechodnost(ini: TMemIniFile);
+
   end;
 
 var
@@ -105,6 +110,7 @@ var HV:THV;
     i, j:Integer;
     pomCV:THVPomCV;
     newVyznamy:string;
+    str: string;
 begin
  if (Self.E_Name.Text = '') then
   begin
@@ -126,26 +132,36 @@ begin
    Application.MessageBox('Vyberte stanoviště A lokomotivy!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
    Exit();
   end;
+ if (Self.CB_Prechodnost.ItemIndex < 0) then
+  begin
+   Application.MessageBox('Vyberte třídu přechodnosti hnacího vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+   Exit();
+  end;
+
 
  HV := THV.Create();
 
  // kontrola M_Poznamka
  for j := 0 to Length(_forbidden_chars)-1 do
+  begin
    if (strscan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
      begin
       Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!'+#13#10+'Zakázané znaky: '+GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
       Exit();
      end;
+  end;
 
- HV.Nazev       := Self.E_Name.Text;
- HV.Majitel     := Self.E_Majitel.Text;
- HV.Oznaceni    := Self.E_Oznaceni.Text;
- HV.Poznamka    := Self.M_Poznamka.Text;
- HV.Adresa      := StrToInt(Self.E_Adresa.Text);
- HV.Trida       := THVClass(Self.RG_Trida.ItemIndex);
- HV.Souprava    := '-';
+ HV.Nazev := Self.E_Name.Text;
+ HV.Majitel := Self.E_Majitel.Text;
+ HV.Oznaceni := Self.E_Oznaceni.Text;
+ HV.Poznamka := Self.M_Poznamka.Text;
+ HV.Adresa := StrToInt(Self.E_Adresa.Text);
+ HV.Typ := THVClass(Self.RG_Trida.ItemIndex);
+ HV.Souprava := '-';
  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
  HV.maxRychlost := Self.SE_MaxSpeed.Value;
+ str := Self.CB_Prechodnost.Items[Self.CB_Prechodnost.ItemIndex];
+ HV.prechodnost := StrToInt(Copy(str, 1, Pos(':', str)-1));
 
  for i := 0 to _MAX_FUNC do
    HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
@@ -248,6 +264,7 @@ var HV:THV;
     LI:TListItem;
     pomCv:THVPomCv;
     i:Integer;
+    j: Cardinal;
 begin
  Self.SB_Take_Remove.Enabled := false;
  Self.SB_Rel_Remove.Enabled  := false;
@@ -258,18 +275,19 @@ begin
   begin
    Self.B_Apply.Enabled := true;
 
-   Self.E_Name.Enabled      := true;
-   Self.E_Oznaceni.Enabled  := true;
-   Self.E_Majitel.Enabled   := true;
-   Self.E_Adresa.Enabled    := true;
-   Self.M_Poznamka.Enabled  := true;
-   Self.RG_Trida.Enabled    := true;
-   Self.RG_StA.Enabled      := true;
+   Self.E_Name.Enabled := true;
+   Self.E_Oznaceni.Enabled := true;
+   Self.E_Majitel.Enabled := true;
+   Self.E_Adresa.Enabled := true;
+   Self.M_Poznamka.Enabled := true;
+   Self.RG_Trida.Enabled := true;
+   Self.RG_StA.Enabled := true;
    Self.SE_MaxSpeed.Enabled := true;
+   Self.CB_Prechodnost.Enabled := true;
 
-   Self.SB_Take_Add.Enabled    := true;
-   Self.SB_Rel_Add.Enabled     := true;
-   Self.LV_Pom_Load.Enabled    := true;
+   Self.SB_Take_Add.Enabled := true;
+   Self.SB_Rel_Add.Enabled := true;
+   Self.LV_Pom_Load.Enabled := true;
    Self.LV_Pom_Release.Enabled := true;
 
    Self.LV_Funkce.Enabled := true;
@@ -283,14 +301,27 @@ begin
    if (not Self.new) then
     begin
      HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
-     Self.E_Name.Text         := HV.Nazev;
-     Self.E_Oznaceni.Text     := HV.Oznaceni;
-     Self.E_Majitel.Text      := HV.Majitel;
-     Self.E_Adresa.Text       := IntToStr(HV.Adresa);
-     Self.M_Poznamka.Text     := HV.Poznamka;
-     Self.RG_Trida.ItemIndex  := Integer(HV.Trida);
-     Self.RG_StA.ItemIndex    := Integer(HV.StanovisteA);
-     Self.SE_MaxSpeed.Value   := HV.maxRychlost;
+     Self.E_Name.Text := HV.Nazev;
+     Self.E_Oznaceni.Text := HV.Oznaceni;
+     Self.E_Majitel.Text := HV.Majitel;
+     Self.E_Adresa.Text := IntToStr(HV.Adresa);
+     Self.M_Poznamka.Text := HV.Poznamka;
+     Self.RG_Trida.ItemIndex := Integer(HV.Typ);
+     Self.RG_StA.ItemIndex := Integer(HV.StanovisteA);
+     Self.SE_MaxSpeed.Value := HV.maxRychlost;
+
+     Self.CB_Prechodnost.Clear();
+     for j in Self.prechodnost.Keys do
+      begin
+       Self.CB_Prechodnost.Items.Add(IntToStr(j)+': '+Self.prechodnost[j]);
+       if (j = HV.prechodnost) then
+         Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count-1;
+      end;
+     if (not Self.prechodnost.ContainsKey(HV.prechodnost)) then
+      begin
+       Self.CB_Prechodnost.Items.Add(IntToStr(HV.prechodnost)+': ?');
+       Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count-1;
+      end;
 
      for i := 0 to _MAX_FUNC do
       Self.LV_Funkce.Items[i].Checked := HV.funkce[i];
@@ -323,50 +354,51 @@ begin
   end else begin
    Self.B_Apply.Enabled := false;
 
-   Self.E_Name.Enabled      := false;
-   Self.E_Oznaceni.Enabled  := false;
-   Self.E_Majitel.Enabled   := false;
-   Self.E_Adresa.Enabled    := false;
-   Self.M_Poznamka.Enabled  := false;
-   Self.RG_Trida.Enabled    := false;
-   Self.RG_StA.Enabled      := false;
+   Self.E_Name.Enabled := false;
+   Self.E_Oznaceni.Enabled := false;
+   Self.E_Majitel.Enabled := false;
+   Self.E_Adresa.Enabled := false;
+   Self.M_Poznamka.Enabled := false;
+   Self.RG_Trida.Enabled := false;
+   Self.RG_StA.Enabled := false;
    Self.SE_MaxSpeed.Enabled := false;
+   Self.CB_Prechodnost.Enabled := false;
 
-   Self.E_Name.Text         := '';
-   Self.E_Oznaceni.Text     := '';
-   Self.E_Majitel.Text      := '';
-   Self.E_Adresa.Text       := '';
-   Self.M_Poznamka.Text     := '';
-   Self.RG_Trida.ItemIndex  := -1;
-   Self.RG_StA.ItemIndex    := -1;
+   Self.E_Name.Text := '';
+   Self.E_Oznaceni.Text := '';
+   Self.E_Majitel.Text := '';
+   Self.E_Adresa.Text := '';
+   Self.M_Poznamka.Text := '';
+   Self.RG_Trida.ItemIndex := -1;
+   Self.RG_StA.ItemIndex := -1;
+   Self.CB_Prechodnost.ItemIndex := -1;
 
    Self.LV_Funkce.Items[0].Checked := true;
    for i := 1 to _MAX_FUNC do
     Self.LV_Funkce.Items[i].Checked := false;
 
-   Self.SB_Take_Add.Enabled    := false;
-   Self.SB_Rel_Add.Enabled     := false;
-   Self.LV_Pom_Load.Enabled    := false;
+   Self.SB_Take_Add.Enabled := false;
+   Self.SB_Rel_Add.Enabled := false;
+   Self.LV_Pom_Load.Enabled := false;
    Self.LV_Pom_Release.Enabled := false;
 
    Self.LV_Funkce.Enabled := false;
    for i := 0 to _MAX_FUNC do
     begin
      Self.CB_funkce[i].Enabled := false;
-     Self.CB_funkce[i].Text    := '';
+     Self.CB_funkce[i].Text := '';
      Self.RB_P[i].Enabled := false;
      Self.RB_P[i].Checked := false;
      Self.RB_M[i].Enabled := false;
      Self.RB_M[i].Enabled := false;
     end;
-
   end;
-
 end;
 
 procedure TF_HVEdit.FormCreate(Sender: TObject);
 begin
  Self.vyznType := TDictionary<string, THVFuncType>.Create();
+ Self.prechodnost := TDIctionary<Cardinal, string>.Create();
  Self.InitFunkce();
 end;
 
@@ -374,16 +406,17 @@ procedure TF_HVEdit.FormDestroy(Sender: TObject);
 begin
  Self.FreeFunkce();
  Self.vyznType.Free();
+ Self.prechodnost.Free();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HVEdit.HVAdd(sender_or:string; HVs:THVDb);
-var i:Integer;
+var i: Integer;
 begin
  Self.sender_or := sender_or;
- Self.HVs       := HVs;
- Self.new       := true;
+ Self.HVs  := HVs;
+ Self.new := true;
 
  Self.CB_HV.Enabled := false;
  Self.CB_HV.Clear();
@@ -391,14 +424,18 @@ begin
  Self.CB_HV.Items.Add('Nové hnací vozidlo');
  Self.CB_HV.ItemIndex := 0;
 
- Self.E_Name.Text         := '';
- Self.E_Oznaceni.Text     := '';
- Self.E_Majitel.Text      := '';
- Self.E_Adresa.Text       := '';
- Self.M_Poznamka.Text     := '';
- Self.RG_Trida.ItemIndex  := -1;
- Self.RG_StA.ItemIndex    := -1;
- Self.SE_MaxSpeed.Value   := _DEFAULT_MAX_SPEED;
+ Self.E_Name.Text := '';
+ Self.E_Oznaceni.Text := '';
+ Self.E_Majitel.Text := '';
+ Self.E_Adresa.Text := '';
+ Self.M_Poznamka.Text := '';
+ Self.RG_Trida.ItemIndex := -1;
+ Self.RG_StA.ItemIndex := -1;
+ Self.SE_MaxSpeed.Value := _DEFAULT_MAX_SPEED;
+
+ Self.CB_Prechodnost.Clear();
+ for i in Self.prechodnost.Keys do
+   Self.CB_Prechodnost.Items.Add(IntToStr(i)+': '+Self.prechodnost[i]);
 
  Self.LV_Funkce.Items[0].Checked := true;
  for i := 1 to _MAX_FUNC do
@@ -423,8 +460,8 @@ end;
 procedure TF_HVEdit.HVEdit(sender_or:string; HVs:THVDb);
 begin
  Self.sender_or := sender_or;
- Self.new       := false;
- Self.HVs       := HVs;
+ Self.new := false;
+ Self.HVs := HVs;
 
  Self.CB_HV.Enabled := true;
  HVs.FillHVs(Self.CB_HV, Self.HVIndexes, -1, nil, true);
@@ -694,6 +731,27 @@ begin
    else
      Self.RB_P[func].Checked := true;
   end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.LoadPrechodnost(ini: TMemIniFile);
+const _SECTION: string = 'prechodnost';
+var strs: TStrings;
+    str: string;
+begin
+ Self.prechodnost.Clear();
+ strs := TStringList.Create();
+ try
+   ini.ReadSection(_SECTION, strs);
+   for str in strs do
+     Self.prechodnost.Add(StrToInt(str), ini.ReadString(_SECTION, str, ''));
+ finally
+   strs.Free();
+ end;
+
+ if (not Self.prechodnost.ContainsKey(0)) then
+   Self.prechodnost.Add(0, 'základní');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

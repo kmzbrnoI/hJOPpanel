@@ -99,7 +99,7 @@ var
 
 implementation
 
-uses TCPClientPanel, fMain, fSprHelp;
+uses TCPClientPanel, fMain, fSprHelp, fHVEdit;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -187,6 +187,7 @@ begin
    F_Main.T_Main.Interval := ini.ReadInteger('global', 'timer', 200);
 
    F_SprHelp.LoadData(ini);
+   F_HVEdit.LoadPrechodnost(ini);
  finally
    ini.Free();
  end;

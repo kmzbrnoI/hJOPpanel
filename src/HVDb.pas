@@ -40,7 +40,7 @@ type
      Oznaceni:string;                                                           // oznaceni HV
      Poznamka:String;                                                           // poznamka k HV
      Adresa:Word;                                                               // digitalni adresa HW (0..9999)
-     Trida:THVClass;                                                            // trida hnaciho vozidla - parni, diesel, motor, elektro
+     Typ:THVClass;                                                               // Typ hnaciho vozidla - parni, diesel, motor, elektro
      Souprava:string;                                                           // cislo soupravy, na ktere je HV
      StanovisteA:THVStanoviste;                                                 // orientace stanoviste A
      funkce:TFunkce;                                                            // stav funkci
@@ -50,6 +50,7 @@ type
      token:string;
      orid:string;                                                               // id oblasti rizeni, ve ktere se nachazi loko
      maxRychlost:Cardinal;
+     prechodnost:Cardinal;
 
      POMtake : TList<THVPomCV>;                                                 // seznam POM pri prevzeti do automatu
      POMrelease : TList<THVPomCV>;                                              // seznam POM pri uvolneni to rucniho rizeni
@@ -207,7 +208,7 @@ var str, str2, str3:TStrings;
     pomCv:THVPomCv;
     tmp:string;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce|rychlost_stupne|
+ // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|Typ|souprava|stanovisteA|funkce|rychlost_stupne|
  //   rychlost_kmph|smer|or_id{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
  //   {vyznam-F0;vyznam-F1;...}|typy_funkci|max rychlost
 
@@ -220,14 +221,14 @@ begin
  Self.DefaultData();
 
  try
-  Self.Nazev        := str[0];
-  Self.Majitel      := str[1];
-  Self.Oznaceni     := str[2];
-  Self.Poznamka     := str[3];
-  Self.Adresa       := StrToInt(str[4]);
-  Self.Trida        := THvClass(StrToInt(str[5]));
-  Self.Souprava     := str[6];
-  Self.StanovisteA  := THVStanoviste(StrToInt(str[7]));
+  Self.Nazev := str[0];
+  Self.Majitel := str[1];
+  Self.Oznaceni := str[2];
+  Self.Poznamka := str[3];
+  Self.Adresa := StrToInt(str[4]);
+  Self.Typ := THvClass(StrToInt(str[5]));
+  Self.Souprava := str[6];
+  Self.StanovisteA := THVStanoviste(StrToInt(str[7]));
 
   for i := 0 to _MAX_FUNC do
    begin
@@ -300,6 +301,9 @@ begin
    if (str.Count > 17) then
      Self.maxRychlost := StrToInt(str[17]);
 
+   if (str.Count > 18) then
+     Self.prechodnost := StrToInt(str[18]);
+
  except
 
  end;
@@ -333,14 +337,15 @@ end;
 procedure THV.DefaultData();
 var i:Integer;
 begin
- Self.Nazev     := '';
- Self.Majitel   := '';
- Self.Oznaceni  := '';
- Self.Poznamka  := '';
- Self.Adresa    := 0;
- Self.Trida     := THvClass.diesel;
- Self.Souprava  := '-';
+ Self.Nazev := '';
+ Self.Majitel := '';
+ Self.Oznaceni := '';
+ Self.Poznamka := '';
+ Self.Adresa := 0;
+ Self.Typ := THvClass.diesel;
+ Self.Souprava := '-';
  Self.maxRychlost := _DEFAULT_MAX_SPEED;
+ Self.prechodnost := 0;
 
  for i := 0 to _MAX_FUNC do
    Self.funkce[i] := false;
@@ -352,12 +357,8 @@ function THV.GetPanelLokString(mode:TLokStringMode = normal):string;
 var i:Integer;
     pomCV:THVPomCv;
 begin
- // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|-|stanovisteA|funkce|rychlost_stupne|
- //   rychlost_kmph|smer|or_id|{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
- //   {vyznam-F0;vyznam-F1;...}|
- // souprava je bud cislo soupravy, nebo znak '-'
  Result := Self.Nazev + '|' + Self.Majitel + '|' + Self.Oznaceni + '|{' + Self.Poznamka + '}|' +
-           IntToStr(Self.adresa) + '|' + IntToStr(Integer(Self.Trida)) + '|' + Self.souprava + '|' +
+           IntToStr(Self.adresa) + '|' + IntToStr(Integer(Self.Typ)) + '|' + Self.souprava + '|' +
            IntToStr(Integer(Self.StanovisteA)) + '|';
 
  for i := 0 to _MAX_FUNC do
@@ -401,6 +402,7 @@ begin
  Result := Result + '|';
 
  Result := Result + IntToStr(Self.maxRychlost) + '|';
+ Result := Result + IntToStr(Self.prechodnost) + '|';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
