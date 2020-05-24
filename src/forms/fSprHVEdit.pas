@@ -205,7 +205,7 @@ begin
      Left     := 2;
      Caption  := 'F'+IntToStr(i);
      AutoSize := false;
-     Width    := 130;
+     Width    := 160;
 
      atop := atop + 16;
      if (i = 14) then aTop := 16;

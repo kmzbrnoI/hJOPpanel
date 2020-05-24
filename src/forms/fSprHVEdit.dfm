@@ -35,7 +35,7 @@ object F_SprHVEdit: TF_SprHVEdit
   object CB_HV1_HV: TComboBox
     Left = 7
     Top = 13
-    Width = 217
+    Width = 194
     Height = 21
     Margins.Left = 2
     Margins.Top = 2
@@ -55,7 +55,7 @@ object F_SprHVEdit: TF_SprHVEdit
   object RG_HV1_dir: TRadioGroup
     Left = 7
     Top = 38
-    Width = 219
+    Width = 194
     Height = 57
     Margins.Left = 2
     Margins.Top = 2
@@ -76,7 +76,7 @@ object F_SprHVEdit: TF_SprHVEdit
   object M_HV1_Notes: TMemo
     Left = 7
     Top = 122
-    Width = 219
+    Width = 194
     Height = 156
     Margins.Left = 2
     Margins.Top = 2
@@ -88,22 +88,20 @@ object F_SprHVEdit: TF_SprHVEdit
     OnKeyPress = M_HV1_NotesKeyPress
   end
   object PC_Funkce: TPageControl
-    Left = 233
+    Left = 206
     Top = 8
-    Width = 145
+    Width = 172
     Height = 270
-    ActivePage = TS_F15_F28
+    ActivePage = TS_F0_F14
     TabOrder = 3
     object TS_F0_F14: TTabSheet
       Caption = 'F0-F14'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 281
-      ExplicitHeight = 165
+      ExplicitWidth = 137
     end
     object TS_F15_F28: TTabSheet
       Caption = 'F15-F28'
       ImageIndex = 1
+      ExplicitWidth = 137
     end
   end
 end
