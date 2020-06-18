@@ -24,6 +24,7 @@ type
   PanelProp:TRozpPanelProp;
 
   procedure Show(obj:TDXDraw; blik:boolean);
+  procedure ShowBg(obj:TDXDraw; blik:boolean);
   procedure Reset();
  end;
 
@@ -41,6 +42,7 @@ type
 
     procedure Load(ini:TMemIniFile);
     procedure Show(obj:TDXDraw; blik:boolean);
+    procedure ShowBg(obj:TDXDraw; blik:boolean);
     function GetIndex(Pos:TPoint):Integer;
     procedure Reset(orindex:Integer = -1);
 
@@ -68,6 +70,19 @@ uses Symbols, PanelPainter, parseHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+procedure TPRozp.ShowBg(obj:TDXDraw; blik:boolean);
+begin
+ if (Self.PanelProp.Pozadi <> clBlack) then
+  begin
+   obj.Surface.Canvas.Pen.Color := Self.PanelProp.Pozadi;
+   obj.Surface.Canvas.Brush.Color := Self.PanelProp.Pozadi;
+   obj.Surface.Canvas.Rectangle(Self.Pos.X * SymbolSet._Symbol_Sirka,
+                                Self.Pos.Y * SymbolSet._Symbol_Vyska,
+                                (Self.Pos.X+1) * SymbolSet._Symbol_Sirka,
+                                (Self.Pos.Y+1) * SymbolSet._Symbol_Vyska);
+  end;
+end;
+
 procedure TPRozp.Show(obj:TDXDraw; blik:boolean);
 var fg: TColor;
 begin
@@ -77,7 +92,7 @@ begin
    fg := Self.PanelProp.Symbol;
 
  PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _Rozp_Start+1, fg,
-    clBlack, obj, true);
+    Self.PanelProp.Pozadi, obj, true);
 end;
 
 procedure TPRozp.Reset();
@@ -137,6 +152,13 @@ var rozp:TPRozp;
 begin
  for rozp in Self.data do
    rozp.Show(obj, blik);
+end;
+
+procedure TPRozpojovace.ShowBg(obj:TDXDraw; blik:boolean);
+var rozp:TPRozp;
+begin
+ for rozp in Self.data do
+   rozp.ShowBg(obj, blik);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -566,6 +566,7 @@ begin
    Self.Navestidla.Show(Self.DrawObject, Self.Graphics.blik);
    Self.Prejezdy.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.PomocneObj.Show(Self.DrawObject, Self.Graphics.blik);
+   Self.Rozp.ShowBg(Self.DrawObject, Self.Graphics.blik);
    Self.Useky.Show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
    Self.Vyhybky.Show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
    Self.Zamky.Show(Self.DrawObject, Self.Graphics.blik);
