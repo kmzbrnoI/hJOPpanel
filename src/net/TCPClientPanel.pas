@@ -79,6 +79,7 @@ type
       procedure PanelFirstGet(Sender:string);
       procedure PanelClick(Sender:string; Button:TPanelButton; blokid:Integer = -1; params:string = '');
       procedure PanelMenuClick(item_hint:string; item_index:Integer);
+      procedure PanelDkMenuClick(Sender:string; rootItem: string; subItem: string = '');
       procedure PanelSetStitVyl(typ:Integer; stitvyl:string);
       procedure PanelPotvrSekv(Sender: TObject);
       procedure PanelNUZ(Sender:string);
@@ -570,8 +571,13 @@ begin
    for i := 0 to data.Count-1 do ar[i] := StrToInt(data[i]);
    F_SprToSlot.Open(parsed[0], ar);
    data.Free();
+
  end else if (parsed[1] = 'SHP') then
-   Relief.ORHlaseniMsg(parsed[0], parsed);
+   Relief.ORHlaseniMsg(parsed[0], parsed)
+
+ else if (parsed[1] = 'MENU') then
+  Relief.ORDkShowMenu(parsed[0], parsed[2], parsed[3]);
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -612,6 +618,11 @@ end;
 procedure TPanelTCPClient.PanelMenuClick(item_hint:string; item_index:Integer);
 begin
  Self.SendLn('-;MENUCLICK;'+item_hint+';'+IntToStr(item_index));
+end;
+
+procedure TPanelTCPClient.PanelDkMenuClick(Sender:string; rootItem: string; subItem: string = '');
+begin
+ Self.SendLn(Sender+';MENUCLICK;'+rootItem+';'+subItem);
 end;
 
 procedure TPanelTCPClient.PanelSetStitVyl(typ:Integer; stitvyl:string);

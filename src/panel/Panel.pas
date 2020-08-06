@@ -29,10 +29,6 @@ const
 
 type
  ///////////////////////////////////////////////////////////////////////////////
-
- TSpecialMenu = (none, dk, osv, loko, reg_please, hlaseni);
-
- ///////////////////////////////////////////////////////////////////////////////
  // eventy:
 
  TMoveEvent = procedure(Sender:TObject;Position:TPoint) of object;
@@ -104,10 +100,10 @@ type
 
    StaniceIndex:Integer;
 
-   myORs:TList<TORPanel>;
+   myORs:TObjectList<TORPanel>;
 
    Menu:TPanelMenu;
-   special_menu: TSpecialMenu;
+   dk_root_menu_item: string;
    menu_lastpos: TPoint;                 // pozice, na ktere se mys nachazela pred otevrenim menu
    root_menu:boolean;
    infoTimers:TList<TInfoTimer>;
@@ -165,6 +161,8 @@ type
    procedure ShowInfoTimers;
 
    function GetDK(Pos:TPoint):Integer;
+   function GetOR(id: string): TORPanel;
+   function GetORIndex(id: string): Integer;
 
    procedure AEMessage(var Msg: tagMSG; var Handled: Boolean);
 
@@ -175,9 +173,6 @@ type
    //DK menu clicks:
    procedure DKMenuClickMP(Sender:Integer; item:string);
    procedure DKMenuClickMSG(Sender:Integer; item:string);
-   procedure DKMenuClickNUZ(Sender:Integer; item:string);
-   procedure DKMenuClickOSV(Sender:Integer; item:string);
-   procedure DKMenuClickLOKO(Sender:Integer; item:string);
    procedure DKMenuClickSUPERUSER(Sender:Integer; item:string);
    procedure DKMenuClickCAS(Sender:Integer; item:string);
    procedure DKMenuClickSetCAS(Sender:Integer; item:string);
@@ -186,9 +181,9 @@ type
 
    procedure DKMenuClickSUPERUSER_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
 
-   procedure OSVMenuClick(Sender:Integer; item:string);
+   function DKMenuLOKOItems(Sender: TORPanel): string;
 
-   procedure ParseLOKOMenuClick(item:string; obl_r:Integer);
+   function ParseLOKOMenuClick(item:string; obl_r:Integer): Boolean;
    procedure ParseDKMenuClick(item:string; obl_r:Integer);
    procedure ParseRegMenuClick(item:string; obl_r:Integer);
    procedure ParseHlaseniMenuClick(item:string; obl_r:Integer);
@@ -248,7 +243,7 @@ type
    property PanelWidth:SmallInt read GetPanelWidth;
    property PanelHeight:SmallInt read GetPanelHeight;
    property StIndex: integer read StaniceIndex;
-   property ORs:TList<TORPanel> read myORs;
+   property ORs:TObjectList<TORPanel> read myORs;
 
    //events
    property OnMove: TMoveEvent read FOnMove write FOnMove;
@@ -260,6 +255,7 @@ type
    procedure ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string=''; username:string='');
    procedure ORInfoMsg(msg:string);
    procedure ORShowMenu(items:string);
+   procedure ORDkShowMenu(Sender:string; rootItem, menuItems: string);
    procedure ORNUZ(Sender:string; status:TNUZstatus);
    procedure ORConnectionOpenned();
    procedure ORConnectionOpenned_AuthCallback(Sender:TObject; username:string; password:string; ors:TIntAr; guest:boolean);
@@ -308,7 +304,7 @@ begin
  Self.PomocneObj := TPPomocneObj.Create();
 
  Self.ParentForm := aParentForm;
- Self.myORs := TList<TORPanel>.Create();
+ Self.myORs := TObjectList<TORPanel>.Create();
  Self.reAuth.old_ors := TList<Integer>.Create();
 
  Self.Enabled := true;
@@ -371,10 +367,7 @@ var i:Integer;
 begin
  Self.mouseTimer.Free();
 
- for i := Self.myORs.Count-1 downto 0 do
-   Self.myORs[i].Free();
  Self.myORs.Free();
-
  Self.Vyhybky.Free();
  Self.Useky.Free();
  Self.Navestidla.Free();
@@ -1330,13 +1323,11 @@ end;
 
 //odpoved na autorizaci:
 procedure TRelief.ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string=''; username:string='');
-var i,orindex:Integer;
+var i:Integer;
     tmp:TORControlRights;
+    orindex: Integer;
 begin
- orindex := -1;
- for i := 0 to Self.myORs.Count-1 do
-  if (Self.myORs[i].id = Sender) then orindex := i;
-
+ orindex := Self.GetORIndex(Sender);
  if (orindex = -1) then Exit;
 
  tmp := Self.myORs[orindex].tech_rights;
@@ -1385,18 +1376,16 @@ begin
 end;
 
 procedure TRelief.ORNUZ(Sender:string; status:TNUZstatus);
-var i,orindex:Integer;
+var oblr: TORPanel;
 begin
- orindex := -1;
- for i := 0 to Self.myORs.Count-1 do
-  if (Self.myORs[i].id = Sender) then orindex := i;
- if (orindex = -1) then Exit;
+ oblr := Self.GetOR(Sender);
+ if (oblr = nil) then Exit;
 
- Self.myORs[orindex].NUZ_status := status;
+ oblr.NUZ_status := status;
 
  case (status) of
-  no_nuz, nuzing: Self.myORs[orindex].dk_blik := false;
-  blk_in_nuz: Self.myORs[orindex].dk_blik := true;
+  no_nuz, nuzing: oblr.dk_blik := false;
+  blk_in_nuz: oblr.dk_blik := true;
  end;
 end;
 
@@ -1594,8 +1583,24 @@ end;
 procedure TRelief.ORShowMenu(items:string);
 begin
  Self.menu_lastpos := Self.CursorDraw.Pos;
- Self.special_menu := TSpecialMenu.none;
+ Self.dk_root_menu_item := '';
  Self.Menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0,0)));
+end;
+
+procedure TRelief.ORDkShowMenu(Sender:string; rootItem, menuItems: string);
+var oblr: TORPanel;
+begin
+ oblr := Self.GetOR(Sender);
+ if (oblr = nil) then
+   Exit();
+
+ Self.menu_lastpos := Self.CursorDraw.Pos;
+ Self.dk_root_menu_item := rootItem;
+
+ if (rootItem = 'LOKO') then
+   menuItems := Self.DKMenuLOKOItems(oblr) + ',' + menuItems;
+
+ Self.Menu.ShowMenu(menuItems, Self.GetORIndex(Sender), Self.DrawObject.ClientToScreen(Point(0,0)));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1604,7 +1609,7 @@ procedure TRelief.HideMenu();
 var bPos:TPoint;
 begin
  Self.Menu.showing := false;
- Self.special_menu := TSpecialMenu.none;
+ Self.dk_root_menu_item := '';
  bPos := Self.DrawObject.ClientToScreen(Point(0,0));
  SetCursorPos(Self.menu_lastpos.X*SymbolSet._Symbol_Sirka + bPos.X, Self.menu_lastpos.Y*SymbolSet._Symbol_Vyska + bPos.Y);
  Self.Show();
@@ -1671,7 +1676,7 @@ begin
 
  menu_str := menu_str + 'INFO,';
 
- Self.special_menu := dk;
+ Self.dk_root_menu_item := 'DK';
  Self.menu_lastpos := Self.CursorDraw.Pos;
 
  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
@@ -1703,43 +1708,10 @@ begin
   end;
 end;
 
-procedure TRelief.DKMenuClickNUZ(Sender:Integer; item:string);
+function TRelief.DKMenuLOKOItems(Sender: TORPanel): string;
 begin
- if (item = 'NUZ>') then
-   PanelTCPClient.PanelNUZ(Self.myORs[Sender].id)
- else
-   PanelTCPClient.PanelNUZCancel(Self.myORs[Sender].id);
-end;
-
-procedure TRelief.DKMenuClickOSV(Sender:Integer; item:string);
-var menu_str:string;
-    i:Integer;
-begin
- menu_str := '$'+Self.myORs[Sender].Name+',$Osvětlení,-,';
-
- for i := 0 to Self.myORs[Sender].Osvetleni.Count-1 do
-  begin
-   case (Self.myORs[Sender].Osvetleni[i].state) of
-    false : menu_str := menu_str + Self.myORs[Sender].Osvetleni[i].name + '>,';
-    true  : menu_str := menu_str + Self.myORs[Sender].Osvetleni[i].name + '<,';
-   end;//case
-  end;
-
- Self.special_menu := osv;
- Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;
-
-procedure TRelief.DKMenuClickLOKO(Sender:Integer; item:string);
-var menu_str:string;
-begin
- // nejdřív aktualizuji seznam LOKO
- PanelTCPClient.PanelLokList(Self.myORs[Sender].id);
-
- menu_str := '$'+Self.myORs[Sender].Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PŘEDAT loko,HLEDAT loko,RUČ loko';
- if (BridgeClient.authStatus = TuLIAuthStatus.yes) then menu_str := menu_str + ',MAUS loko';
-
- Self.special_menu := loko;
- Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
+ Result := '$'+Sender.Name+',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PŘEDAT loko,HLEDAT loko,RUČ loko';
+ if (BridgeClient.authStatus = TuLIAuthStatus.yes) then Result := Result + ',MAUS loko';
 end;
 
 procedure TRelief.DKMenuClickSUPERUSER(Sender:Integer; item:string);
@@ -1801,16 +1773,8 @@ procedure TRelief.DKMenuClickHLASENI(Sender:Integer; item:string);
 var menu_str:string;
 begin
  menu_str := '$'+Self.myORs[Sender].Name+',$STANIČNÍ HLÁŠENÍ,-,POSUN,NESAHAT,INTRO,SPEC1,SPEC2,SPEC3';
- Self.special_menu := hlaseni;
+ Self.dk_root_menu_item := 'HLASENI';
  Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0,0)));
-end;
-
-procedure TRelief.OSVMenuClick(Sender:Integer; item:string);
-begin
- case (RightStr(item, 1))[1] of
-  '>' : PanelTCPClient.PanelSetOsv(Self.ORs[Sender].id, LeftStr(item, Length(item)-1), 1);
-  '<' : PanelTCPClient.PanelSetOsv(Self.ORs[Sender].id, LeftStr(item, Length(item)-1), 0);
- end;//case
 end;
 
 procedure TRelief.DKMenuClickMSG(Sender:Integer; item:string);
@@ -1831,7 +1795,7 @@ begin
 
  Self.myORs[obl_rizeni].RegPlease.status := TORRegPleaseStatus.request;
 
- Self.special_menu := reg_please;
+ Self.dk_root_menu_item := 'REG-PLEASE';
  Self.menu_lastpos := Self.CursorDraw.Pos;
 
  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0,0)));
@@ -1842,39 +1806,47 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.MenuOnClick(Sender:TObject; item:string; obl_r:Integer; itemindex:Integer);
-var sp_menu:TSpecialMenu;
+var sp_menu: string;
 begin
- sp_menu := Self.special_menu;
+ sp_menu := Self.dk_root_menu_item;
  Self.HideMenu();
 
- case (sp_menu) of
-  none       : PanelTCPClient.PanelMenuClick(item, itemindex);
-  dk         : Self.ParseDKMenuClick(item, obl_r);
-  osv        : Self.OSVMenuClick(obl_r, item);
-  loko       : Self.ParseLOKOMenuClick(item, obl_r);
-  reg_please : Self.ParseRegMenuClick(item, obl_r);
-  hlaseni    : Self.ParseHlaseniMenuClick(item, obl_r);
- end;
+ if (sp_menu = '') then
+   PanelTCPClient.PanelMenuClick(item, itemindex)
+ else if (sp_menu = 'DK') then
+   Self.ParseDKMenuClick(item, obl_r)
+ else if (sp_menu = 'REG-PLEASE') then
+   Self.ParseRegMenuClick(item, obl_r)
+ else if (sp_menu = 'HLASENI') then
+   Self.ParseHlaseniMenuClick(item, obl_r)
+ else if (sp_menu = 'LOKO') then begin
+   if (not Self.ParseLOKOMenuClick(item, obl_r)) then // not handled
+     PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, sp_menu, item);
+ end else
+   PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, sp_menu, item);
 end;
 
 procedure TRelief.ParseDKMenuClick(item:string; obl_r:Integer);
 begin
  if ((item = 'MP') or (item = 'DP')) then Self.DKMenuClickMP(obl_r, item)
- else if ((item = 'NUZ>') or (item = 'NUZ<')) then Self.DKMenuClickNUZ(obl_r, item)
- else if (item = 'OSV') then Self.DKMenuClickOSV(obl_r, item)
- else if (item = 'LOKO') then Self.DKMenuClickLOKO(obl_r, item)
  else if (item = 'MSG') then Self.DKMenuClickMSG(obl_r, item)
  else if (item = 'SUPERUSER') then Self.DKMenuClickSUPERUSER(obl_r, item)
  else if ((item = 'CAS>') or (item = 'CAS<')) then Self.DKMenuClickCAS(obl_r, item)
  else if (item = 'CAS') then Self.DKMenuClickSetCAS(obl_r, item)
  else if (item = 'INFO') then Self.DKMenuClickINFO(obl_r, item)
- else if (item = 'HLÁŠENÍ') then Self.DKMenuClickHLASENI(obl_r, item);           
+ else if (item = 'HLÁŠENÍ') then Self.DKMenuClickHLASENI(obl_r, item)
+ else PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, item); // no special menu -> send click to server
+
+ if (item = 'LOKO') then
+   PanelTCPClient.PanelLokList(Self.myORs[obl_r].id);
 end;
 
-procedure TRelief.ParseLOKOMenuClick(item:string; obl_r:Integer);
+function TRelief.ParseLOKOMenuClick(item:string; obl_r:Integer): Boolean;
 begin
- if (item = 'NOVÁ loko')   then F_HVEdit.HVAdd(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
- else if (item = 'EDIT loko')   then F_HVEdit.HVEdit(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+ Result := true;
+
+ if (item = 'NOVÁ loko') then F_HVEdit.HVAdd(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+ else if (item = 'EDIT loko') then F_HVEdit.HVEdit(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'SMAZAT loko') then F_HVDelete.OpenForm(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'PŘEDAT loko') then F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
  else if (item = 'HLEDAT loko') then F_HVSearch.Show()
@@ -1887,7 +1859,9 @@ begin
       Self.myORs[obl_r].RegPlease.lastname,
       Self.myORs[obl_r].RegPlease.comment,
       (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.none),
-      false, false, (item = 'MAUS loko'));
+      false, false, (item = 'MAUS loko'))
+ else
+   Result := false;
 end;
 
 procedure TRelief.ParseRegMenuClick(item:string; obl_r:Integer);
@@ -2406,9 +2380,9 @@ begin
   begin
    Self.ORs[i].hlaseni := (data[3] = '1');
 
-   if (Self.special_menu = dk) then
+   if (Self.dk_root_menu_item = 'DK') then
      Self.ShowDKMenu(orindex);
-   if ((Self.special_menu = hlaseni) and (not Self.ORs[i].hlaseni)) then
+   if ((Self.dk_root_menu_item = 'HLASENI') and (not Self.ORs[i].hlaseni)) then
      Self.HideMenu();
   end;
 end;
@@ -2442,6 +2416,24 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+function TRelief.GetOR(id: string): TORPanel;
+var i: Integer;
+begin
+ i := Self.GetORIndex(id);
+ if (i = -1) then
+   Exit(nil);
+ Result := Self.myORs[i];
+end;
+
+function TRelief.GetORIndex(id: string): Integer;
+var i: Integer;
+begin
+ for i := 0 to Self.myORs.Count-1 do
+   if (Self.myORs[i].id = id) then
+     Exit(i);
+ Result := -1;
+end;
 
 end.//unit
 
