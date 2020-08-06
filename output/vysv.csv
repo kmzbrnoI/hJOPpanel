@@ -69,6 +69,11 @@ RUČ vlak;Převzít vlak do ručního ovladače
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
 PODJ;Editovat předvídaný odjezd
 
+ZVUK<;Trvale vypnout zvuky všech HV na celém kolejišti
+ZVUK>;Zapnout zvuky všech HV na celém kolejišti
+ZVUK ztlum;Dočasně vypnout zvuky všech HV na celém kolejišti
+ZVUK obnov;Zapnout dříve ztišené zvuky HV
+
 NOVÁ loko;Vytvořit novou lokomotivu
 EDIT loko;Editovat lokomotivu
 SMAZAT loko;Smazat lokomotivu
