@@ -1323,8 +1323,7 @@ end;
 
 //odpoved na autorizaci:
 procedure TRelief.ORAuthoriseResponse(Sender:string; Rights:TORControlRights; comment:string=''; username:string='');
-var i:Integer;
-    tmp:TORControlRights;
+var tmp:TORControlRights;
     orindex: Integer;
 begin
  orindex := Self.GetORIndex(Sender);

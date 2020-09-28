@@ -38,7 +38,7 @@ type
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
      procedure DataReceived(const data: string);
-     procedure Timeout();   // timeout from socket = broken pipe
+     procedure DataError();   // timeout from socket = broken pipe
      procedure ConnectionResusced(Sender:TObject);
 
      // data se predavaji v Self.Parsed
@@ -230,7 +230,7 @@ begin
  try
   Self.rthread := TReadingThread.Create((Sender as TIdTCPClient));
   Self.rthread.OnData := DataReceived;
-  Self.rthread.OnTimeout := Timeout;
+  Self.rthread.OnError := DataError;
   Self.rthread.Resume;
 
   Self.SendLn('AUTH?');
@@ -285,9 +285,14 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TBridgeClient.Timeout();
+procedure TBridgeClient.DataError();
 begin
- Self.OnTcpClientDisconnected(Self);
+ try
+   if (Self.tcpClient.Connected) then
+     Self.tcpClient.Disconnect();
+ except
+
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

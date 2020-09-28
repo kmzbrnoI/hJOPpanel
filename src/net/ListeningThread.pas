@@ -11,20 +11,20 @@ uses
 
 type
   TDataEvent = procedure(const Data: string) of object;
-  TTimeoutEvent = procedure() of object;
+  TErrorEvent = procedure() of object;
   TReadingThread = class(TThread)
   private
     FClient: TIdTCPClient;
     FData: string;
     FOnData: TDataEvent;
-    FOnTimeout: TTimeoutEvent;
+    FOnError: TErrorEvent;
     procedure DataReceived;
   protected
     procedure Execute; override;
   public
     constructor Create(AClient: TIdTCPClient); reintroduce;
     property OnData: TDataEvent read FOnData write FOnData;
-    property OnTimeout: TTimeoutEvent read FOnTimeout write FOnTimeout;
+    property OnError: TErrorEvent read FOnError write FOnError;
   end;
 
 implementation
@@ -40,10 +40,10 @@ begin
   while (not Terminated) do
   begin
     try
-     FData := FClient.IOHandler.ReadLn;
+     FData := FClient.IOHandler.ReadLn();
     except
-     if ((Assigned(FOnTimeout)) and (not Terminated)) then
-      Synchronize(FOnTimeout);
+     if ((Assigned(FOnError)) and (not Terminated)) then
+      Synchronize(FOnError);
      Exit;
     end;
     if (FData <> '') and Assigned(FOnData) then
