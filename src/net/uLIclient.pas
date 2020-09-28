@@ -231,6 +231,7 @@ begin
   Self.rthread := TReadingThread.Create((Sender as TIdTCPClient));
   Self.rthread.OnData := DataReceived;
   Self.rthread.OnError := DataError;
+  Self.rthread.OnTimeout := DataError;
   Self.rthread.Resume;
 
   Self.SendLn('AUTH?');
@@ -289,7 +290,9 @@ procedure TBridgeClient.DataError();
 begin
  try
    if (Self.tcpClient.Connected) then
-     Self.tcpClient.Disconnect();
+     Self.tcpClient.Disconnect()
+   else
+     Self.OnTcpClientDisconnected(Self);
  except
 
  end;

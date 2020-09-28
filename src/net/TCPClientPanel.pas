@@ -44,7 +44,9 @@ type
      procedure OnTcpClientConnected(Sender: TObject);
      procedure OnTcpClientDisconnected(Sender: TObject);
      procedure DataReceived(const data: string);
+     procedure DataErrorGlobalHandle();
      procedure DataError();   // timeout from socket = broken pipe
+     procedure DataTimeout();
 
      // data se predavaji v Self.Parsed
      procedure ParseGlobal();
@@ -251,6 +253,7 @@ begin
   Self.rthread := TReadingThread.Create((Sender as TIdTCPClient));
   Self.rthread.OnData := DataReceived;
   Self.rthread.OnError := DataError;
+  Self.rthread.OnTimeout := DataTimeout;
   Self.rthread.Resume;
  except
   (Sender as TIdTCPClient).Disconnect;
@@ -350,16 +353,28 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelTCPClient.DataError();
+procedure TPanelTCPClient.DataErrorGlobalHandle();
 begin
  try
    if (Self.tcpClient.Connected) then
-     Self.tcpClient.Disconnect();
+     Self.tcpClient.Disconnect()
+   else
+     Self.OnTcpClientDisconnected(Self);
  except
 
  end;
+end;
 
+procedure TPanelTCPClient.DataError();
+begin
+ Self.DataErrorGlobalHandle();
  Errors.writeerror('Výjimka čtení socketu!', 'KLIENT', '-');
+end;
+
+procedure TPanelTCPClient.DataTimeout();
+begin
+ Self.DataErrorGlobalHandle();
+ Errors.writeerror('Spojení se serverem přerušeno!', 'KLIENT', '-');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
