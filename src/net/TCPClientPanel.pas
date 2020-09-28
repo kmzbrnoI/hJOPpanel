@@ -211,6 +211,7 @@ begin
  end;
 
  Self.tcpClient.IOHandler.DefStringEncoding := TIdEncoding.enUTF8;
+ Self.tcpClient.IOHandler.MaxLineLength := 16777215;
  Self.control_disconnect := false;
 
  Result := 0;
