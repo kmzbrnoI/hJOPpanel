@@ -11,7 +11,7 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
 
 type
  TNavPanelProp = record
-  Symbol,Pozadi:TColor;
+  Symbol,Pozadi,Okoli:TColor;
   AB:Boolean;
   blikani:boolean;
 
@@ -62,12 +62,14 @@ const
   _Def_Nav_Prop:TNavPanelProp = (
       Symbol: clBlack;
       Pozadi: clFuchsia;
+      Okoli: clBlack;
       AB: false;
       blikani: false);
 
   _UA_Nav_Prop:TNavPanelProp = (
       Symbol: $A0A0A0;
       Pozadi: clBlack;
+      Okoli: clBlack;
       AB: false;
       blikani: false);
 
@@ -208,16 +210,14 @@ begin
 
  for nav in Self.data do
   begin
-   if ((nav.PanelProp.Pozadi = clGreen) or
-       (nav.PanelProp.Pozadi = clWhite) or
-       (nav.PanelProp.Pozadi = clTeal)) then
+   if (nav.PanelProp.Okoli <> clBlack) then
     begin
-     sjc.Color := nav.PanelProp.Pozadi;
-     sjc.Pos   := Point(nav.Position.X-1,nav.Position.Y);
+     sjc.Color := nav.PanelProp.Okoli;
+     sjc.Pos := Point(nav.Position.X-1,nav.Position.Y);
      Self.startJC.Add(sjc);
 
-     sjc.Color := nav.PanelProp.Pozadi;
-     sjc.Pos   := Point(nav.Position.X+1,nav.Position.Y);
+     sjc.Color := nav.PanelProp.Okoli;
+     sjc.Pos := Point(nav.Position.X+1,nav.Position.Y);
      Self.startJC.Add(sjc);
     end;
   end;
@@ -231,6 +231,10 @@ begin
  Pozadi  := StrToColor(data[5]);
  blikani := StrToBool(data[6]);
  AB      := StrToBool(data[7]);
+ if (data.Count >= 9) then
+   Okoli := StrToColor(data[8])
+ else
+   Okoli := clBlack;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
