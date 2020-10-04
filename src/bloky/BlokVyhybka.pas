@@ -86,7 +86,7 @@ begin
  if ((Self.PanelProp.blikani) and (blik) and (Self.visible)) then
    fg := clBlack
  else begin
-   if ((Self.visible) or (Self.PanelProp.Symbol = clAqua)) then
+   if ((Self.visible) or (Self.PanelProp.Symbol = clAqua) or (Self.PanelProp.Symbol = clFuchsia)) then
     fg := Self.PanelProp.Symbol
    else
     fg := useky[Self.obj].PanelProp.nebarVetve;
