@@ -73,6 +73,8 @@ begin
    Self.PanelProp := _Def_Vyh_Prop
  else
    Self.PanelProp := _UA_Vyh_Prop;
+
+ Self.visible := true;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
