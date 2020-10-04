@@ -41,8 +41,8 @@ type
 const
   _Def_Vyh_Prop:TVyhPanelProp = (
       blikani: false;
-      Symbol: clBlack;
-      Pozadi: clFuchsia;
+      Symbol: clFuchsia;
+      Pozadi: clBlack;
       Poloha: TVyhPoloha.disabled);
 
   _UA_Vyh_Prop:TVyhPanelProp = (
@@ -102,11 +102,7 @@ begin
              Self.SymbolID, fg, bkcol, obj);
   end else begin
    case (Self.PanelProp.Poloha) of
-    TVyhPoloha.disabled:begin
-     PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position,
-               Self.SymbolID, useky[Self.obj].PanelProp.Pozadi, clFuchsia, obj);
-    end;
-    TVyhPoloha.none:begin
+    TVyhPoloha.disabled, TVyhPoloha.none:begin
      PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID,
                bkcol, fg, obj);
     end;
