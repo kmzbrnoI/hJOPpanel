@@ -361,7 +361,15 @@ begin
    else
      Self.OnTcpClientDisconnected(Self);
  except
+   try
+     Self.tcpClient.Disconnect();
+   except
+     try
+       Self.OnTcpClientDisconnected(Self);
+     except
 
+     end;
+   end;
  end;
 end;
 
