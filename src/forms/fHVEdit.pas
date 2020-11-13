@@ -13,7 +13,7 @@ uses
 
 type
   TF_HVEdit = class(TForm)
-    Label1: TLabel;
+    L_HV: TLabel;
     CB_HV: TComboBox;
     GB_HV: TGroupBox;
     Label2: TLabel;
@@ -67,7 +67,6 @@ type
   private
     { Private declarations }
 
-    HVIndexes:TWordAr;
     HVs:THVDb;
     new:boolean;
     sender_or:string;
@@ -275,7 +274,7 @@ begin
  Self.LV_Pom_Load.Clear();
  Self.LV_Pom_Release.Clear();
 
- if ((Self.CB_HV.ItemIndex > -1) or (Self.new)) then
+ if (Self.CB_HV.ItemIndex > -1) then
   begin
    Self.B_Apply.Enabled := true;
 
@@ -302,9 +301,46 @@ begin
      Self.RB_M[i].Enabled := true;
     end;
 
-   if (not Self.new) then
+   if ((Self.new) and (Self.CB_HV.ItemIndex = 0)) then
     begin
-     HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
+     Self.E_Name.Text := '';
+     Self.E_Oznaceni.Text := '';
+     Self.E_Majitel.Text := '';
+     Self.E_Adresa.Text := '';
+     Self.M_Poznamka.Text := '';
+     Self.RG_Trida.ItemIndex := -1;
+     Self.RG_StA.ItemIndex := -1;
+     Self.SE_MaxSpeed.Value := _DEFAULT_MAX_SPEED;
+
+     prechSorted := TList<Cardinal>.Create(Self.prechodnost.Keys);
+     try
+       prechSorted.Sort();
+       Self.CB_Prechodnost.Clear();
+       for i in prechSorted do
+         Self.CB_Prechodnost.Items.Add(IntToStr(i)+': '+Self.prechodnost[i]);
+     finally
+       prechSorted.Free();
+     end;
+
+     Self.LV_Funkce.Items[0].Checked := true;
+     for i := 1 to _MAX_FUNC do
+       Self.LV_Funkce.Items[i].Checked := false;
+
+     Self.SB_Take_Remove.Enabled := false;
+     Self.SB_Rel_Remove.Enabled  := false;
+
+     for i := 0 to _MAX_FUNC do
+      begin
+       Self.CB_funkce[i].Text := '';
+       Self.RB_P[i].Checked := true;
+      end;
+
+    end else begin
+     if (Self.new) then
+       HV := Self.HVs.HVs[Self.CB_HV.ItemIndex-1]
+     else
+       HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
+
      Self.E_Name.Text := HV.Nazev;
      Self.E_Oznaceni.Text := HV.Oznaceni;
      Self.E_Majitel.Text := HV.Majitel;
@@ -425,71 +461,39 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HVEdit.HVAdd(sender_or:string; HVs:THVDb);
-var i: Integer;
-    prechSorted: TList<Cardinal>;
+var arr: TWordAr; // not used
 begin
  Self.sender_or := sender_or;
- Self.HVs  := HVs;
+ Self.HVs := HVs;
  Self.new := true;
 
- Self.CB_HV.Enabled := false;
- Self.CB_HV.Clear();
- Self.CB_HVChange(Self.CB_HV);
- Self.CB_HV.Items.Add('Nové hnací vozidlo');
+ HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
+ Self.CB_HV.Items.Insert(0, 'Nepoužít šablonu');
  Self.CB_HV.ItemIndex := 0;
-
- Self.E_Name.Text := '';
- Self.E_Oznaceni.Text := '';
- Self.E_Majitel.Text := '';
- Self.E_Adresa.Text := '';
- Self.M_Poznamka.Text := '';
- Self.RG_Trida.ItemIndex := -1;
- Self.RG_StA.ItemIndex := -1;
- Self.SE_MaxSpeed.Value := _DEFAULT_MAX_SPEED;
-
- prechSorted := TList<Cardinal>.Create(Self.prechodnost.Keys);
- try
-   prechSorted.Sort();
-   Self.CB_Prechodnost.Clear();
-   for i in prechSorted do
-     Self.CB_Prechodnost.Items.Add(IntToStr(i)+': '+Self.prechodnost[i]);
- finally
-   prechSorted.Free();
- end;
-
- Self.LV_Funkce.Items[0].Checked := true;
- for i := 1 to _MAX_FUNC do
-   Self.LV_Funkce.Items[i].Checked := false;
-
- Self.SB_Take_Remove.Enabled := false;
- Self.SB_Rel_Remove.Enabled  := false;
-
- for i := 0 to _MAX_FUNC do
-  begin
-   Self.CB_funkce[i].Text := '';
-   Self.RB_P[i].Checked := true;
-  end;
+ Self.CB_HVChange(Self.CB_HV);
 
  Self.B_Search.Visible := true;
 
- Self.Caption := 'Nové hnací vozidlo';
+ Self.Caption := 'Vytvořit nové hnací vozidlo';
+ Self.L_HV.Caption := 'Vytvořit hnací vozidlo na základě šablony:';
  Self.Show();
- Self.ActiveControl := Self.E_Name;
+ Self.ActiveControl := Self.CB_HV;
 end;
 
 procedure TF_HVEdit.HVEdit(sender_or:string; HVs:THVDb);
+var arr: TWordAr; // not used
 begin
  Self.sender_or := sender_or;
  Self.new := false;
  Self.HVs := HVs;
 
- Self.CB_HV.Enabled := true;
- HVs.FillHVs(Self.CB_HV, Self.HVIndexes, -1, nil, true);
+ HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
  Self.CB_HVChange(Self.CB_HV);
 
  Self.B_Search.Visible := false;
 
  Self.Caption := 'Upravit hnací vozidlo';
+ Self.L_HV.Caption := 'Hnací vozidlo:';
  Self.Show();
  Self.ActiveControl := Self.CB_HV;
 end;

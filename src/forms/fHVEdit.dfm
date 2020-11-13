@@ -18,7 +18,7 @@ object F_HVEdit: TF_HVEdit
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object L_HV: TLabel
     Left = 8
     Top = 8
     Width = 66
