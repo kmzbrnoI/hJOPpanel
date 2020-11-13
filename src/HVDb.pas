@@ -15,7 +15,7 @@ const
   _DEFAULT_MAX_SPEED = 120;
 
 type
-  THVClass = (parni = 0, diesel = 1, motor = 2, elektro = 3);
+  THVType = (other = -1, steam = 0, diesel = 1, motor = 2, electro = 3, car = 4);
   TFunkce = array [0.._MAX_FUNC] of boolean;
   THVStanoviste = (lichy = 0, sudy = 1);              // v jakem smeru se nachazi stanoviste A
 
@@ -40,7 +40,7 @@ type
      Oznaceni:string;                                                           // oznaceni HV
      Poznamka:String;                                                           // poznamka k HV
      Adresa:Word;                                                               // digitalni adresa HW (0..9999)
-     Typ:THVClass;                                                               // Typ hnaciho vozidla - parni, diesel, motor, elektro
+     Typ:THVType;                                                               // Typ hnaciho vozidla - parni, diesel, motor, elektro
      Souprava:string;                                                           // cislo soupravy, na ktere je HV
      StanovisteA:THVStanoviste;                                                 // orientace stanoviste A
      funkce:TFunkce;                                                            // stav funkci
@@ -226,7 +226,7 @@ begin
   Self.Oznaceni := str[2];
   Self.Poznamka := str[3];
   Self.Adresa := StrToInt(str[4]);
-  Self.Typ := THvClass(StrToInt(str[5]));
+  Self.Typ := THVType(StrToInt(str[5]));
   Self.Souprava := str[6];
   Self.StanovisteA := THVStanoviste(StrToInt(str[7]));
 
@@ -342,7 +342,7 @@ begin
  Self.Oznaceni := '';
  Self.Poznamka := '';
  Self.Adresa := 0;
- Self.Typ := THvClass.diesel;
+ Self.Typ := THVType.other;
  Self.Souprava := '-';
  Self.maxRychlost := _DEFAULT_MAX_SPEED;
  Self.prechodnost := 0;

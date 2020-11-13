@@ -3,8 +3,8 @@ object F_HVEdit: TF_HVEdit
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'Editovat hnac'#237' vozidlo'
-  ClientHeight = 545
+  Caption = 'Upravit hnac'#237' vozidlo'
+  ClientHeight = 561
   ClientWidth = 689
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -39,7 +39,7 @@ object F_HVEdit: TF_HVEdit
     Left = 8
     Top = 51
     Width = 673
-    Height = 455
+    Height = 471
     Caption = ' Hnac'#237' vozidlo '
     TabOrder = 1
     object Label2: TLabel
@@ -72,7 +72,7 @@ object F_HVEdit: TF_HVEdit
     end
     object Label7: TLabel
       Left = 263
-      Top = 221
+      Top = 237
       Width = 126
       Height = 13
       Alignment = taRightJustify
@@ -80,7 +80,7 @@ object F_HVEdit: TF_HVEdit
     end
     object Label8: TLabel
       Left = 12
-      Top = 312
+      Top = 328
       Width = 146
       Height = 13
       Margins.Left = 2
@@ -97,7 +97,7 @@ object F_HVEdit: TF_HVEdit
     end
     object SB_Take_Add: TSpeedButton
       Left = 169
-      Top = 330
+      Top = 346
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -131,7 +131,7 @@ object F_HVEdit: TF_HVEdit
     end
     object SB_Take_Remove: TSpeedButton
       Left = 169
-      Top = 358
+      Top = 374
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -165,7 +165,7 @@ object F_HVEdit: TF_HVEdit
     end
     object SB_Rel_Add: TSpeedButton
       Left = 369
-      Top = 330
+      Top = 346
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -199,7 +199,7 @@ object F_HVEdit: TF_HVEdit
     end
     object SB_Rel_Remove: TSpeedButton
       Left = 369
-      Top = 358
+      Top = 374
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -233,7 +233,7 @@ object F_HVEdit: TF_HVEdit
     end
     object Label9: TLabel
       Left = 211
-      Top = 312
+      Top = 328
       Width = 141
       Height = 13
       Margins.Left = 2
@@ -257,35 +257,35 @@ object F_HVEdit: TF_HVEdit
     end
     object Label5: TLabel
       Left = 15
-      Top = 221
+      Top = 237
       Width = 52
       Height = 13
       Caption = 'Pozn'#225'mka:'
     end
     object Label11: TLabel
       Left = 15
-      Top = 163
+      Top = 170
       Width = 91
       Height = 13
       Caption = 'Maxim'#225'ln'#237' rychlost:'
     end
     object Label12: TLabel
       Left = 15
-      Top = 191
+      Top = 207
       Width = 93
       Height = 13
       Caption = 'T'#345#237'da p'#345'echodnosti:'
     end
     object Label13: TLabel
-      Left = 240
-      Top = 169
+      Left = 81
+      Top = 184
       Width = 23
       Height = 13
       Caption = 'km/h'
     end
     object M_Poznamka: TMemo
       Left = 12
-      Top = 240
+      Top = 256
       Width = 377
       Height = 60
       Lines.Strings = (
@@ -339,20 +339,22 @@ object F_HVEdit: TF_HVEdit
       Left = 239
       Top = 16
       Width = 149
-      Height = 83
-      Caption = ' Typ lokomotivy '
+      Height = 123
+      Caption = ' Typ '
       Items.Strings = (
         'parn'#237
         'dieselov'#225
         'motorov'#225
-        'elektrick'#225)
+        'elektrick'#225
+        'v'#367'z'
+        'jin'#253)
       TabOrder = 7
     end
     object RG_StA: TRadioGroup
       Left = 239
-      Top = 105
+      Top = 145
       Width = 149
-      Height = 58
+      Height = 52
       Caption = ' Stanovi'#353't'#283' A ve sm'#283'ru '
       Items.Strings = (
         'lich'#233'm'
@@ -361,7 +363,7 @@ object F_HVEdit: TF_HVEdit
     end
     object LV_Pom_Load: TListView
       Left = 12
-      Top = 330
+      Top = 346
       Width = 152
       Height = 113
       Columns = <
@@ -381,7 +383,7 @@ object F_HVEdit: TF_HVEdit
     end
     object LV_Pom_Release: TListView
       Left = 211
-      Top = 330
+      Top = 346
       Width = 152
       Height = 113
       Columns = <
@@ -403,7 +405,7 @@ object F_HVEdit: TF_HVEdit
       Left = 397
       Top = 39
       Width = 268
-      Height = 404
+      Height = 420
       Checkboxes = True
       Columns = <
         item
@@ -436,14 +438,14 @@ object F_HVEdit: TF_HVEdit
       Left = 112
       Top = 132
       Width = 121
-      Height = 25
+      Height = 29
       Caption = 'Existuje lokomotiva?'
       TabOrder = 4
       OnClick = B_SearchClick
     end
     object SE_MaxSpeed: TSpinEdit
       Left = 112
-      Top = 163
+      Top = 167
       Width = 121
       Height = 22
       MaxValue = 120
@@ -453,7 +455,7 @@ object F_HVEdit: TF_HVEdit
     end
     object CB_Prechodnost: TComboBox
       Left = 112
-      Top = 192
+      Top = 208
       Width = 276
       Height = 21
       Style = csDropDownList
@@ -463,7 +465,7 @@ object F_HVEdit: TF_HVEdit
   end
   object B_Apply: TButton
     Left = 606
-    Top = 512
+    Top = 528
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -473,7 +475,7 @@ object F_HVEdit: TF_HVEdit
   end
   object B_Cancel: TButton
     Left = 525
-    Top = 512
+    Top = 528
     Width = 75
     Height = 25
     Caption = 'Storno'

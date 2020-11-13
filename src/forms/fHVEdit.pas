@@ -156,7 +156,10 @@ begin
  HV.Oznaceni := Self.E_Oznaceni.Text;
  HV.Poznamka := Self.M_Poznamka.Text;
  HV.Adresa := StrToInt(Self.E_Adresa.Text);
- HV.Typ := THVClass(Self.RG_Trida.ItemIndex);
+ if (Self.RG_Trida.ItemIndex = Self.RG_Trida.Items.Count-1) then
+   HV.Typ := THVType.other
+ else
+   HV.Typ := THVType(Self.RG_Trida.ItemIndex);
  HV.Souprava := '-';
  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
  HV.maxRychlost := Self.SE_MaxSpeed.Value;
@@ -307,7 +310,10 @@ begin
      Self.E_Majitel.Text := HV.Majitel;
      Self.E_Adresa.Text := IntToStr(HV.Adresa);
      Self.M_Poznamka.Text := HV.Poznamka;
-     Self.RG_Trida.ItemIndex := Integer(HV.Typ);
+     if (HV.Typ = THVType.other) then
+       Self.RG_Trida.ItemIndex := Self.RG_Trida.Items.Count-1
+     else
+       Self.RG_Trida.ItemIndex := Integer(HV.Typ);
      Self.RG_StA.ItemIndex := Integer(HV.StanovisteA);
      Self.SE_MaxSpeed.Value := HV.maxRychlost;
 
@@ -483,7 +489,7 @@ begin
 
  Self.B_Search.Visible := false;
 
- Self.Caption := 'Editovat hnací vozidlo';
+ Self.Caption := 'Upravit hnací vozidlo';
  Self.Show();
  Self.ActiveControl := Self.CB_HV;
 end;
