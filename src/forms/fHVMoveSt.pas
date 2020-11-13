@@ -20,11 +20,15 @@ type
     LV_HVs: TListView;
     procedure B_StornoClick(Sender: TObject);
     procedure B_OKClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     sender_id:string;
+    successfully_moved: Integer;
+    to_move: Integer;
 
   public
     procedure Open(sender:string; HVs:THVDb);
+    procedure ServerResp(parsed: TStrings);
   end;
 
 var
@@ -52,17 +56,28 @@ begin
    Exit();
   end;
 
+ Self.successfully_moved := 0;
+ Self.to_move := 0;
+ for LI in Self.LV_HVs.Items do
+   if (LI.Selected) then
+     Inc(Self.to_move);
+
  for LI in Self.LV_HVs.Items do
    if (LI.Selected) then
      PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data),
                                  ORDb.db_reverse[Self.CB_Stanice.Text]);
 
- Self.Close();
+ Screen.Cursor := crHourGlass;
 end;
 
 procedure TF_HV_Move.B_StornoClick(Sender: TObject);
 begin
  Self.Close();
+end;
+
+procedure TF_HV_Move.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+ Screen.Cursor := crDefault;
 end;
 
 procedure TF_HV_Move.Open(sender:string; HVs:THVDb);
@@ -91,6 +106,30 @@ begin
 
  Self.ActiveControl := Self.LV_HVs;
  Self.Show();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HV_Move.ServerResp(parsed: TStrings);
+var err: string;
+begin
+ if (not Self.Showing) then Exit();
+ Screen.Cursor := crDefault;
+
+ if (parsed[4] = 'ERR') then
+  begin
+   if (parsed.Count >= 6) then
+     err := parsed[5]
+   else
+     err := 'neznámá chyba';
+
+   Application.MessageBox(PChar('Při přesouvání HV '+parsed[2]+' nastala chyba:'+#13#10+err), 'Chyba', MB_OK OR MB_ICONWARNING);
+  end else if (parsed[4] = 'OK') then
+   begin
+    Inc(Self.successfully_moved);
+    if (Self.successfully_moved = SELF.to_move) then
+      Self.Close();
+   end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

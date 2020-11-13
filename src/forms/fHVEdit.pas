@@ -64,6 +64,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure B_SearchClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
 
@@ -88,6 +89,9 @@ type
     procedure HVAdd(sender_or:string; HVs:THVDb);
     procedure HVEdit(sender_or:string; HVs:THVDb);
     procedure ParseVyznamy(vyznamy:string);
+
+    procedure ServerEditResp(parsed: TStrings);
+    procedure ServerAddResp(parsed: TStrings);
 
     procedure LoadPrechodnost(ini: TMemIniFile);
 
@@ -242,7 +246,7 @@ begin
    PanelTCPClient.SendLn('-;F-VYZN-ADD;{'+newVyznamy+'}');
 
  HV.Free();
- Self.Close();
+ Screen.Cursor := crHourGlass;
 end;
 
 procedure TF_HVEdit.B_CancelClick(Sender: TObject);
@@ -258,7 +262,7 @@ begin
    Exit();
   end;
 
- PanelTCPClient.SendLn('-;LOK;'+Self.E_Adresa.Text+';ASK');
+ PanelTCPClient.SendLn('-;HV;ASK;'+Self.E_Adresa.Text);
 end;
 
 procedure TF_HVEdit.CB_HVChange(Sender: TObject);
@@ -282,6 +286,7 @@ begin
    Self.E_Oznaceni.Enabled := true;
    Self.E_Majitel.Enabled := true;
    Self.E_Adresa.Enabled := true;
+   Self.E_Adresa.ReadOnly := not Self.new;
    Self.M_Poznamka.Enabled := true;
    Self.RG_Trida.Enabled := true;
    Self.RG_StA.Enabled := true;
@@ -442,6 +447,11 @@ begin
      Self.RB_M[i].Enabled := false;
     end;
   end;
+end;
+
+procedure TF_HVEdit.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+ Screen.Cursor := crDefault;
 end;
 
 procedure TF_HVEdit.FormCreate(Sender: TObject);
@@ -776,6 +786,44 @@ begin
 
  if (not Self.prechodnost.ContainsKey(0)) then
    Self.prechodnost.Add(0, 'základní');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.ServerEditResp(parsed: TStrings);
+var err: string;
+begin
+ if (not Self.Showing or Self.new) then Exit();
+ Screen.Cursor := crDefault;
+
+ if (parsed[4] = 'ERR') then
+  begin
+   if (parsed.Count >= 6) then
+     err := parsed[5]
+   else
+     err := 'neznámá chyba';
+
+   Application.MessageBox(PChar('Při úpravě HV nastala chyba:'+#13#10+err), 'Chyba', MB_OK OR MB_ICONWARNING);
+  end else if (parsed[4] = 'OK') then
+    Self.Close();
+end;
+
+procedure TF_HVEdit.ServerAddResp(parsed: TStrings);
+var err: string;
+begin
+ if (not Self.Showing or not Self.new) then Exit();
+ Screen.Cursor := crDefault;
+
+ if (parsed[4] = 'ERR') then
+  begin
+   if (parsed.Count >= 6) then
+     err := parsed[5]
+   else
+     err := 'neznámá chyba';
+
+   Application.MessageBox(PChar('Při přidávání HV nastala chyba:'+#13#10+err), 'Chyba', MB_OK OR MB_ICONWARNING);
+  end else if (parsed[4] = 'OK') then
+    Self.Close();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ object F_HV_Move: TF_HV_Move
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel

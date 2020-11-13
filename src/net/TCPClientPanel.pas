@@ -116,8 +116,7 @@ implementation
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
       ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
       GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
-
-      parseHelper, fOdlozeniOdjezdu;
+      fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -284,6 +283,10 @@ begin
  if (F_HVSearch.Showing) then F_HVSearch.Close();
  if (F_Auth.Showing) then F_Auth.Close();
  if (F_OOdj.Showing) then F_OOdj.Close();
+ if (F_HVEdit.Showing) then F_HVEdit.Close();
+ if (F_HVDelete.Showing) then F_HVDelete.Close();
+ if (F_HVSearch.Showing) then F_HVSearch.Close();
+ if (F_HV_Move.Showing) then F_HV_Move.Close();
 
  SoundsPlay.DeleteAll();
  ModCas.Reset();
@@ -507,11 +510,12 @@ begin
  else if ((parsed[1] = 'F-VYZN-LIST') and (parsed.Count > 2)) then
   F_HVEdit.ParseVyznamy(parsed[2])
 
- else if ((parsed[1] = 'LOK') and (parsed[3] = 'FOUND')) then
-  F_HVSearch.LokoFound(THV.Create(parsed[4]))
-
- else if ((parsed[1] = 'LOK') and (parsed[3] = 'NOT-FOUND')) then
-  F_HVSearch.LokoNotFound()
+ else if (parsed[1] = 'HV') and (parsed[2] = 'ASK') then begin
+  if (parsed[4] = 'FOUND') then
+    F_HVSearch.LokoFound(THV.Create(parsed[5]))
+  else if (parsed[4] = 'NOT-FOUND') then
+    F_HVSearch.LokoNotFound();
+ end
 
  else if (parsed[1] = 'PODJ') then
   F_OOdj.OpenForm(parsed);
@@ -549,14 +553,6 @@ begin
 
  else if (parsed[1] = 'MSG-ERR') then
   TF_Messages.ErrorReceive(parsed[0], parsed[3], parsed[2])
-
- else if (parsed[1] = 'HV-LIST') then
-  begin
-   if (parsed.Count > 2) then
-     Relief.ORHVList(parsed[0], parsed[2])
-   else
-     Relief.ORHVList(parsed[0], '');
-  end
 
  else if (parsed[1] = 'SPR-NEW') then
   Relief.ORSprNew(parsed[0])
@@ -606,7 +602,25 @@ begin
    Relief.ORHlaseniMsg(parsed[0], parsed)
 
  else if (parsed[1] = 'MENU') then
-  Relief.ORDkShowMenu(parsed[0], parsed[2], parsed[3]);
+   Relief.ORDkShowMenu(parsed[0], parsed[2], parsed[3])
+
+ else if (parsed[1] = 'HV') then
+  begin
+   if (parsed[2] = 'ADD') then
+     F_HVEdit.ServerAddResp(parsed)
+   else if (parsed[2] = 'EDIT') then
+     F_HVEdit.ServerEditResp(parsed)
+   else if (parsed[2] = 'REMOVE') then
+     F_HVDelete.ServerResp(parsed)
+   else if (parsed[2] = 'LIST') then
+    begin
+     if (parsed.Count > 3) then
+       Relief.ORHVList(parsed[0], parsed[3])
+     else
+       Relief.ORHVList(parsed[0], '');
+   end else if (parsed[2] = 'MOVE') then
+     F_HV_Move.ServerResp(parsed);
+  end;
 
 end;
 
@@ -690,12 +704,12 @@ end;
 
 procedure TPanelTCPClient.PanelLokMove(Sender:string; addr:Word; or_id:string);
 begin
- Self.SendLn(sender+';LOK-MOVE-OR;'+IntToStr(addr)+';'+or_id);
+ Self.SendLn(sender+';HV;MOVE;'+IntToStr(addr)+';'+or_id);
 end;
 
 procedure TPanelTCPClient.PanelLokList(Sender:string);
 begin
- Self.SendLn(sender+';HV-LIST;');
+ Self.SendLn(sender+';HV;LIST;');
 end;
 
 procedure TPanelTCPClient.PanelSetOsv(Sender:string; code:string; state:Integer);

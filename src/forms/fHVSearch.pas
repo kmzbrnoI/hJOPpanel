@@ -42,7 +42,7 @@ begin
    Exit();
   end;
 
- PanelTCPClient.SendLn('-;LOK;'+Self.E_Adresa.Text+';ASK');
+ PanelTCPClient.SendLn('-;HV;ASK;'+Self.E_Adresa.Text);
  Self.Close();
 end;
 
