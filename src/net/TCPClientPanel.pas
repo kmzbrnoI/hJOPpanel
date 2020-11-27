@@ -601,10 +601,13 @@ begin
  end else if (parsed[1] = 'SHP') then
    Relief.ORHlaseniMsg(parsed[0], parsed)
 
- else if (parsed[1] = 'MENU') then
-   Relief.ORDkShowMenu(parsed[0], parsed[2], parsed[3])
+ else if (parsed[1] = 'MENU') then begin
+   if (parsed.Count > 3) then
+     Relief.ORDkShowMenu(parsed[0], parsed[2], parsed[3])
+   else
+     Relief.ORDkShowMenu(parsed[0], parsed[2], '');
 
- else if (parsed[1] = 'HV') then
+ end else if (parsed[1] = 'HV') then
   begin
    if (parsed[2] = 'ADD') then
      F_HVEdit.ServerAddResp(parsed)
