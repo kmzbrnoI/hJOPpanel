@@ -45,7 +45,7 @@ var
 
 implementation
 
-uses TCPCLientPanel, Symbols, PanelPainter;
+uses TCPCLientPanel, Symbols, PanelPainter, BottomErrors;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -115,11 +115,11 @@ begin
  left := (Self.Graphics.PanelWidth div 2)-5;
  top  := Self.Graphics.PanelHeight-1;
 
- for i := 0 to Min(Self.lokos.Count, 2)-1 do
+ for i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount)-1 do
   begin
    PanelPainter.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
    Dec(top);
-  end;//for i
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
