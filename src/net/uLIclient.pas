@@ -191,7 +191,7 @@ begin
 
  end;
 
- Self.tcpClient.IOHandler.DefStringEncoding := enUTF8;
+ Self.tcpClient.IOHandler.DefStringEncoding := IndyTextEncoding_UTF8();
  Self.control_disconnect := false;
 
  Result := 0;
@@ -232,7 +232,7 @@ begin
   Self.rthread.OnData := DataReceived;
   Self.rthread.OnError := DataError;
   Self.rthread.OnTimeout := DataError;
-  Self.rthread.Resume;
+  Self.rthread.Start();
 
   Self.SendLn('AUTH?');
   Self.SendLn('SLOTS?');
@@ -256,9 +256,9 @@ begin
  if (not Self.control_disconnect) then
   begin
    Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
-   Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
+   Self.resusc.server_ip := _BRIDGE_DEFAULT_SERVER;
    Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
-   Self.resusc.Resume();
+   Self.resusc.Start();
   end;
 
  if (Assigned(Self.OnAuthStatushanged)) then Self.OnAuthStatushanged(Self);
@@ -409,9 +409,9 @@ begin
    if (not Assigned(Self.resusc)) then
     begin
      Self.resusc := TResuscitation.Create(true, Self.ConnectionResusced);
-     Self.resusc.server_ip   := _BRIDGE_DEFAULT_SERVER;
+     Self.resusc.server_ip := _BRIDGE_DEFAULT_SERVER;
      Self.resusc.server_port := _BRIDGE_DEFAULT_PORT;
-     Self.resusc.Resume();
+     Self.resusc.Start();
     end;
   end else begin
     if (Self.opened) then Self.Disconnect();

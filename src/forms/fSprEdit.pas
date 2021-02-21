@@ -9,7 +9,7 @@ interface
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fSprHVEdit, Buttons,
-  CloseTabSheet, Themes, Generics.Collections;
+  CloseTabSheet, Themes, Generics.Collections, Types;
 
 const
   _MAX_HV_CNT = 4;
@@ -540,7 +540,7 @@ begin
     PageControl.Canvas.TextOut(TabCaption.X, TabCaption.Y,
             PageControl.Pages[TabIndex].Caption);
 
-    if not ThemeServices.ThemesEnabled then
+    if not StyleServices.Enabled then
     begin
       if (FCloseButtonMouseDownTab = TabSheet) and FCloseButtonShowPushed then
         CloseBtnDrawState := DFCS_CAPTIONCLOSE + DFCS_PUSHED
@@ -555,11 +555,11 @@ begin
       Dec(TabSheet.FCloseButtonRect.Left);
 
       if (FCloseButtonMouseDownTab = TabSheet) and FCloseButtonShowPushed then
-        CloseBtnDrawDetails := ThemeServices.GetElementDetails(twCloseButtonPushed)
+        CloseBtnDrawDetails := StyleServices.GetElementDetails(twCloseButtonPushed)
       else
-        CloseBtnDrawDetails := ThemeServices.GetElementDetails(twCloseButtonNormal);
+        CloseBtnDrawDetails := StyleServices.GetElementDetails(twCloseButtonNormal);
 
-      ThemeServices.DrawElement(PageControl.Canvas.Handle, CloseBtnDrawDetails,
+      StyleServices.DrawElement(PageControl.Canvas.Handle, CloseBtnDrawDetails,
                 TabSheet.FCloseButtonRect);
     end;
   end else begin

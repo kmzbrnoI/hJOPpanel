@@ -265,7 +265,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 148
     Width = 21
     Height = 21
-    DoubleBuffered = True
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
       1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -293,7 +292,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
       FFFFFFFFFFFFFFFFFFFFFFFF000000000000000000AAAAAAFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-    ParentDoubleBuffered = False
     TabOrder = 15
     OnClick = BB_HV_AddClick
   end
@@ -312,7 +310,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 22
     Width = 96
     Height = 21
-    ItemHeight = 13
     TabOrder = 1
     OnChange = CB_TypChange
     Items.Strings = (
@@ -352,7 +349,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 175
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 6
   end
   object CB_Cilova: TComboBox
@@ -361,7 +357,6 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Width = 177
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 7
   end
   object CHB_report: TCheckBox

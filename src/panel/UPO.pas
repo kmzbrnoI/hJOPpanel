@@ -8,7 +8,7 @@
 interface
 
 uses PGraphics, Classes, Graphics, Generics.Collections, StrUtils, Windows,
-     DXDraws;
+     DXDraws, Types;
 
 const
   _UPO_WIDTH  = 36;

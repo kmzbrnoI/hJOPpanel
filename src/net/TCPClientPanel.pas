@@ -211,7 +211,7 @@ begin
    raise;
  end;
 
- Self.tcpClient.IOHandler.DefStringEncoding := enUTF8;
+ Self.tcpClient.IOHandler.DefStringEncoding := IndyTextEncoding_UTF8();
  Self.tcpClient.IOHandler.MaxLineLength := 16777215;
  Self.control_disconnect := false;
 
@@ -253,7 +253,7 @@ begin
   Self.rthread.OnData := DataReceived;
   Self.rthread.OnError := DataError;
   Self.rthread.OnTimeout := DataTimeout;
-  Self.rthread.Resume;
+  Self.rthread.Start();
  except
   (Sender as TIdTCPClient).Disconnect;
   raise;
@@ -318,9 +318,9 @@ begin
  if ((not Self.control_disconnect) and (GlobConfig.data.resuscitation)) then
   begin
    Resusct := TResuscitation.Create(true, Self.ConnetionResusced);
-   Resusct.server_ip   := GlobConfig.data.server.host;
+   Resusct.server_ip := GlobConfig.data.server.host;
    Resusct.server_port := GlobConfig.data.server.port;
-   Resusct.Resume();
+   Resusct.Start();
   end;
 
  if (F_Main.close_app) then

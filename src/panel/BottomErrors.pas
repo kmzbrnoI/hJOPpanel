@@ -7,7 +7,7 @@ unit BottomErrors;
 interface
 
 uses SysUtils, Graphics, PGraphics, Classes, StrUtils, DXDraws, Math,
-     Generics.Collections;
+     Generics.Collections, Types;
 
 const
   _MAX_ERR = 128;

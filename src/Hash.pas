@@ -8,11 +8,11 @@ interface
 
 uses System.Hash, SysUtils;
 
-  function GenerateHash(plain: AnsiString):string;
+  function GenerateHash(plain: string):string;
 
 implementation
 
-function GenerateHash(plain: AnsiString):string;
+function GenerateHash(plain: string):string;
 begin
  Result := LowerCase(System.hash.THashSHA2.GetHashString(plain, SHA256));
 end;

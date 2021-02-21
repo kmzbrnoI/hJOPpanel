@@ -7,7 +7,7 @@ unit LokoRuc;
 interface
 
 uses Generics.Collections, Classes, SysUtils, PGraphics, Graphics, Math,
-      Windows, DXDraws;
+      Windows, DXDraws, Types;
 
 type
   TORStackVolba = (PV = 0, VZ = 1);

@@ -132,7 +132,7 @@ begin
  Self.HideErrorMessage();
  Self.ShowLogging();
 
- hashed := GenerateHash(AnsiString(Self.E_Password.Text));
+ hashed := GenerateHash(Self.E_Password.Text);
 
  if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply) and
      (PanelTCPClient.status = TPanelConnectionStatus.opened)) then
