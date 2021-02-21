@@ -91,7 +91,7 @@ var
 
 implementation
 
-uses fMain, BottomErrors, Sounds, parseHelper, IBUtils, Math;
+uses fMain, BottomErrors, Sounds, parseHelper, Math;
 
 {$R *.dfm}
 

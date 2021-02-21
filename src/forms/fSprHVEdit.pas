@@ -8,7 +8,7 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls, IBUtils;
+  StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls;
 
 type
   TF_SprHVEdit = class(TForm)

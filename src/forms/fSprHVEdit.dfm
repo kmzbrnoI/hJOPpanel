@@ -47,7 +47,6 @@ object F_SprHVEdit: TF_SprHVEdit
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    ItemHeight = 13
     ParentFont = False
     TabOrder = 0
     OnChange = CB_HV1_HVChange
@@ -96,12 +95,18 @@ object F_SprHVEdit: TF_SprHVEdit
     TabOrder = 3
     object TS_F0_F14: TTabSheet
       Caption = 'F0-F14'
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 137
+      ExplicitHeight = 0
     end
     object TS_F15_F28: TTabSheet
       Caption = 'F15-F28'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 137
+      ExplicitHeight = 0
     end
   end
 end

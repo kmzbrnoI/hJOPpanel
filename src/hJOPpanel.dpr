@@ -1,4 +1,5 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_GENERATEJDBG OFF
 program hJOPpanel;
 
 uses
@@ -73,7 +74,8 @@ uses
 
 begin
   Randomize();
-  DecimalSeparator := '.';
+
+  FormatSettings.DecimalSeparator := '.';
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

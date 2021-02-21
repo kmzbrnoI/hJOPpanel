@@ -8,7 +8,7 @@ unit HVDb;
 interface
 
 uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,
-     Generics.Collections, IBUtils, Generics.Defaults, Math;
+     Generics.Collections, Generics.Defaults, Math;
 
 const
   _MAX_FUNC = 28;

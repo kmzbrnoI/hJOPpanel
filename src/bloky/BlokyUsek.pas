@@ -7,8 +7,7 @@ unit BlokyUsek;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-     Symbols, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, IBUtils,
-     BlokUsek;
+     Symbols, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, BlokUsek;
 
 const
   _Konec_JC: array [0..3] of TColor = (clBlack, clGreen, clWhite, clTeal);  //zadna, vlakova, posunova, nouzova (privolavaci)

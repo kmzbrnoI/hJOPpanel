@@ -17,12 +17,12 @@ implementation
 function NactiVerzi(const FileName: string): string;//cteni verze z nastaveni
 var
   size, len: longword;
-  handle: THandle;
+  handle: Cardinal;
   buffer: pchar;
   pinfo: ^VS_FIXEDFILEINFO;
   Major, Minor, Release: word;
 begin
-  Result:='Není dostupná';
+  Result := 'Není dostupná';
   size := GetFileVersionInfoSize(Pointer(FileName), handle);
   if size > 0 then begin
     GetMem(buffer, size);

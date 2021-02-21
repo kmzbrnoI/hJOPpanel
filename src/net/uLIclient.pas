@@ -191,7 +191,7 @@ begin
 
  end;
 
- Self.tcpClient.IOHandler.DefStringEncoding := TIdEncoding.enUTF8;
+ Self.tcpClient.IOHandler.DefStringEncoding := enUTF8;
  Self.control_disconnect := false;
 
  Result := 0;

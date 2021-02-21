@@ -6,9 +6,9 @@
 
 interface
 
-uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms,
+uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
      ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
-     StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO, IBUtils,
+     StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO,
      PngImage, DirectX, PanelOR, BlokTypes,
      BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
      BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek,

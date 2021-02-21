@@ -1,16 +1,15 @@
 # hJOPpanel
 
-Panel for hJOP.
+Panel for [hJOP](https://hjop.kmz-brno.cz/).
 
-- Used programming language: Object Pascal
-- Used environment: Delphi 2009
-- Author: Jan Horacek
+- Programming language: Object Pascal
+- Environment: CodeGear RAD Studio 10.3 (available for free under [Community edition](http://docwiki.embarcadero.com/RADStudio/Sydney/en/Community_Edition))
 - For: Microsoft Windows OS
+- Author: Jan Horacek
 
 ## Special components & libraries
 
-- [DelphiX](http://www.micrel.cz/Dx/) 1.12.x
-- [JEDI Code Library](http://wiki.delphi-jedi.org/index.php?title=JEDI_Code_Library)
+- [DelphiX](http://www.micrel.cz/Dx/) 1.20
 
 ## Resource file
 
