@@ -7,177 +7,181 @@ unit BottomErrors;
 interface
 
 uses SysUtils, Graphics, PGraphics, Classes, StrUtils, DXDraws, Math,
-     Generics.Collections, Types;
+  Generics.Collections, Types;
 
 const
   _MAX_ERR = 128;
-  _ERR_WIDTH = 50;   // symbols
+  _ERR_WIDTH = 50; // symbols
   _TECH_WIDTH = 20;
-  _TECH_LEFT  = 2;
+  _TECH_LEFT = 2;
 
 type
   TError = class
-   err:string;
-   tech:string;
-   stanice:string;
-   cas:TDateTime;
-   techStr:string;
+    err: string;
+    tech: string;
+    stanice: string;
+    cas: TDateTime;
+    techStr: string;
   end;
 
   TErrors = class
-    private
-      errors: TObjectList<TError>;
-      Graphics:TPanelGraphics;
+  private
+    errors: TObjectList<TError>;
+    Graphics: TPanelGraphics;
 
-       function GetCount():Cardinal;
-       function GetErrorShowCount():Cardinal;
+    function GetCount(): Cardinal;
+    function GetErrorShowCount(): Cardinal;
 
-    public
+  public
 
-       constructor Create(Graphics:TPanelGraphics);
-       destructor Destroy(); override;
+    constructor Create(Graphics: TPanelGraphics);
+    destructor Destroy(); override;
 
-       procedure Show(obj:TDXDraw);
+    procedure Show(obj: TDXDraw);
 
-       procedure WriteError(error:string;system:string;Stanice:string);
-       procedure RemoveVisibleErrors();
-       procedure RemoveAllErrors();
+    procedure WriteError(error: string; system: string; stanice: string);
+    procedure RemoveVisibleErrors();
+    procedure RemoveAllErrors();
 
-       property Count:Cardinal read GetCount;
-       property ErrorShowCount:Cardinal read GetErrorShowCount;
+    property Count: Cardinal read GetCount;
+    property ErrorShowCount: Cardinal read GetErrorShowCount;
   end;
 
 var
-  Errors:TErrors;
+  errors: TErrors;
 
 implementation
 
 uses fMain, Sounds, PanelPainter;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-constructor TErrors.Create(Graphics:TPanelGraphics);
+constructor TErrors.Create(Graphics: TPanelGraphics);
 begin
- inherited Create();
+  inherited Create();
 
- Self.Graphics := Graphics;
- Self.errors := TObjectList<TError>.Create();
+  Self.Graphics := Graphics;
+  Self.errors := TObjectList<TError>.Create();
 end;
 
 destructor TErrors.Destroy();
 begin
- Self.errors.Free(); // will destroy all error automatically
+  Self.errors.Free(); // will destroy all error automatically
 
- inherited;
+  inherited;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-function TErrors.GetCount():Cardinal;
+function TErrors.GetCount(): Cardinal;
 begin
- Result := Self.errors.Count;
+  Result := Self.errors.Count;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.WriteError(error:string; system:string; Stanice:string);
-var len:Integer;
-    msg:string;
-    err:TError;
+procedure TErrors.WriteError(error: string; system: string; stanice: string);
+var len: Integer;
+  msg: string;
+  err: TError;
 begin
- if (Self.errors.Count > _MAX_ERR) then Exit();
+  if (Self.errors.Count > _MAX_ERR) then
+    Exit();
 
- err         := TError.Create();
- err.err     := error;
- err.tech    := system;
- err.stanice := stanice;
+  err := TError.Create();
+  err.err := error;
+  err.tech := system;
+  err.stanice := stanice;
 
- system := '! '+system+' !';
- if (Length(system) > _TECH_WIDTH) then
-   system := LeftStr(system, _TECH_WIDTH);
+  system := '! ' + system + ' !';
+  if (Length(system) > _TECH_WIDTH) then
+    system := LeftStr(system, _TECH_WIDTH);
 
- len := (_TECH_WIDTH - Length(system)) div 2;
- msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
- if (Length(msg) < _TECH_WIDTH) then msg := msg + ' ';
- err.techStr := msg;
+  len := (_TECH_WIDTH - Length(system)) div 2;
+  msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
+  if (Length(msg) < _TECH_WIDTH) then
+    msg := msg + ' ';
+  err.techStr := msg;
 
- Self.errors.Add(err);
- Relief.UpdateEnabled();
- SoundsPlay.Play(_SND_CHYBA);
+  Self.errors.Add(err);
+  Relief.UpdateEnabled();
+  SoundsPlay.Play(_SND_CHYBA);
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.RemoveVisibleErrors();
-var i:Integer;
+var i: Integer;
 begin
- for i := 0 to Self.ErrorShowCount-1 do
-   if (Self.errors.Count > 0) then
-     Self.errors.Delete(0);
+  for i := 0 to Self.ErrorShowCount - 1 do
+    if (Self.errors.Count > 0) then
+      Self.errors.Delete(0);
 
- if (Self.errors.Count = 0) then
-   Relief.UpdateEnabled();
+  if (Self.errors.Count = 0) then
+    Relief.UpdateEnabled();
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.RemoveAllErrors();
 begin
- Self.errors.Clear();
- Relief.UpdateEnabled();
+  Self.errors.Clear();
+  Relief.UpdateEnabled();
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.Show(obj:TDXDraw);
-var i, top, left, len:Integer;
-    msg:string;
+procedure TErrors.Show(obj: TDXDraw);
+var i, top, left, len: Integer;
+  msg: string;
 begin
- if (Self.errors.Count = 0) then Exit();
+  if (Self.errors.Count = 0) then
+    Exit();
 
- // vypsani zdroje chyby (napr. "TECHNOLOGIE")
- if (Self.Graphics.blik) then
-  msg := Self.errors[0].techStr
- else
-  msg := StringOfChar(' ', _TECH_WIDTH);
+  // vypsani zdroje chyby (napr. "TECHNOLOGIE")
+  if (Self.Graphics.blik) then
+    msg := Self.errors[0].techStr
+  else
+    msg := StringOfChar(' ', _TECH_WIDTH);
 
- PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
+  PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
 
- // vypsani poctu chyb
- msg := Format('%2d', [Self.errors.Count]);
- PanelPainter.TextOutput(Point(_TECH_LEFT+_TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
+  // vypsani poctu chyb
+  msg := Format('%2d', [Self.errors.Count]);
+  PanelPainter.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
 
- // vypsani samotnych chyb
- len := Min(Self.ErrorShowCount, Self.errors.Count);
- top  := Relief.PanelHeight - 1;
- left := (Relief.PanelWidth div 2) - (_ERR_WIDTH div 2) + 10;
+  // vypsani samotnych chyb
+  len := Min(Self.ErrorShowCount, Self.errors.Count);
+  top := Relief.PanelHeight - 1;
+  left := (Relief.PanelWidth div 2) - (_ERR_WIDTH div 2) + 10;
 
- for i := 0 to len-1 do
+  for i := 0 to len - 1 do
   begin
-   msg := ' '+Self.errors[i].stanice + ' : ' + Self.errors[i].err;
-   msg := Format('%-'+IntToStr(_ERR_WIDTH)+'s', [msg]);
+    msg := ' ' + Self.errors[i].stanice + ' : ' + Self.errors[i].err;
+    msg := Format('%-' + IntToStr(_ERR_WIDTH) + 's', [msg]);
 
-   PanelPainter.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
+    PanelPainter.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
 
-   top := top - 1;
+    top := top - 1;
   end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-function TErrors.GetErrorShowCount():Cardinal;
+function TErrors.GetErrorShowCount(): Cardinal;
 begin
- if (Self.Graphics.PanelHeight > 25) then
-   Result := 4
- else
-   Result := 2;
+  if (Self.Graphics.PanelHeight > 25) then
+    Result := 4
+  else
+    Result := 2;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 initialization
 
 finalization
-  FreeAndNil(Errors);
 
-end.//unit
+FreeAndNil(errors);
+
+end.// unit

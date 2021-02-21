@@ -12,6 +12,7 @@ uses
 type
   TDataEvent = procedure(const Data: string) of object;
   TErrorEvent = procedure() of object;
+
   TReadingThread = class(TThread)
   private
     FClient: TIdTCPClient;
@@ -42,19 +43,19 @@ begin
   while (not Terminated) do
   begin
     try
-     FData := FClient.IOHandler.ReadLn();
+      FData := FClient.IOHandler.ReadLn();
     except
-     on E:EIdConnClosedGracefully do
+      on E: EIdConnClosedGracefully do
       begin
-       if ((Assigned(FOnTimeout)) and (not Terminated)) then
-        Synchronize(FOnTimeout);
-       Exit();
+        if ((Assigned(FOnTimeout)) and (not Terminated)) then
+          Synchronize(FOnTimeout);
+        Exit();
       end;
-     on E:Exception do
+      on E: Exception do
       begin
-       if ((Assigned(FOnError)) and (not Terminated)) then
-        Synchronize(FOnError);
-       Exit();
+        if ((Assigned(FOnError)) and (not Terminated)) then
+          Synchronize(FOnError);
+        Exit();
       end;
     end;
     if (FData <> '') and Assigned(FOnData) then

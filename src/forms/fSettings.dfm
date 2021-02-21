@@ -375,7 +375,6 @@ object F_Settings: TF_Settings
           Width = 217
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
           TabOrder = 1
           OnChange = CB_ORRightsChange
           Items.Strings = (
@@ -915,6 +914,10 @@ object F_Settings: TF_Settings
     object TS_IPC: TTabSheet
       Caption = 'Meziprocesov'#253' login'
       ImageIndex = 11
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object CHB_IPC_Send: TCheckBox
         Left = 176
         Top = 49

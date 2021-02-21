@@ -29,29 +29,29 @@ implementation
 {$R *.dfm}
 
 procedure TF_SprHelp.B_OKClick(Sender: TObject);
- begin
+begin
   F_SprHelp.Close;
- end;
+end;
 
 procedure TF_SprHelp.LoadData(ini: TMemIniFile);
 const _SECTION: string = 'train-types';
 var strs: TStrings;
-    str: string;
-    LI: TListItem;
+  str: string;
+  LI: TListItem;
 begin
- strs := TStringList.Create();
- try
-   ini.ReadSection(_SECTION, strs);
-   Self.LV_SprHelp.Clear();
-   for str in strs do
+  strs := TStringList.Create();
+  try
+    ini.ReadSection(_SECTION, strs);
+    Self.LV_SprHelp.Clear();
+    for str in strs do
     begin
-     LI := Self.LV_SprHelp.Items.Add;
-     LI.Caption := str;
-     LI.SubItems.Add(ini.ReadString(_SECTION, str, ''));
+      LI := Self.LV_SprHelp.Items.Add;
+      LI.Caption := str;
+      LI.SubItems.Add(ini.ReadString(_SECTION, str, ''));
     end;
- finally
-   strs.Free();
- end;
+  finally
+    strs.Free();
+  end;
 end;
 
-end.//unit
+end.// unit

@@ -37,7 +37,6 @@ object F_HV_Move: TF_HV_Move
     Width = 273
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 1
   end
   object B_Storno: TButton

@@ -11,28 +11,28 @@ uses DXDraws, Graphics, Classes;
 
 type
   TPanelGraphics = class
-   blik:boolean;                          // pokud neco ma blikat, tady je globalne ulozen jeho stav
-                                          // true = sviti, false = zhasnuto
-                                          // obsluhu promenne zajistuje timer
+    blik: boolean; // pokud neco ma blikat, tady je globalne ulozen jeho stav
+    // true = sviti, false = zhasnuto
+    // obsluhu promenne zajistuje timer
 
-   DrawObject:TDXDraw;
-   PanelWidth,PanelHeight:SmallInt;
+    DrawObject: TDXDraw;
+    PanelWidth, PanelHeight: SmallInt;
 
-   constructor Create(drawObject:TDXDraw);
+    constructor Create(DrawObject: TDXDraw);
   end;
 
 implementation
 
 uses Symbols;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPanelGraphics.Create(drawObject:TDXDraw);
+constructor TPanelGraphics.Create(DrawObject: TDXDraw);
 begin
- inherited Create();
- Self.DrawObject := drawObject;
-end;//ctor
+  inherited Create();
+  Self.DrawObject := DrawObject;
+end; // ctor
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-end.//unit
+end.// unit

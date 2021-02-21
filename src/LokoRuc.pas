@@ -7,133 +7,134 @@ unit LokoRuc;
 interface
 
 uses Generics.Collections, Classes, SysUtils, PGraphics, Graphics, Math,
-      Windows, DXDraws, Types;
+  Windows, DXDraws, Types;
 
 type
   TORStackVolba = (PV = 0, VZ = 1);
   TOREZVolba = (closed = 0, please = 1, openned = 2);
 
   TRucLoko = record
-   addr:Word;
-   str:string;
-   OblR:string;
+    addr: Word;
+    str: string;
+    OblR: string;
   end;
 
   TRucList = class
-   private const
+  private const
     _RL_TEXT_WIDTH = 20;
 
-   private
-     lokos:TList<TRucLoko>;
+  private
+    lokos: TList<TRucLoko>;
 
-     Graphics:TPanelGraphics;
+    Graphics: TPanelGraphics;
 
-   public
+  public
 
+    constructor Create(Graphics: TPanelGraphics);
+    destructor Destroy(); override;
 
-      constructor Create(Graphics:TPanelGraphics);
-      destructor Destroy(); override;
+    procedure Show(obj: TDXDraw);
+    procedure ParseCommand(data: TStrings);
+    procedure Clear();
 
-      procedure Show(obj:TDXDraw);
-      procedure ParseCommand(data:TStrings);
-      procedure Clear();
-
-  end;//TORStack
+  end; // TORStack
 
 var
-  RucList : TRucList;
+  RucList: TRucList;
 
 implementation
 
 uses TCPCLientPanel, Symbols, PanelPainter, BottomErrors;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-constructor TRucList.Create(Graphics:TPanelGraphics);
+constructor TRucList.Create(Graphics: TPanelGraphics);
 begin
- inherited Create();
+  inherited Create();
 
- Self.lokos    := TList<TRucLoko>.Create();
- Self.Graphics := Graphics;
-end;//ctor
+  Self.lokos := TList<TRucLoko>.Create();
+  Self.Graphics := Graphics;
+end; // ctor
 
 destructor TRucList.Destroy();
 begin
- Self.lokos.Free();
- inherited Destroy();
-end;//dtor
+  Self.lokos.Free();
+  inherited Destroy();
+end; // dtor
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRucList.ParseCommand(data:TStrings);
-var rl:TRucLoko;
-    i:Integer;
+procedure TRucList.ParseCommand(data: TStrings);
+var rl: TRucLoko;
+  i: Integer;
 begin
- try
-   if (data[1] = 'RUC') then begin
-    for i := 0 to Self.lokos.Count-1 do
-      if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
-       begin
-        // aktualizace existujiciho zaznamu
-        rl := Self.lokos[i];
-        rl.str := data[3];
-        while (Length(rl.str) < _RL_TEXT_WIDTH) do
-          rl.str := rl.str + ' ';
-        Self.lokos[i] := rl;
-        Exit();
-       end;
+  try
+    if (data[1] = 'RUC') then
+    begin
+      for i := 0 to Self.lokos.Count - 1 do
+        if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
+        begin
+          // aktualizace existujiciho zaznamu
+          rl := Self.lokos[i];
+          rl.str := data[3];
+          while (Length(rl.str) < _RL_TEXT_WIDTH) do
+            rl.str := rl.str + ' ';
+          Self.lokos[i] := rl;
+          Exit();
+        end;
 
-    // vytvoreni noveho zaznamu
-    rl.OblR := data[0];
-    rl.addr := StrToInt(data[2]);
-    rl.str  := data[3];
-    while (Length(rl.str) < _RL_TEXT_WIDTH) do
-     rl.str := rl.str + ' ';
-    Self.lokos.Add(rl);
+      // vytvoreni noveho zaznamu
+      rl.OblR := data[0];
+      rl.addr := StrToInt(data[2]);
+      rl.str := data[3];
+      while (Length(rl.str) < _RL_TEXT_WIDTH) do
+        rl.str := rl.str + ' ';
+      Self.lokos.Add(rl);
 
+    end else if (data[1] = 'RUC-RM') then
+    begin
+      for i := 0 to Self.lokos.Count - 1 do
+        if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
+        begin
+          Self.lokos.Delete(i);
+          Exit();
+        end;
+    end;
 
-   end else if (data[1] = 'RUC-RM') then begin
-    for i := 0 to Self.lokos.Count-1 do
-      if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
-       begin
-        Self.lokos.Delete(i);
-        Exit();
-       end;
-   end;
+  except
 
- except
-
- end;
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TRucList.Show(obj:TDXDraw);
-var i:Integer;
-    left, top:Integer;
-begin
- left := (Self.Graphics.PanelWidth div 2)-5;
- top  := Self.Graphics.PanelHeight-1;
-
- for i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount)-1 do
-  begin
-   PanelPainter.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
-   Dec(top);
   end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TRucList.Show(obj: TDXDraw);
+var i: Integer;
+  left, top: Integer;
+begin
+  left := (Self.Graphics.PanelWidth div 2) - 5;
+  top := Self.Graphics.PanelHeight - 1;
+
+  for i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount) - 1 do
+  begin
+    PanelPainter.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
+    Dec(top);
+  end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRucList.Clear();
 begin
- Self.lokos.Clear();
+  Self.lokos.Clear();
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 initialization
 
 finalization
-  RucList.Free();
 
-end.//unit
+RucList.Free();
+
+end.// unit

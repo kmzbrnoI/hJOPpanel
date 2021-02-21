@@ -25,7 +25,7 @@ type
   private
     { Private declarations }
   public
-   procedure AddStav(Text:String);
+    procedure AddStav(Text: String);
   end;
 
 var
@@ -38,22 +38,22 @@ implementation
 uses Verze;
 
 procedure TF_splash.FormCreate(Sender: TObject);
- begin
+begin
   F_splash.Show;
   Application.ProcessMessages;
- end;
+end;
 
 procedure TF_splash.FormShow(Sender: TObject);
- begin
-  ST_Version.Caption  := 'Verze '+NactiVerzi(Application.ExeName);
-  L_BuildTime.Caption := GetLastBuildDate+'  '+GetLastBuildTime;
- end;
+begin
+  ST_Version.Caption := 'Verze ' + NactiVerzi(Application.ExeName);
+  L_BuildTime.Caption := GetLastBuildDate + '  ' + GetLastBuildTime;
+end;
 
-procedure TF_Splash.AddStav(Text:String);
- begin
+procedure TF_splash.AddStav(Text: String);
+begin
   F_splash.L_Nacitani.Caption := Text;
   F_splash.PB_Prubeh.Position := F_splash.PB_Prubeh.Position + 1;
   F_splash.Refresh;
- end;
+end;
 
-end.//unit
+end.// unit
