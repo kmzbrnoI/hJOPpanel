@@ -48,11 +48,11 @@ procedure TSndThread.Execute;
       begin
        if (Self.priority <> nil) then
         begin
-         sndPlaySound(PChar(Self.priority), SND_MEMORY);
+         sndPlaySound(PChar(Self.priority^), SND_MEMORY);
          Self.priority := nil;
         end else begin
          if (Self.data <> nil) then
-           sndPlaySound(PChar(Self.data), SND_ASYNC or SND_LOOP OR SND_MEMORY)
+           sndPlaySound(PChar(Self.data^), SND_ASYNC or SND_LOOP or SND_MEMORY)
          else
            sndPlaySound(nil, 0);
 
