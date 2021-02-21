@@ -241,15 +241,14 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 function TSoundsPlay.LoadFile(const FileName: string): PBytes;
-var SZ: Int64;
-    data: PBytes;
-    S: TFileStream;
+var data: PBytes;
+    stream: TFileStream;
 begin
-  S := TFileStream.Create(FileName, fmOpenRead);
+  stream := TFileStream.Create(FileName, fmOpenRead);
   try
-    SZ := S.Size;
-    GetMem(data, SZ);
-    S.Read(data^, SZ);
+    GetMem(data, stream.Size);
+    SetLength(data^, stream.Size);
+    stream.Read(data^, stream.Size);
 
     if (Self.memorySounds.ContainsKey(filename)) then
       FreeMem(Self.memorySounds[filename]);
@@ -257,7 +256,7 @@ begin
 
     Result := data;
   finally
-    FreeAndNil(S);
+    FreeAndNil(stream);
   end;
 end;
 
