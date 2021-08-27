@@ -517,7 +517,7 @@ begin
     else if (rightCross) then
       Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 5, fg, usek.panelProp.bg, obj)
     else
-      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.panelProp.notColorBranches, usek.panelProp.bg, obj)
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_BOT, usek.panelProp.notColorBranches, usek.panelProp.bg, obj)
   end;
 end;
 

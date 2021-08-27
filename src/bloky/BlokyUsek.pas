@@ -20,10 +20,10 @@ type
     function GetItem(index: Integer): TPTrack;
     function GetCount(): Integer;
 
-    procedure ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
-      myORs: TList<TAreaPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
-    procedure ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
-      blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+    procedure ShowBranches(track: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
+      myORs: TList<TAreaPanel>; flash: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+    procedure ShowDKSBranches(track: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
+      flash: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 
   public
 
@@ -33,7 +33,7 @@ type
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; myORs: TList<TAreaPanel>; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
+    procedure Show(obj: TDXDraw; flash: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
       turnouts: TList<TPTurnout>);
     function GetIndex(pos: TPoint): TPTrackId;
     procedure Reset(orindex: Integer = -1);
@@ -234,7 +234,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTracks.Show(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
+procedure TPTracks.Show(obj: TDXDraw; flash: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
   turnouts: TList<TPTurnout>);
 var fg: TColor;
     showed: array of Boolean;
@@ -244,7 +244,7 @@ begin
     // vykresleni symbolu useku
 
     if (((track.panelProp.flash) or ((track.panelProp.trains.Count > 0) and
-      (myORs[track.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik)) then
+      (myORs[track.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (flash)) then
       fg := clBlack
     else
       fg := track.panelProp.fg;
@@ -275,9 +275,9 @@ begin
 
       // pokud jsou vetve a usek neni disabled, kreslim vetve
       if (track.dksType <> dksNone) then
-        ShowDKSBranches(track, true, showed, myORs, blik, obj, startJC, turnouts)
+        ShowDKSBranches(track, true, showed, myORs, flash, obj, startJC, turnouts)
       else
-        ShowBranches(track, 0, true, showed, myORs, blik, obj, startJC, turnouts);
+        ShowBranches(track, 0, true, showed, myORs, flash, obj, startJC, turnouts);
     end;
 
     // vykresleni cisla koleje
@@ -295,15 +295,15 @@ begin
       end;
     end;
 
-    track.ShowTrains(obj, blik, myORs);
+    track.ShowTrains(obj, flash, myORs);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 // Rekurzivne kresli vetve bezneho bloku
-procedure TPTracks.ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
-  myORs: TList<TAreaPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+procedure TPTracks.ShowBranches(track: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
+  myORs: TList<TAreaPanel>; flash: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 var fg: TColor;
 begin
   if (vetevI < 0) then
@@ -311,71 +311,71 @@ begin
   if (showed[vetevI]) then
     Exit();
   showed[vetevI] := true;
-  var branch := usek.branches[vetevI];
+  var branch := track.branches[vetevI];
 
   branch.visible := visible;
-  usek.branches[vetevI] := branch;
+  track.branches[vetevI] := branch;
 
-  if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
-    (myORs[usek.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik) and (visible)) then
+  if (((track.panelProp.flash) or ((track.panelProp.trains.Count > 0) and
+    (myORs[track.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (flash) and (visible)) then
     fg := clBlack
   else
   begin
     if (visible) then
-      fg := usek.panelProp.fg
+      fg := track.panelProp.fg
     else
-      fg := usek.panelProp.notColorBranches;
+      fg := track.panelProp.notColorBranches;
   end;
 
-  var bg := usek.panelProp.bg;
+  var bg := track.panelProp.bg;
 
   for var symbol in branch.Symbols do
   begin
     if ((symbol.SymbolID < _S_TRACK_DET_B) and (symbol.SymbolID > _S_TRACK_NODET_E)) then
       continue; // tato situace nastava v pripade vykolejek
 
-    bg := usek.panelProp.bg;
+    bg := track.panelProp.bg;
 
     for var sjc in startJC do
       if ((sjc.pos.X = symbol.Position.X) and (sjc.pos.Y = symbol.Position.Y)) then
         bg := sjc.Color;
 
-    for var p in usek.JCClick do
+    for var p in track.JCClick do
       if ((p.X = symbol.Position.X) and (p.Y = symbol.Position.Y)) then
-        if (Integer(usek.panelProp.jcend) > 0) then
-          bg := _JC_END[Integer(usek.panelProp.jcend)];
+        if (Integer(track.panelProp.jcend) > 0) then
+          bg := _JC_END[Integer(track.panelProp.jcend)];
 
     Symbols.Draw(SymbolSet.IL_Symbols, symbol.Position, symbol.SymbolID, fg, bg, obj);
-  end; // for i
+  end;
 
   if (branch.node1.turnout > -1) then
   begin
-    var vyh := turnouts[branch.node1.turnout];
-    vyh.visible := visible;
+    var turnout := turnouts[branch.node1.turnout];
+    turnout.visible := visible;
 
-    // nastaveni barvy neprirazene vyhybky
-    if (vyh.block = -2) then
+    // nastaveni barvy neprirazene turnoutybky
+    if (turnout.block = -2) then
     begin
-      vyh.panelProp.fg := fg;
-      vyh.panelProp.bg := bg;
+      turnout.panelProp.fg := fg;
+      turnout.panelProp.bg := bg;
     end;
 
-    case (vyh.panelProp.position) of
+    case (turnout.panelProp.position) of
       TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:
         begin
-          ShowBranches(usek, branch.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
-          ShowBranches(usek, branch.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
+          ShowBranches(track, branch.node1.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
+          ShowBranches(track, branch.node1.ref_minus, visible, showed, myORs, flash, obj, startJC, turnouts);
         end; // case disable, both, none
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(vyh.panelProp.position) xor vyh.orientationPlus) = 0) then
+          if ((Integer(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
           begin
-            ShowBranches(usek, branch.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
-            ShowBranches(usek, branch.node1.ref_minus, false, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(track, branch.node1.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
+            ShowBranches(track, branch.node1.ref_minus, false, showed, myORs, flash, obj, startJC, turnouts);
           end else begin
-            ShowBranches(usek, branch.node1.ref_plus, false, showed, myORs, blik, obj, startJC, turnouts);
-            ShowBranches(usek, branch.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(track, branch.node1.ref_plus, false, showed, myORs, flash, obj, startJC, turnouts);
+            ShowBranches(track, branch.node1.ref_minus, visible, showed, myORs, flash, obj, startJC, turnouts);
           end;
         end; // case disable, both, none
     end; // case
@@ -383,32 +383,32 @@ begin
 
   if (branch.node2.turnout > -1) then
   begin
-    var vyh := turnouts[branch.node2.turnout];
-    vyh.visible := visible;
+    var turnout := turnouts[branch.node2.turnout];
+    turnout.visible := visible;
 
     // nastaveni barvy neprirazene vyhybky
-    if (vyh.block = -2) then
+    if (turnout.block = -2) then
     begin
-      vyh.panelProp.fg := fg;
-      vyh.panelProp.bg := bg;
+      turnout.panelProp.fg := fg;
+      turnout.panelProp.bg := bg;
     end;
 
-    case (vyh.panelProp.position) of
+    case (turnout.panelProp.position) of
       TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:
         begin
-          ShowBranches(usek, branch.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
-          ShowBranches(usek, branch.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
+          ShowBranches(track, branch.node2.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
+          ShowBranches(track, branch.node2.ref_minus, visible, showed, myORs, flash, obj, startJC, turnouts);
         end; // case disable, both, none
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(vyh.panelProp.position) xor vyh.orientationPlus) = 0) then
+          if ((Integer(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
           begin
-            ShowBranches(usek, branch.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
-            ShowBranches(usek, branch.node2.ref_minus, false, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(track, branch.node2.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
+            ShowBranches(track, branch.node2.ref_minus, false, showed, myORs, flash, obj, startJC, turnouts);
           end else begin
-            ShowBranches(usek, branch.node2.ref_plus, false, showed, myORs, blik, obj, startJC, turnouts);
-            ShowBranches(usek, branch.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(track, branch.node2.ref_plus, false, showed, myORs, flash, obj, startJC, turnouts);
+            ShowBranches(track, branch.node2.ref_minus, visible, showed, myORs, flash, obj, startJC, turnouts);
           end;
         end; // case disable, both, none
     end; // case
@@ -418,19 +418,19 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
-procedure TPTracks.ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
-  blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+procedure TPTracks.ShowDKSBranches(track: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
+  flash: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 begin
-  if (usek.branches.Count < 3) then
+  if (track.branches.Count < 3) then
     Exit();
-  if (usek.branches[0].node1.turnout < 0) then
+  if (track.branches[0].node1.turnout < 0) then
     Exit();
-  if (usek.branches[1].node1.turnout < 0) then
+  if (track.branches[1].node1.turnout < 0) then
     Exit();
 
   // 1) zjistime si polohy vyhybek
-  var polLeft := turnouts[usek.branches[0].node1.turnout].panelProp.position;
-  var polRight := turnouts[usek.branches[1].node1.turnout].panelProp.position;
+  var polLeft := turnouts[track.branches[0].node1.turnout].panelProp.position;
+  var polRight := turnouts[track.branches[1].node1.turnout].panelProp.position;
 
   // 2) rozhodneme o tom co barvit
   var leftHidden := ((polLeft = TVyhPoloha.plus) and (polRight = TVyhPoloha.minus));
@@ -439,34 +439,34 @@ begin
   var leftCross := (polLeft <> TVyhPoloha.plus) and (not leftHidden);
   var rightCross := (polRight <> TVyhPoloha.plus) and (not rightHidden);
 
-  ShowBranches(usek, 0, leftCross, showed, myORs, blik, obj, startJC, turnouts);
-  ShowBranches(usek, 1, rightCross, showed, myORs, blik, obj, startJC, turnouts);
-  ShowBranches(usek, 2, not(leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and
-    (polRight = TVyhPoloha.minus))), showed, myORs, blik, obj, startJC, turnouts);
-  if (usek.branches.Count > 3) then
-    ShowBranches(usek, 3, not leftHidden, showed, myORs, blik, obj, startJC, turnouts);
-  if (usek.branches.Count > 4) then
-    ShowBranches(usek, 4, not rightHidden, showed, myORs, blik, obj, startJC, turnouts);
+  ShowBranches(track, 0, leftCross, showed, myORs, flash, obj, startJC, turnouts);
+  ShowBranches(track, 1, rightCross, showed, myORs, flash, obj, startJC, turnouts);
+  ShowBranches(track, 2, not(leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and
+    (polRight = TVyhPoloha.minus))), showed, myORs, flash, obj, startJC, turnouts);
+  if (track.branches.Count > 3) then
+    ShowBranches(track, 3, not leftHidden, showed, myORs, flash, obj, startJC, turnouts);
+  if (track.branches.Count > 4) then
+    ShowBranches(track, 4, not rightHidden, showed, myORs, flash, obj, startJC, turnouts);
 
-  turnouts[usek.branches[0].node1.turnout].visible := not leftHidden;
-  turnouts[usek.branches[1].node1.turnout].visible := not rightHidden;
+  turnouts[track.branches[0].node1.turnout].visible := not leftHidden;
+  turnouts[track.branches[1].node1.turnout].visible := not rightHidden;
 
   // 3) vykreslime stredovy kriz
   var fg: TColor;
-  if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
-    (myORs[usek.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik) and (visible)) then
+  if (((track.panelProp.flash) or ((track.panelProp.trains.Count > 0) and
+    (myORs[track.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (flash) and (visible)) then
     fg := clBlack
   else
   begin
     if (visible) then
-      fg := usek.panelProp.fg
+      fg := track.panelProp.fg
     else
-      fg := usek.panelProp.notColorBranches;
+      fg := track.panelProp.notColorBranches;
   end;
 
-  usek.ShowDKSCross(usek.root, obj, leftCross, rightCross, usek.dksType, fg, usek);
-  if (usek.IsSecondCross()) then
-    usek.ShowDKSCross(usek.SecondCrossPos(), obj, rightCross, leftCross, InvDKSType(usek.dksType), fg, usek);
+  track.ShowDKSCross(track.root, obj, leftCross, rightCross, track.dksType, fg, track);
+  if (track.IsSecondCross()) then
+    track.ShowDKSCross(track.SecondCrossPos(), obj, rightCross, leftCross, InvDKSType(track.dksType), fg, track);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

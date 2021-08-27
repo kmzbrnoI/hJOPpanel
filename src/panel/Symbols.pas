@@ -60,7 +60,7 @@ const
 
   _S_CROSSING = 52;
   _S_RAILWAY_LEFT = 53;
-  _S_RAILWAY_RIGHT = 53;
+  _S_RAILWAY_RIGHT = 54;
   _S_LINKER_TRAIN = 55;
   _S_LOCK = 56;
   _S_DISC_TRACK = 57;
