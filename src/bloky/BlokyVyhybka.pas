@@ -21,7 +21,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile);
+    procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
@@ -50,7 +50,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybky.Load(ini: TMemIniFile);
+procedure TPVyhybky.Load(ini: TMemIniFile; version: Word);
 var Count, i: Integer;
   vyh: TPVyhybka;
 begin

@@ -47,7 +47,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile);
+    procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw; blik: Boolean);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
@@ -65,7 +65,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper;
+uses PanelPainter, Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -112,7 +112,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidla.Load(ini: TMemIniFile);
+procedure TPNavestidla.Load(ini: TMemIniFile; version: Word);
 var i, Count: Integer;
   nav: TPNavestidlo;
 begin
@@ -127,6 +127,8 @@ begin
     nav.Position.X := ini.ReadInteger('N' + IntToStr(i), 'X', 0);
     nav.Position.Y := ini.ReadInteger('N' + IntToStr(i), 'Y', 0);
     nav.SymbolID := ini.ReadInteger('N' + IntToStr(i), 'S', 0);
+    if (version < _FILEVERSION_20) then
+      nav.SymbolID := TranscodeSymbolFromBpnlV3(nav.SymbolID);
 
     // OR
     nav.OblRizeni := ini.ReadInteger('N' + IntToStr(i), 'OR', -1);

@@ -39,9 +39,8 @@ begin
       (pos.X + 1) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
   end;
 
-  item := GetSymbolIndex(symbol, fg);
+  item := SymbolIndex(symbol, fg);
   IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight, item);
-
   IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
 
@@ -49,9 +48,7 @@ end;
 
 procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; underline: boolean = false;
   transparent: boolean = false);
-var j: Integer;
-  TextIndex: Integer;
-  item: Integer;
+var TextIndex: Integer;
 begin
   // transparent is faster
 
@@ -63,7 +60,7 @@ begin
       (pos.X + Length(Text)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
   end;
 
-  for j := 0 to Length(Text) - 1 do
+  for var j := 0 to Length(Text) - 1 do
   begin
     // prevedeni textu na indexy v ImageListu
     // texty v image listu jsou ilozeny v ASCII, coz tyto Delphi evidentne neumi zchroustat
@@ -138,9 +135,8 @@ begin
       TextIndex := 0;
     end;
 
-    item := (TextIndex * Length(_Symbol_Colors)) + GetColorIndex(fg);
     SymbolSet.IL_Text.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth + (j * SymbolSet.symbWidth),
-      pos.Y * SymbolSet.symbHeight, item);
+      pos.Y * SymbolSet.symbHeight, SymbolIndex(TextIndex, fg));
   end; // for j
 
   if (underline) then

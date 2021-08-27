@@ -22,8 +22,9 @@ const
   _FILEVERSION_11 = $0101;
   _FILEVERSION_12 = $0102;
   _FILEVERSION_13 = $0103;
+  _FILEVERSION_20 = $0200;
 
-  _FileVersion_accept: array [0 .. 2] of string = ('1.1', '1.2', '1.3');
+  _FileVersion_accept: array [0 .. 3] of string = ('1.1', '1.2', '1.3', '2.0');
 
 type
   /// ////////////////////////////////////////////////////////////////////////////
@@ -1110,18 +1111,18 @@ begin
     for i := 0 to Self.myORs.Count - 1 do
       TF_Messages.frm_db[i] := TF_Messages.Create(Self.myORs[i].Name, Self.myORs[i].id);
 
-    Self.Useky.Load(inifile, Self.myORs);
-    Self.Navestidla.Load(inifile);
-    Self.Vyhybky.Load(inifile);
-    Self.Vykol.Load(inifile);
+    Self.Useky.Load(inifile, Self.myORs, verWord);
+    Self.Navestidla.Load(inifile, verWord);
+    Self.Vyhybky.Load(inifile, verWord);
+    Self.Vykol.Load(inifile, verWord);
     Self.Prejezdy.Load(inifile, Self.Useky, verWord);
-    Self.Uvazky.Load(inifile);
-    Self.UvazkySpr.Load(inifile);
-    Self.Zamky.Load(inifile);
-    Self.Rozp.Load(inifile);
-    Self.Texty.Load(inifile, 'T');
-    Self.PopiskyBloku.Load(inifile, 'TP');
-    Self.PomocneObj.Load(inifile);
+    Self.Uvazky.Load(inifile, verWord);
+    Self.UvazkySpr.Load(inifile, verWord);
+    Self.Zamky.Load(inifile, verWord);
+    Self.Rozp.Load(inifile, verWord);
+    Self.Texty.Load(inifile, 'T', verWord);
+    Self.PopiskyBloku.Load(inifile, 'TP', verWord);
+    Self.PomocneObj.Load(inifile, verWord);
 
     Self.Tech_blok.Clear();
 

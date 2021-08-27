@@ -44,7 +44,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile);
+    procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw; blik: boolean);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
@@ -54,21 +54,13 @@ type
   end;
 
 const
-  // zde je definovano, jaky specialni symbol se ma vykreslovat jakou barvou (mimo separatoru)
-  _SpecS_DrawColors: array [0 .. 60] of TColor = ($A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0,
-    $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0,
-    $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, clBlue,
-    clBlue, clBlue, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0,
-    $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0, $A0A0A0,
-    $A0A0A0, $A0A0A0);
-
   _Def_Pomocny_Prop: TPPomocnyPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; blik: false;);
 
   _Assigned_Pomocny_Prop: TPPomocnyPanelProp = (Symbol: clFuchsia; Pozadi: clBlack; blik: false;);
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper;
+uses PanelPainter, Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -89,11 +81,9 @@ var p: TPoint;
   color: TColor;
 begin
   if (Self.Blok > -1) then
-  begin
-    color := Self.PanelProp.Symbol;
-  end
+    color := Self.PanelProp.Symbol
   else
-    color := _SpecS_DrawColors[Self.Symbol];
+    color := SymbolDefaultColor(Self.Symbol);
 
   if ((Self.PanelProp.blik) and (blik)) then
     color := clBlack;
@@ -133,7 +123,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPPomocneObj.Load(ini: TMemIniFile);
+procedure TPPomocneObj.Load(ini: TMemIniFile; version: Word);
 var i, j, Count, count2: Integer;
   po: TPPomocnyObj;
   obj: string;
@@ -148,6 +138,9 @@ begin
     po.Blok := ini.ReadInteger('P' + IntToStr(i), 'B', -1);
     po.OblRizeni := ini.ReadInteger('P' + IntToStr(i), 'OR', -1);
     po.Symbol := ini.ReadInteger('P' + IntToStr(i), 'S', 0);
+    if (version < _FILEVERSION_20) then
+      po.Symbol := TranscodeSymbolFromBpnlV3(po.Symbol);
+
     po.Positions := TList<TPoint>.Create();
 
     obj := ini.ReadString('P' + IntToStr(i), 'P', '');

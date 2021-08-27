@@ -43,7 +43,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile; key: string);
+    procedure Load(ini: TMemIniFile; key: string; version: Word);
     procedure Show(obj: TDXDraw);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
@@ -107,7 +107,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Load(ini: TMemIniFile; key: string);
+procedure TPTexty.Load(ini: TMemIniFile; key: string; version: Word);
 var i, Count: Integer;
   popisek: TPText;
 begin

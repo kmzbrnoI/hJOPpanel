@@ -36,7 +36,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile; myORs: TList<TORPanel>);
+    procedure Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
     procedure Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
       vyhybky: TList<TPVyhybka>);
     function GetIndex(pos: TPoint): TPUsekID;
@@ -49,7 +49,7 @@ type
 
 implementation
 
-uses ParseHelper, PanelPainter;
+uses ParseHelper, PanelPainter, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -67,7 +67,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUseky.Load(ini: TMemIniFile; myORs: TList<TORPanel>);
+procedure TPUseky.Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
 var i, j, k, Count, count2, count3: Integer;
   usek: TPUsek;
   obj: string;
@@ -94,6 +94,8 @@ begin
         symbol.Position.X := StrToInt(copy(obj, j * 8 + 1, 3));
         symbol.Position.Y := StrToInt(copy(obj, j * 8 + 4, 3));
         symbol.SymbolID := StrToInt(copy(obj, j * 8 + 7, 2));
+        if (version < _FILEVERSION_20) then
+          symbol.SymbolID := TranscodeSymbolFromBpnlV3(symbol.SymbolID);
       except
         continue;
       end;

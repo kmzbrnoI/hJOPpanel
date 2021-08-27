@@ -62,7 +62,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile);
+    procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw);
     function GetIndex(Pos: TPoint): TPUvazkaID;
     procedure Reset(orindex: Integer = -1);
@@ -138,7 +138,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazkySpr.Load(ini: TMemIniFile);
+procedure TPUvazkySpr.Load(ini: TMemIniFile; version: Word);
 var i, Count: Integer;
   uvs: TPUvazkaSpr;
 begin

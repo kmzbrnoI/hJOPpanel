@@ -14,7 +14,7 @@ const
   // barvy symbolu
   // zde jsou definovany jednotlive barvy
   _SYMBOL_COLORS: array [0 .. 14] of TColor = (
-    $FF00FF, // purple
+    clFuchsia, // fuchsia
     $A0A0A0, // gray
     clRed,
     clLime,
@@ -90,6 +90,24 @@ const
 type
   TSymbolSetType = (normal = 0, bigger = 1);
 
+  SymbolColor = (
+    scFuchsia = 0,
+    scGray = 1,
+    scRed = 2,
+    scLime = 3,
+    scWhite = 4,
+    scAqua = 5,
+    scBlue = 6,
+    scYellow = 7,
+    scBlack = 8,
+    scTeal = 9,
+    scOlive = 10,
+    scPurple = 11,
+    scMaroon = 12,
+    scLightGray = 13,
+    scGreen = 14
+  );
+
   TOneSymbolSet = record
     Names: record
       Symbols, Text, DK, Trat: string;
@@ -137,8 +155,12 @@ type
     procedure LoadSet(typ: TSymbolSetType);
   end;
 
-function GetColorIndex(Color: TColor): Integer;
-function GetSymbolIndex(SymbolID: Integer; Color: TColor): Integer;
+function ColorToSymbolColor(color: TColor): SymbolColor;
+function SymbolIndex(symbol: Integer; color: SymbolColor): Integer; overload;
+function SymbolIndex(symbol: Integer; color: TColor): Integer; overload;
+function SymbolDrawColor(symbol: Integer): SymbolColor;
+function SymbolDefaultColor(symbol: Integer): TColor;
+function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 
 var
   SymbolSet: TSymbolSet;
@@ -316,26 +338,74 @@ end;
 // GLOBALNI FUNKCE                                  //
 /// /////////////////////////////////////////////////////////////////////////////
 
-// TColor -> color index
-function GetColorIndex(Color: TColor): Integer;
-var i: Integer;
+function ColorToSymbolColor(color: TColor): SymbolColor;
 begin
-  Result := 0;
-  for i := 0 to Length(_Symbol_Colors) - 1 do
-  begin
-    if (_Symbol_Colors[i] = Color) then
-    begin
-      Result := i;
-      Break;
-    end;
-  end; // for i
+  for var i: Integer := 0 to Length(_SYMBOL_COLORS)-1 do
+    if (_SYMBOL_COLORS[i] = color) then
+      Exit(SymbolColor(i));
+  Result := scFuchsia;
+end;
+
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function SymbolIndex(symbol: Integer; color: SymbolColor): Integer;
+begin
+  Result := symbol*Length(_SYMBOL_COLORS) + Integer(color);
+end;
+
+function SymbolIndex(symbol: Integer; color: TColor): Integer;
+begin
+  Result := SymbolIndex(symbol, ColorToSymbolColor(color));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function GetSymbolIndex(SymbolID: Integer; Color: TColor): Integer;
+function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 begin
-  Result := (SymbolID * Length(_Symbol_Colors)) + GetColorIndex(Color);
+ if ((symbol >= 12) and (symbol <= 17)) then
+   Result := symbol-12 + _S_TRACK_DET_B
+ else if ((symbol >= 18) and (symbol <= 23)) then
+   Result := symbol-18 + _S_TRACK_NODET_B
+ else if ((symbol >= 24) and (symbol <= 29)) then
+   Result := symbol-24 + _S_SIGNAL_B
+ else if (symbol = 30) then
+   Result := _S_BUMPER_R
+ else if (symbol = 31) then
+   Result := _S_BUMPER_L
+ else if ((symbol >= 32) and (symbol <= 34)) then
+   Result := symbol-32 + _S_PLATFORM_B
+ else if (symbol = 40) then
+   Result := _S_CROSSING
+ else if (symbol = 42) then
+   Result := _S_CIRCLE
+ else if ((symbol >= 43) and (symbol <= 45)) then
+   Result := symbol-43 + _S_RAILWAY_LEFT
+ else if ((symbol >= 49) and (symbol <= 54)) then
+   Result := symbol-49 + _S_DERAIL_B
+ else if ((symbol >= 55) and (symbol <= 56)) then
+   Result := symbol-55 + _S_DISC_TRACK
+ else if ((symbol >= 58) and (symbol <= 59)) then
+   Result := symbol-58 + _S_DKS_DET_TOP
+ else
+   Result := symbol;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function SymbolDrawColor(symbol: Integer): SymbolColor;
+begin
+  if ((symbol >= _S_PLATFORM_B) and (symbol <= _S_PLATFORM_E)) then
+    Result := scBlue
+  else if (symbol = _S_LINKER_TRAIN) then
+    Result := scYellow
+  else
+    Result := scGray;
+end;
+
+function SymbolDefaultColor(symbol: Integer): TColor;
+begin
+  Result := _SYMBOL_COLORS[Integer(SymbolDrawColor(symbol))];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

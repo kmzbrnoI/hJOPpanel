@@ -33,7 +33,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile);
+    procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
@@ -62,7 +62,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVykolejky.Load(ini: TMemIniFile);
+procedure TPVykolejky.Load(ini: TMemIniFile; version: Word);
 var i, Count: Integer;
   vykol: TPVykolejka;
 begin
