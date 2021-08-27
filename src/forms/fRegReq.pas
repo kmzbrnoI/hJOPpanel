@@ -126,8 +126,8 @@ begin
   for HV in HVDb.HVs do
   begin
     LI := Self.LV_Lokos.Items.Add;
-    LI.Caption := IntToStr(HV.Adresa);
-    LI.SubItems.Add(HV.Nazev + ' (' + HV.Oznaceni + ')');
+    LI.Caption := IntToStr(HV.addr);
+    LI.SubItems.Add(HV.name + ' (' + HV.designation + ')');
     LI.Checked := all_selected;
   end; // for i
 end;

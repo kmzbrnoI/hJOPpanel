@@ -10,7 +10,7 @@ interface
 uses SysUtils, Classes, Generics.Collections, Generics.Defaults;
 
 type
-  TORDb = class
+  TAreaDb = class
   private
   public
 
@@ -27,7 +27,7 @@ type
   end; // class
 
 var
-  ORDb: TORDb;
+  areaDb: TAreaDb;
 
 implementation
 
@@ -35,27 +35,26 @@ uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TORDb.Create();
+constructor TAreaDb.Create();
 begin
   inherited;
   Self.db := TDictionary<string, string>.Create();
   Self.db_reverse := TDictionary<string, string>.Create();
   Self.names_sorted := TList<string>.Create(Self.StrComparer());
-end; // ctor
+end;
 
-destructor TORDb.Destroy();
+destructor TAreaDb.Destroy();
 begin
   Self.db.Free();
   Self.db_reverse.Free();
   Self.names_sorted.Free();
   inherited;
-end; // dtor
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TORDb.Parse(data: string);
-var i: Integer;
-  list1, list2: TStrings;
+procedure TAreaDb.Parse(data: string);
+var list1, list2: TStrings;
 begin
   try
     list1 := TStringList.Create();
@@ -67,7 +66,7 @@ begin
       Self.db_reverse.Clear();
       Self.names_sorted.Clear();
 
-      for i := 0 to list1.Count - 1 do
+      for var i := 0 to list1.Count - 1 do
       begin
         list2.Clear();
         ExtractStringsEx([','], [], list1[i], list2);
@@ -93,7 +92,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-class function TORDb.StrComparer(): IComparer<string>;
+class function TAreaDb.StrComparer(): IComparer<string>;
 begin
   Result := TComparer<string>.Construct(
     function(const Left, Right: string): Integer
@@ -106,10 +105,10 @@ end;
 
 initialization
 
-ORDb := TORDb.Create();
+areaDb := TAreaDb.Create();
 
 finalization
 
-FreeAndNil(ORDb);
+FreeAndNil(areaDb);
 
-end.// unit
+end.

@@ -112,13 +112,13 @@ begin
     LI.SubItems.Add(sl[4]);
     LI.SubItems.Add(sl[5]);
 
-    if ((sl.Count > 7) and (ORdb.db.ContainsKey(sl[7]))) then
-      LI.SubItems.Add(ORdb.db[sl[7]])
+    if ((sl.Count > 7) and (areaDb.db.ContainsKey(sl[7]))) then
+      LI.SubItems.Add(areaDb.db[sl[7]])
     else
       LI.SubItems.Add('Nevyplněno');
 
-    if ((sl.Count > 8) and (ORdb.db.ContainsKey(sl[8]))) then
-      LI.SubItems.Add(ORdb.db[sl[8]])
+    if ((sl.Count > 8) and (areaDb.db.ContainsKey(sl[8]))) then
+      LI.SubItems.Add(areaDb.db[sl[8]])
     else
       LI.SubItems.Add('Nevyplněno');
   except

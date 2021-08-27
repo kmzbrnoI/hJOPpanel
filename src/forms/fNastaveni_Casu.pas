@@ -11,7 +11,7 @@ uses
   StdCtrls, ExtCtrls, Mask, StrUtils;
 
 type
-  TF_ModCasSet = class(TForm)
+  TF_ModelTIme = class(TForm)
     ME_start_time: TMaskEdit;
     L_time_start: TLabel;
     B_OK: TButton;
@@ -30,7 +30,7 @@ type
   end;
 
 var
-  F_ModCasSet: TF_ModCasSet;
+  F_ModelTIme: TF_ModelTIme;
 
 implementation
 
@@ -38,7 +38,7 @@ uses ModelovyCas, TCPClientPanel;
 
 {$R *.dfm}
 
-procedure TF_ModCasSet.B_OKClick(Sender: TObject);
+procedure TF_ModelTIme.B_OKClick(Sender: TObject);
 begin
   try
     if (StrToInt(Copy(ME_start_time.Text, 4, 2)) > 59) then
@@ -71,18 +71,18 @@ begin
 
 end;
 
-procedure TF_ModCasSet.B_StornoClick(Sender: TObject);
+procedure TF_ModelTIme.B_StornoClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_ModCasSet.CHB_UsedClick(Sender: TObject);
+procedure TF_ModelTIme.CHB_UsedClick(Sender: TObject);
 begin
   Self.ME_start_time.Enabled := Self.CHB_Used.Checked;
   Self.ME_Nasobic.Enabled := Self.CHB_Used.Checked;
 end;
 
-procedure TF_ModCasSet.ME_start_timeKeyPress(Sender: TObject; var Key: Char);
+procedure TF_ModelTIme.ME_start_timeKeyPress(Sender: TObject; var Key: Char);
 begin
   Key := Key;
   case Key of
@@ -96,11 +96,11 @@ begin
   end; // case
 end;
 
-procedure TF_ModCasSet.OpenForm;
+procedure TF_ModelTIme.OpenForm;
 begin
-  Self.CHB_Used.Checked := ModCas.used;
-  Self.ME_start_time.Text := FormatDateTime('hh:nn', ModCas.time);
-  Self.ME_Nasobic.Text := FloatToStrF(ModCas.speed, ffNumber, 1, 1);
+  Self.CHB_Used.Checked := ModelTime.used;
+  Self.ME_start_time.Text := FormatDateTime('hh:nn', ModelTime.time);
+  Self.ME_Nasobic.Text := FloatToStrF(ModelTime.speed, ffNumber, 1, 1);
 
   Self.CHB_UsedClick(Self.CHB_Used);
 

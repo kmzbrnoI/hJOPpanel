@@ -1,7 +1,7 @@
 unit LokoRuc;
 
 {
-  Tato unita zobrazuje do panelu seznam lokomotiv v rucnim rizeni.
+  Show list of engines in manual control on bottom side of a panel.
 }
 
 interface
@@ -54,28 +54,26 @@ begin
 
   Self.lokos := TList<TRucLoko>.Create();
   Self.Graphics := Graphics;
-end; // ctor
+end;
 
 destructor TRucList.Destroy();
 begin
   Self.lokos.Free();
-  inherited Destroy();
-end; // dtor
+  inherited;
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRucList.ParseCommand(data: TStrings);
-var rl: TRucLoko;
-  i: Integer;
 begin
   try
     if (data[1] = 'RUC') then
     begin
-      for i := 0 to Self.lokos.Count - 1 do
+      for var i := 0 to Self.lokos.Count - 1 do
         if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
         begin
           // aktualizace existujiciho zaznamu
-          rl := Self.lokos[i];
+          var rl := Self.lokos[i];
           rl.str := data[3];
           while (Length(rl.str) < _RL_TEXT_WIDTH) do
             rl.str := rl.str + ' ';
@@ -84,6 +82,7 @@ begin
         end;
 
       // vytvoreni noveho zaznamu
+      var rl: TRucLoko;
       rl.OblR := data[0];
       rl.addr := StrToInt(data[2]);
       rl.str := data[3];
@@ -93,7 +92,7 @@ begin
 
     end else if (data[1] = 'RUC-RM') then
     begin
-      for i := 0 to Self.lokos.Count - 1 do
+      for var i := 0 to Self.lokos.Count - 1 do
         if ((Self.lokos[i].addr = StrToInt(data[2])) and (Self.lokos[i].OblR = data[0])) then
         begin
           Self.lokos.Delete(i);
@@ -111,8 +110,8 @@ end;
 procedure TRucList.Show(obj: TDXDraw);
 var left, top: Integer;
 begin
-  left := (Self.Graphics.PanelWidth div 2) - 5;
-  top := Self.Graphics.PanelHeight - 1;
+  left := (Self.Graphics.pWidth div 2) - 5;
+  top := Self.Graphics.pHeight - 1;
 
   for var i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount) - 1 do
   begin

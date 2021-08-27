@@ -365,7 +365,7 @@ begin
     for j := 0 to _MAX_FUNC do
       if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
         err := err + Self.PC_HVs.Pages[i].Caption + ' má aktivovanou funkci ' + IntToStr(j) + ' (' +
-          Self.HVs[i].HV.funcVyznam[j] + '), která je momentary.' + #13#10;
+          Self.HVs[i].HV.funcDesc[j] + '), která je momentary.' + #13#10;
 
     sprstr := sprstr + Self.HVs[i].GetHVString();
   end;
@@ -378,11 +378,11 @@ begin
   sprstr := sprstr + '};';
 
   if (Self.CB_Vychozi.ItemIndex > 0) then
-    sprstr := sprstr + ORDb.db_reverse[CB_Vychozi.Items[CB_Vychozi.ItemIndex]];
+    sprstr := sprstr + areaDb.db_reverse[CB_Vychozi.Items[CB_Vychozi.ItemIndex]];
   sprstr := sprstr + ';';
 
   if (Self.CB_Cilova.ItemIndex > 0) then
-    sprstr := sprstr + ORDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
+    sprstr := sprstr + areaDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
   sprstr := sprstr + ';';
 
   if (Self.CHB_report.Checked) then
@@ -653,8 +653,8 @@ begin
       if (i < Self.sprHVs.HVs.Count) then
       begin
         for HV in HVDb.HVs do
-          if (HV.Adresa = Self.sprHVs.HVs[i].Adresa) then
-            HV.Souprava := '-';
+          if (HV.addr = Self.sprHVs.HVs[i].addr) then
+            HV.train := '-';
         Self.sprHVs.Delete(i);
       end;
 
@@ -686,15 +686,15 @@ begin
   Self.CB_Vychozi.Items.Add('Nevyplněno');
   Self.CB_Cilova.Items.Add('Nevyplněno');
 
-  for name in ORDb.names_sorted do
+  for name in areaDb.names_sorted do
   begin
     Self.CB_Vychozi.Items.Add(name);
     Self.CB_Cilova.Items.Add(name);
 
-    if (ORDb.db_reverse[name] = vychoziId) then
+    if (areaDb.db_reverse[name] = vychoziId) then
       Self.CB_Vychozi.ItemIndex := Self.CB_Vychozi.Items.Count - 1;
 
-    if (ORDb.db_reverse[name] = cilovaId) then
+    if (areaDb.db_reverse[name] = cilovaId) then
       Self.CB_Cilova.ItemIndex := Self.CB_Cilova.Items.Count - 1;
   end;
 

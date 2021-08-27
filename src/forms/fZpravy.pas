@@ -116,10 +116,10 @@ begin
     end;
 
   // okynko se zpravou neexituje -> otevreme ho
-  for id in ORDb.db.Keys do
+  for id in areaDb.db.Keys do
     if (id = Sender) then
     begin
-      form := Self.OpenTab(ORDb.db[id], Sender);
+      form := Self.OpenTab(areaDb.db[id], Sender);
       if (form <> nil) then
         form.ReceiveMsg(msg);
       Exit();
@@ -281,11 +281,11 @@ var LI: TListItem;
   name: string;
 begin
   Self.LV_ORs.Clear();
-  for name in ORDb.names_sorted do
+  for name in areaDb.names_sorted do
   begin
     LI := Self.LV_ORs.Items.Add;
     LI.Caption := name;
-    LI.SubItems.Add(ORDb.db_reverse[name]);
+    LI.SubItems.Add(areaDb.db_reverse[name]);
   end;
 
   Self.Caption := Self.name + ' - zprávy';

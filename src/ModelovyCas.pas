@@ -1,7 +1,7 @@
 unit ModelovyCas;
 
 {
-  Sprava modeloveho casu.
+  Model time management.
 }
 
 interface
@@ -10,7 +10,7 @@ uses Classes, SysUtils, Graphics, ExtCtrls;
 
 type
 
-  TModCas = class
+  TModelTime = class
   private
     ftime: TTime;
     fspeed: Real;
@@ -39,7 +39,7 @@ type
   end; // class TModCas
 
 var
-  ModCas: TModCas;
+  ModelTime: TModelTime;
 
 implementation
 
@@ -47,7 +47,7 @@ uses fMain;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TModCas.Create();
+constructor TModelTime.Create();
 begin
   inherited Create();
 
@@ -55,19 +55,17 @@ begin
   Self.timer.Enabled := false;
   Self.timer.Interval := 200;
   Self.timer.OnTimer := OnTimer;
-end; // ctor
+end;
 
-destructor TModCas.Destroy();
+destructor TModelTime.Destroy();
 begin
   FreeAndNil(Self.timer);
-
-  inherited Destroy();
-end; // dtor
+  inherited;
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// -;MOD-CAS;running;speed;cas;                  - oznameni o stavu modeloveho casu - aktualni modelovy cas a jestli bezi
-procedure TModCas.ParseData(data: TStrings);
+procedure TModelTime.ParseData(data: TStrings);
 begin
   Self.fstarted := (data[2] = '1');
   Self.timer.Enabled := Self.fstarted;
@@ -86,10 +84,10 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TModCas.OnTimer(Sender: TObject);
+procedure TModelTime.OnTimer(Sender: TObject);
 var diff: TTime;
 begin
-  // pocitani aktualniho modeloveho casu:
+  // calculate current model time:
   diff := Now - Self.last_call;
   Self.ftime := Self.time + (diff * Self.speed);
 
@@ -99,7 +97,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TModCas.Reset();
+procedure TModelTime.Reset();
 begin
   Self.ftime := EncodeTime(0, 0, 0, 0);
   Self.fstarted := false;
@@ -113,7 +111,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TModCas.GetStrSpeed(): string;
+function TModelTime.GetStrSpeed(): string;
 begin
   Result := FloatToStrF(Self.speed, ffGeneral, 1, 1);
 end;
@@ -122,10 +120,10 @@ end;
 
 initialization
 
-ModCas := TModCas.Create();
+ModelTime := TModelTime.Create();
 
 finalization
 
-FreeAndNil(ModCas);
+FreeAndNil(ModelTime);
 
 end.// unit

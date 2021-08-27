@@ -23,8 +23,7 @@ implementation
 // vrati: ["ahoj", "ja", "jsem", "Honza;Horacek"]
 
 procedure ExtractStringsEx(Separators: TSysCharSet; Ignore: TSysCharSet; Content: string; var Strings: TStrings);
-var i: word;
-  s: string;
+var s: string;
   plain_cnt: Integer;
 begin
   s := '';
@@ -32,7 +31,7 @@ begin
   if (Length(Content) = 0) then
     Exit();
 
-  for i := 1 to Length(Content) do
+  for var i := 1 to Length(Content) do
   begin
     if (Content[i] = '{') then
     begin
@@ -63,17 +62,19 @@ function GetPos(data: string): TPoint;
 var list: TStrings;
 begin
   list := TStringList.Create;
-  ExtractStrings([';'], [], PChar(data), list);
+  try
+    ExtractStrings([';'], [], PChar(data), list);
 
-  if (list.Count < 2) then
-  begin
-    Result := Point(-1, -1);
-    Exit;
+    if (list.Count < 2) then
+    begin
+      Result := Point(-1, -1);
+      Exit;
+    end;
+
+    Result := Point(StrToIntDef(list[0], -1), StrToIntDef(list[1], -1));
+  finally
+    list.Free();
   end;
-
-  Result := Point(StrToIntDef(list[0], -1), StrToIntDef(list[1], -1));
-
-  list.Free;
 end;
 
 function StrToColor(str: string): TColor;

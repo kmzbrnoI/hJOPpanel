@@ -319,7 +319,7 @@ begin
     for Item in Self.auth_errors do
     begin
       if (Assigned(Self.auth_ors)) then
-        Self.ST_Error.caption := Self.ST_Error.caption + relief.ors[Item.Key].Name + ': ' + Item.Value + #13#10
+        Self.ST_Error.caption := Self.ST_Error.caption + relief.pareas[Item.Key].Name + ': ' + Item.Value + #13#10
       else
         Self.ST_Error.caption := Self.ST_Error.caption + Item.Value + #13#10;
     end;

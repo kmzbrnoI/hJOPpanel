@@ -151,23 +151,23 @@ begin
     end;
   end;
 
-  HV.Nazev := Self.E_Name.Text;
-  HV.Majitel := Self.E_Majitel.Text;
-  HV.Oznaceni := Self.E_Oznaceni.Text;
-  HV.Poznamka := Self.M_Poznamka.Text;
-  HV.Adresa := StrToInt(Self.E_Adresa.Text);
+  HV.name := Self.E_Name.Text;
+  HV.owner := Self.E_Majitel.Text;
+  HV.designation := Self.E_Oznaceni.Text;
+  HV.note := Self.M_Poznamka.Text;
+  HV.addr := StrToInt(Self.E_Adresa.Text);
   if (Self.RG_Trida.ItemIndex = Self.RG_Trida.Items.Count - 1) then
-    HV.Typ := THVType.other
+    HV.typ := THVType.other
   else
-    HV.Typ := THVType(Self.RG_Trida.ItemIndex);
-  HV.Souprava := '-';
-  HV.StanovisteA := THVStanoviste(Self.RG_StA.ItemIndex);
-  HV.maxRychlost := Self.SE_MaxSpeed.Value;
+    HV.typ := THVType(Self.RG_Trida.ItemIndex);
+  HV.train := '-';
+  HV.siteA := THVSite(Self.RG_StA.ItemIndex);
+  HV.maxSpeed := Self.SE_MaxSpeed.Value;
   str := Self.CB_Prechodnost.Items[Self.CB_Prechodnost.ItemIndex];
-  HV.prechodnost := StrToInt(Copy(str, 1, Pos(':', str) - 1));
+  HV.transience := StrToInt(Copy(str, 1, Pos(':', str) - 1));
 
   for i := 0 to _MAX_FUNC do
-    HV.funkce[i] := Self.LV_Funkce.Items[i].Checked;
+    HV.functions[i] := Self.LV_Funkce.Items[i].Checked;
 
   HV.POMtake.Clear();
   HV.POMrelease.Clear();
@@ -213,7 +213,7 @@ begin
         Exit();
       end;
 
-    HV.funcVyznam[i] := Self.CB_funkce[i].Text;
+    HV.funcDesc[i] := Self.CB_funkce[i].Text;
     if (Self.RB_M[i].Checked) then
       HV.funcType[i] := THVFuncType.momentary
     else
@@ -345,17 +345,17 @@ begin
       else
         HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
 
-      Self.E_Name.Text := HV.Nazev;
-      Self.E_Oznaceni.Text := HV.Oznaceni;
-      Self.E_Majitel.Text := HV.Majitel;
-      Self.E_Adresa.Text := IntToStr(HV.Adresa);
-      Self.M_Poznamka.Text := HV.Poznamka;
-      if (HV.Typ = THVType.other) then
+      Self.E_Name.Text := HV.name;
+      Self.E_Oznaceni.Text := HV.designation;
+      Self.E_Majitel.Text := HV.owner;
+      Self.E_Adresa.Text := IntToStr(HV.addr);
+      Self.M_Poznamka.Text := HV.note;
+      if (HV.typ = THVType.other) then
         Self.RG_Trida.ItemIndex := Self.RG_Trida.Items.Count - 1
       else
-        Self.RG_Trida.ItemIndex := Integer(HV.Typ);
-      Self.RG_StA.ItemIndex := Integer(HV.StanovisteA);
-      Self.SE_MaxSpeed.Value := HV.maxRychlost;
+        Self.RG_Trida.ItemIndex := Integer(HV.typ);
+      Self.RG_StA.ItemIndex := Integer(HV.siteA);
+      Self.SE_MaxSpeed.Value := HV.maxSpeed;
 
       prechSorted := TList<Cardinal>.Create(Self.prechodnost.Keys);
       try
@@ -364,12 +364,12 @@ begin
         for j in prechSorted do
         begin
           Self.CB_Prechodnost.Items.Add(IntToStr(j) + ': ' + Self.prechodnost[j]);
-          if (j = HV.prechodnost) then
+          if (j = HV.transience) then
             Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count - 1;
         end;
-        if (not Self.prechodnost.ContainsKey(HV.prechodnost)) then
+        if (not Self.prechodnost.ContainsKey(HV.transience)) then
         begin
-          Self.CB_Prechodnost.Items.Add(IntToStr(HV.prechodnost) + ': ?');
+          Self.CB_Prechodnost.Items.Add(IntToStr(HV.transience) + ': ?');
           Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count - 1;
         end;
       finally
@@ -377,7 +377,7 @@ begin
       end;
 
       for i := 0 to _MAX_FUNC do
-        Self.LV_Funkce.Items[i].Checked := HV.funkce[i];
+        Self.LV_Funkce.Items[i].Checked := HV.functions[i];
 
       for pomCV in HV.POMtake do
       begin
@@ -395,7 +395,7 @@ begin
 
       for i := 0 to _MAX_FUNC do
       begin
-        Self.CB_funkce[i].Text := HV.funcVyznam[i];
+        Self.CB_funkce[i].Text := HV.funcDesc[i];
         if (HV.funcType[i] = THVFuncType.permanent) then
           Self.RB_P[i].Checked := true
         else

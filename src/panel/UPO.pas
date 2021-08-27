@@ -62,19 +62,18 @@ begin
   Self.fshowing := false;
   Self.Graphics := Graphics;
   Self.items := TList<TPanelUPOItem>.Create();
-end; // ctor
+end;
 
 destructor TPanelUPO.Destroy();
 begin
   Self.items.Free();
-  inherited Destroy();
-end; // dtor
+  inherited;
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelUPO.Show(obj: TDXDraw);
-var i, j: Integer;
-  str: string;
+var str: string;
 begin
   if (not Self.showing) then
     Exit();
@@ -85,8 +84,8 @@ begin
     Exit();
   end;
 
-  // vykresleni polozek
-  for i := 0 to 2 do
+  // show items
+  for var i := 0 to 2 do
   begin
     if (Length(Self.items[Self.current].lines[i].str) > _UPO_WIDTH) then
       str := LeftStr(Self.items[Self.current].lines[i].str, _UPO_WIDTH);
@@ -94,8 +93,7 @@ begin
     case (Self.items[Self.current].lines[i].align) of
       taCenter:
         begin
-          str := '';
-          for j := 0 to ((_UPO_WIDTH - Length(Self.items[Self.current].lines[i].str)) div 2) - 1 do
+          for var j := 0 to ((_UPO_WIDTH - Length(Self.items[Self.current].lines[i].str)) div 2) - 1 do
             str := str + ' ';
           str := str + Self.items[Self.current].lines[i].str;
           while (Length(str) < _UPO_WIDTH) do
@@ -111,22 +109,22 @@ begin
 
       taRightJustify:
         begin
-          for j := 0 to (_UPO_WIDTH - Length(Self.items[Self.current].lines[i].str)) - 1 do
+          for var j := 0 to (_UPO_WIDTH - Length(Self.items[Self.current].lines[i].str)) - 1 do
             str := str + ' ';
           str := str + Self.items[Self.current].lines[i].str;
         end; // taRightJustify
     end; // case
 
-    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - _UPO_HEIGHT + i), str,
+    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - _UPO_HEIGHT + i), str,
       Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg, obj);
   end; // for i
 
   // vykresleni informaceo pokracovani
   if ((Self.critical) and (Self.current = Self.items.Count - 1)) then
-    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '          Ukončení: ESCAPE          ', clBlack,
+    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), '          Ukončení: ESCAPE          ', clBlack,
       clTeal, obj)
   else
-    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '  Pokračovat: ENTER, konec: ESCAPE  ', clBlack,
+    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), '  Pokračovat: ENTER, konec: ESCAPE  ', clBlack,
       clTeal, obj);
 end;
 

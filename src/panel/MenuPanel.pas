@@ -2,7 +2,7 @@
 
 {
   TPanelMenu
-  Zobrazovani menu na panelu.
+  Show menu in top-left corner of a panel.
 }
 
 interface
@@ -91,7 +91,7 @@ begin
 
   Self.Graphics := Graphics;
   Self.Hints := TDictionary<string, string>.Create();
-end; // ctor
+end;
 
 destructor TPanelMenu.Destroy();
 begin
@@ -99,7 +99,7 @@ begin
     FreeAndNil(Self.Hints);
 
   inherited;
-end; // dtor
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -225,53 +225,54 @@ end;
 
 procedure TPanelMenu.ParseMenuItems(Items: string);
 var sl: TStrings;
-  i: Integer;
 begin
   sl := TStringList.Create();
-  ExtractStringsEx([',', ';'], [], Items, sl);
+  try
+    ExtractStringsEx([',', ';'], [], Items, sl);
 
-  Self.Items.cnt := sl.Count;
+    Self.Items.cnt := sl.Count;
 
-  for i := 0 to sl.Count - 1 do
-  begin
-    Self.Items.data[i].disabled := false;
-    Self.Items.data[i].header := false;
-    Self.Items.data[i].important := false;
-    Self.Items.data[i].admin := false;
+    for var i := 0 to sl.Count - 1 do
+    begin
+      Self.Items.data[i].disabled := false;
+      Self.Items.data[i].header := false;
+      Self.Items.data[i].important := false;
+      Self.Items.data[i].admin := false;
 
-    case (sl[i][1]) of
-      '#':
-        begin
-          Self.Items.data[i].disabled := true;
-          Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
-        end;
-      '$':
-        begin
-          Self.Items.data[i].header := true;
-          Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
-        end;
-      '!':
-        begin
-          Self.Items.data[i].important := true;
-          Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
-        end;
-      '*':
-        begin
-          Self.Items.data[i].admin := true;
-          Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
-        end
-    else
-      Self.Items.data[i].plain_text := sl[i];
+      case (sl[i][1]) of
+        '#':
+          begin
+            Self.Items.data[i].disabled := true;
+            Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
+          end;
+        '$':
+          begin
+            Self.Items.data[i].header := true;
+            Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
+          end;
+        '!':
+          begin
+            Self.Items.data[i].important := true;
+            Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
+          end;
+        '*':
+          begin
+            Self.Items.data[i].admin := true;
+            Self.Items.data[i].plain_text := RightStr(sl[i], Length(sl[i]) - 1);
+          end
+      else
+        Self.Items.data[i].plain_text := sl[i];
+      end;
+
+      if (Length(Self.Items.data[i].plain_text) > _MENU_WIDTH - 2) then
+        Self.Items.data[i].show_text := LeftStr(Self.Items.data[i].plain_text, _MENU_WIDTH - 3) + '.'
+      else
+        Self.Items.data[i].show_text := Self.Items.data[i].plain_text;
+
     end;
-
-    if (Length(Self.Items.data[i].plain_text) > _MENU_WIDTH - 2) then
-      Self.Items.data[i].show_text := LeftStr(Self.Items.data[i].plain_text, _MENU_WIDTH - 3) + '.'
-    else
-      Self.Items.data[i].show_text := Self.Items.data[i].plain_text;
-
-  end; // for i
-
-  sl.Free;
+  finally
+    sl.Free();
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -291,7 +292,6 @@ end;
 procedure TPanelMenu.LoadHints(fn: string);
 var parsed: TStrings;
   f: TextFile;
-  line: string;
 begin
   Self.Hints.Clear();
 
@@ -303,29 +303,29 @@ begin
   end;
 
   parsed := TStringList.Create();
+  try
+    while (not eof(f)) do
+    begin
+      var line: string;
+      ReadLn(f, line);
+      parsed.Clear();
+      ExtractStringsEx([',', ';'], [], line, parsed);
 
-  while (not eof(f)) do
-  begin
-    ReadLn(f, line);
-    parsed.Clear();
-    ExtractStringsEx([',', ';'], [], line, parsed);
-
-    try
-      if (parsed.Count >= 2) then
-        Self.Hints.Add(UTF8ToString(RawByteString(parsed[0])), UTF8ToString(RawByteString(parsed[1])));
-    except
-      Self.Hints.Clear;
-      Exit();
+      try
+        if (parsed.Count >= 2) then
+          Self.Hints.Add(UTF8ToString(RawByteString(parsed[0])), UTF8ToString(RawByteString(parsed[1])));
+      except
+        Self.Hints.Clear;
+        Exit();
+      end;
     end;
-  end; // while
-
-  parsed.Free();
-  CloseFile(f);
+  finally
+    parsed.Free();
+    CloseFile(f);
+  end;
 end;
 
 procedure TPanelMenu.KeyPress(key: Integer; var handled: boolean);
-var mouse: TPoint;
-  i: Integer;
 begin
   handled := true;
 
@@ -335,9 +335,11 @@ begin
 
     VK_UP:
       begin
+        var mouse: TPoint;
         GetCursorPos(mouse);
         if (Self.fselected > Self.GetFirstItemIndex()) then
         begin
+          var i: Integer;
           for i := Self.fselected - 1 downto 0 do
             if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and
               (Self.Items.data[i].show_text <> '-')) then
@@ -346,7 +348,7 @@ begin
         end;
         if (Self.fselected = -1) then
         begin
-          mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
+          mouse := Self.Graphics.dxd.ClientToScreen(Point(0, 0));
           mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
           mouse.Y := mouse.Y + Round((2.5 + Self.GetLastItemIndex()) * SymbolSet.symbHeight);
         end;
@@ -355,9 +357,11 @@ begin
 
     VK_DOWN:
       begin
+        var mouse: TPoint;
         GetCursorPos(mouse);
         if ((Self.fselected < Self.GetLastItemIndex()) and (Self.fselected <> -1)) then
         begin
+          var i: Integer;
           for i := Self.fselected + 1 to Self.Items.cnt - 1 do
             if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and
               (Self.Items.data[i].show_text <> '-')) then
@@ -367,7 +371,7 @@ begin
         end;
         if (Self.fselected = -1) then
         begin
-          mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
+          mouse := Self.Graphics.dxd.ClientToScreen(Point(0, 0));
           mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
           mouse.Y := mouse.Y + Round((2.5 + Self.GetFirstItemIndex()) * SymbolSet.symbHeight);
         end;
@@ -376,7 +380,8 @@ begin
 
     48 .. 57, 65 .. 90:
       begin
-        mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
+        var mouse: TPoint;
+        mouse := Self.Graphics.dxd.ClientToScreen(Point(0, 0));
         mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
         mouse.Y := mouse.Y + Round((2.5 + Self.GetItemIndex(chr(key))) * SymbolSet.symbHeight);
         SetCursorPos(mouse.X, mouse.Y);
@@ -385,7 +390,8 @@ begin
     // numpad keys
     96 .. 105:
       begin
-        mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
+        var mouse: TPoint;
+        mouse := Self.Graphics.dxd.ClientToScreen(Point(0, 0));
         mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
         mouse.Y := mouse.Y + Round((2.5 + Self.GetItemIndex(chr(key - VK_NUMPAD0 + ord('0')))) *
           SymbolSet.symbHeight);
@@ -398,9 +404,8 @@ begin
 end;
 
 function TPanelMenu.GetFirstItemIndex(): Integer;
-var i: Integer;
 begin
-  for i := 0 to Self.Items.cnt - 1 do
+  for var i := 0 to Self.Items.cnt - 1 do
     if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-'))
     then
       Exit(i);
@@ -408,9 +413,8 @@ begin
 end;
 
 function TPanelMenu.GetLastItemIndex(): Integer;
-var i: Integer;
 begin
-  for i := Self.Items.cnt - 1 downto 0 do
+  for var i := Self.Items.cnt - 1 downto 0 do
     if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-'))
     then
       Exit(i);
@@ -418,8 +422,7 @@ begin
 end;
 
 function TPanelMenu.GetItemIndex(starting: char): Integer;
-var i: Integer;
-  start: Integer;
+var start: Integer;
 begin
   if (Self.fselected > -1) then
   begin
@@ -431,12 +434,12 @@ begin
     start := 0;
   end;
 
-  for i := start to Self.Items.cnt - 1 do
+  for var i := start to Self.Items.cnt - 1 do
     if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-')
       and (Self.Items.data[i].show_text[1] = starting)) then
       Exit(i);
 
-  for i := 0 to start - 1 do
+  for var i := 0 to start - 1 do
     if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and (Self.Items.data[i].show_text <> '-')
       and (Self.Items.data[i].show_text[1] = starting)) then
       Exit(i);

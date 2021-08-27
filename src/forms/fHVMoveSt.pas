@@ -64,7 +64,7 @@ begin
 
   for LI in Self.LV_HVs.Items do
     if (LI.Selected) then
-      PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), ORDb.db_reverse[Self.CB_Stanice.Text]);
+      PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), areaDb.db_reverse[Self.CB_Stanice.Text]);
 
   Screen.Cursor := crHourGlass;
 end;
@@ -89,18 +89,18 @@ begin
   Self.LV_HVs.Clear();
   for HV in HVs.HVs do
   begin
-    if (HV.Souprava = '-') then
+    if (HV.train = '-') then
     begin
       LI := Self.LV_HVs.Items.Add();
-      LI.Caption := IntToStr(HV.Adresa);
-      LI.SubItems.Add(HV.Nazev);
-      LI.SubItems.Add(HV.Oznaceni);
-      LI.Data := Pointer(HV.Adresa);
+      LI.Caption := IntToStr(HV.addr);
+      LI.SubItems.Add(HV.name);
+      LI.SubItems.Add(HV.designation);
+      LI.Data := Pointer(HV.addr);
     end;
   end;
 
   Self.CB_Stanice.Clear();
-  for name in ORDb.names_sorted do
+  for name in areaDb.names_sorted do
     Self.CB_Stanice.Items.Add(name);
 
   Self.ActiveControl := Self.LV_HVs;

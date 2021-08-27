@@ -10,58 +10,57 @@ uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,
   PGraphics;
 
 type
-  TORControlRights = (null = 0, read = 1, write = 2, superuser = 3);
+  TAreaControlRights = (null = 0, read = 1, write = 2, superuser = 3);
+  TAreaDkOrientation = (dkBot = 0, dkTop = 1);
 
-  // prava oblasti rizeni
-  TORRights = record
-    ModCasStart: Boolean;
-    ModCasStop: Boolean;
-    ModCasSet: Boolean;
+  TAreaRights = record
+    modelTimeStart: Boolean;
+    modelTimeStop: Boolean;
+    modelTimeSet: Boolean;
   end;
 
-  // pozice symbolu OR
-  TPoss = record
-    DK: TPoint;
-    DKOr: byte; // orientace DK (0,1)
-    Time: TPoint;
+  TAreaPos = record
+    dk: TPoint;
+    dkOrentation: TAreaDkOrientation;
+    time: TPoint;
   end;
 
-  // 1 element osvetleni oblasti rizeni
-  TOsv = record
-    board: byte;
-    port: byte;
-    name: string; // max 5 znaku
+  TAreaLights = record
+    board: Cardinal;
+    port: Cardinal;
+    name: string; // max length = 5
     state: Boolean;
   end;
 
-  TMereniCasu = record
-    Start: TDateTime;
-    Length: TDateTime;
+  TCountdown = record
+    start: TDateTime;
+    length: TDateTime;
     id: Integer;
   end;
 
-  TORRegPleaseStatus = (none = 0, request = 1, selected = 2);
+  TAreaRegPleaseStatus = (none = 0, request = 1, selected = 2);
 
-  TORRegPlease = record
-    status: TORRegPleaseStatus;
+  TAreaRegPlease = record
+    status: TAreaRegPleaseStatus;
     user, firstname, lastname, comment: string;
   end;
 
+  TAreaOrientation = (aoOddLeftToRight = 0, aoOddRightToLeft = 1);
+
   EInvalidData = class(Exception);
 
-  // 1 oblast rizeni
-  TORPanel = class
+  TAreaPanel = class
     str: string;
     name: string;
-    ShortName: string;
+    shortName: string;
     id: string;
-    Lichy: byte; // 0 = zleva doprava ->, 1 = zprava doleva <-
-    Rights: TORRights;
-    Poss: TPoss;
-    Osvetleni: TList<TOsv>;
-    MereniCasu: TList<TMereniCasu>;
+    orientation: TAreaOrientation;
+    rights: TAreaRights;
+    positions: TAreaPos;
+    lights: TList<TAreaLights>;
+    countdown: TList<TCountdown>;
 
-    tech_rights: TORControlRights;
+    tech_rights: TAreaControlRights;
     dk_blik: Boolean;
     dk_click_server: Boolean;
     stack: TORStack;
@@ -70,11 +69,11 @@ type
     login: string;
 
     NUZ_status: TNUZstatus;
-    RegPlease: TORRegPlease;
+    RegPlease: TAreaRegPlease;
 
     HVs: THVDb;
 
-    hlaseni: Boolean;
+    announcement: Boolean;
 
     constructor Create(line: string; Graphics: TPanelGraphics);
     destructor Destroy(); override;
@@ -86,10 +85,8 @@ uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TORPanel.Create(line: string; Graphics: TPanelGraphics);
+constructor TAreaPanel.Create(line: string; Graphics: TPanelGraphics);
 var data_main, data_osv, data_osv2: TStrings;
-  j: Integer;
-  Osv: TOsv;
   Pos: TPoint;
 begin
   inherited Create();
@@ -107,33 +104,33 @@ begin
     Self.str := line;
 
     Self.name := data_main[0];
-    Self.ShortName := data_main[1];
+    Self.shortName := data_main[1];
     Self.id := data_main[2];
-    Self.Lichy := StrToInt(data_main[3]);
-    Self.Poss.DKOr := StrToInt(data_main[4]);
+    Self.orientation := TAreaOrientation(StrToInt(data_main[3]));
+    Self.positions.dkOrentation := TAreaDkOrientation(StrToInt(data_main[4]));
 
-    Self.Rights.ModCasStart := StrToBool(data_main[5]);
-    Self.Rights.ModCasStop := StrToBool(data_main[6]);
-    Self.Rights.ModCasSet := StrToBool(data_main[7]);
+    Self.rights.ModelTimeStart := StrToBool(data_main[5]);
+    Self.rights.ModelTimeStop := StrToBool(data_main[6]);
+    Self.rights.ModelTimeSet := StrToBool(data_main[7]);
 
-    Self.Poss.DK.X := StrToInt(data_main[8]);
-    Self.Poss.DK.Y := StrToInt(data_main[9]);
+    Self.positions.DK.X := StrToInt(data_main[8]);
+    Self.positions.DK.Y := StrToInt(data_main[9]);
 
     Pos.X := StrToInt(data_main[10]);
     Pos.Y := StrToInt(data_main[11]);
     Self.stack := TORStack.Create(Graphics, Self.id, Pos);
 
-    Self.Poss.Time.X := StrToInt(data_main[12]);
-    Self.Poss.Time.Y := StrToInt(data_main[13]);
+    Self.positions.Time.X := StrToInt(data_main[12]);
+    Self.positions.Time.Y := StrToInt(data_main[13]);
 
-    Self.Osvetleni := TList<TOsv>.Create();
-    Self.MereniCasu := TList<TMereniCasu>.Create();
+    Self.lights := TList<TAreaLights>.Create();
+    Self.countdown := TList<TCountdown>.Create();
 
     data_osv.Clear();
     if (data_main.Count >= 15) then
     begin
       ExtractStrings(['|'], [], PChar(data_main[14]), data_osv);
-      for j := 0 to data_osv.Count - 1 do
+      for var j := 0 to data_osv.Count - 1 do
       begin
         data_osv2.Clear();
         ExtractStrings(['#'], [], PChar(data_osv[j]), data_osv2);
@@ -141,15 +138,16 @@ begin
         if (data_osv2.Count < 2) then
           continue;
 
-        Osv.board := StrToInt(data_osv2[0]);
-        Osv.port := StrToInt(data_osv2[1]);
+        var lights: TAreaLights;
+        lights.board := StrToInt(data_osv2[0]);
+        lights.port := StrToInt(data_osv2[1]);
         if (data_osv2.Count > 2) then
-          Osv.name := data_osv2[2]
+          lights.name := data_osv2[2]
         else
-          Osv.name := '';
-        Self.Osvetleni.Add(Osv);
-      end; // for j
-    end; // .Count >= 15
+          lights.name := '';
+        Self.lights.Add(lights);
+      end;
+    end;
 
     Self.HVs := THVDb.Create();
   finally
@@ -161,11 +159,11 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-destructor TORPanel.Destroy();
+destructor TAreaPanel.Destroy();
 begin
   Self.stack.Free();
-  Self.Osvetleni.Free();
-  Self.MereniCasu.Free();
+  Self.lights.Free();
+  Self.countdown.Free();
   Self.HVs.Free();
   inherited;
 end;

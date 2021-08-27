@@ -86,9 +86,9 @@ type
     function TrainPaintsOnRailNum(): boolean;
     procedure Reset();
 
-    procedure PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
+    procedure PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TAreaPanel>; obj: TDXDraw; blik: boolean;
       bgZaver: boolean = false);
-    procedure ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
+    procedure ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>);
     procedure PaintTrackName(pos: TPoint; obj: TDXDraw; hidden: boolean);
     procedure AddSymbolFromCrossing(pos: TPoint);
     procedure RemoveSymbolFromCrossing(pos: TPoint);
@@ -152,7 +152,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // vykresleni soupravy na dane pozici
-procedure TPTrack.PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
+procedure TPTrack.PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TAreaPanel>; obj: TDXDraw; blik: boolean;
   bgZaver: boolean = false);
 var fg, bg: TColor;
   arrowLeft, arrowRight: boolean;
@@ -164,7 +164,7 @@ begin
   fg := train.fg;
 
   // urceni barvy
-  if (myORs[Self.area].RegPlease.status = TORRegPleaseStatus.selected) then
+  if (myORs[Self.area].RegPlease.status = TAreaRegPleaseStatus.selected) then
   begin
     if (blik) then
     begin
@@ -180,14 +180,13 @@ begin
 
   TextOutput(pos, train.name, fg, bg, obj, true);
 
-  // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
-  arrowLeft := (((train.arrowL) and (myORs[Self.area].Lichy = 1)) or
-    ((train.arrowS) and (myORs[Self.area].Lichy = 0)));
+  arrowLeft := (((train.arrowL) and (myORs[Self.area].orientation = aoOddRightToLeft)) or
+    ((train.arrowS) and (myORs[Self.area].orientation = aoOddLeftToRight)));
 
-  arrowRight := (((train.arrowS) and (myORs[Self.area].Lichy = 1)) or
-    ((train.arrowL) and (myORs[Self.area].Lichy = 0)));
+  arrowRight := (((train.arrowS) and (myORs[Self.area].orientation = aoOddRightToLeft)) or
+    ((train.arrowL) and (myORs[Self.area].orientation = aoOddLeftToRight)));
 
-  // vykresleni ramecku kolem cisla soupravy
+  // show border around train number
   if (train.border <> clBlack) then
   begin
     obj.Surface.Canvas.Pen.Mode := pmMerge;
@@ -240,7 +239,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 // zobrazi soupravy na celem useku
 
-procedure TPTrack.ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
+procedure TPTrack.ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>);
 begin
   // Posindex neni potreba mazat, protoze se vzdy se zmenou stavu bloku
   // prepisuje automaticky na -1.

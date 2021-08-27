@@ -248,7 +248,7 @@ begin
 
   BridgeClient.OnAuthStatushanged := Self.OnuLIAuthStatusChanged;
 
-  ModCas.Reset();
+  ModelTime.Reset();
   DCC := TDCC.Create();
 
   JclAppInstances.CheckInstance(0);
@@ -283,10 +283,10 @@ end;
 
 procedure TF_Main.FormResize(Sender: TObject);
 begin
-  Self.P_Time_modelovy.Visible := ModCas.used;
-  Self.P_Zrychleni.Visible := ModCas.used;
+  Self.P_Time_modelovy.Visible := ModelTime.used;
+  Self.P_Zrychleni.Visible := ModelTime.used;
 
-  if (ModCas.used) then
+  if (ModelTime.used) then
   begin
     Self.P_Zrychleni.Left := Self.P_Header.width - Self.P_Zrychleni.width - 5;
     Self.P_Time_modelovy.Left := Self.P_Zrychleni.Left - Self.P_Time_modelovy.width - 5;
@@ -653,7 +653,7 @@ end;
 
 procedure TF_Main.OnModTimeChanged();
 begin
-  if (ModCas.started) then
+  if (ModelTime.started) then
   begin
     F_Main.P_Time_modelovy.Font.Color := clBlack;
     F_Main.P_Zrychleni.Font.Color := clBlack;
@@ -662,8 +662,8 @@ begin
     F_Main.P_Zrychleni.Font.Color := clRed;
   end;
 
-  F_Main.P_Zrychleni.Caption := ModCas.strSpeed + '×';
-  F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', ModCas.time);
+  F_Main.P_Zrychleni.Caption := ModelTime.strSpeed + '×';
+  F_Main.P_Time_modelovy.Caption := FormatDateTime('hh:nn:ss', ModelTime.time);
 
   Self.CheckTimeSpeedWidth();
   Self.FormResize(Self);
@@ -685,8 +685,8 @@ function TF_Main.LargeSSFitsScreen(): Boolean;
 begin
   if (Relief = nil) then
     Exit(True);
-  Result := ((Relief.PanelWidth * SymbolSet.sets[1].symbolWidth <= Screen.DesktopWidth) and
-    (Relief.PanelHeight * SymbolSet.sets[1].symbolHeight <= Screen.DesktopHeight));
+  Result := ((Relief.width * SymbolSet.sets[1].symbolWidth <= Screen.DesktopWidth) and
+    (Relief.height * SymbolSet.sets[1].symbolHeight <= Screen.DesktopHeight));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

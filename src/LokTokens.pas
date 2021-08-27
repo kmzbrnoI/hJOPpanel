@@ -1,7 +1,7 @@
 unit LokTokens;
 
 {
-  Databaze autorizacnich tokenu pro rucni rizeni hnacich vozidel.
+  Database of authorization token for manual control of engines.
 }
 
 interface
@@ -57,11 +57,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TTokens.ParseData(var parsed: TStrings);
-var HVs: THVDb;
-  i: Integer;
-  Purpose, gpurpose: TTokenPurpose;
+var purpose, gpurpose: TTokenPurpose;
   splitted: TStrings;
-  HV: THV;
 begin
   if (parsed[2] = 'OK') then
   begin
@@ -70,15 +67,15 @@ begin
     if (F_SprToSlot.token_req_sent) then
       F_SprToSlot.ServerResponseOK();
 
-    HVs := THVDb.Create();
+    var HVs := THVDb.Create();
     HVs.ParseHVsFromToken(parsed[3]);
 
     gpurpose.slot := 0;
-    for HV in HVs.HVs do
+    for var HV in HVs.HVs do
     begin
-      if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HV.Adresa, Purpose))) then
+      if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HV.addr, Purpose))) then
         gpurpose := Purpose
-      else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HV.Adresa, Purpose)) or
+      else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HV.addr, Purpose)) or
         (Purpose.slot <> gpurpose.slot))) then
       begin
         gpurpose.slot := 0;
@@ -110,8 +107,8 @@ begin
 
     end; // case
 
-    for HV in HVs.HVs do
-      Self.tokenPurpose.Remove(HV.Adresa);
+    for var HV in HVs.HVs do
+      Self.tokenPurpose.Remove(HV.addr);
 
     HVs.Free();
   end
@@ -126,7 +123,7 @@ begin
     try
       splitted := TStringList.Create();
       ExtractStringsEx(['|'], [], parsed[3], splitted);
-      for i := 0 to splitted.Count - 1 do
+      for var i := 0 to splitted.Count - 1 do
       begin
         try
           Self.tokenPurpose.Remove(StrToInt(splitted[i]));
@@ -143,11 +140,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TTokens.LokosToReg(orId: string; lokos: array of Word);
-var i: Integer;
-  str: string;
+var str: string;
 begin
   str := '';
-  for i := 0 to Length(lokos) - 1 do
+  for var i := 0 to Length(lokos) - 1 do
   begin
     str := str + IntToStr(lokos[i]) + '|';
     Self.tokenPurpose.Remove(lokos[i]);
@@ -157,11 +153,10 @@ begin
 end;
 
 procedure TTokens.LokosToMaus(orId: string; lokos: array of Word; slot: Integer; ruc: boolean);
-var i: Integer;
-  str: string;
+var str: string;
 begin
   str := '';
-  for i := 0 to Length(lokos) - 1 do
+  for var i := 0 to Length(lokos) - 1 do
   begin
     str := str + IntToStr(lokos[i]) + '|';
     Self.tokenPurpose.AddOrSetValue(lokos[i], Purpose(slot, ruc));

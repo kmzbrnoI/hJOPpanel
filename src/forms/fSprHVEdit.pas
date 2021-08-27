@@ -94,18 +94,18 @@ begin
     for i := 0 to _MAX_FUNC do
     begin
       Self.CHB_funkce[i].Visible := true;
-      Self.CHB_funkce[i].Enabled := ((HV.funcType[i] = THVFuncType.permanent) or (HV.funkce[i]));
-      Self.CHB_funkce[i].Checked := HV.funkce[i];
+      Self.CHB_funkce[i].Enabled := ((HV.funcType[i] = THVFuncType.permanent) or (HV.functions[i]));
+      Self.CHB_funkce[i].Checked := HV.functions[i];
       str := 'F' + IntToStr(i);
       if (HV.funcType[i] = THVFuncType.momentary) then
         str := str + ' [M]';
-      if (HV.funcVyznam[i] <> '') then
-        str := str + ': ' + HV.funcVyznam[i];
+      if (HV.funcDesc[i] <> '') then
+        str := str + ': ' + HV.funcDesc[i];
       Self.CHB_funkce[i].Caption := str;
     end;
 
-    Self.RG_HV1_dir.ItemIndex := Integer(HV.StanovisteA);
-    Self.M_HV1_Notes.Text := HV.Poznamka;
+    Self.RG_HV1_dir.ItemIndex := Integer(HV.siteA);
+    Self.M_HV1_Notes.Text := HV.note;
   end; // else
 
 end;
@@ -120,7 +120,7 @@ begin
   if (sprHV = nil) then
     HVs.FillHVs(Self.CB_HV1_HV, Self.Indexes)
   else
-    HVs.FillHVs(Self.CB_HV1_HV, Self.Indexes, sprHV.Adresa, sprHV);
+    HVs.FillHVs(Self.CB_HV1_HV, Self.Indexes, sprHV.addr, sprHV);
 
   Self.CB_HV1_HVChange(Self.CB_HV1_HV);
   Self.PC_Funkce.ActivePageIndex := 0;
@@ -146,12 +146,12 @@ var HV: THV;
 begin
   HV := THV.Create();
 
-  HV.StanovisteA := THVStanoviste(Self.RG_HV1_dir.ItemIndex);
-  HV.Adresa := Self.Indexes[Self.CB_HV1_HV.ItemIndex];
-  HV.Poznamka := Self.M_HV1_Notes.Text;
+  HV.siteA := THVSite(Self.RG_HV1_dir.ItemIndex);
+  HV.addr := Self.Indexes[Self.CB_HV1_HV.ItemIndex];
+  HV.note := Self.M_HV1_Notes.Text;
 
   for i := 0 to _MAX_FUNC do
-    HV.funkce[i] := Self.CHB_funkce[i].Checked;
+    HV.functions[i] := Self.CHB_funkce[i].Checked;
 
   Result := '[{' + HV.GetPanelLokString() + '}]';
 end;
@@ -163,13 +163,13 @@ var HV: THV;
 begin
   // nejdrive hledame lokomotivu ve hnacim vozidle k souprave
   if (Assigned(Self.sprHV)) then
-    if (Self.sprHV.Adresa = addr) then
+    if (Self.sprHV.addr = addr) then
       Exit(Self.sprHV);
 
   // pak hledame hnaci vozidlo v HVs, ktere mame k dispozici
   if (Assigned(Self.HVs)) then
     for HV in Self.HVs.HVs do
-      if (HV.Adresa = addr) then
+      if (HV.addr = addr) then
         Exit(HV);
 
   Exit(nil);

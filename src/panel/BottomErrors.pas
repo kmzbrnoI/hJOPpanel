@@ -139,21 +139,21 @@ begin
     Exit();
 
   // vypsani zdroje chyby (napr. "TECHNOLOGIE")
-  if (Self.Graphics.blik) then
+  if (Self.Graphics.flash) then
     msg := Self.errors[0].techStr
   else
     msg := StringOfChar(' ', _TECH_WIDTH);
 
-  Symbols.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
+  Symbols.TextOutput(Point(_TECH_LEFT, Relief.height - 1), msg, clRed, clWhite, obj);
 
   // vypsani poctu chyb
   msg := Format('%2d', [Self.errors.Count]);
-  Symbols.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
+  Symbols.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.height - 1), msg, clBlack, clSilver, obj);
 
   // vypsani samotnych chyb
   len := Min(Self.ErrorShowCount, Self.errors.Count);
-  top := Relief.PanelHeight - 1;
-  left := (Relief.PanelWidth div 2) - (_ERR_WIDTH div 2) + 10;
+  top := Relief.height - 1;
+  left := (Relief.width div 2) - (_ERR_WIDTH div 2) + 10;
 
   for i := 0 to len - 1 do
   begin
@@ -170,7 +170,7 @@ end;
 
 function TErrors.GetErrorShowCount(): Cardinal;
 begin
-  if (Self.Graphics.PanelHeight > 25) then
+  if (Self.Graphics.pHeight > 25) then
     Result := 4
   else
     Result := 2;

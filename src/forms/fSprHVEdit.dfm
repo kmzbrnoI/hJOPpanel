@@ -95,6 +95,10 @@ object F_SprHVEdit: TF_SprHVEdit
     TabOrder = 3
     object TS_F0_F14: TTabSheet
       Caption = 'F0-F14'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TS_F15_F28: TTabSheet
       Caption = 'F15-F28'

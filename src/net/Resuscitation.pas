@@ -65,7 +65,6 @@ end;
 
 procedure TResuscitation.Execute;
 var IdTCPClient: TIdTCPClient;
-  i: Integer;
 begin
   IdTCPClient := TIdTCPClient.Create(nil);
 
@@ -84,7 +83,7 @@ begin
       Self.frunning := false;
     end;
 
-    for i := 0 to 200 do
+    for var i := 0 to 200 do
     begin
       sleep(1);
       if (Terminated) then

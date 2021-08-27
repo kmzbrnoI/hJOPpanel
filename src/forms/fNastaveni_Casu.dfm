@@ -1,4 +1,4 @@
-object F_ModCasSet: TF_ModCasSet
+object F_ModelTIme: TF_ModelTIme
   Left = 1015
   Top = 147
   BorderIcons = [biSystemMenu]

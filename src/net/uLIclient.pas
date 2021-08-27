@@ -481,7 +481,7 @@ var str: string;
 begin
   str := '';
   for HV in HVs.HVs do
-    str := str + '{' + IntToStr(HV.Adresa) + ';' + HV.token + '};';
+    str := str + '{' + IntToStr(HV.addr) + ';' + HV.token + '};';
 
   if (ruc) then
     Self.SendLn('LOKO-RUC;' + IntToStr(slot) + ';' + str)

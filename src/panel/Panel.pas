@@ -45,15 +45,15 @@ type
 
   // data kurzoru
   TCursorDraw = record
-    KurzorRamecek, KurzorObsah: TColor;
-    Pos: TPoint;
-    Pozadi: TBitmap;
+    border, fill: TColor;
+    pos: TPoint;
+    bg: TBitmap;
   end;
 
   /// ////////////////////////////////////////////////////////////////////////////
 
   TInfoTimer = record
-    konec: TDateTime;
+    finish: TDateTime;
     str: string;
     id: Integer;
   end;
@@ -70,17 +70,15 @@ type
   /// ////////////////////////////////////////////////////////////////////////////
   TRelief = class
   private const
-    _Def_Color_Pozadi = clBlack;
-    _Def_Color_Kurzor_Ramecek = clYellow;
-    _Def_Color_Kurzor_Obsah = clMaroon;
-
-    _msg_width = 30;
-
-    _DblClick_Timeout_Ms = 250;
+    _DEF_COLOR_BG = clBlack;
+    _DEF_COLOR_CURSOR_BORDER = clYellow;
+    _DEF_COLOR_CURSOR_FILL = clMaroon;
+    _MSG_WIDTH = 30;
+    _DBLCLICK_TIMEOUT_MS = 250;
 
   private
-    DrawObject: TDXDraw;
-    ParentForm: TForm;
+    drawObject: TDXDraw;
+    parentForm: TForm;
     AE: TApplicationEvents;
     T_SystemOK: TTimer; // timer na SystemOK na 500ms - nevykresluje
     Graphics: TPanelGraphics;
@@ -90,23 +88,21 @@ type
     mouseLastBtn: TMouseButton;
     mouseClickPos: TPoint;
 
-    Colors: record
-      Pozadi: TColor;
+    colors: record
+      bg: TColor;
     end;
 
-    CursorDraw: TCursorDraw;
+    cursorDraw: TCursorDraw;
+    areaIndex: Integer;
+    areas: TObjectList<TAreaPanel>;
 
-    StaniceIndex: Integer;
-
-    myORs: TObjectList<TORPanel>;
-
-    Menu: TPanelMenu;
-    dk_root_menu_item: string;
-    menu_lastpos: TPoint; // pozice, na ktere se mys nachazela pred otevrenim menu
-    root_menu: boolean;
+    menu: TPanelMenu;
+    dkRootMenuItem: string;
+    menuLastpos: TPoint; // pozice, na ktere se mys nachazela pred otevrenim menu
+    rootMenu: boolean;
     infoTimers: TList<TInfoTimer>;
 
-    Tech_blok: TDictionary<Integer, TList<TTechBlokToSymbol>>; // mapuje id technologickeho bloku na
+    techBlok: TDictionary<Integer, TList<TTechBlokToSymbol>>; // mapuje id technologickeho bloku na
 
     tracks: TPTracks;
     turnouts: TPTurnouts;
@@ -121,8 +117,8 @@ type
     blockLabels: TPTexts;
     otherObj: TPObjOthers;
 
-    SystemOK: record
-      Poloha: boolean;
+    systemOK: record
+      position: boolean;
     end;
 
     msg: record
@@ -151,15 +147,15 @@ type
 
     procedure FLoad(aFile: string);
 
-    procedure ShowDK;
-    procedure ShowOpravneni;
-    procedure ShowMereniCasu;
-    procedure ShowMsg;
-    procedure ShowZasobniky;
-    procedure ShowInfoTimers;
+    procedure ShowAreas();
+    procedure ShowRights();
+    procedure ShowTimeCountdown();
+    procedure ShowMsg();
+    procedure ShowStacks();
+    procedure ShowInfoTimers();
 
     function GetDK(Pos: TPoint): Integer;
-    function GetOR(id: string): TORPanel;
+    function GetOR(id: string): TAreaPanel;
     function GetORIndex(id: string): Integer;
 
     procedure AEMessage(var msg: tagMSG; var Handled: boolean);
@@ -180,7 +176,7 @@ type
     procedure DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
       guest: boolean);
 
-    function DKMenuLOKOItems(Sender: TORPanel): string;
+    function DKMenuLOKOItems(Sender: TAreaPanel): string;
 
     function ParseLOKOMenuClick(item: string; obl_r: Integer): boolean;
     procedure ParseDKMenuClick(item: string; obl_r: Integer);
@@ -234,15 +230,15 @@ type
     procedure IPAAuth();
     procedure UpdateEnabled();
 
-    property PozadiColor: TColor read Colors.Pozadi write Colors.Pozadi;
-    property KurzorRamecek: TColor read CursorDraw.KurzorRamecek write CursorDraw.KurzorRamecek;
-    property KurzorObsah: TColor read CursorDraw.KurzorObsah write CursorDraw.KurzorObsah;
-    property ShowDetails: boolean read fShowDetails write SetShowDetails;
+    property bgColor: TColor read colors.bg write colors.bg;
+    property cursorBorder: TColor read cursorDraw.border write cursorDraw.border;
+    property cursorFill: TColor read cursorDraw.fill write cursorDraw.fill;
+    property showDetails: boolean read fShowDetails write SetShowDetails;
 
-    property PanelWidth: SmallInt read GetPanelWidth;
-    property PanelHeight: SmallInt read GetPanelHeight;
-    property StIndex: Integer read StaniceIndex;
-    property ors: TObjectList<TORPanel> read myORs;
+    property width: SmallInt read GetPanelWidth;
+    property height: SmallInt read GetPanelHeight;
+    property areai: Integer read areaIndex;
+    property pareas: TObjectList<TAreaPanel> read areas;
 
     // events
     property OnMove: TMoveEvent read FOnMove write FOnMove;
@@ -251,7 +247,7 @@ type
     // komunikace se serverem
     // sender = id oblasti rizeni
 
-    procedure ORAuthoriseResponse(Sender: string; Rights: TORControlRights; comment: string = '';
+    procedure ORAuthoriseResponse(Sender: string; Rights: TAreaControlRights; comment: string = '';
       username: string = '');
     procedure ORInfoMsg(msg: string);
     procedure ORShowMenu(items: string);
@@ -304,8 +300,8 @@ begin
   Self.locks := TPLocks.Create();
   Self.otherObj := TPObjOthers.Create();
 
-  Self.ParentForm := aParentForm;
-  Self.myORs := TObjectList<TORPanel>.Create();
+  Self.parentForm := aParentForm;
+  Self.areas := TObjectList<TAreaPanel>.Create();
   Self.reAuth.old_ors := TList<Integer>.Create();
 
   Self.Enabled := true;
@@ -314,62 +310,61 @@ begin
   Self.mouseTimer.Interval := _DblClick_Timeout_Ms + 20;
   Self.mouseTimer.OnTimer := Self.OnMouseTimer;
   Self.mouseTimer.Enabled := false;
-end; // contructor
+end;
 
 procedure TRelief.Initialize(var DrawObject: TDXDraw; aFile: string; hints_file: string);
 begin
-  Self.Graphics := TPanelGraphics.Create(DrawObject);
+  Self.graphics := TPanelGraphics.Create(DrawObject);
 
-  Self.Menu := TPanelMenu.Create(Self.Graphics);
-  Self.Menu.OnClick := Self.MenuOnClick;
-  Self.Menu.LoadHints(hints_file);
+  Self.menu := TPanelMenu.Create(Self.Graphics);
+  Self.menu.OnClick := Self.MenuOnClick;
+  Self.menu.LoadHints(hints_file);
 
   Errors := TErrors.Create(Self.Graphics);
   Self.UPO := TPanelUPO.Create(Self.Graphics);
   RucList := TRucList.Create(Self.Graphics);
-  Self.Tech_blok := TDictionary < Integer, TList < TTechBlokToSymbol >>.Create();
+  Self.techBlok := TDictionary < Integer, TList < TTechBlokToSymbol >>.Create();
 
   Self.infoTimers := TList<TInfoTimer>.Create();
 
-  Self.DrawObject := DrawObject;
+  Self.drawObject := DrawObject;
 
-  Self.DrawObject.OnMouseUp := Self.DXDMouseUp;
-  Self.DrawObject.OnMouseDown := Self.DXDMouseDown;
-  Self.DrawObject.OnMouseMove := Self.DXDMouseMove;
+  Self.drawObject.OnMouseUp := Self.DXDMouseUp;
+  Self.drawObject.OnMouseDown := Self.DXDMouseDown;
+  Self.drawObject.OnMouseMove := Self.DXDMouseMove;
 
-  Self.CursorDraw.Pos.X := -2;
-  Self.CursorDraw.Pozadi := TBitmap.Create();
-  Self.CursorDraw.Pozadi.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
-  Self.CursorDraw.Pozadi.Height := SymbolSet.symbHeight + 2;
+  Self.cursorDraw.pos.X := -2;
+  Self.cursorDraw.bg := TBitmap.Create();
+  Self.cursorDraw.bg.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
+  Self.cursorDraw.bg.Height := SymbolSet.symbHeight + 2;
 
-  Self.AE := TApplicationEvents.Create(Self.ParentForm);
+  Self.AE := TApplicationEvents.Create(Self.parentForm);
   Self.AE.OnMessage := Self.AEMessage;
 
-  Self.T_SystemOK := TTimer.Create(Self.ParentForm);
+  Self.T_SystemOK := TTimer.Create(Self.parentForm);
   Self.T_SystemOK.Interval := 500;
   Self.T_SystemOK.Enabled := true;
   Self.T_SystemOK.OnTimer := Self.T_SystemOKOnTimer;
 
-  Self.Colors.Pozadi := _Def_Color_Pozadi;
-  Self.CursorDraw.KurzorRamecek := _Def_Color_Kurzor_Ramecek;
-  Self.CursorDraw.KurzorObsah := _Def_Color_Kurzor_Obsah;
+  Self.colors.bg := _DEF_COLOR_BG;
+  Self.cursorDraw.border := _DEF_COLOR_CURSOR_BORDER;
+  Self.cursorDraw.fill := _DEF_COLOR_CURSOR_FILL;
 
-  Self.StaniceIndex := StIndex;
+  Self.areaIndex := areaIndex;
 
   Self.FLoad(aFile);
 
-  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet.symbWidth,
-    Self.Graphics.PanelHeight * SymbolSet.symbHeight);
+  (Self.parentForm as TF_Main).SetPanelSize(Self.Graphics.pWidth * SymbolSet.symbWidth,
+    Self.Graphics.pHeight * SymbolSet.symbHeight);
 
   Self.show();
 end;
 
 destructor TRelief.Destroy();
-var i: Integer;
 begin
   Self.mouseTimer.Free();
 
-  Self.myORs.Free();
+  Self.areas.Free();
   Self.turnouts.Free();
   Self.tracks.Free();
   Self.signals.Free();
@@ -389,18 +384,18 @@ begin
     FreeAndNil(Self.UPO);
   if (Assigned(Self.T_SystemOK)) then
     FreeAndNil(Self.T_SystemOK);
-  if (Assigned(Self.Menu)) then
-    FreeAndNil(Self.Menu);
+  if (Assigned(Self.menu)) then
+    FreeAndNil(Self.menu);
   if (Assigned(Self.Graphics)) then
     FreeAndNil(Self.Graphics);
   if (Assigned(Self.reAuth.old_ors)) then
     FreeAndNil(Self.reAuth.old_ors);
 
-  for i in Self.Tech_blok.Keys do
-    Self.Tech_blok[i].Free();
-  Self.Tech_blok.Free();
+  for var i in Self.techBlok.Keys do
+    Self.techBlok[i].Free();
+  Self.techBlok.Free();
 
-  Self.CursorDraw.Pozadi.Free();
+  Self.cursorDraw.bg.Free();
 
   inherited Destroy;
 end; // destructor
@@ -408,50 +403,47 @@ end; // destructor
 /// /////////////////////////////////////////////////////////////////////////////
 
 // zobrazi vsechny dopravni kancelare
-procedure TRelief.ShowDK();
-var fg: TColor;
-  OblR: TORPanel;
+procedure TRelief.ShowAreas();
 begin
-  // projedeme vsechny OR
-  for OblR in Self.myORs do
+  for var area in Self.areas do
   begin
-    if (((OblR.dk_blik) or (OblR.RegPlease.status = TORRegPleaseStatus.selected)) and (Self.Graphics.blik)) then
+    var fg: TColor;
+    if (((area.dk_blik) or (area.RegPlease.status = TAreaRegPleaseStatus.selected)) and (Self.Graphics.flash)) then
       fg := clBlack
     else
     begin
-      case (OblR.tech_rights) of
+      case (area.tech_rights) of
         read:
           fg := clWhite;
         write:
           fg := $A0A0A0;
         superuser:
           fg := clYellow;
-      else // case rights
+      else
         fg := clFuchsia;
       end;
 
-      if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
+      if (area.RegPlease.status = TAreaRegPleaseStatus.selected) then
         fg := clYellow;
     end;
 
-    Symbols.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_DK, area.positions.dk, Integer(area.positions.dkOrentation), fg, clBlack, Self.drawObject);
 
     // symbol zadosti o loko se vykresluje vpravo
-    if (((OblR.RegPlease.status = TORRegPleaseStatus.request) or (OblR.RegPlease.status = TORRegPleaseStatus.selected))
-      and (not Self.Graphics.blik)) then
-      Symbols.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X + 6, OblR.Poss.DK.Y + 1), _S_CIRCLE, clYellow,
-        clBlack, Self.DrawObject);
-
-  end; // for i
+    if (((area.RegPlease.status = TAreaRegPleaseStatus.request) or (area.RegPlease.status = TAreaRegPleaseStatus.selected))
+      and (not Self.Graphics.flash)) then
+      Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.dk.X + 6, area.positions.dk.Y + 1), _S_CIRCLE, clYellow,
+        clBlack, Self.drawObject);
+  end;
 end;
 
 // zobrazeni SystemOK + opravneni
-procedure TRelief.ShowOpravneni();
-var Pos: TPoint;
+procedure TRelief.ShowRights();
+var pos: TPoint;
   c1, c2, c3: TColor;
 begin
-  Pos.X := 1;
-  Pos.Y := Self.Graphics.PanelHeight - 3;
+  pos.X := 1;
+  pos.Y := Self.Graphics.pHeight - 3;
 
   if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
   begin
@@ -464,87 +456,85 @@ begin
     c3 := clPurple;
   end;
 
-  if (Self.SystemOK.Poloha) then
+  if (Self.systemOK.position) then
   begin
-    // vodorovne
+    // horizontal
 
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_FULL + 1, clBlack, c1, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y), _S_FULL + 1, clBlack, c1, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 1, pos.Y), _S_HALF_TOP, clBlack, c1, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 2, pos.Y), _S_HALF_TOP, clBlack, c1, Self.drawObject);
 
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y + 1), _S_HALF_TOP, c2, c3, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 1, pos.Y + 1), _S_HALF_TOP, c2, c3, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 2, pos.Y + 1), _S_HALF_TOP, c2, c3, Self.drawObject);
   end else begin
-    // svisle
+    // vertical
 
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_FULL, c1, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y), _S_HALF_TOP, clBlack, c1, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y + 1), _S_FULL, c1, c1, Self.drawObject);
 
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_BOT, c2, clBlack, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_FULL, c2, clBlack, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 1, pos.Y), _S_HALF_BOT, c2, clBlack, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 1, pos.Y + 1), _S_FULL, c2, clBlack, Self.drawObject);
 
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c3, Self.DrawObject);
-    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_FULL, c3, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 2, pos.Y), _S_HALF_TOP, clBlack, c3, Self.drawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(pos.X + 2, pos.Y + 1), _S_FULL, c3, c3, Self.drawObject);
   end;
 
   case (PanelTCPClient.status) of
     TPanelConnectionStatus.closed:
-      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.drawObject);
     TPanelConnectionStatus.opening:
-      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Otevírám spojení...', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Otevírám spojení...', clFuchsia, clBlack, Self.drawObject);
     TPanelConnectionStatus.handshake:
-      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Probíhá handshake...', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Probíhá handshake...', clFuchsia, clBlack, Self.drawObject);
     TPanelConnectionStatus.opened:
-      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Připojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Připojeno k serveru', $A0A0A0, clBlack, Self.drawObject);
   end;
 end;
 
-// vykresleni pasku mereni casu
-procedure TRelief.ShowMereniCasu();
-var Time1, Time2: string;
-  i, j, k: Integer;
-const _delka = 16;
+procedure TRelief.ShowTimeCountdown();
+const _LENGTH = 16;
 begin
-  for j := 0 to Self.myORs.Count - 1 do
+  for var j := 0 to Self.areas.Count - 1 do
   begin
-    for k := 0 to Self.myORs[j].MereniCasu.Count - 1 do
+    for var k := 0 to Self.areas[j].countdown.Count - 1 do
     begin
-      Symbols.TextOutput(Point(Self.myORs[j].Poss.Time.X, Self.myORs[j].Poss.Time.Y + k), 'MER.CASU', clRed,
-        clWhite, Self.DrawObject);
+      Symbols.TextOutput(Point(Self.areas[j].positions.time.X, Self.areas[j].positions.time.Y + k), 'MER.CASU', clRed,
+        clWhite, Self.drawObject);
 
-      DateTimeToString(Time1, 'ss', Now - Self.myORs[j].MereniCasu[k].Start);
-      DateTimeToString(Time2, 'ss', Self.myORs[j].MereniCasu[k].Length);
+      var time1, time2: string;
+      DateTimeToString(time1, 'ss', Now - Self.areas[j].countdown[k].Start);
+      DateTimeToString(time2, 'ss', Self.areas[j].countdown[k].Length);
 
-      for i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) - 1 do
-        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
-          _S_FULL, clRed, clBlack, Self.DrawObject);
+      for var i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2) - 1 do
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.areas[j].positions.Time.X + 8 + i, Self.areas[j].positions.Time.Y + k),
+          _S_FULL, clRed, clBlack, Self.drawObject);
 
-      for i := (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) to (_delka div 2) - 1 do
-        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
-          _S_FULL, clWhite, clBlack, Self.DrawObject);
+      for var i := (Round((StrToIntDef(time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) div 2) to (_LENGTH div 2) - 1 do
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.areas[j].positions.Time.X + 8 + i, Self.areas[j].positions.Time.Y + k),
+          _S_FULL, clWhite, clBlack, Self.drawObject);
 
       // vykresleni poloviny symbolu
-      if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) mod 2) = 1) then
+      if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) mod 2) = 1) then
         Symbols.Draw(SymbolSet.IL_Symbols,
-          Point(Self.myORs[j].Poss.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2),
-          Self.myORs[j].Poss.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.DrawObject);
+          Point(Self.areas[j].positions.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2),
+          Self.areas[j].positions.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.drawObject);
 
     end; // for i
 
     // detekce konce mereni casu
-    for k := Self.myORs[j].MereniCasu.Count - 1 downto 0 do
+    for var k := Self.areas[j].countdown.Count - 1 downto 0 do
     begin
-      if (Now >= Self.myORs[j].MereniCasu[k].Length + Self.myORs[j].MereniCasu[k].Start) then
-        Self.myORs[j].MereniCasu.Delete(k);
+      if (Now >= Self.areas[j].countdown[k].Length + Self.areas[j].countdown[k].Start) then
+        Self.areas[j].countdown.Delete(k);
     end;
-  end; // for j
+  end;
 end;
 
 procedure TRelief.ShowMsg();
 begin
   if (Self.msg.show) then
-    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), Self.msg.msg, clRed, clWhite, Self.DrawObject);
+    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), Self.msg.msg, clRed, clWhite, Self.drawObject);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -553,58 +543,58 @@ end;
 procedure TRelief.show();
 begin
   try
-    if (not Assigned(Self.DrawObject)) then
+    if (not Assigned(Self.drawObject)) then
       Exit;
-    if (not Self.DrawObject.CanDraw) then
+    if (not Self.drawObject.CanDraw) then
       Exit;
-    Self.DrawObject.Surface.Canvas.Lock();
+    Self.drawObject.Surface.Canvas.Lock();
 
-    Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
+    Self.drawObject.Surface.Fill(Self.colors.bg);
 
-    if (Self.ShowDetails) then
-      Self.blockLabels.show(Self.DrawObject);
-    Self.texts.show(Self.DrawObject);
-    Self.linkersTrains.show(Self.DrawObject);
-    Self.linkers.show(Self.DrawObject, Self.Graphics.blik);
-    Self.signals.show(Self.DrawObject, Self.Graphics.blik);
-    Self.crossings.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
-    Self.otherObj.show(Self.DrawObject, Self.Graphics.blik);
-    Self.disconnectors.ShowBg(Self.DrawObject, Self.Graphics.blik);
-    Self.tracks.show(Self.DrawObject, Self.Graphics.blik, Self.myORs, signals.startJC, Self.turnouts.data);
-    Self.turnouts.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
-    Self.locks.show(Self.DrawObject, Self.Graphics.blik);
-    Self.disconnectors.show(Self.DrawObject, Self.Graphics.blik);
-    Self.derails.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
+    if (Self.showDetails) then
+      Self.blockLabels.show(Self.drawObject);
+    Self.texts.show(Self.drawObject);
+    Self.linkersTrains.show(Self.drawObject);
+    Self.linkers.show(Self.drawObject, Self.Graphics.flash);
+    Self.signals.show(Self.drawObject, Self.Graphics.flash);
+    Self.crossings.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
+    Self.otherObj.show(Self.drawObject, Self.Graphics.flash);
+    Self.disconnectors.ShowBg(Self.drawObject, Self.Graphics.flash);
+    Self.tracks.show(Self.drawObject, Self.Graphics.flash, Self.areas, signals.startJC, Self.turnouts.data);
+    Self.turnouts.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
+    Self.locks.show(Self.drawObject, Self.Graphics.flash);
+    Self.disconnectors.show(Self.drawObject, Self.Graphics.flash);
+    Self.derails.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
 
-    Self.ShowDK();
-    Self.ShowOpravneni();
-    Self.ShowZasobniky();
-    Self.ShowMereniCasu();
-    RucList.show(Self.DrawObject);
+    Self.ShowAreas();
+    Self.ShowRights();
+    Self.ShowStacks();
+    Self.ShowTimeCountdown();
+    RucList.show(Self.drawObject);
     Self.ShowMsg();
     Self.ShowInfoTimers();
-    Errors.show(Self.DrawObject);
+    Errors.show(Self.drawObject);
 
     if (Self.UPO.showing) then
-      Self.UPO.show(Self.DrawObject);
+      Self.UPO.show(Self.drawObject);
 
-    if (Self.Menu.showing) then
+    if (Self.menu.showing) then
     begin
-      Self.Menu.PaintMenu(Self.DrawObject, Self.CursorDraw.Pos)
+      Self.menu.PaintMenu(Self.drawObject, Self.cursorDraw.pos)
     end else begin
       if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
         Self.PaintKurzor();
     end;
 
-    Self.DrawObject.Surface.Canvas.Release();
-    Self.DrawObject.Flip();
+    Self.drawObject.Surface.Canvas.Release();
+    Self.drawObject.Flip();
   except
 
   end;
 
   try
-    if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
-      Self.DrawObject.Surface.Canvas.UnLock();
+    if (Self.drawObject.Surface.Canvas.LockCount > 0) then
+      Self.drawObject.Surface.Canvas.UnLock();
   except
 
   end;
@@ -615,36 +605,36 @@ end;
 // vykresluje kurzor
 procedure TRelief.PaintKurzor();
 begin
-  if ((Self.CursorDraw.Pos.X < 0) or (Self.CursorDraw.Pos.Y < 0)) then
+  if ((Self.cursorDraw.pos.X < 0) or (Self.cursorDraw.pos.Y < 0)) then
     Exit;
   if (GlobConfig.data.panel_mouse <> _MOUSE_PANEL) then
     Exit();
 
   // zkopirujeme si obrazek pod kurzorem jeste pred tim, nez se pres nej prekresli mys
-  Self.CursorDraw.Pozadi.Canvas.CopyRect(Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2),
-    Self.DrawObject.Surface.Canvas, Rect(Self.CursorDraw.Pos.X * SymbolSet.symbWidth - 1,
-    Self.CursorDraw.Pos.Y * SymbolSet.symbHeight - 1, (Self.CursorDraw.Pos.X + 1) * SymbolSet.symbWidth + 1,
-    (Self.CursorDraw.Pos.Y + 1) * SymbolSet.symbHeight + 1));
+  Self.cursorDraw.bg.Canvas.CopyRect(Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2),
+    Self.drawObject.Surface.Canvas, Rect(Self.cursorDraw.pos.X * SymbolSet.symbWidth - 1,
+    Self.cursorDraw.pos.Y * SymbolSet.symbHeight - 1, (Self.cursorDraw.pos.X + 1) * SymbolSet.symbWidth + 1,
+    (Self.cursorDraw.pos.Y + 1) * SymbolSet.symbHeight + 1));
 
   // vykresleni kurzoru
-  Self.DrawObject.Surface.Canvas.Pen.Color := Self.CursorDraw.KurzorRamecek;
-  Self.DrawObject.Surface.Canvas.Brush.Color := Self.CursorDraw.KurzorObsah;
-  Self.DrawObject.Surface.Canvas.Pen.Mode := pmMerge;
-  Self.DrawObject.Surface.Canvas.Rectangle((Self.CursorDraw.Pos.X * SymbolSet.symbWidth) - 1,
-    (Self.CursorDraw.Pos.Y * SymbolSet.symbHeight) - 1,
-    ((Self.CursorDraw.Pos.X * SymbolSet.symbWidth) + SymbolSet.symbWidth) + 1,
-    ((Self.CursorDraw.Pos.Y * SymbolSet.symbHeight) + SymbolSet.symbHeight) + 1);
-  Self.DrawObject.Surface.Canvas.Pen.Mode := pmCopy;
+  Self.drawObject.Surface.Canvas.Pen.Color := Self.cursorDraw.border;
+  Self.drawObject.Surface.Canvas.Brush.Color := Self.cursorDraw.fill;
+  Self.drawObject.Surface.Canvas.Pen.Mode := pmMerge;
+  Self.drawObject.Surface.Canvas.Rectangle((Self.cursorDraw.pos.X * SymbolSet.symbWidth) - 1,
+    (Self.cursorDraw.pos.Y * SymbolSet.symbHeight) - 1,
+    ((Self.cursorDraw.pos.X * SymbolSet.symbWidth) + SymbolSet.symbWidth) + 1,
+    ((Self.cursorDraw.pos.Y * SymbolSet.symbHeight) + SymbolSet.symbHeight) + 1);
+  Self.drawObject.Surface.Canvas.Pen.Mode := pmCopy;
 end;
 
 // vykresli pozadi pod kurzorem, ktere je ulozeno v Self.CursorDraw.Pozadi
 // na zadane souradnice (v polickach).
 procedure TRelief.PaintKurzorBg(Pos: TPoint);
 begin
-  Self.DrawObject.Surface.Canvas.CopyRect(Rect(Pos.X * SymbolSet.symbWidth - 1, Pos.Y * SymbolSet.symbHeight - 1,
+  Self.drawObject.Surface.Canvas.CopyRect(Rect(Pos.X * SymbolSet.symbWidth - 1, Pos.Y * SymbolSet.symbHeight - 1,
     (Pos.X + 1) * SymbolSet.symbWidth + 1, (Pos.Y + 1) * SymbolSet.symbHeight + 1),
 
-    Self.CursorDraw.Pozadi.Canvas,
+    Self.cursorDraw.bg.Canvas,
 
     Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2));
 end;
@@ -662,23 +652,23 @@ begin
   if ((not Self.Enabled) or (Handled)) then
     Exit();
 
-  Self.CursorDraw.Pos.X := X div SymbolSet.symbWidth;
-  Self.CursorDraw.Pos.Y := Y div SymbolSet.symbHeight;
+  Self.cursorDraw.pos.X := X div SymbolSet.symbWidth;
+  Self.cursorDraw.pos.Y := Y div SymbolSet.symbHeight;
 
   case (Button) of
     mbLeft:
       begin
-        Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.ENTER);
-        Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.ENTER);
+        Self.ObjectMouseUp(Self.cursorDraw.pos, TPanelButton.ENTER);
+        Self.ObjectMouseClick(Self.cursorDraw.pos, TPanelButton.ENTER);
       end;
     mbRight:
       begin
-        Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.Escape);
-        Self.ObjectMouseClick(Self.CursorDraw.Pos, TPanelButton.Escape);
+        Self.ObjectMouseUp(Self.cursorDraw.pos, TPanelButton.Escape);
+        Self.ObjectMouseClick(Self.cursorDraw.pos, TPanelButton.Escape);
       end;
     mbMiddle:
       begin
-        Self.ObjectMouseUp(Self.CursorDraw.Pos, TPanelButton.F1);
+        Self.ObjectMouseUp(Self.cursorDraw.pos, TPanelButton.F1);
 
         if ((Self.mouseLastBtn = mbMiddle) and (Now - Self.mouseClick < EncodeTime(0, 0, 0, _DblClick_Timeout_Ms))) then
         begin
@@ -686,7 +676,7 @@ begin
           Self.ObjectMouseClick(Self.mouseClickPos, TPanelButton.F2);
         end else begin
           Self.mouseTimer.Enabled := true;
-          Self.mouseClickPos := Self.CursorDraw.Pos;
+          Self.mouseClickPos := Self.cursorDraw.pos;
         end;
       end;
   end;
@@ -731,75 +721,73 @@ end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var old: TPoint;
-  i: Integer;
-  stackDragged: boolean;
 begin
   if (not Self.Enabled) then
     Exit();
 
   // pokud se nemeni pozice kurzoru -- ramecku, neni potreba prekreslovat
-  if ((X div SymbolSet.symbWidth = Self.CursorDraw.Pos.X) and
-    (Y div SymbolSet.symbHeight = Self.CursorDraw.Pos.Y)) then
+  if ((X div SymbolSet.symbWidth = Self.cursorDraw.pos.X) and
+    (Y div SymbolSet.symbHeight = Self.cursorDraw.pos.Y)) then
     Exit;
 
   // vytvorime novou pozici a ulozime ji
-  old := Self.CursorDraw.Pos;
-  Self.CursorDraw.Pos.X := X div SymbolSet.symbWidth;
-  Self.CursorDraw.Pos.Y := Y div SymbolSet.symbHeight;
+  old := Self.cursorDraw.pos;
+  Self.cursorDraw.pos.X := X div SymbolSet.symbWidth;
+  Self.cursorDraw.pos.Y := Y div SymbolSet.symbHeight;
 
   // skryjeme informacni zpravu vlevo dole
   Self.msg.show := false;
 
   // pokud je zobrazeno menu, prekreslime pouze menu
-  if ((Self.Menu.showing) and (Self.Menu.CheckCursorPos(Self.CursorDraw.Pos))) then
+  if ((Self.menu.showing) and (Self.menu.CheckCursorPos(Self.cursorDraw.pos))) then
     Exit();
 
   // zavolame vnejsi event
   if (Assigned(Self.FOnMove)) then
-    Self.FOnMove(Self, Self.CursorDraw.Pos);
+    Self.FOnMove(Self, Self.cursorDraw.pos);
 
   // potencialni prekresleni zasobniku pri presunu povelu
-  stackDragged := false;
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[i].stack.IsDragged()) then
+  var stackDragged := false;
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].stack.IsDragged()) then
       stackDragged := true;
 
   // panel prekreslujeme jen kdyz je nutne vykreslovat mys na panelu
   // pokud se vykresluje mys operacniho systemu, panel neni prekreslovan
-  if ((GlobConfig.data.panel_mouse = _MOUSE_PANEL) or (Self.Menu.showing) or (stackDragged)) then
+  if ((GlobConfig.data.panel_mouse = _MOUSE_PANEL) or (Self.menu.showing) or (stackDragged)) then
   begin
     // neprekreslujeme cely panel, ale pouze policko, na kterem byla mys v minule pozici
     // obsah tohoto policka je ulozen v Self.CursorDraw.History
     try
-      Self.DrawObject.Surface.Canvas.Lock();
-      if (not Assigned(Self.DrawObject)) then
+      Self.drawObject.Surface.Canvas.Lock();
+      if (not Assigned(Self.drawObject)) then
         Exit;
-      if (not Self.DrawObject.CanDraw) then
+      if (not Self.drawObject.CanDraw) then
         Exit;
 
-      if (Self.Menu.showing) then
-        Self.Menu.PaintMenu(Self.DrawObject, Self.CursorDraw.Pos)
+      if (Self.menu.showing) then
+        Self.menu.PaintMenu(Self.drawObject, Self.cursorDraw.pos)
       else
       begin
         Self.PaintKurzorBg(old);
 
-        for i := 0 to Self.myORs.Count - 1 do
-          if (Self.myORs[i].stack.IsDragged()) then
-            Self.myORs[i].stack.show(Self.DrawObject, Self.CursorDraw.Pos);
+        for var i := 0 to Self.areas.Count - 1 do
+          if (Self.areas[i].stack.IsDragged()) then
+            Self.areas[i].stack.show(Self.drawObject, Self.cursorDraw.pos);
 
         Self.PaintKurzor();
       end;
 
       // prekreslime si platno
-      Self.DrawObject.Surface.Canvas.Release();
-      Self.DrawObject.Flip();
+      Self.drawObject.Surface.Canvas.Release();
+      Self.drawObject.Flip();
     except
 
     end;
 
     try
-      if (Self.DrawObject.Surface.Canvas.LockCount > 0) then
-        Self.DrawObject.Surface.Canvas.UnLock();
+      if (Self.drawObject.Surface.Canvas.LockCount > 0) then
+        Self.drawObject.Surface.Canvas.UnLock();
     except
 
     end;
@@ -810,177 +798,163 @@ end;
 
 // vyvolano pri kliku na relief
 procedure TRelief.ObjectMouseClick(Position: TPoint; Button: TPanelButton);
-var i, index: Integer;
-  Handled: boolean;
-  uid: TPTrackId;
-  uvid: TPLinkerId;
+var index: Integer;
 label
   EscCheck;
 begin
-  if (Self.Menu.showing) then
+  if (Self.menu.showing) then
   begin
     if (Button = TPanelButton.ENTER) then
-      Self.Menu.Click()
+      Self.menu.Click()
     else if (Button = TPanelButton.Escape) then
       Self.Escape();
     Exit;
   end;
 
   // nabidka regulatoru u dopravni kancelare
-  Handled := false;
-  for i := 0 to Self.myORs.Count - 1 do
+  var Handled := false;
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.myORs[i].tech_rights < TORControlRights.write) then
+    if (Self.areas[i].tech_rights < TAreaControlRights.write) then
       continue;
-    if ((Self.myORs[i].RegPlease.status > TORRegPleaseStatus.none) and (Position.X = Self.myORs[i].Poss.DK.X + 6) and
-      (Position.Y = Self.myORs[i].Poss.DK.Y + 1)) then
+    if ((Self.areas[i].RegPlease.status > TAreaRegPleaseStatus.none) and (Position.X = Self.areas[i].positions.DK.X + 6) and
+      (Position.Y = Self.areas[i].positions.DK.Y + 1)) then
     begin
       if (Button = ENTER) then
       begin
-        case (Self.myORs[i].RegPlease.status) of
-          TORRegPleaseStatus.request:
-            Self.myORs[i].RegPlease.status := TORRegPleaseStatus.selected;
-          TORRegPleaseStatus.selected:
-            Self.myORs[i].RegPlease.status := TORRegPleaseStatus.request;
+        case (Self.areas[i].RegPlease.status) of
+          TAreaRegPleaseStatus.request:
+            Self.areas[i].RegPlease.status := TAreaRegPleaseStatus.selected;
+          TAreaRegPleaseStatus.selected:
+            Self.areas[i].RegPlease.status := TAreaRegPleaseStatus.request;
         end; // case
       end else if (Button = F2) then
         Self.ShowRegMenu(i);
 
       goto EscCheck;
     end;
-  end; // for OblR
+  end;
 
   // zasobniky
   Handled := false;
-  for i := 0 to Self.myORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.myORs[i].tech_rights = TORControlRights.null) then
+    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
       continue;
-    Self.myORs[i].stack.mouseClick(Position, Button, Handled);
+    Self.areas[i].stack.mouseClick(Position, Button, Handled);
     if (Handled) then
       goto EscCheck;
   end;
 
-  // prejezd
   index := Self.crossings.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.crossings[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.crossings[index].area].id, Button, Self.crossings[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.crossings[index].area].id, Button, Self.crossings[index].block);
     goto EscCheck;
   end;
 
-  // souctova hlaska
   index := Self.texts.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.texts[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.texts[index].area].id, Button, Self.texts[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.texts[index].area].id, Button, Self.texts[index].block);
     goto EscCheck;
   end;
 
-  // rozpojovac
   index := Self.disconnectors.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.disconnectors[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.disconnectors[index].area].id, Button, Self.disconnectors[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.disconnectors[index].area].id, Button, Self.disconnectors[index].block);
     goto EscCheck;
   end;
 
-  // vykolejka
   index := Self.derails.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.derails[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.derails[index].area].id, Button, Self.derails[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.derails[index].area].id, Button, Self.derails[index].block);
     goto EscCheck;
   end;
 
-  // usek
-  uid := Self.tracks.GetIndex(Position);
+  var uid := Self.tracks.GetIndex(Position);
   if (uid.index <> -1) then
   begin
     if (Self.tracks[uid.index].block < 0) then
       goto EscCheck;
 
     // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na souprave v tomto useku
-    if ((Self.myORs[Self.tracks[uid.index].area].RegPlease.status = TORRegPleaseStatus.selected) and
+    if ((Self.areas[Self.tracks[uid.index].area].RegPlease.status = TAreaRegPleaseStatus.selected) and
       (Button = ENTER)) then
       // zadost o vydani seznamu hnacich vozidel na danem useku
-      PanelTCPClient.SendLn(Self.myORs[Self.tracks[uid.index].area].id + ';LOK-REQ;U-PLEASE;' +
+      PanelTCPClient.SendLn(Self.areas[Self.tracks[uid.index].area].id + ';LOK-REQ;U-PLEASE;' +
         IntToStr(Self.tracks[uid.index].block) + ';' + IntToStr(uid.traini))
     else
-      PanelTCPClient.PanelClick(Self.myORs[Self.tracks[uid.index].area].id, Button, Self.tracks[uid.index].block,
+      PanelTCPClient.PanelClick(Self.areas[Self.tracks[uid.index].area].id, Button, Self.tracks[uid.index].block,
         IntToStr(uid.traini));
 
     goto EscCheck;
   end;
 
-  // navestidlo
   index := Self.signals.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.signals[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.signals[index].area].id, Button, Self.signals[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.signals[index].area].id, Button, Self.signals[index].block);
     goto EscCheck;
   end;
 
-  // vyhybka
   index := Self.turnouts.GetIndex(Position);
   if (index <> -1) then
   begin
     if (turnouts[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[turnouts[index].area].id, Button, turnouts[index].block);
+    PanelTCPClient.PanelClick(Self.areas[turnouts[index].area].id, Button, turnouts[index].block);
     goto EscCheck;
   end;
 
-  // DK
   index := Self.GetDK(Position);
   if (index <> -1) then
   begin
-    if (Self.myORs[index].dk_click_server) then
+    if (Self.areas[index].dk_click_server) then
     begin
-      PanelTCPClient.SendLn(Self.myORs[index].id + ';DK-CLICK;' + IntToStr(Integer(Button)));
+      PanelTCPClient.SendLn(Self.areas[index].id + ';DK-CLICK;' + IntToStr(Integer(Button)));
     end else if (Button <> TPanelButton.Escape) then
       Self.ShowDKMenu(index);
     goto EscCheck;
   end;
 
-  // uvazka
   index := Self.linkers.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.linkers[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.linkers[index].area].id, Button, Self.linkers[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.linkers[index].area].id, Button, Self.linkers[index].block);
     goto EscCheck;
   end;
 
-  // uvazka soupravy
-  uvid := Self.linkersTrains.GetIndex(Position);
+  var uvid := Self.linkersTrains.GetIndex(Position);
   if (uvid.index <> -1) then
   begin
     if (Self.linkersTrains[uvid.index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.linkersTrains[uvid.index].area].id, Button,
+    PanelTCPClient.PanelClick(Self.areas[Self.linkersTrains[uvid.index].area].id, Button,
       Self.linkersTrains[uvid.index].block, IntToStr(uvid.traini));
     goto EscCheck;
   end;
 
-  // zamek
   index := Self.locks.GetIndex(Position);
   if (index <> -1) then
   begin
     if (Self.locks[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.locks[index].area].id, Button, Self.locks[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.locks[index].area].id, Button, Self.locks[index].block);
     goto EscCheck;
   end;
 
@@ -990,7 +964,7 @@ begin
   begin
     if (Self.otherObj[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.otherObj[index].area].id, Button, Self.otherObj[index].block);
+    PanelTCPClient.PanelClick(Self.areas[Self.otherObj[index].area].id, Button, Self.otherObj[index].block);
     goto EscCheck;
   end;
 
@@ -1011,17 +985,13 @@ end;
 
 procedure TRelief.ObjectMouseUp(Position: TPoint; Button: TPanelButton);
 var Handled: boolean;
-  i: Integer;
 begin
   Handled := false;
-
-  // zasobniky
-  Handled := false;
-  for i := 0 to Self.myORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.myORs[i].tech_rights = TORControlRights.null) then
+    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
       continue;
-    Self.myORs[i].stack.MouseUp(Position, Button, Handled);
+    Self.areas[i].stack.MouseUp(Position, Button, Handled);
     if (Handled) then
       Exit();
   end;
@@ -1031,17 +1001,13 @@ end;
 
 procedure TRelief.ObjectMouseDown(Position: TPoint; Button: TPanelButton);
 var Handled: boolean;
-  i: Integer;
 begin
   Handled := false;
-
-  // zasobniky
-  Handled := false;
-  for i := 0 to Self.myORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.myORs[i].tech_rights = TORControlRights.null) then
+    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
       continue;
-    Self.myORs[i].stack.MouseDown(Position, Button, Handled);
+    Self.areas[i].stack.MouseDown(Position, Button, Handled);
     if (Handled) then
       Exit();
   end;
@@ -1063,8 +1029,8 @@ begin
   inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
 
   try
-    Self.Graphics.PanelWidth := inifile.ReadInteger('P', 'W', 100);
-    Self.Graphics.PanelHeight := inifile.ReadInteger('P', 'H', 20);
+    Self.Graphics.pWidth := inifile.ReadInteger('P', 'W', 100);
+    Self.Graphics.pHeight := inifile.ReadInteger('P', 'H', 20);
 
     // kontrola verze
     ver := inifile.ReadString('G', 'ver', 'invalid');
@@ -1098,19 +1064,19 @@ begin
     sect_str := TStringList.Create();
     try
       inifile.ReadSection('OR', sect_str);
-      Self.myORs.Clear();
+      Self.areas.Clear();
       for var i := 0 to sect_str.Count - 1 do
-        Self.myORs.Add(TORPanel.Create(inifile.ReadString('OR', sect_str[i], ''), Self.Graphics));
+        Self.areas.Add(TAreaPanel.Create(inifile.ReadString('OR', sect_str[i], ''), Self.Graphics));
     finally
       sect_str.Free();
     end;
 
     // vytvorime okynka zprav
-    TF_Messages.frm_cnt := Self.myORs.Count;
-    for var i := 0 to Self.myORs.Count - 1 do
-      TF_Messages.frm_db[i] := TF_Messages.Create(Self.myORs[i].Name, Self.myORs[i].id);
+    TF_Messages.frm_cnt := Self.areas.Count;
+    for var i := 0 to Self.areas.Count - 1 do
+      TF_Messages.frm_db[i] := TF_Messages.Create(Self.areas[i].Name, Self.areas[i].id);
 
-    Self.tracks.Load(inifile, Self.myORs, verWord);
+    Self.tracks.Load(inifile, Self.areas, verWord);
     Self.signals.Load(inifile, verWord);
     Self.turnouts.Load(inifile, verWord);
     Self.derails.Load(inifile, verWord);
@@ -1123,7 +1089,7 @@ begin
     Self.blockLabels.Load(inifile, 'TP', verWord);
     Self.otherObj.Load(inifile, verWord);
 
-    Self.Tech_blok.Clear();
+    Self.techBlok.Clear();
 
     for var i := 0 to Self.tracks.data.Count - 1 do
       Self.AddToTechBlk(btTrack, Self.tracks[i].block, i);
@@ -1160,17 +1126,16 @@ begin
         Self.AddToTechBlk(btSummary, Self.texts[i].block, i);
 
   finally
-    inifile.Free;
+    inifile.Free();
   end;
 end;
 
 function TRelief.GetDK(Pos: TPoint): Integer;
-var i: Integer;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if ((Pos.X >= Self.myORs[i].Poss.DK.X) and (Pos.Y >= Self.myORs[i].Poss.DK.Y) and
-      (Pos.X <= Self.myORs[i].Poss.DK.X + (((_DK_WIDTH_MULT * SymbolSet.symbWidth) - 1) div SymbolSet.symbWidth)) and
-      (Pos.Y <= Self.myORs[i].Poss.DK.Y + (((_DK_HEIGHT_MULT * SymbolSet.symbHeight) - 1) div SymbolSet.symbHeight)))
+  for var i := 0 to Self.areas.Count - 1 do
+    if ((Pos.X >= Self.areas[i].positions.DK.X) and (Pos.Y >= Self.areas[i].positions.DK.Y) and
+      (Pos.X <= Self.areas[i].positions.DK.X + (((_DK_WIDTH_MULT * SymbolSet.symbWidth) - 1) div SymbolSet.symbWidth)) and
+      (Pos.Y <= Self.areas[i].positions.DK.Y + (((_DK_HEIGHT_MULT * SymbolSet.symbHeight) - 1) div SymbolSet.symbHeight)))
     then
       Exit(i);
 
@@ -1178,9 +1143,6 @@ begin
 end;
 
 procedure TRelief.AEMessage(var msg: tagMSG; var Handled: boolean);
-var mouse: TPoint;
-  ahandled: boolean;
-  i: Integer;
 begin
   if ((msg.message = WM_KeyDown) and (Self.ParentForm.Active)) then // pokud je stisknuta klavesa
   begin
@@ -1193,7 +1155,7 @@ begin
       Exit();
     end;
 
-    ahandled := false;
+    var ahandled := false;
     if (Self.Menu.showing) then
       Self.Menu.KeyPress(msg.wParam, ahandled);
     if (ahandled) then
@@ -1208,9 +1170,9 @@ begin
     end;
 
     ahandled := false;
-    for i := 0 to Self.myORs.Count - 1 do
+    for var i := 0 to Self.areas.Count - 1 do
     begin
-      Self.myORs[i].stack.KeyPress(msg.wParam, ahandled);
+      Self.areas[i].stack.KeyPress(msg.wParam, ahandled);
       if (ahandled) then
         Exit();
     end; // for i
@@ -1229,6 +1191,7 @@ begin
 
       VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:
         begin
+          var mouse: TPoint;
           GetCursorPos(mouse);
 
           case (msg.wParam) of
@@ -1247,8 +1210,8 @@ begin
 
       VK_F9:
         begin
-          Self.root_menu := not Self.root_menu;
-          if (Self.root_menu) then
+          Self.rootMenu := not Self.rootMenu;
+          if (Self.rootMenu) then
             Self.ORInfoMsg('Root menu on')
           else
             Self.ORInfoMsg('Root menu off');
@@ -1259,12 +1222,11 @@ end;
 
 procedure TRelief.T_SystemOKOnTimer(Sender: TObject);
 begin
-  Self.SystemOK.Poloha := not Self.SystemOK.Poloha;
-  Self.Graphics.blik := not Self.Graphics.blik;
+  Self.systemOK.position := not Self.systemOK.position;
+  Self.graphics.flash := not Self.graphics.flash;
 end;
 
 procedure TRelief.Escape(send: boolean = true);
-var OblR: TORPanel;
 begin
   if (Self.Menu.showing) then
     Self.HideMenu();
@@ -1277,106 +1239,104 @@ begin
   if (F_PotvrSekv.running) then
     F_PotvrSekv.Stop('escape');
 
-  for OblR in Self.myORs do
-    if (OblR.RegPlease.status = TORRegPleaseStatus.selected) then
-      OblR.RegPlease.status := TORRegPleaseStatus.request;
+  for var area in Self.areas do
+    if (area.RegPlease.status = TAreaRegPleaseStatus.selected) then
+      area.RegPlease.status := TAreaRegPleaseStatus.request;
 
   if (send) then
     PanelTCPClient.PanelClick('-', TPanelButton.Escape);
 end;
 
 function TRelief.AddMereniCasu(Sender: string; Delka: TDateTime; id: Integer): byte;
-var orindex: Integer;
-  mc: TMereniCasu;
 begin
-  for orindex := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[orindex].id = Sender) then
+  for var areai := 0 to Self.areas.Count - 1 do
+    if (Self.areas[areai].id = Sender) then
       Break;
-  if (orindex = Self.myORs.Count) then
+  if (areai = Self.areas.Count) then
     Exit(2);
 
+  var mc: TCountdown;
   mc.Start := Now;
   mc.Length := Delka;
   mc.id := id;
-  Self.myORs[orindex].MereniCasu.Add(mc);
+  Self.areas[areai].countdown.Add(mc);
 
   Result := 0;
 end;
 
 procedure TRelief.StopMereniCasu(Sender: string; id: Integer);
-var orindex, i: Integer;
 begin
-  for orindex := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[orindex].id = Sender) then
+  for var areai := 0 to Self.areas.Count - 1 do
+    if (Self.areas[areai].id = Sender) then
       Break;
-  if (orindex = Self.myORs.Count) then
+  if (areai = Self.areas.Count) then
     Exit;
 
-  for i := 0 to Self.myORs[orindex].MereniCasu.Count - 1 do
-    if (Self.myORs[orindex].MereniCasu[i].id = id) then
+  for var i := 0 to Self.areas[areai].countdown.Count - 1 do
+    if (Self.areas[areai].countdown[i].id = id) then
     begin
-      Self.myORs[orindex].MereniCasu.Delete(i);
+      Self.areas[areai].countdown.Delete(i);
       Break;
     end;
 end;
 
 procedure TRelief.Image(filename: string);
-var Bmp: TBitmap;
-  X, Y: Cardinal;
-  PR, PG, PB: ^byte;
-  PYStart: Cardinal;
-  aColor: TColor;
-  png: TPngImage;
+var PR, PG, PB: ^byte;
 begin
   Self.CursorDraw.Pos.X := -2;
 
   Self.show();
 
-  Bmp := TBitmap.Create;
-  Bmp.PixelFormat := pf24bit;
-  Bmp.Width := Self.DrawObject.Width;
-  Bmp.Height := Self.DrawObject.Height;
-  Bmp.Canvas.CopyRect(Rect(0, 0, Self.DrawObject.Width, Self.DrawObject.Height), Self.DrawObject.Surface.Canvas,
-    Rect(0, 0, Self.DrawObject.Width, Self.DrawObject.Height));
+  var Bmp := TBitmap.Create;
+  try
+    Bmp.PixelFormat := pf24bit;
+    Bmp.Width := Self.DrawObject.Width;
+    Bmp.Height := Self.DrawObject.Height;
+    Bmp.Canvas.CopyRect(Rect(0, 0, Self.DrawObject.Width, Self.DrawObject.Height), Self.DrawObject.Surface.Canvas,
+      Rect(0, 0, Self.DrawObject.Width, Self.DrawObject.Height));
 
-  // zmena barev
-  for Y := 0 to Bmp.Height - 1 do
-  begin
-    PYStart := Cardinal(Bmp.ScanLine[Y]);
-    for X := 0 to Bmp.Width - 1 do
+    // change colors
+    for var Y := 0 to Bmp.Height - 1 do
     begin
-      PB := Pointer(PYStart + 3 * X);
-      PG := Pointer(PYStart + 3 * X + 1);
-      PR := Pointer(PYStart + 3 * X + 2);
-
-      aColor := PR^ + (PG^ shl 8) + (PB^ shl 16);
-      if (aColor = clBlack) then
+      var PYStart := Cardinal(Bmp.ScanLine[Y]);
+      for var X := 0 to Bmp.Width - 1 do
       begin
-        PR^ := 255;
-        PG^ := 255;
-        PB^ := 255;
-      end else begin
-        if ((aColor = clWhite) or (aColor = clGray) or (aColor = clSilver) or (aColor = $A0A0A0)) then
+        PB := Pointer(PYStart + 3 * X);
+        PG := Pointer(PYStart + 3 * X + 1);
+        PR := Pointer(PYStart + 3 * X + 2);
+
+        var aColor := PR^ + (PG^ shl 8) + (PB^ shl 16);
+        if (aColor = clBlack) then
         begin
-          PR^ := 0;
-          PG^ := 0;
-          PB^ := 0;
+          PR^ := 255;
+          PG^ := 255;
+          PB^ := 255;
+        end else begin
+          if ((aColor = clWhite) or (aColor = clGray) or (aColor = clSilver) or (aColor = $A0A0A0)) then
+          begin
+            PR^ := 0;
+            PG^ := 0;
+            PB^ := 0;
+          end;
         end;
+      end; // for x
+    end; // for y
+
+    if (RightStr(filename, 3) = 'bmp') then
+      Bmp.SaveToFile(filename)
+    else
+    begin
+      var png := TPngImage.Create;
+      try
+        png.Assign(Bmp);
+        png.SaveToFile(filename);
+      finally
+        FreeAndNil(png);
       end;
-    end; // for x
-  end; // for y
-
-  if (RightStr(filename, 3) = 'bmp') then
-    Bmp.SaveToFile(filename)
-  else
-  begin
-    png := TPngImage.Create;
-    png.Assign(Bmp);
-    png.SaveToFile(filename);
-    FreeAndNil(png);
+    end;
+  finally
+    FreeAndNil(Bmp);
   end;
-
-  FreeAndNil(Bmp);
 end;
 
 procedure TRelief.HideCursor();
@@ -1392,46 +1352,44 @@ end;
 // komunikace s oblastmi rizeni:
 
 // odpoved na autorizaci:
-procedure TRelief.ORAuthoriseResponse(Sender: string; Rights: TORControlRights; comment: string = '';
+procedure TRelief.ORAuthoriseResponse(Sender: string; Rights: TAreaControlRights; comment: string = '';
   username: string = '');
-var tmp: TORControlRights;
-  orindex: Integer;
 begin
-  orindex := Self.GetORIndex(Sender);
+  var orindex := Self.GetORIndex(Sender);
   if (orindex = -1) then
     Exit;
 
-  tmp := Self.myORs[orindex].tech_rights;
-  Self.myORs[orindex].tech_rights := Rights;
-  Self.myORs[orindex].username := username;
+  var tmp := Self.areas[orindex].tech_rights;
+  Self.areas[orindex].tech_rights := Rights;
+  Self.areas[orindex].username := username;
   Self.UpdateLoginString();
 
   if ((Rights < tmp) and (Rights < write)) then
   begin
-    Self.myORs[orindex].MereniCasu.Clear();
+    Self.areas[orindex].countdown.Clear();
     while (SoundsPlay.IsPlaying(_SND_TRAT_ZADOST)) do
       SoundsPlay.DeleteSound(_SND_TRAT_ZADOST);
   end;
 
-  if ((tmp = TORControlRights.null) and (Rights > tmp)) then
+  if ((tmp = TAreaControlRights.null) and (Rights > tmp)) then
     PanelTCPClient.PanelFirstGet(Sender);
 
-  if (Rights = TORControlRights.null) then
+  if (Rights = TAreaControlRights.null) then
     Self.ORDisconnect(orindex);
 
-  if ((Rights > TORControlRights.null) and (tmp = TORControlRights.null)) then
-    Self.myORs[orindex].stack.Enabled := true;
+  if ((Rights > TAreaControlRights.null) and (tmp = TAreaControlRights.null)) then
+    Self.areas[orindex].stack.Enabled := true;
 
-  if ((Rights >= TORControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
+  if ((Rights >= TAreaControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
     (BridgeClient.toLogin.password <> '')) then
     BridgeClient.Auth();
 
-  if (Rights >= TORControlRights.read) then
+  if (Rights >= TAreaControlRights.read) then
     IPC.CheckAuth();
 
   if (F_Auth.listening) then
   begin
-    if (Rights = TORControlRights.null) then
+    if (Rights = TAreaControlRights.null) then
       F_Auth.AuthError(orindex, comment)
     else
       F_Auth.AuthOK(orindex);
@@ -1448,37 +1406,35 @@ begin
 end;
 
 procedure TRelief.ORNUZ(Sender: string; status: TNUZstatus);
-var OblR: TORPanel;
 begin
-  OblR := Self.GetOR(Sender);
-  if (OblR = nil) then
+  var area := Self.GetOR(Sender);
+  if (area = nil) then
     Exit;
 
-  OblR.NUZ_status := status;
+  area.NUZ_status := status;
 
   case (status) of
     no_nuz, nuzing:
-      OblR.dk_blik := false;
+      area.dk_blik := false;
     blk_in_nuz:
-      OblR.dk_blik := true;
+      area.dk_blik := true;
   end;
 end;
 
 procedure TRelief.ORConnectionOpenned();
-var i, j, cnt: Integer;
-  ors: TIntAr;
-  Rights: TORControlRights;
 begin
   // zjistime pocet OR s zadanym opravnenim > null
-  cnt := GlobConfig.GetAuthNonNullORSCnt();
+  var cnt := GlobConfig.GetAuthNonNullORSCnt();
   if (cnt = 0) then
     Exit();
 
   // do \ors si priradime vsechna or s zadanym opravnenim > null
+  var ors: TIntAr;
   SetLength(ors, cnt);
-  j := 0;
-  for i := 0 to Self.ors.Count - 1 do
-    if ((GlobConfig.data.Auth.ors.TryGetValue(Self.myORs[i].id, Rights)) and (Rights > TORControlRights.null)) then
+  var j := 0;
+  var rights: TAreaControlRights;
+  for var i := 0 to Self.areas.Count - 1 do
+    if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) and (rights > TAreaControlRights.null)) then
     begin
       ors[j] := i;
       Inc(j);
@@ -1505,23 +1461,22 @@ end;
 
 procedure TRelief.ORConnectionOpenned_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
   guest: boolean);
-var i: Integer;
-  Rights: TORControlRights;
+var rights: TAreaControlRights;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (GlobConfig.data.Auth.ors.TryGetValue(Self.myORs[i].id, Rights)) then
+    if (GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) then
     begin
-      if (Rights > TORControlRights.null) then
+      if (rights > TAreaControlRights.null) then
       begin
-        if ((Rights > TORControlRights.read) and (guest)) then
-          Rights := TORControlRights.read;
-        Self.myORs[i].login := username;
-        PanelTCPClient.PanelAuthorise(Self.myORs[i].id, Rights, username, password)
+        if ((rights > TAreaControlRights.read) and (guest)) then
+          rights := TAreaControlRights.read;
+        Self.areas[i].login := username;
+        PanelTCPClient.PanelAuthorise(Self.areas[i].id, rights, username, password)
       end;
     end else begin
-      Self.myORs[i].login := username;
-      PanelTCPClient.PanelAuthorise(Self.myORs[i].id, read, username, password);
+      Self.areas[i].login := username;
+      PanelTCPClient.PanelAuthorise(Self.areas[i].id, read, username, password);
     end;
   end;
 end;
@@ -1533,9 +1488,9 @@ end;
 procedure TRelief.ORBlkChange(Sender: string; BlokID: Integer; blockType: TBlkType; parsed: TStrings);
 begin
   // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
-  if (not Self.Tech_blok.ContainsKey(BlokID)) then
+  if (not Self.techBlok.ContainsKey(BlokID)) then
     Exit();
-  var symbols := Self.Tech_blok[BlokID];
+  var symbols := Self.techBlok[BlokID];
 
   for var i := 0 to Symbols.Count - 1 do
   begin
@@ -1543,71 +1498,71 @@ begin
       btTrack:
         begin
           if ((Symbols[i].blk_type = btTrack) and
-            (Sender = Self.myORs[Self.tracks[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.tracks[Symbols[i].symbol_index].area].id)) then
             Self.tracks[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btTurnout:
         begin
-          if ((Symbols[i].blk_type = btTurnout) and (Sender = Self.myORs[turnouts[Symbols[i].symbol_index].area].id))
+          if ((Symbols[i].blk_type = btTurnout) and (Sender = Self.areas[turnouts[Symbols[i].symbol_index].area].id))
           then
             Self.turnouts[Symbols[i].symbol_index].PanelProp.Change(parsed);
 
           if ((Symbols[i].blk_type = btDerail) and
-            (Sender = Self.myORs[Self.derails[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.derails[Symbols[i].symbol_index].area].id)) then
             Self.derails[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btSignal:
         begin
           if ((Symbols[i].blk_type = btSignal) and
-            (Sender = Self.myORs[Self.signals[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.signals[Symbols[i].symbol_index].area].id)) then
             Self.signals[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btCrossing:
         begin
           if ((Symbols[i].blk_type = btCrossing) and
-            (Sender = Self.myORs[Self.crossings[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.crossings[Symbols[i].symbol_index].area].id)) then
             Self.crossings[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btLock:
         begin
           if ((Symbols[i].blk_type = btLock) and
-            (Sender = Self.myORs[Self.locks[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.locks[Symbols[i].symbol_index].area].id)) then
             Self.locks[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btDisconnector:
         begin
           if ((Symbols[i].blk_type = btDisconnector) and
-            (Sender = Self.myORs[Self.disconnectors[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.disconnectors[Symbols[i].symbol_index].area].id)) then
             Self.disconnectors[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btLinker:
         begin
           if ((Symbols[i].blk_type = btLinker) and
-            (Sender = Self.myORs[Self.linkers[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.linkers[Symbols[i].symbol_index].area].id)) then
             Self.linkers[Symbols[i].symbol_index].PanelProp.Change(parsed);
 
           if ((Symbols[i].blk_type = btLinkerSpr) and
-            (Sender = Self.myORs[Self.linkersTrains[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.linkersTrains[Symbols[i].symbol_index].area].id)) then
             Self.linkersTrains[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btSummary:
         begin
           if ((Symbols[i].blk_type = btSummary) and
-            (Sender = Self.myORs[Self.texts[Symbols[i].symbol_index].area].id)) then
+            (Sender = Self.areas[Self.texts[Symbols[i].symbol_index].area].id)) then
             Self.texts[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
     end; // case
 
     if ((Symbols[i].blk_type = btOther) and
-      (Sender = Self.myORs[Self.otherObj[Symbols[i].symbol_index].area].id)) then
+      (Sender = Self.areas[Self.otherObj[Symbols[i].symbol_index].area].id)) then
       Self.otherObj[Symbols[i].symbol_index].PanelProp.Change(parsed);
   end;
 
@@ -1618,35 +1573,31 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORHVList(Sender: string; data: string);
-var i: Integer;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Sender = Self.myORs[i].id) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Sender = Self.areas[i].id) then
     begin
-      Self.myORs[i].HVs.ParseHVs(data);
-      Self.myORs[i].HVs.HVs.Sort();
+      Self.areas[i].HVs.ParseHVs(data);
+      Self.areas[i].HVs.HVs.Sort();
       Exit();
     end;
 end;
 
 procedure TRelief.ORSprNew(Sender: string);
-var i: Integer;
-  HV: THV;
-  available: boolean;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Sender = Self.myORs[i].id) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Sender = Self.areas[i].id) then
     begin
-      available := false;
-      for HV in Self.myORs[i].HVs.HVs do
-        if (HV.Souprava = '-') then
+      var available := false;
+      for var HV in Self.areas[i].HVs.HVs do
+        if (HV.train = '-') then
         begin
           available := true;
           Break;
         end;
 
       if (available) then
-        F_SoupravaEdit.NewSpr(Self.myORs[i].HVs, Self.myORs[i].id)
+        F_SoupravaEdit.NewSpr(Self.areas[i].HVs, Self.areas[i].id)
       else
         Self.ORInfoMsg('Nejsou volné loko');
 
@@ -1655,12 +1606,11 @@ begin
 end;
 
 procedure TRelief.ORSprEdit(Sender: string; parsed: TStrings);
-var i: Integer;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Sender = Self.myORs[i].id) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Sender = Self.areas[i].id) then
     begin
-      F_SoupravaEdit.EditSpr(parsed, Self.myORs[i].HVs, Self.myORs[i].id, Self.myORs[i].Name);
+      F_SoupravaEdit.EditSpr(parsed, Self.areas[i].HVs, Self.areas[i].id, Self.areas[i].Name);
       Exit();
     end;
 end;
@@ -1670,23 +1620,22 @@ end;
 // technologie posle nejake menu a my ho zobrazime:
 procedure TRelief.ORShowMenu(items: string);
 begin
-  Self.menu_lastpos := Self.CursorDraw.Pos;
-  Self.dk_root_menu_item := '';
+  Self.menuLastpos := Self.CursorDraw.Pos;
+  Self.dkRootMenuItem := '';
   Self.Menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
 
 procedure TRelief.ORDkShowMenu(Sender: string; rootItem, menuItems: string);
-var OblR: TORPanel;
 begin
-  OblR := Self.GetOR(Sender);
-  if (OblR = nil) then
+  var area := Self.GetOR(Sender);
+  if (area = nil) then
     Exit();
 
-  Self.menu_lastpos := Self.CursorDraw.Pos;
-  Self.dk_root_menu_item := rootItem;
+  Self.menuLastpos := Self.CursorDraw.Pos;
+  Self.dkRootMenuItem := rootItem;
 
   if (rootItem = 'LOKO') then
-    menuItems := Self.DKMenuLOKOItems(OblR) + ',' + menuItems;
+    menuItems := Self.DKMenuLOKOItems(area) + ',' + menuItems;
 
   Self.Menu.ShowMenu(menuItems, Self.GetORIndex(Sender), Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
@@ -1694,12 +1643,11 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.HideMenu();
-var bPos: TPoint;
 begin
   Self.Menu.showing := false;
-  Self.dk_root_menu_item := '';
-  bPos := Self.DrawObject.ClientToScreen(Point(0, 0));
-  SetCursorPos(Self.menu_lastpos.X * SymbolSet.symbWidth + bPos.X, Self.menu_lastpos.Y * SymbolSet.symbHeight
+  Self.dkRootMenuItem := '';
+  var bPos := Self.DrawObject.ClientToScreen(Point(0, 0));
+  SetCursorPos(Self.menuLastpos.X * SymbolSet.symbWidth + bPos.X, Self.menuLastpos.Y * SymbolSet.symbHeight
     + bPos.Y);
   Self.show();
 end;
@@ -1713,33 +1661,33 @@ begin
   if (PanelTCPClient.status <> TPanelConnectionStatus.opened) then
     Exit();
 
-  menu_str := '$' + Self.myORs[obl_rizeni].Name + ',-,';
+  menu_str := '$' + Self.areas[obl_rizeni].Name + ',-,';
 
-  case (Self.myORs[obl_rizeni].tech_rights) of
-    TORControlRights.null, TORControlRights.read, TORControlRights.superuser:
+  case (Self.areas[obl_rizeni].tech_rights) of
+    TAreaControlRights.null, TAreaControlRights.read, TAreaControlRights.superuser:
       menu_str := menu_str + 'MP,';
-    TORControlRights.write:
+    TAreaControlRights.write:
       menu_str := menu_str + 'DP,';
   end; // case
 
-  if (Self.root_menu) then
+  if (Self.rootMenu) then
     menu_str := menu_str + '!SUPERUSER,';
 
-  if (Integer(Self.myORs[obl_rizeni].tech_rights) >= 2) then
+  if (Integer(Self.areas[obl_rizeni].tech_rights) >= 2) then
   begin
     // mame pravo zapisovat
 
-    PanelTCPClient.PanelUpdateOsv(Self.myORs[obl_rizeni].id);
+    PanelTCPClient.PanelUpdateOsv(Self.areas[obl_rizeni].id);
 
     // LOKO
     menu_str := menu_str + 'LOKO,';
 
     // OSV
-    if (Self.myORs[obl_rizeni].Osvetleni.Count > 0) then
+    if (Self.areas[obl_rizeni].lights.Count > 0) then
       menu_str := menu_str + 'OSV,';
 
     // NUZ
-    case (Self.myORs[obl_rizeni].NUZ_status) of
+    case (Self.areas[obl_rizeni].NUZ_status) of
       TNUZstatus.blk_in_nuz:
         menu_str := menu_str + '!NUZ>,';
       TNUZstatus.nuzing:
@@ -1748,29 +1696,29 @@ begin
 
     menu_str := menu_str + 'MSG,';
 
-    if (ModCas.used) then
+    if (ModelTime.used) then
     begin
-      if (ModCas.started) then
+      if (ModelTime.started) then
       begin
-        if (Self.myORs[obl_rizeni].Rights.ModCasStop) then
+        if (Self.areas[obl_rizeni].Rights.ModelTimeStop) then
           menu_str := menu_str + 'CAS<,';
       end else begin
-        if (Self.myORs[obl_rizeni].Rights.ModCasStart) then
+        if (Self.areas[obl_rizeni].Rights.ModelTimeStart) then
           menu_str := menu_str + 'CAS>,';
       end;
     end;
 
-    if ((Self.myORs[obl_rizeni].Rights.ModCasSet) and (not ModCas.started)) then
+    if ((Self.areas[obl_rizeni].Rights.ModelTimeSet) and (not ModelTime.started)) then
       menu_str := menu_str + 'CAS,';
 
-    if (Self.myORs[obl_rizeni].hlaseni) then
+    if (Self.areas[obl_rizeni].announcement) then
       menu_str := menu_str + 'HLÁŠENÍ,';
   end;
 
   menu_str := menu_str + 'INFO,';
 
-  Self.dk_root_menu_item := 'DK';
-  Self.menu_lastpos := Self.CursorDraw.Pos;
+  Self.dkRootMenuItem := 'DK';
+  Self.menuLastpos := Self.CursorDraw.Pos;
 
   Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
@@ -1784,7 +1732,7 @@ begin
   SetLength(ors, 1);
   ors[0] := Sender;
 
-  if ((GlobConfig.data.Auth.autoauth) and (Self.myORs[Sender].tech_rights < TORControlRights.superuser)) then
+  if ((GlobConfig.data.Auth.autoauth) and (Self.areas[Sender].tech_rights < TAreaControlRights.superuser)) then
   begin
     if (item = 'MP') then
     begin
@@ -1802,7 +1750,7 @@ begin
   end;
 end;
 
-function TRelief.DKMenuLOKOItems(Sender: TORPanel): string;
+function TRelief.DKMenuLOKOItems(Sender: TAreaPanel): string;
 begin
   Result := '$' + Sender.Name + ',$LOKO,-,NOVÁ loko,EDIT loko,SMAZAT loko,PŘEDAT loko,HLEDAT loko,RUČ loko';
   if (BridgeClient.authStatus = TuLIAuthStatus.yes) then
@@ -1820,57 +1768,55 @@ end;
 procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
   guest: boolean);
 begin
-  Self.myORs[ors[0]].login := username;
-  PanelTCPClient.PanelAuthorise(Self.myORs[ors[0]].id, superuser, username, password);
-  Self.root_menu := false;
+  Self.areas[ors[0]].login := username;
+  PanelTCPClient.PanelAuthorise(Self.areas[ors[0]].id, superuser, username, password);
+  Self.rootMenu := false;
 end;
 
 procedure TRelief.DKMenuClickCAS(Sender: Integer; item: string);
 begin
   if (item = 'CAS>') then
-  begin
-    PanelTCPClient.SendLn('-;MOD-CAS;START;');
-  end else begin
+    PanelTCPClient.SendLn('-;MOD-CAS;START;')
+  else
     PanelTCPClient.SendLn('-;MOD-CAS;STOP;');
-  end;
 end;
 
 procedure TRelief.DKMenuClickSetCAS(Sender: Integer; item: string);
 begin
-  F_ModCasSet.OpenForm();
+  F_ModelTime.OpenForm();
 end;
 
 procedure TRelief.DKMenuClickINFO(Sender: Integer; item: string);
 var lichy, rs: string;
 begin
-  if (Self.myORs[Sender].lichy = 0) then
+  if (Self.areas[Sender].orientation = aoOddLeftToRight) then
     lichy := 'zleva doprava'
-  else if (Self.myORs[Sender].lichy = 1) then
+  else if (Self.areas[Sender].orientation = aoOddRightToLeft) then
     lichy := 'zprava doleva'
   else
     lichy := 'nedefinován';
 
-  case (Self.myORs[Sender].tech_rights) of
-    TORControlRights.read:
+  case (Self.areas[Sender].tech_rights) of
+    TAreaControlRights.read:
       rs := 'ke čtení';
-    TORControlRights.write:
+    TAreaControlRights.write:
       rs := 'k zápisu';
-    TORControlRights.superuser:
+    TAreaControlRights.superuser:
       rs := 'superuser';
   else
     rs := 'nedefinováno';
   end;
 
-  Application.MessageBox(PChar('Oblast řízení : ' + Self.myORs[Sender].Name + #13#10 + 'ID : ' + Self.myORs[Sender].id +
-    #13#10 + 'Přihlášen : ' + Self.myORs[Sender].username + #13#10 + 'Lichý směr : ' + lichy + #13#10 + 'Oprávnění : ' +
-    rs), PChar(Self.myORs[Sender].Name), MB_OK OR MB_ICONINFORMATION);
+  Application.MessageBox(PChar('Oblast řízení : ' + Self.areas[Sender].Name + #13#10 + 'ID : ' + Self.areas[Sender].id +
+    #13#10 + 'Přihlášen : ' + Self.areas[Sender].username + #13#10 + 'Lichý směr : ' + lichy + #13#10 + 'Oprávnění : ' +
+    rs), PChar(Self.areas[Sender].Name), MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TRelief.DKMenuClickHLASENI(Sender: Integer; item: string);
 var menu_str: string;
 begin
-  menu_str := '$' + Self.myORs[Sender].Name + ',$STANIČNÍ HLÁŠENÍ,-,POSUN,NESAHAT,INTRO,SPEC1,SPEC2,SPEC3';
-  Self.dk_root_menu_item := 'HLASENI';
+  menu_str := '$' + Self.areas[Sender].Name + ',$STANIČNÍ HLÁŠENÍ,-,POSUN,NESAHAT,INTRO,SPEC1,SPEC2,SPEC3';
+  Self.dkRootMenuItem := 'HLASENI';
   Self.Menu.ShowMenu(menu_str, Sender, Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
 
@@ -1886,19 +1832,19 @@ procedure TRelief.ShowRegMenu(obl_rizeni: Integer);
 var menu_str: string;
 begin
   if ((PanelTCPClient.status <> TPanelConnectionStatus.opened) or
-    (Self.myORs[obl_rizeni].RegPlease.status = TORRegPleaseStatus.none)) then
+    (Self.areas[obl_rizeni].RegPlease.status = TAreaRegPleaseStatus.none)) then
     Exit();
 
-  menu_str := '$' + Self.myORs[obl_rizeni].Name + ',$Žádost o loko,-,INFO,ODMÍTNI';
+  menu_str := '$' + Self.areas[obl_rizeni].Name + ',$Žádost o loko,-,INFO,ODMÍTNI';
 
-  Self.myORs[obl_rizeni].RegPlease.status := TORRegPleaseStatus.request;
+  Self.areas[obl_rizeni].RegPlease.status := TAreaRegPleaseStatus.request;
 
-  Self.dk_root_menu_item := 'REG-PLEASE';
-  Self.menu_lastpos := Self.CursorDraw.Pos;
+  Self.dkRootMenuItem := 'REG-PLEASE';
+  Self.menuLastpos := Self.CursorDraw.Pos;
 
   Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0, 0)));
 
-  PanelTCPClient.PanelLokList(Self.myORs[obl_rizeni].id);
+  PanelTCPClient.PanelLokList(Self.areas[obl_rizeni].id);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1906,7 +1852,7 @@ end;
 procedure TRelief.MenuOnClick(Sender: TObject; item: string; obl_r: Integer; itemindex: Integer);
 var sp_menu: string;
 begin
-  sp_menu := Self.dk_root_menu_item;
+  sp_menu := Self.dkRootMenuItem;
   Self.HideMenu();
 
   if (sp_menu = '') then
@@ -1920,10 +1866,10 @@ begin
   else if (sp_menu = 'LOKO') then
   begin
     if (not Self.ParseLOKOMenuClick(item, obl_r)) then // not handled
-      PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, sp_menu, item);
+      PanelTCPClient.PanelDkMenuClick(Self.areas[obl_r].id, sp_menu, item);
   end
   else
-    PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, sp_menu, item);
+    PanelTCPClient.PanelDkMenuClick(Self.areas[obl_r].id, sp_menu, item);
 end;
 
 procedure TRelief.ParseDKMenuClick(item: string; obl_r: Integer);
@@ -1943,10 +1889,10 @@ begin
   else if (item = 'HLÁŠENÍ') then
     Self.DKMenuClickHLASENI(obl_r, item)
   else
-    PanelTCPClient.PanelDkMenuClick(Self.myORs[obl_r].id, item); // no special menu -> send click to server
+    PanelTCPClient.PanelDkMenuClick(Self.areas[obl_r].id, item); // no special menu -> send click to server
 
   if (item = 'LOKO') then
-    PanelTCPClient.PanelLokList(Self.myORs[obl_r].id);
+    PanelTCPClient.PanelLokList(Self.areas[obl_r].id);
 end;
 
 function TRelief.ParseLOKOMenuClick(item: string; obl_r: Integer): boolean;
@@ -1954,19 +1900,19 @@ begin
   Result := true;
 
   if (item = 'NOVÁ loko') then
-    F_HVEdit.HVAdd(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+    F_HVEdit.HVAdd(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
   else if (item = 'EDIT loko') then
-    F_HVEdit.HVEdit(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+    F_HVEdit.HVEdit(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
   else if (item = 'SMAZAT loko') then
-    F_HVDelete.OpenForm(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+    F_HVDelete.OpenForm(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
   else if (item = 'PŘEDAT loko') then
-    F_HV_Move.Open(Self.myORs[obl_r].id, Self.myORs[obl_r].HVs)
+    F_HV_Move.Open(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
   else if (item = 'HLEDAT loko') then
     F_HVSearch.show()
   else if ((item = 'RUČ loko') or (item = 'MAUS loko')) then
-    F_RegReq.Open(Self.myORs[obl_r].HVs, Self.myORs[obl_r].id, Self.myORs[obl_r].RegPlease.user,
-      Self.myORs[obl_r].RegPlease.firstname, Self.myORs[obl_r].RegPlease.lastname, Self.myORs[obl_r].RegPlease.comment,
-      (Self.myORs[obl_r].RegPlease.status <> TORRegPleaseStatus.none), false, false, (item = 'MAUS loko'))
+    F_RegReq.Open(Self.areas[obl_r].HVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
+      Self.areas[obl_r].RegPlease.firstname, Self.areas[obl_r].RegPlease.lastname, Self.areas[obl_r].RegPlease.comment,
+      (Self.areas[obl_r].RegPlease.status <> TAreaRegPleaseStatus.none), false, false, (item = 'MAUS loko'))
   else
     Result := false;
 end;
@@ -1974,31 +1920,30 @@ end;
 procedure TRelief.ParseRegMenuClick(item: string; obl_r: Integer);
 begin
   if (item = 'ODMÍTNI') then
-    PanelTCPClient.SendLn(Self.myORs[obl_r].id + ';LOK-REQ;DENY')
+    PanelTCPClient.SendLn(Self.areas[obl_r].id + ';LOK-REQ;DENY')
   else if (item = 'INFO') then
   begin
-    F_RegReq.Open(Self.myORs[obl_r].HVs, Self.myORs[obl_r].id, Self.myORs[obl_r].RegPlease.user,
-      Self.myORs[obl_r].RegPlease.firstname, Self.myORs[obl_r].RegPlease.lastname, Self.myORs[obl_r].RegPlease.comment,
+    F_RegReq.Open(Self.areas[obl_r].HVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
+      Self.areas[obl_r].RegPlease.firstname, Self.areas[obl_r].RegPlease.lastname, Self.areas[obl_r].RegPlease.comment,
       true, false, false, false);
   end;
 end;
 
 procedure TRelief.ParseHlaseniMenuClick(item: string; obl_r: Integer);
 begin
-  PanelTCPClient.SendLn(Self.ors[obl_r].id + ';SHP;SPEC;' + item);
+  PanelTCPClient.SendLn(Self.areas[obl_r].id + ';SHP;SPEC;' + item);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORDisconnect(orindex: Integer = -1);
-var i: Integer;
 begin
   if (orindex = -1) then
   begin
     Self.Menu.showing := false;
     Self.UPO.showing := false;
     Self.infoTimers.Clear();
-    Self.Graphics.DrawObject.Enabled := true;
+    Self.Graphics.dxd.Enabled := true;
   end;
 
   Self.tracks.Reset(orindex);
@@ -2014,18 +1959,18 @@ begin
   Self.blockLabels.Reset(orindex);
   Self.otherObj.Reset(orindex);
 
-  for i := 0 to Self.myORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
     if ((orindex < 0) or (i = orindex)) then
     begin
-      Self.myORs[i].tech_rights := TORControlRights.null;
-      Self.myORs[i].dk_blik := false;
-      Self.myORs[i].stack.Enabled := false;
-      Self.myORs[i].dk_click_server := false;
-      Self.myORs[i].RegPlease.status := TORRegPleaseStatus.none;
-      Self.myORs[i].hlaseni := false;
-      Self.myORs[i].login := '';
-      Self.myORs[i].username := '';
+      Self.areas[i].tech_rights := TAreaControlRights.null;
+      Self.areas[i].dk_blik := false;
+      Self.areas[i].stack.Enabled := false;
+      Self.areas[i].dk_click_server := false;
+      Self.areas[i].RegPlease.status := TAreaRegPleaseStatus.none;
+      Self.areas[i].announcement := false;
+      Self.areas[i].login := '';
+      Self.areas[i].username := '';
     end;
   end;
 
@@ -2034,18 +1979,16 @@ begin
 end;
 
 procedure TRelief.OROsvChange(Sender: string; code: string; state: boolean);
-var i, j: Integer;
-  Osv: TOsv;
 begin
-  for i := 0 to Self.ors.Count - 1 do
-    if (Self.ors[i].id = Sender) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = Sender) then
     begin
-      for j := 0 to Self.ors[i].Osvetleni.Count - 1 do
-        if (Self.ors[i].Osvetleni[j].Name = code) then
+      for var j := 0 to Self.areas[i].lights.Count - 1 do
+        if (Self.areas[i].lights[j].Name = code) then
         begin
-          Osv := Self.ors[i].Osvetleni.items[j];
-          Osv.state := state;
-          Self.ors[i].Osvetleni.items[j] := Osv;
+          var osv := Self.areas[i].lights.items[j];
+          osv.state := state;
+          Self.areas[i].lights.items[j] := osv;
         end;
       Exit();
     end;
@@ -2053,51 +1996,47 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.ShowZasobniky();
-var i: Integer;
+procedure TRelief.ShowStacks();
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    Self.myORs[i].stack.show(Self.DrawObject, Self.CursorDraw.Pos);
+  for var i := 0 to Self.areas.Count - 1 do
+    Self.areas[i].stack.show(Self.DrawObject, Self.CursorDraw.Pos);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORStackMsg(Sender: string; data: TStrings);
-var i: Integer;
 begin
-  for i := 0 to Self.ors.Count - 1 do
-    if (Self.ors[i].id = Sender) then
-      Self.ors[i].stack.ParseCommand(data);
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = Sender) then
+      Self.areas[i].stack.ParseCommand(data);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TRelief.GetPanelWidth(): SmallInt;
 begin
-  Result := Self.Graphics.PanelWidth;
+  Result := Self.Graphics.pWidth;
 end;
 
 function TRelief.GetPanelHeight(): SmallInt;
 begin
-  Result := Self.Graphics.PanelHeight;
+  Result := Self.Graphics.pHeight;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ShowInfoTimers();
-var i: Integer;
-  str: string;
 begin
-  for i := Self.infoTimers.Count - 1 downto 0 do
-    if (Self.infoTimers[i].konec < Now) then
+  for var i := Self.infoTimers.Count - 1 downto 0 do
+    if (Self.infoTimers[i].finish < Now) then
       Self.infoTimers.Delete(i);
 
-  for i := 0 to Min(Self.infoTimers.Count, 2) - 1 do
+  for var i := 0 to Min(Self.infoTimers.Count, 2) - 1 do
   begin
-    str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].konec - Now) + ' ';
-    Symbols.TextOutput(Point(Self.PanelWidth - _INFOTIMER_WIDTH, Self.PanelHeight - i - 1), str, clRed, clWhite,
+    var str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].finish - Now) + ' ';
+    Symbols.TextOutput(Point(Self.width - _INFOTIMER_WIDTH, Self.height - i - 1), str, clRed, clWhite,
       Self.DrawObject);
-  end; // for i
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2105,7 +2044,7 @@ end;
 procedure TRelief.ORInfoTimer(id: Integer; time_min: Integer; time_sec: Integer; str: string);
 var tmr: TInfoTimer;
 begin
-  tmr.konec := Now + EncodeTime(0, time_min, time_sec, 0);
+  tmr.finish := Now + EncodeTime(0, time_min, time_sec, 0);
   if (Length(str) > _INFOTIMER_TEXT_WIDTH) then
     tmr.str := LeftStr(str, _INFOTIMER_TEXT_WIDTH)
   else
@@ -2121,9 +2060,8 @@ begin
 end;
 
 procedure TRelief.ORInfoTimerRemove(id: Integer);
-var i: Integer;
 begin
-  for i := 0 to Self.infoTimers.Count - 1 do
+  for var i := 0 to Self.infoTimers.Count - 1 do
     if (Self.infoTimers[i].id = id) then
     begin
       Self.infoTimers.Delete(i);
@@ -2134,11 +2072,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORDKClickServer(Sender: string; enable: boolean);
-var i: Integer;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[i].id = Sender) then
-      Self.myORs[i].dk_click_server := enable;
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = Sender) then
+      Self.areas[i].dk_click_server := enable;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2153,85 +2090,82 @@ end;
 
 procedure TRelief.AddToTechBlk(typ: TBlkType; blok_id: Integer; symbol_index: Integer);
 var Symbols: TList<TTechBlokToSymbol>;
-  val: TTechBlokToSymbol;
 begin
   if (blok_id = -1) then
     Exit();
 
-  if (Self.Tech_blok.ContainsKey(blok_id)) then
-    Symbols := Self.Tech_blok[blok_id]
+  if (Self.techBlok.ContainsKey(blok_id)) then
+    Symbols := Self.techBlok[blok_id]
   else
     Symbols := TList<TTechBlokToSymbol>.Create();
 
-  val := GetTechBlk(typ, symbol_index);
+  var val := GetTechBlk(typ, symbol_index);
   if (not Symbols.Contains(val)) then
     Symbols.Add(val);
 
-  Self.Tech_blok.AddOrSetValue(blok_id, Symbols);
+  Self.techBlok.AddOrSetValue(blok_id, Symbols);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORLokReq(Sender: string; parsed: TStrings);
-var i: Integer;
-  OblR: TORPanel;
-  HVDb: THVDb;
+var area: TAreaPanel;
 begin
-  OblR := nil;
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[i].id = Sender) then
+  area := nil;
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = Sender) then
     begin
-      OblR := Self.myORs[i];
+      area := Self.areas[i];
       Break;
     end;
-  if (OblR = nil) then
+  if (area = nil) then
     Exit();
 
   parsed[2] := UpperCase(parsed[2]);
 
   if (parsed[2] = 'REQ') then
   begin
-    OblR.RegPlease.status := TORRegPleaseStatus.request;
+    area.RegPlease.status := TAreaRegPleaseStatus.request;
 
     // vychozi hodnoty
-    OblR.RegPlease.firstname := '';
-    OblR.RegPlease.lastname := '';
-    OblR.RegPlease.comment := '';
+    area.RegPlease.firstname := '';
+    area.RegPlease.lastname := '';
+    area.RegPlease.comment := '';
 
-    OblR.RegPlease.user := parsed[3];
+    area.RegPlease.user := parsed[3];
     if (parsed.Count > 4) then
-      OblR.RegPlease.firstname := parsed[4];
+      area.RegPlease.firstname := parsed[4];
     if (parsed.Count > 5) then
-      OblR.RegPlease.lastname := parsed[5];
+      area.RegPlease.lastname := parsed[5];
     if (parsed.Count > 6) then
-      OblR.RegPlease.comment := parsed[6];
+      area.RegPlease.comment := parsed[6];
   end
 
   else if (parsed[2] = 'OK') then
   begin
     F_RegReq.ServerResponseOK();
-    OblR.RegPlease.status := TORRegPleaseStatus.none;
+    area.RegPlease.status := TAreaRegPleaseStatus.none;
   end
 
   else if (parsed[2] = 'ERR') then
   begin
     F_RegReq.ServerResponseErr(parsed[3]);
-    OblR.RegPlease.status := TORRegPleaseStatus.none;
+    area.RegPlease.status := TAreaRegPleaseStatus.none;
   end
 
   else if (parsed[2] = 'CANCEL') then
   begin
     F_RegReq.ServerCanceled();
-    OblR.RegPlease.status := TORRegPleaseStatus.none;
+    area.RegPlease.status := TAreaRegPleaseStatus.none;
   end
 
   else if (parsed[2] = 'U-OK') then
   begin
-    HVDb := THVDb.Create;
+    var HVDb := THVDb.Create;
     HVDb.ParseHVs(parsed[3]);
 
-    F_RegReq.Open(HVDb, OblR.id, OblR.RegPlease.user, OblR.RegPlease.firstname, OblR.RegPlease.lastname,
-      OblR.RegPlease.comment, true, true, true, false);
+    F_RegReq.Open(HVDb, area.id, area.RegPlease.user, area.RegPlease.firstname, area.RegPlease.lastname,
+      area.RegPlease.comment, true, true, true, false);
   end
 
   else if (parsed[2] = 'U-ERR') then
@@ -2244,11 +2178,11 @@ end;
 
 procedure TRelief.UpdateSymbolSet();
 begin
-  Self.CursorDraw.Pozadi := TBitmap.Create();
-  Self.CursorDraw.Pozadi.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
-  Self.CursorDraw.Pozadi.Height := SymbolSet.symbHeight + 2;
-  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet.symbWidth,
-    Self.Graphics.PanelHeight * SymbolSet.symbHeight);
+  Self.CursorDraw.bg := TBitmap.Create();
+  Self.CursorDraw.bg.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
+  Self.CursorDraw.bg.Height := SymbolSet.symbHeight + 2;
+  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.pWidth * SymbolSet.symbWidth,
+    Self.Graphics.pHeight * SymbolSet.symbHeight);
   Self.show();
 end;
 
@@ -2261,21 +2195,20 @@ begin
 end;
 
 function TRelief.GetLoginString(): string;
-var i: Integer;
-  res: string;
+var res: string;
 begin
-  if (Self.myORs.Count = 0) then
+  if (Self.areas.Count = 0) then
     Exit('-');
 
-  if (Self.myORs[0].username = '') then
+  if (Self.areas[0].username = '') then
     res := ''
   else
-    res := Self.myORs[0].username;
+    res := Self.areas[0].username;
 
-  for i := 1 to Self.myORs.Count - 1 do
+  for var i := 1 to Self.areas.Count - 1 do
     if (res = '-') then
-      res := Self.myORs[i].username
-    else if (Self.myORs[i].username <> res) then
+      res := Self.areas[i].username
+    else if (Self.areas[i].username <> res) then
       Exit('více uživatelů');
 
   if (res = '') then
@@ -2287,10 +2220,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TRelief.AnyORWritable(): boolean;
-var OblR: TORPanel;
 begin
-  for OblR in Self.ors do
-    if (OblR.tech_rights > TORControlRights.read) then
+  for var area in Self.areas do
+    if (area.tech_rights > TAreaControlRights.read) then
       Exit(true);
   Result := false;
 end;
@@ -2298,9 +2230,6 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ReAuthorize();
-var fors: TIntAr;
-  i, j, cnt: Integer;
-  Rights: TORControlRights;
 begin
   // pokud je alespon jedno OR pro zapis, odhlasujeme vsechny OR, na kterych je prihlsen uzivatel z prvni OR
   // ciste teoreticky tedy muzeme postupne odhlasovat ruzne uzivatele z jednotlivych OR
@@ -2319,12 +2248,13 @@ begin
       GlobConfig.data.Auth.username := '';
       GlobConfig.data.Auth.password := '';
 
-      SetLength(fors, Self.ors.Count);
-      for i := 0 to Self.ors.Count - 1 do
+      var fors: TIntAr;
+      SetLength(fors, Self.areas.Count);
+      for var i := 0 to Self.areas.Count - 1 do
       begin
         fors[i] := i;
-        Self.myORs[i].login := '';
-        PanelTCPClient.PanelAuthorise(Self.myORs[i].id, TORControlRights.null, '', '');
+        Self.areas[i].login := '';
+        PanelTCPClient.PanelAuthorise(Self.areas[i].id, TAreaControlRights.null, '', '');
       end;
 
       F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true);
@@ -2336,19 +2266,20 @@ begin
 
     // zjistime si aktualne prihlasene uzivatele a ke kterym OR je prihlasen
     Self.reAuth.old_login := '';
-    for i := 0 to Self.ors.Count - 1 do
+    for var i := 0 to Self.areas.Count - 1 do
     begin
-      if ((Self.ors[i].login <> '') and (Self.ors[i].login <> GlobConfig.data.guest.username) and
+      if ((Self.areas[i].login <> '') and (Self.areas[i].login <> GlobConfig.data.guest.username) and
         (Self.reAuth.old_login = '')) then
-        Self.reAuth.old_login := Self.ors[i].login;
-      if ((Self.reAuth.old_login <> '') and (Self.reAuth.old_login = Self.ors[i].login) and
-        (Self.ors[i].tech_rights >= TORControlRights.write)) then
+        Self.reAuth.old_login := Self.areas[i].login;
+      if ((Self.reAuth.old_login <> '') and (Self.reAuth.old_login = Self.areas[i].login) and
+        (Self.areas[i].tech_rights >= TAreaControlRights.write)) then
         Self.reAuth.old_ors.Add(i);
     end;
 
     // vytvorime pole indexu oblasti rizeni pro autorizacni proces
+    var fors: TIntAr;
     SetLength(fors, Self.reAuth.old_ors.Count);
-    for i := 0 to Self.reAuth.old_ors.Count - 1 do
+    for var i := 0 to Self.reAuth.old_ors.Count - 1 do
       fors[i] := Self.reAuth.old_ors[i];
 
     // zapomeneme ulozeneho uzivatele
@@ -2374,15 +2305,17 @@ begin
     if (Self.reAuth.old_ors.Count = 0) then
     begin
       // zadne OR nezapamatovany -> prihlasujeme uzivatele na vsechny OR
-      cnt := GlobConfig.GetAuthNonNullORSCnt();
+      var cnt := GlobConfig.GetAuthNonNullORSCnt();
       if (cnt = 0) then
         Exit();
 
       // do \ors si priradime vsechna or s zadanym opravnenim > null
+      var fors: TIntAr;
       SetLength(fors, cnt);
-      j := 0;
-      for i := 0 to Self.ors.Count - 1 do
-        if ((GlobConfig.data.Auth.ors.TryGetValue(Self.ors[i].id, Rights)) and (Rights > TORControlRights.null)) then
+      var j := 0;
+      var rights: TAreaControlRights;
+      for var i := 0 to Self.areas.Count - 1 do
+        if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) and (Rights > TAreaControlRights.null)) then
         begin
           fors[j] := i;
           Inc(j);
@@ -2393,8 +2326,9 @@ begin
       // OR zapamatovany -> prihlasujeme uzivatele jen na tyto OR
 
       // vytvorime pole indexu oblasti rizeni pro autorizacni proces
+      var fors: TIntAr;
       SetLength(fors, Self.reAuth.old_ors.Count);
-      for i := 0 to Self.reAuth.old_ors.Count - 1 do
+      for var i := 0 to Self.reAuth.old_ors.Count - 1 do
         fors[i] := Self.reAuth.old_ors[i];
 
       // na OR v seznamu 'Self.reAuth.old_ors' prihlasime skutecneho uzivatele
@@ -2409,27 +2343,26 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.IPAAuth();
-var i, j, cnt: Integer;
-  ors: TIntAr;
-  Rights: TORControlRights;
+var rights: TAreaControlRights;
 begin
   if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
   begin
     // existujici spojeni -> autorizovat
 
     // zjistime pocet OR s (zadanym opravnenim > null) nebo (prave autorizovanych)
-    cnt := 0;
-    for i := 0 to Self.ors.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.myORs[i].id, Rights)) or (Rights > TORControlRights.null) or
-        (Self.ors[i].tech_rights > TORControlRights.null)) then
+    var cnt := 0;
+    for var i := 0 to Self.areas.Count - 1 do
+      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (Rights > TAreaControlRights.null) or
+        (Self.areas[i].tech_rights > TAreaControlRights.null)) then
         Inc(cnt);
 
     // do \ors si priradime vsechna or s (zadanym opravennim > null) nebo (prave autorizovanych)
+    var ors: TIntAr;
     SetLength(ors, cnt);
-    j := 0;
-    for i := 0 to Self.ors.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.myORs[i].id, Rights)) or (Rights > TORControlRights.null) or
-        (Self.ors[i].tech_rights > TORControlRights.null)) then
+    var j := 0;
+    for var i := 0 to Self.areas.Count - 1 do
+      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (Rights > TAreaControlRights.null) or
+        (Self.areas[i].tech_rights > TAreaControlRights.null)) then
       begin
         ors[j] := i;
         Inc(j);
@@ -2451,34 +2384,31 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.AuthReadCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
-var i: Integer;
 begin
-  for i := 0 to Length(ors) - 1 do
+  for var i := 0 to Length(ors) - 1 do
   begin
-    Self.myORs[ors[i]].login := username;
-    PanelTCPClient.PanelAuthorise(Self.myORs[ors[i]].id, read, username, password);
+    Self.areas[ors[i]].login := username;
+    PanelTCPClient.PanelAuthorise(Self.areas[ors[i]].id, read, username, password);
   end;
 end;
 
 procedure TRelief.AuthWriteCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
-var i: Integer;
 begin
-  for i := 0 to Length(ors) - 1 do
+  for var i := 0 to Length(ors) - 1 do
   begin
-    Self.myORs[ors[i]].login := username;
-    PanelTCPClient.PanelAuthorise(Self.myORs[ors[i]].id, write, username, password);
+    Self.areas[ors[i]].login := username;
+    PanelTCPClient.PanelAuthorise(Self.areas[ors[i]].id, write, username, password);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORHlaseniMsg(Sender: string; data: TStrings);
-var i: Integer;
-  orindex: Integer;
+var orindex: Integer;
 begin
   orindex := -1;
-  for i := 0 to Self.ors.Count - 1 do
-    if (Self.ors[i].id = Sender) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = Sender) then
     begin
       orindex := i;
       Break;
@@ -2492,11 +2422,11 @@ begin
   data[2] := UpperCase(data[2]);
   if ((data[2] = 'AVAILABLE') and (data.Count > 3)) then
   begin
-    Self.ors[i].hlaseni := (data[3] = '1');
+    Self.areas[orindex].announcement := (data[3] = '1');
 
-    if (Self.dk_root_menu_item = 'DK') then
+    if (Self.dkRootMenuItem = 'DK') then
       Self.ShowDKMenu(orindex);
-    if ((Self.dk_root_menu_item = 'HLASENI') and (not Self.ors[i].hlaseni)) then
+    if ((Self.dkRootMenuItem = 'HLASENI') and (not Self.areas[orindex].announcement)) then
       Self.HideMenu();
   end;
 end;
@@ -2514,10 +2444,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class function TRelief.FileSupportedVersionsStr(): string;
-var i: Integer;
 begin
   Result := '';
-  for i := 0 to Length(_FileVersion_accept) - 1 do
+  for var i := 0 to Length(_FileVersion_accept) - 1 do
     Result := Result + _FileVersion_accept[i] + ', ';
   Result := LeftStr(Result, Length(Result) - 2);
 end;
@@ -2531,20 +2460,19 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TRelief.GetOR(id: string): TORPanel;
+function TRelief.GetOR(id: string): TAreaPanel;
 var i: Integer;
 begin
   i := Self.GetORIndex(id);
   if (i = -1) then
     Exit(nil);
-  Result := Self.myORs[i];
+  Result := Self.areas[i];
 end;
 
 function TRelief.GetORIndex(id: string): Integer;
-var i: Integer;
 begin
-  for i := 0 to Self.myORs.Count - 1 do
-    if (Self.myORs[i].id = id) then
+  for var i := 0 to Self.areas.Count - 1 do
+    if (Self.areas[i].id = id) then
       Exit(i);
   Result := -1;
 end;

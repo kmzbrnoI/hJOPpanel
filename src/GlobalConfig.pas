@@ -1,7 +1,7 @@
 unit GlobalConfig;
 
 {
-  Globalni konfigurace SW.
+  Global SW configuration.
 }
 
 interface
@@ -34,7 +34,7 @@ type
   TAuthConfig = record
     autoauth: boolean;
     username, password: string;
-    ORs: TDictionary<string, TORControlRights>;
+    ORs: TDictionary<string, TAreaControlRights>;
     forgot: boolean; // smazat autorizacni udaje po odpojeni ze serveru
     auth_default_level: Integer;
 
@@ -106,7 +106,7 @@ uses TCPClientPanel, fMain, fSprHelp, fHVEdit;
 constructor TGlobConfig.Create();
 begin
   inherited;
-  Self.data.auth.ORs := TDictionary<string, TORControlRights>.Create();
+  Self.data.auth.ORs := TDictionary<string, TAreaControlRights>.Create();
 end;
 
 destructor TGlobConfig.Destroy();
@@ -118,11 +118,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TGlobConfig.LoadFile(const filename: string = _DEFAULT_FN);
-var ini: TMemIniFile;
-  str: TStrings;
-  i: Integer;
 begin
-  ini := TMemIniFile.Create(filename, TEncoding.UTF8);
+  var ini := TMemIniFile.Create(filename, TEncoding.UTF8);
   try
     Self.filename := filename;
 
@@ -159,20 +156,22 @@ begin
     Self.data.auth.ipc_send := ini.ReadBool('auth', 'ipc_send', true);
     Self.data.auth.ipc_receive := ini.ReadBool('auth', 'ipc_received', true);
 
-    str := TStringList.Create();
-    ExtractStrings(['(', ')', ',', ';'], [], PChar(ini.ReadString('auth', 'ORs', '')), str);
+    var str := TStringList.Create();
+    try
+      ExtractStrings(['(', ')', ',', ';'], [], PChar(ini.ReadString('auth', 'ORs', '')), str);
 
-    Self.data.auth.ORs.Clear();
-    for i := 0 to (str.Count div 2) - 1 do
-    begin
-      try
-        Self.data.auth.ORs.Add(str[i * 2], TORControlRights(StrToInt(str[i * 2 + 1])));
-      except
+      Self.data.auth.ORs.Clear();
+      for var i := 0 to (str.Count div 2) - 1 do
+      begin
+        try
+          Self.data.auth.ORs.Add(str[i * 2], TAreaControlRights(StrToInt(str[i * 2 + 1])));
+        except
 
+        end;
       end;
+    finally
+      str.Free();
     end;
-
-    str.Free();
 
     Self.data.guest.allow := ini.ReadBool('guest', 'allow', false);
     Self.data.guest.username := ini.ReadString('guest', 'username', '');
@@ -194,12 +193,8 @@ begin
 end;
 
 procedure TGlobConfig.SaveFile(const filename: string);
-var ini: TMemIniFile;
-  i: Integer;
-  str: string;
-  rights: TORControlRights;
 begin
-  ini := TMemIniFile.Create(filename, TEncoding.UTF8);
+  var ini := TMemIniFile.Create(filename, TEncoding.UTF8);
 
   try
     ini.WriteString('global', 'panel', Self.data.panel_fn);
@@ -234,10 +229,11 @@ begin
     ini.WriteBool('auth', 'ipc_send', Self.data.auth.ipc_send);
     ini.WriteBool('auth', 'ipc_received', Self.data.auth.ipc_receive);
 
-    str := '';
-    for i := 0 to Relief.ORs.Count - 1 do
-      if (Self.data.auth.ORs.TryGetValue(Relief.ORs[i].id, rights)) then
-        str := str + '(' + Relief.ORs[i].id + ';' + IntToStr(Integer(rights)) + ')';
+    var str := '';
+    var rights: TAreaControlRights;
+    for var i := 0 to Relief.pareas.Count - 1 do
+      if (Self.data.auth.ORs.TryGetValue(Relief.pareas[i].id, rights)) then
+        str := str + '(' + Relief.pareas[i].id + ';' + IntToStr(Integer(rights)) + ')';
     ini.WriteString('auth', 'ORs', str);
 
     ini.WriteBool('guest', 'allow', Self.data.guest.allow);
@@ -266,11 +262,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TGlobConfig.GetAuthNonNullORSCnt(): Cardinal;
-var item: TPair<string, TORControlRights>;
 begin
   Result := 0;
-  for item in Self.data.auth.ORs do
-    if (item.Value > TORControlRights.null) then
+  for var item in Self.data.auth.ORs do
+    if (item.Value > TAreaControlRights.null) then
       Inc(Result);
 end;
 

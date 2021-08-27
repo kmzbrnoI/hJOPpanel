@@ -74,7 +74,7 @@ type
     procedure Update();
 
     // udalosti z panelu:
-    procedure PanelAuthorise(Sender: string; rights: TORControlRights; username, password: string);
+    procedure PanelAuthorise(Sender: string; rights: TAreaControlRights; username, password: string);
     procedure PanelFirstGet(Sender: string);
     procedure PanelClick(Sender: string; Button: TPanelButton; blokid: Integer = -1; params: string = '');
     procedure PanelMenuClick(item_hint: string; item_index: Integer);
@@ -301,8 +301,8 @@ begin
     F_HV_Move.Close();
 
   SoundsPlay.DeleteAll();
-  ModCas.Reset();
-  F_ModCasSet.Close();
+  ModelTime.Reset();
+  F_ModelTime.Close();
   DCC.status := TDCCStatus.disabled;
   F_Main.SB_Soupravy.Enabled := false;
   RucList.Clear();
@@ -490,7 +490,7 @@ begin
   end
 
   else if (parsed[1] = 'OR-LIST') then
-    ORDb.Parse(parsed[2])
+    areaDb.Parse(parsed[2])
 
   else if (parsed[1] = 'UPO') then
     Relief.UPO.ParseCommand(parsed[2], false)
@@ -508,7 +508,7 @@ begin
     Relief.ORInfoTimerRemove(StrToInt(parsed[2]))
 
   else if (parsed[1] = 'MOD-CAS') then
-    ModCas.ParseData(parsed)
+    ModelTime.ParseData(parsed)
 
   else if (parsed[1] = 'DCC') then
     DCC.Parse(parsed)
@@ -547,9 +547,9 @@ begin
   else if (parsed[1] = 'AUTH') then
   begin
     if parsed.Count > 4 then
-      Relief.ORAuthoriseResponse(parsed[0], TORControlRights(StrToInt(parsed[2])), parsed[3], parsed[4])
+      Relief.ORAuthoriseResponse(parsed[0], TAreaControlRights(StrToInt(parsed[2])), parsed[3], parsed[4])
     else
-      Relief.ORAuthoriseResponse(parsed[0], TORControlRights(StrToInt(parsed[2])), parsed[3])
+      Relief.ORAuthoriseResponse(parsed[0], TAreaControlRights(StrToInt(parsed[2])), parsed[3])
 
   end else if (parsed[1] = 'NUZ') then
     Relief.ORNUZ(parsed[0], TNuzStatus(StrToInt(parsed[2])))
@@ -660,7 +660,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 // udalosti z panelu:
 
-procedure TPanelTCPClient.PanelAuthorise(Sender: string; rights: TORControlRights; username, password: string);
+procedure TPanelTCPClient.PanelAuthorise(Sender: string; rights: TAreaControlRights; username, password: string);
 begin
   Self.SendLn(Sender + ';AUTH;' + IntToStr(Integer(rights)) + ';{' + username + '};{' + password + '}');
 end;

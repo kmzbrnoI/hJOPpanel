@@ -32,10 +32,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function GetForbidderChars(): string;
-var i: Integer;
 begin
   Result := '';
-  for i := 0 to Length(_forbidden_chars) - 2 do
+  for var i := 0 to Length(_forbidden_chars) - 2 do
     Result := Result + _forbidden_chars[i] + ' ';
   Result := Result + _forbidden_chars[Length(_forbidden_chars) - 1];
 end;

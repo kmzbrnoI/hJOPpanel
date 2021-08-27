@@ -21,8 +21,8 @@ type
     function GetCount(): Integer;
 
     procedure ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
-      myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
-    procedure ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
+      myORs: TList<TAreaPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+    procedure ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
       blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 
   public
@@ -32,8 +32,8 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
+    procedure Load(ini: TMemIniFile; myORs: TList<TAreaPanel>; version: Word);
+    procedure Show(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
       turnouts: TList<TPTurnout>);
     function GetIndex(pos: TPoint): TPTrackId;
     procedure Reset(orindex: Integer = -1);
@@ -63,7 +63,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTracks.Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
+procedure TPTracks.Load(ini: TMemIniFile; myORs: TList<TAreaPanel>; version: Word);
 begin
   var count := ini.ReadInteger('P', 'U', 0);
   for var i := 0 to count - 1 do
@@ -137,7 +137,7 @@ begin
     end;
 
     // usporadame seznam souprav podle licheho smeru
-    if (myORs[track.area].Lichy = 1) then
+    if (myORs[track.area].orientation = aoOddRightToLeft) then
       track.trains.Reverse();
 
     // pokud nejsou pozice na soupravu, kreslime soupravu na cislo koleje
@@ -234,7 +234,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTracks.Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
+procedure TPTracks.Show(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>; startJC: TList<TStartJC>;
   turnouts: TList<TPTurnout>);
 var fg: TColor;
     showed: array of Boolean;
@@ -244,7 +244,7 @@ begin
     // vykresleni symbolu useku
 
     if (((track.panelProp.flash) or ((track.panelProp.trains.Count > 0) and
-      (myORs[track.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik)) then
+      (myORs[track.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik)) then
       fg := clBlack
     else
       fg := track.panelProp.fg;
@@ -303,7 +303,7 @@ end;
 
 // Rekurzivne kresli vetve bezneho bloku
 procedure TPTracks.ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
-  myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+  myORs: TList<TAreaPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 var fg: TColor;
 begin
   if (vetevI < 0) then
@@ -317,7 +317,7 @@ begin
   usek.branches[vetevI] := branch;
 
   if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
-    (myORs[usek.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
+    (myORs[usek.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik) and (visible)) then
     fg := clBlack
   else
   begin
@@ -418,7 +418,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
-procedure TPTracks.ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
+procedure TPTracks.ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TAreaPanel>;
   blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 begin
   if (usek.branches.Count < 3) then
@@ -454,7 +454,7 @@ begin
   // 3) vykreslime stredovy kriz
   var fg: TColor;
   if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
-    (myORs[usek.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
+    (myORs[usek.area].RegPlease.status = TAreaRegPleaseStatus.selected))) and (blik) and (visible)) then
     fg := clBlack
   else
   begin
