@@ -1,7 +1,7 @@
 unit fSprHVEdit;
 
 {
-  Okno editace HV v ramci editace soupravy.
+  Edit engine in train edit window.
 }
 
 interface
@@ -51,10 +51,8 @@ implementation
 {$R *.dfm}
 
 procedure TF_SprHVEdit.M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
-var i: Integer;
 begin
-  // osetreni vstupu
-  for i := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
     begin
       Key := #0;
@@ -65,16 +63,13 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SprHVEdit.CB_HV1_HVChange(Sender: TObject);
-var HV: THV;
-  i: Integer;
-  str: string;
 begin
   if (Self.CB_HV1_HV.ItemIndex < 0) then
   begin
     Self.RG_HV1_dir.Enabled := false;
     Self.M_HV1_Notes.Enabled := false;
 
-    for i := 0 to _MAX_FUNC do
+    for var i := 0 to _MAX_FUNC do
     begin
       Self.CHB_funkce[i].Enabled := false;
       Self.CHB_funkce[i].Checked := false;
@@ -87,16 +82,16 @@ begin
     Self.RG_HV1_dir.Enabled := true;
     Self.M_HV1_Notes.Enabled := true;
 
-    HV := Self.GetHV(Self.Indexes[Self.CB_HV1_HV.ItemIndex]);
+    var HV := Self.GetHV(Self.Indexes[Self.CB_HV1_HV.ItemIndex]);
     if (HV = nil) then
       Exit(); // tohleto by se teoreticky nikdy nemelo stat
 
-    for i := 0 to _MAX_FUNC do
+    for var i := 0 to _MAX_FUNC do
     begin
       Self.CHB_funkce[i].Visible := true;
       Self.CHB_funkce[i].Enabled := ((HV.funcType[i] = THVFuncType.permanent) or (HV.functions[i]));
       Self.CHB_funkce[i].Checked := HV.functions[i];
-      str := 'F' + IntToStr(i);
+      var str := 'F' + IntToStr(i);
       if (HV.funcType[i] = THVFuncType.momentary) then
         str := str + ' [M]';
       if (HV.funcDesc[i] <> '') then
@@ -106,7 +101,7 @@ begin
 
     Self.RG_HV1_dir.ItemIndex := Integer(HV.siteA);
     Self.M_HV1_Notes.Text := HV.note;
-  end; // else
+  end;
 
 end;
 

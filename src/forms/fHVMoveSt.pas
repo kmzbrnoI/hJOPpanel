@@ -1,7 +1,7 @@
 ﻿unit fHVMoveSt;
 
 {
-  Okno presunu lokomotivy do jine oblasti rizeni.
+  Move engine to different area.
 }
 
 interface
@@ -43,7 +43,6 @@ uses OrList, TCPClientPanel;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HV_Move.B_OKClick(Sender: TObject);
-var LI: TListItem;
 begin
   if (Self.LV_HVs.Selected = nil) then
   begin
@@ -58,11 +57,11 @@ begin
 
   Self.successfully_moved := 0;
   Self.to_move := 0;
-  for LI in Self.LV_HVs.Items do
+  for var LI in Self.LV_HVs.Items do
     if (LI.Selected) then
       Inc(Self.to_move);
 
-  for LI in Self.LV_HVs.Items do
+  for var LI in Self.LV_HVs.Items do
     if (LI.Selected) then
       PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), areaDb.db_reverse[Self.CB_Stanice.Text]);
 
@@ -80,18 +79,15 @@ begin
 end;
 
 procedure TF_HV_Move.Open(Sender: string; HVs: THVDb);
-var HV: THV;
-  LI: TListItem;
-  name: string;
 begin
   Self.sender_id := Sender;
 
   Self.LV_HVs.Clear();
-  for HV in HVs.HVs do
+  for var HV in HVs.HVs do
   begin
     if (HV.train = '-') then
     begin
-      LI := Self.LV_HVs.Items.Add();
+      var LI := Self.LV_HVs.Items.Add();
       LI.Caption := IntToStr(HV.addr);
       LI.SubItems.Add(HV.name);
       LI.SubItems.Add(HV.designation);
@@ -100,7 +96,7 @@ begin
   end;
 
   Self.CB_Stanice.Clear();
-  for name in areaDb.names_sorted do
+  for var name in areaDb.names_sorted do
     Self.CB_Stanice.Items.Add(name);
 
   Self.ActiveControl := Self.LV_HVs;

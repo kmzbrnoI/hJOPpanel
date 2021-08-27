@@ -206,7 +206,7 @@
         <DCCReference Include="panel\UPO.pas"/>
         <DCCReference Include="ModelovyCas.pas"/>
         <DCCReference Include="forms\fNastaveni_Casu.pas">
-            <Form>F_ModCasSet</Form>
+            <Form>F_ModelTIme</Form>
         </DCCReference>
         <DCCReference Include="DCC_Icons.pas"/>
         <DCCReference Include="forms\fSoupravy.pas">

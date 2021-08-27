@@ -1,7 +1,7 @@
 ﻿unit fSoupravy;
 
 {
-  Okno seznamu vsech souprav.
+  Window with list of all trains in all controlled areas.
 }
 
 interface
@@ -45,18 +45,16 @@ uses TCPClientPanel, ORList, parseHelper;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SprList.ParseLoko(str: string);
-var sl: TStrings;
-  i: Integer;
 begin
   Self.LV_Soupravy.Clear();
   Self.LV_Soupravy.Color := clWhite;
   Self.B_RemoveSpr.Enabled := false;
 
-  sl := TStringList.Create();
+  var sl: TStrings := TStringList.Create();
   try
     ExtractStringsEx([']'], ['['], str, sl);
 
-    for i := 0 to sl.Count - 1 do
+    for var i := 0 to sl.Count - 1 do
     begin
       try
         Self.AddSpr(sl[i]);
@@ -160,7 +158,6 @@ end;
 
 procedure TF_SprList.B_RemoveSprClick(Sender: TObject);
 var toRemove: TList<string>;
-  LI: TListItem;
   sprs, spr: string;
   Count: Integer;
 begin
@@ -171,7 +168,7 @@ begin
   try
     sprs := '';
     Count := 0;
-    for LI in Self.LV_Soupravy.Items do
+    for var LI in Self.LV_Soupravy.Items do
     begin
       if (LI.Selected) then
       begin

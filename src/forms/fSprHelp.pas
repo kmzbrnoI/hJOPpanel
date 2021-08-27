@@ -1,7 +1,7 @@
 ﻿unit fSprHelp;
 
 {
-  Okno napovedy k souprave.
+  Train help window.
 }
 
 interface
@@ -30,22 +30,20 @@ implementation
 
 procedure TF_SprHelp.B_OKClick(Sender: TObject);
 begin
-  F_SprHelp.Close;
+  Self.Close();
 end;
 
 procedure TF_SprHelp.LoadData(ini: TMemIniFile);
 const _SECTION: string = 'train-types';
 var strs: TStrings;
-  str: string;
-  LI: TListItem;
 begin
   strs := TStringList.Create();
   try
     ini.ReadSection(_SECTION, strs);
     Self.LV_SprHelp.Clear();
-    for str in strs do
+    for var str in strs do
     begin
-      LI := Self.LV_SprHelp.Items.Add;
+      var LI := Self.LV_SprHelp.Items.Add;
       LI.Caption := str;
       LI.SubItems.Add(ini.ReadString(_SECTION, str, ''));
     end;

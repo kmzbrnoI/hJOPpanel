@@ -1,7 +1,7 @@
 ﻿unit fHVSearch;
 
 {
-  Okno zadani parametru ke hledani lokomotivy na kolejisti.
+  Search for engine parameters based on its address.
 }
 
 interface

@@ -58,8 +58,8 @@ type
   end;
 
 const
-  _Def_Signal_Prop: TSignalPanelProp = (symbol: clBlack; bg: clFuchsia; surr: clBlack; AB: false; flash: false);
-  _UA_Signal_Prop: TSignalPanelProp = (symbol: $A0A0A0; bg: clBlack; surr: clBlack; AB: false; flash: false);
+  _DEF_SIGNAL_PROP: TSignalPanelProp = (symbol: clBlack; bg: clFuchsia; surr: clBlack; AB: false; flash: false);
+  _UA_SIGNAL_PROP: TSignalPanelProp = (symbol: $A0A0A0; bg: clBlack; surr: clBlack; AB: false; flash: false);
 
 implementation
 
@@ -70,9 +70,9 @@ uses Symbols, parseHelper, Panel;
 procedure TPSignal.Reset();
 begin
   if (Self.block > -2) then
-    Self.panelProp := _Def_Signal_Prop
+    Self.panelProp := _DEF_SIGNAL_PROP
   else
-    Self.panelProp := _UA_Signal_Prop;
+    Self.panelProp := _UA_SIGNAL_PROP;
 end;
 
 procedure TPSignal.Show(obj: TDXDraw; blik: Boolean);
@@ -127,9 +127,9 @@ begin
     signal.area := ini.ReadInteger('N' + IntToStr(i), 'OR', -1);
 
     if (signal.block = -2) then
-      signal.panelProp := _UA_Signal_Prop
+      signal.panelProp := _UA_SIGNAL_PROP
     else
-      signal.panelProp := _Def_Signal_Prop;
+      signal.panelProp := _DEF_SIGNAL_PROP;
 
     Self.data.Add(signal);
   end;

@@ -1,7 +1,7 @@
 ﻿unit fRegReq;
 
 {
-  Okno potvrzovani zadost o loko z rucniho regulatoru.
+  Confirm moving of an engine to manual control.
 }
 
 interface
@@ -67,7 +67,6 @@ uses ORList, TCPClientPanel, LokTokens;
 
 procedure TF_RegReq.Open(HVDb: THVDb; or_id: string; username, firstname, lastname, comment: string; remote: boolean;
   destroy_hvdb, all_selected, maus: boolean);
-var i: Integer;
 begin
   Self.or_id := or_id;
   Self.HVDb := HVDb;
@@ -99,7 +98,7 @@ begin
     Self.L_Stav.Top := Self.P_MausSlot.Top + Self.P_MausSlot.Height + 5;
     Self.RepaintSlots();
 
-    for i := 1 to TBridgeClient._SLOTS_CNT do
+    for var i := 1 to TBridgeClient._SLOTS_CNT do
     begin
       if ((Self.B_Slots[i].Visible) and (Self.B_Slots[i].Enabled)) then
       begin
@@ -119,17 +118,15 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_RegReq.FillHVs(HVDb: THVDb; all_selected: boolean);
-var LI: TListItem;
-  HV: THV;
 begin
   Self.LV_Lokos.Clear();
-  for HV in HVDb.HVs do
+  for var HV in HVDb.HVs do
   begin
-    LI := Self.LV_Lokos.Items.Add;
+    var LI := Self.LV_Lokos.Items.Add;
     LI.Caption := IntToStr(HV.addr);
     LI.SubItems.Add(HV.name + ' (' + HV.designation + ')');
     LI.Checked := all_selected;
-  end; // for i
+  end;
 end;
 
 procedure TF_RegReq.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -149,11 +146,10 @@ end;
 
 procedure TF_RegReq.B_LocalClick(Sender: TObject);
 var lokos: array of Word;
-  LI: TListItem;
-  cnt, j: Integer;
+  cnt: Integer;
 begin
   cnt := 0;
-  for LI in Self.LV_Lokos.Items do
+  for var LI in Self.LV_Lokos.Items do
     if (LI.Checked) then
       inc(cnt);
 
@@ -164,8 +160,8 @@ begin
   end;
 
   SetLength(lokos, cnt);
-  j := 0;
-  for LI in Self.LV_Lokos.Items do
+  var j := 0;
+  for var LI in Self.LV_Lokos.Items do
   begin
     if (LI.Checked) then
     begin
@@ -185,13 +181,12 @@ end;
 
 procedure TF_RegReq.B_RemoteClick(Sender: TObject);
 var str: string;
-  LI: TListItem;
   one: boolean;
 begin
   str := '';
   one := false;
 
-  for LI in Self.LV_Lokos.Items do
+  for var LI in Self.LV_Lokos.Items do
     if (LI.Checked) then
     begin
       str := str + LI.Caption + '|';
@@ -236,9 +231,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_RegReq.CreateSlotsButtons();
-var i: Integer;
 begin
-  for i := 1 to TBridgeClient._SLOTS_CNT do
+  for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
     Self.B_Slots[i] := TButton.Create(Self.P_MausSlot);
     with (Self.B_Slots[i]) do
@@ -256,7 +250,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_RegReq.RepaintSlots();
-var cnt, i, j: Integer;
+var cnt, j: Integer;
   partWidth: Integer;
 begin
   cnt := BridgeClient.activeSlotsCount;
@@ -272,7 +266,7 @@ begin
   else
     partWidth := 0;
 
-  for i := 1 to TBridgeClient._SLOTS_CNT do
+  for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
     with (Self.B_Slots[i]) do
     begin

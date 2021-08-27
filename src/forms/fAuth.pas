@@ -1,7 +1,7 @@
 ﻿unit fAuth;
 
 {
-  Autorizacni okno.
+  Authorization window.
 }
 
 interface
@@ -73,12 +73,11 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    callback: TAuthFilledCallback; // callback volany pri vyplneni udaju
-    auth_errors: TDictionary<Integer, string>; // chyby autorizace or ve formatu id_or:error
-    auth_remaining: TList<Integer>;
-    // OR_id, u kterych cekame na odpoved autorizace (pri prijimani odpovedi postupne mazeme prvky ze seznamu)
-    auth_ors: TIntAr; // OR k autorizaci (toto pole se nemeni)
-    flistening: boolean; // jestli poslouchame prichozi zpravy o (ne)uspesne autorizaci
+    callback: TAuthFilledCallback; // called on "OK" press
+    auth_errors: TDictionary<Integer, string>; // authorization errors (id_or:error)
+    auth_remaining: TList<Integer>; // areas remaining for authorization
+    auth_areas: TIntAr; // areas to authorization
+    flistening: boolean; // are we listening to AUTH messages?
 
     procedure RefreshErrorMessage();
 
@@ -118,12 +117,10 @@ uses GlobalConfig, fMain, TCPClientPanel, uLIclient, InterProcessCom;
 {$R *.dfm}
 
 procedure TF_Auth.B_ApplyClick(Sender: TObject);
-var i: Integer;
-  hashed: string;
 begin
   Self.auth_remaining.Clear();
-  for i := 0 to Length(Self.auth_ors) - 1 do
-    Self.auth_remaining.Add(Self.auth_ors[i]);
+  for var i := 0 to Length(Self.auth_areas) - 1 do
+    Self.auth_remaining.Add(Self.auth_areas[i]);
   Self.flistening := true;
 
   if (Sender = Self.B_Guest) then
@@ -136,7 +133,7 @@ begin
   Self.HideErrorMessage();
   Self.ShowLogging();
 
-  hashed := GenerateHash(Self.E_Password.Text);
+  var hashed := GenerateHash(Self.E_Password.Text);
 
   if ((Self.TB_Remeber.Position > 0) and (Sender = Self.B_Apply) and
     (PanelTCPClient.status = TPanelConnectionStatus.opened)) then
@@ -167,9 +164,9 @@ begin
   end;
 
   if (Sender = Self.B_Apply) then
-    Self.callback(Self, Self.E_username.Text, hashed, Self.auth_ors, false)
+    Self.callback(Self, Self.E_username.Text, hashed, Self.auth_areas, false)
   else
-    Self.callback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, Self.auth_ors, true);
+    Self.callback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, Self.auth_areas, true);
 end;
 
 procedure TF_Auth.B_CancelClick(Sender: TObject);
@@ -221,7 +218,7 @@ begin
   Self.flistening := false;
   Self.callback := callback;
 
-  Self.auth_ors := or_ids;
+  Self.auth_areas := or_ids;
   Self.auth_errors.Clear();
 
   Self.RefreshErrorMessage();
@@ -249,17 +246,16 @@ end;
 
 procedure TF_Auth.Listen(caption: string; username: string; remember_level: Integer; callback: TAuthFilledCallback;
   or_ids: TIntAr; allow_guest: boolean);
-var i: Integer;
 begin
   Self.flistening := true;
   Self.callback := callback;
 
-  Self.auth_ors := or_ids;
+  Self.auth_areas := or_ids;
   Self.auth_errors.Clear();
 
   Self.auth_remaining.Clear();
-  for i := 0 to Length(Self.auth_ors) - 1 do
-    Self.auth_remaining.Add(Self.auth_ors[i]);
+  for var i := 0 to Length(Self.auth_areas) - 1 do
+    Self.auth_remaining.Add(Self.auth_areas[i]);
 
   Self.E_username.Text := username;
   Self.E_Password.Text := '';
@@ -285,8 +281,6 @@ end;
 
 procedure TF_Auth.RefreshErrorMessage();
 var same: boolean;
-  Item: TPair<Integer, string>;
-  val, valDiff: string;
 begin
   if (Self.auth_errors.Count = 0) then
   begin
@@ -294,9 +288,10 @@ begin
     Exit();
   end;
 
-  // zkontrolujeme jestli jsou ve slovniku stejne hodnoty
+  // check if dictionary contains only same values
   same := true;
-  valDiff := '';
+  var valDiff: string := '';
+  var val: string;
   for val in Self.auth_errors.Values do
   begin
     if (valDiff = '') then
@@ -307,18 +302,18 @@ begin
       same := false;
       break;
     end;
-  end; // for
+  end;
 
   if (same) then
   begin
-    // zobrazime jen jednu chybu
-    Self.ST_Error.caption := val;
+    // show just one error
+    Self.ST_Error.Caption := val;
   end else begin
     // zobrazime chybu pro kazdou oblast rizeni
     Self.ST_Error.caption := '';
-    for Item in Self.auth_errors do
+    for var item in Self.auth_errors do
     begin
-      if (Assigned(Self.auth_ors)) then
+      if (Assigned(Self.auth_areas)) then
         Self.ST_Error.caption := Self.ST_Error.caption + relief.pareas[Item.Key].Name + ': ' + Item.Value + #13#10
       else
         Self.ST_Error.caption := Self.ST_Error.caption + Item.Value + #13#10;
@@ -341,17 +336,17 @@ begin
     Self.Show();
   Self.RefreshErrorMessage();
 
-  // po neuspesnem pokusu o prihlaseni povolime prihlaseni jako host
+  // unsuccessfull login -> login as guest
   Self.B_Guest.Visible := GlobConfig.data.guest.allow;
 
-  // znovu zobrazime prihlasovaci dialog
+  // show login dialog again
   if (Self.auth_remaining.Count = 0) then
     Self.ShowRelogin();
 end;
 
 procedure TF_Auth.AuthOK(or_index: Integer);
 begin
-  if (not Assigned(Self.auth_ors)) then
+  if (not Assigned(Self.auth_areas)) then
   begin
     Self.Close();
     Exit();
@@ -450,7 +445,7 @@ procedure TF_Auth.UpdateIPCcheckbox();
 var old: boolean;
 begin
   old := Self.CHB_IPC_auth.Visible;
-  Self.CHB_IPC_auth.Visible := (IPC.InstanceCnt > 1) and (GlobConfig.data.auth.ipc_send) and (Self.auth_ors <> nil);
+  Self.CHB_IPC_auth.Visible := (IPC.InstanceCnt > 1) and (GlobConfig.data.auth.ipc_send) and (Self.auth_areas <> nil);
 
   // pokud je okno otevrene, nezaskrtavame (aby uzivatel omylem nepotrvdit neco, co nechce)
   if ((not old) and (Self.CHB_IPC_auth.Visible)) then
@@ -484,4 +479,4 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-end.// unit
+end.

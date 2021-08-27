@@ -1,7 +1,7 @@
 unit fDebug;
 
 {
-  Debug okno.
+  Debug window (show network log).
 }
 
 interface
@@ -92,14 +92,13 @@ begin
 end;
 
 procedure TF_Debug.Log(msg: string);
-var LI: TListItem;
 begin
   if (not Self.CHB_DataLogging.Checked) then
     Exit();
   if ((not Self.CHB_PingLogging.Checked) and ((ContainsStr(msg, '-;PING')) or (ContainsStr(msg, '-;PONG')))) then
     Exit();
 
-  LI := Self.LV_Log.Items.Insert(0);
+  var LI := Self.LV_Log.Items.Insert(0);
   LI.Caption := FormatDateTime('hh:nn:ss,zzz', Now);
   LI.SubItems.Add(msg);
 end;

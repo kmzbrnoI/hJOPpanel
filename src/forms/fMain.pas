@@ -1,7 +1,7 @@
 ﻿unit fMain;
 
 {
-  Unit hlavniho okna, resi hlavne GUI.
+  Main window.
 }
 
 interface
@@ -13,7 +13,7 @@ uses
   System.ImageList, Types;
 
 const
-  _MUTE_MIN = 3; // ztisit zvuky je mozne maximalne na 3 minuty, pak se znovu zapnou
+  _MUTE_MIN = 3; // maximum mute time of sounds
   _ULIAUTH_TIMEOUT_SEC = 5;
 
 type
@@ -94,7 +94,7 @@ type
     procedure OnReliefLoginChange(Sender: TObject; user: string);
 
     procedure Init(const config_fn: string = TGlobConfig._DEFAULT_FN);
-    // konfiguracni soubor se cte z argumentu programu
+    // configuration file path = 1st program argument
     procedure SetPanelSize(width, height: Integer);
     procedure UpdateuLIIcon();
     procedure uLIAuthUpdate();
@@ -183,12 +183,11 @@ begin
 end;
 
 procedure TF_Main.A_PrintExecute(Sender: TObject);
-var fn: string;
 begin
   Self.SD_Image.InitialDir := ExtractFilePath(Application.ExeName);
   if (Self.SD_Image.Execute(Self.Handle)) then
   begin
-    fn := Self.SD_Image.FileName;
+    var fn := Self.SD_Image.FileName;
 
     case (Self.SD_Image.FilterIndex) of
       1:
@@ -219,11 +218,6 @@ end;
 procedure TF_Main.A_SettingsExecute(Sender: TObject);
 begin
   Self.SB_SettingsClick(Self.SB_Settings);
-
-  // IPC.se
-  // JclAppInstances.SendString(ClassName, _IPC_MYID, 'testi', Handle);
-  // Self.SB_Main.Panels[2].Text := IntToStr(JclAppInstances.MessageID);
-  // SendMessage(Handle, WM_COPYDATA, Integer(Handle), 4855);
 end;
 
 procedure TF_Main.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -235,9 +229,9 @@ procedure TF_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if ((PanelTCPClient.status <> TPanelConnectionStatus.closed) and (not Self.close_app)) then
   begin
-    Self.close_app := True; // informujeme OnDisconnect, ze ma zavrit okno
+    Self.close_app := True; // OnDisconnect will close application
     PanelTCPClient.Disconnect();
-    CanClose := false; // okno zatim nezavirame, zavre se az pri OnDisconnect
+    CanClose := false; // not closing form yet
   end;
 end;
 
@@ -255,7 +249,6 @@ begin
 end;
 
 procedure TF_Main.FormDestroy(Sender: TObject);
-var data: TGlobConfigData;
 begin
   BridgeClient.OnAuthStatushanged := nil;
 
@@ -263,7 +256,7 @@ begin
 
   if (Assigned(GlobConfig)) then
   begin
-    data := GlobConfig.data;
+    var data := GlobConfig.data;
     data.frmPos := Point(Self.Left, Self.Top);
     GlobConfig.data := data;
     try
@@ -306,9 +299,8 @@ begin
 end;
 
 procedure TF_Main.Init(const config_fn: string);
-var ss, ss2: TSymbolSet;
 begin
-  F_splash.AddStav('Načítám konfiguraci...');
+  F_splash.ShowState('Načítám konfiguraci...');
 
   try
     GlobConfig.LoadFile(config_fn);
@@ -321,7 +313,7 @@ begin
   Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '') + ' – hJOPpanel – v' +
     NactiVerzi(Application.ExeName) + ' (build ' + GetLastBuildDate + ')';
 
-  F_splash.AddStav('Vytvářím plátno...');
+  F_splash.ShowState('Vytvářím plátno...');
 
   try
     Self.DXD_Main := TDXDraw.Create(Self);
@@ -346,7 +338,7 @@ begin
     F_Main.DXD_Main.Cursor := crDefault;
   end;
 
-  F_splash.AddStav('Načítám symboly...');
+  F_splash.ShowState('Načítám symboly...');
 
   try
     SymbolSet := TSymbolSet.Create(GlobConfig.data.SymbolSet);
@@ -360,7 +352,7 @@ begin
     end;
   end;
 
-  F_splash.AddStav('Vytvářím panel...');
+  F_splash.ShowState('Vytvářím panel...');
 
   Relief := TRelief.Create(Self);
   Relief.OnMove := Self.OnReliefMove;
@@ -383,8 +375,8 @@ begin
     GlobConfig.data.SymbolSet := TSymbolSetType.normal;
 
     try
-      ss := TSymbolSet.Create(GlobConfig.data.SymbolSet);
-      ss2 := SymbolSet;
+      var ss := TSymbolSet.Create(GlobConfig.data.SymbolSet);
+      var ss2 := SymbolSet;
       SymbolSet := ss;
       Relief.UpdateSymbolSet();
       ss2.Free();
@@ -399,22 +391,22 @@ begin
   BridgeClient.toLogin.server := GlobConfig.data.server.host;
   BridgeClient.toLogin.port := GlobConfig.data.server.port;
 
-  F_splash.AddStav('Načítám zvuky...');
+  F_splash.ShowState('Načítám zvuky...');
   SoundsPlay.PreloadSounds();
 
   if (GlobConfig.data.uLI.path <> '') then
   begin
-    F_splash.AddStav('Spouštím uLI-daemon...');
+    F_splash.ShowState('Spouštím uLI-daemon...');
     Self.RunuLIDaemon();
   end;
 
   if (GlobConfig.data.uLI.use) then
   begin
-    F_splash.AddStav('Aktivuji spojení s uLI-daemon...');
+    F_splash.ShowState('Aktivuji spojení s uLI-daemon...');
     BridgeClient.Enabled := True;
   end;
 
-  F_splash.AddStav('Hotovo');
+  F_splash.ShowState('Hotovo');
 
   Self.UpdateuLIIcon();
   F_splash.Close();

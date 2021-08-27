@@ -1,7 +1,7 @@
 unit fHVPomEdit;
 
 {
-  Okno zadani POM parametru.
+  Edit POM values of engine.
 }
 
 interface

@@ -1,7 +1,7 @@
 ﻿unit fZpravy;
 
 {
-  Okynko zprav.
+  All messages window.
 }
 
 interface
@@ -89,37 +89,34 @@ begin
   Self.clients := TObjectList<TF_Message>.Create();
   Self.fname := name;
   Self.fid := id;
-end; // ctor
+end;
 
 destructor TF_Messages.Destroy();
 begin
   Self.clients.Free();
   inherited Destroy();
-end; // dtor
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Messages.MsgReceive(msg: string; Sender: string);
-var i: Integer;
-  form: TF_Message;
-  id: string;
 begin
   if (not Self.Showing) then
     Self.Show();
   SoundsPlay.Play(_SND_ZPRAVA);
 
-  for i := 0 to Self.clients.Count - 1 do
+  for var i := 0 to Self.clients.Count - 1 do
     if (Self.clients[i].id = Sender) then
     begin
       Self.clients[i].ReceiveMsg(msg);
       Exit();
     end;
 
-  // okynko se zpravou neexituje -> otevreme ho
-  for id in areaDb.db.Keys do
+  // subwindow with thread does not exist -> open it
+  for var id in areaDb.db.Keys do
     if (id = Sender) then
     begin
-      form := Self.OpenTab(areaDb.db[id], Sender);
+      var form := Self.OpenTab(areaDb.db[id], Sender);
       if (form <> nil) then
         form.ReceiveMsg(msg);
       Exit();
@@ -129,13 +126,12 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Messages.ErrorReceive(error: string; Sender: string);
-var form: TF_Message;
 begin
   if (not Self.Showing) then
     Self.Show();
   SoundsPlay.Play(_SND_CHYBA);
 
-  for form in Self.clients do
+  for var form in Self.clients do
     if (form.id = Sender) then
     begin
       form.ReceiveErr(error);
@@ -146,11 +142,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TF_Messages.OpenTab(name: string; id: string): TF_Message;
-var TS: TCloseTabSheet;
-  form: TF_Message;
 begin
-  // nejdrive zkontolujeme, jestli zalozku uz nemame ...
-  for form in Self.clients do
+  // ckeck if window is open
+  for var form in Self.clients do
   begin
     if (form.id = id) then
     begin
@@ -163,13 +157,13 @@ begin
     Exit(nil);
 
   // je potreba otevrit novou zalozku -> otevreme ji
-  TS := TCloseTabSheet.Create(Self.PC_Clients);
+  var TS := TCloseTabSheet.Create(Self.PC_Clients);
   TS.PageControl := Self.PC_Clients;
   TS.Caption := name + '      '; // mezery kvuli tlacitku zavreni
   TS.OnClose := OnTabClose;
   Self.PC_Clients.ActivePage := TS;
 
-  form := TF_Message.Create(TS, id, name);
+  var form := TF_Message.Create(TS, id, name);
   form.Parent := TS;
   form.Show();
   form.SetFocus();
@@ -191,10 +185,9 @@ const
   TCM_GETITEMRECT = $130A;
 var
   TabRect: TRect;
-  j: Integer;
 begin
   if (Sender is TPageControl) then
-    for j := 0 to Self.PC_Clients.PageCount - 1 do
+    for var j := 0 to Self.PC_Clients.PageCount - 1 do
     begin
       Self.PC_Clients.Perform(TCM_GETITEMRECT, j, LParam(@TabRect));
       if PtInRect(TabRect, Point(X, Y)) then
@@ -214,20 +207,18 @@ begin
 end;
 
 procedure TF_Messages.RemoveClients();
-var i: Integer;
 begin
   Self.clients.Clear();
 
-  for i := Self.PC_Clients.PageCount - 1 downto 0 do
+  for var i := Self.PC_Clients.PageCount - 1 downto 0 do
     Self.PC_Clients.Pages[i].Free();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TF_Messages.IsTypin(): Boolean;
-var form: TF_Message;
 begin
-  for form in Self.clients do
+  for var form in Self.clients do
     if (form.M_Send.Text <> '') then
       Exit(True);
   Exit(false);
@@ -240,9 +231,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class procedure TF_Messages.MsgReceive(recepient: string; msg: string; Sender: string);
-var i: Integer;
 begin
-  for i := 0 to TF_Messages.frm_cnt - 1 do
+  for var i := 0 to TF_Messages.frm_cnt - 1 do
     if (TF_Messages.frm_db[i].id = recepient) then
     begin
       TF_Messages.frm_db[i].MsgReceive(msg, Sender);
@@ -253,9 +243,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class procedure TF_Messages.ErrorReceive(recepient: string; error: string; Sender: string);
-var i: Integer;
 begin
-  for i := 0 to TF_Messages.frm_cnt - 1 do
+  for var i := 0 to TF_Messages.frm_cnt - 1 do
     if (TF_Messages.frm_db[i].id = recepient) then
     begin
       TF_Messages.frm_db[i].ErrorReceive(error, Sender);
@@ -277,13 +266,11 @@ begin
 end;
 
 procedure TF_Messages.FormShow(Sender: TObject);
-var LI: TListItem;
-  name: string;
 begin
   Self.LV_ORs.Clear();
-  for name in areaDb.names_sorted do
+  for var name in areaDb.names_sorted do
   begin
-    LI := Self.LV_ORs.Items.Add;
+    var LI := Self.LV_ORs.Items.Add;
     LI.Caption := name;
     LI.SubItems.Add(areaDb.db_reverse[name]);
   end;
@@ -306,9 +293,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class procedure TF_Messages.DestroyForms();
-var i: Integer;
 begin
-  for i := 0 to Self.frm_cnt - 1 do
+  for var i := 0 to Self.frm_cnt - 1 do
     if (Assigned(Self.frm_db[i])) then
       FreeAndNil(Self.frm_db[i]);
 end;
@@ -316,9 +302,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class procedure TF_Messages.CloseForms();
-var i: Integer;
 begin
-  for i := 0 to Self.frm_cnt - 1 do
+  for var i := 0 to Self.frm_cnt - 1 do
     if (Assigned(Self.frm_db[i])) then
     begin
       Self.frm_db[i].Close();
@@ -329,9 +314,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class function TF_Messages.IsTyping(): Boolean;
-var i: Integer;
 begin
-  for i := 0 to Self.frm_cnt - 1 do
+  for var i := 0 to Self.frm_cnt - 1 do
     if (Self.frm_db[i].IsTypin()) then
       Exit(True);
   Exit(false);
@@ -412,15 +396,14 @@ end;
 procedure TF_Messages.PageControlCloseButtonMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
 var
-  i: Integer;
   PageControl: TPageControl;
   TabSheet: TCloseTabSheet;
 begin
   PageControl := Sender as TPageControl;
 
-  if Button = mbLeft then
+  if (Button = mbLeft) then
   begin
-    for i := 0 to PageControl.PageCount - 1 do
+    for var i := 0 to PageControl.PageCount - 1 do
     begin
       if not(PageControl.Pages[i] is TCloseTabSheet) then
         Continue;
@@ -486,9 +469,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Messages.OnTabClose(Sender: TObject);
-var i: Integer;
 begin
-  for i := 0 to Self.clients.Count - 1 do
+  for var i := 0 to Self.clients.Count - 1 do
     if (Self.clients[i].Parent = Sender) then
     begin
       Self.clients.Delete(i);

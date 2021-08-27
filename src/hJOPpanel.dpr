@@ -37,7 +37,7 @@ uses
   Zasobnik in 'panel\Zasobnik.pas',
   UPO in 'panel\UPO.pas',
   ModelovyCas in 'ModelovyCas.pas',
-  fNastaveni_Casu in 'forms\fNastaveni_Casu.pas' {F_ModCasSet},
+  fNastaveni_Casu in 'forms\fNastaveni_Casu.pas' {F_ModelTIme},
   DCC_Icons in 'DCC_Icons.pas',
   fSoupravy in 'forms\fSoupravy.pas' {F_SprList},
   LokoRuc in 'LokoRuc.pas',
@@ -93,7 +93,7 @@ begin
   Application.CreateForm(TF_Auth, F_Auth);
   Application.CreateForm(TF_HVEdit, F_HVEdit);
   Application.CreateForm(TF_HVDelete, F_HVDelete);
-  Application.CreateForm(TF_ModCasSet, F_ModCasSet);
+  Application.CreateForm(TF_ModelTIme, F_ModelTIme);
   Application.CreateForm(TF_SprList, F_SprList);
   Application.CreateForm(TF_RegReq, F_RegReq);
   Application.CreateForm(TF_HV_Pom, F_HV_Pom);

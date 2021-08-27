@@ -1,7 +1,7 @@
 ﻿unit fZprava;
 
 {
-  Okno jednoho komunikacniho sezeni.
+  Single message thread window.
 }
 
 interface
@@ -53,15 +53,12 @@ uses TCPClientPanel, fZpravy, RPConst;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Message.B_SendClick(Sender: TObject);
-var LI: TListItem;
-  i, j: Integer;
 begin
   if (Self.M_Send.Text = '') then
     Exit();
 
-  // kontrola M_Send
-  for i := 1 to Length(Self.M_Send.Text) do
-    for j := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 1 to Length(Self.M_Send.Text) do
+    for var j := 0 to Length(_forbidden_chars) - 1 do
       if (_forbidden_chars[j] = Self.M_Send.Text[i]) then
       begin
         Application.MessageBox(PChar('Zpráva obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
@@ -69,7 +66,7 @@ begin
         Exit();
       end;
 
-  LI := Self.LV_Messages.Items.Add;
+  var LI := Self.LV_Messages.Items.Add();
   LI.Caption := FormatDateTime('hh:nn:ss', Now);
   LI.SubItems.Add('');
   LI.SubItems.Add(Self.M_Send.Text);
@@ -87,7 +84,7 @@ begin
 
   Self.fid := id;
   Self.fname := name;
-end; // ctor
+end;
 
 procedure TF_Message.FormResize(Sender: TObject);
 begin
@@ -140,7 +137,6 @@ begin
 end;
 
 procedure TF_Message.M_SendKeyPress(Sender: TObject; var Key: Char);
-var i: Integer;
 begin
   if (Key = #13) then
   begin
@@ -148,8 +144,7 @@ begin
     Key := #0;
   end;
 
-  // osetreni zakazanych znaku
-  for i := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
     begin
       Key := #0;
@@ -168,9 +163,8 @@ end;
 /// ////////////////////////////////////////////////////////////////////////
 
 procedure TF_Message.ReceiveMsg(msg: string);
-var LI: TListItem;
 begin
-  LI := Self.LV_Messages.Items.Add;
+  var LI := Self.LV_Messages.Items.Add();
   LI.Caption := FormatDateTime('hh:nn:ss', Now);
   LI.SubItems.Add(msg);
 
@@ -186,9 +180,8 @@ begin
 end;
 
 procedure TF_Message.ReceiveErr(err: string);
-var LI: TListItem;
 begin
-  LI := Self.LV_Messages.Items.Add;
+  var LI := Self.LV_Messages.Items.Add();
   LI.Caption := FormatDateTime('hh:nn:ss', Now);
   LI.SubItems.Add('ERR: ' + err);
 

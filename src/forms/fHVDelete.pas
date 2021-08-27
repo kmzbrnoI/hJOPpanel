@@ -1,7 +1,7 @@
 ﻿unit fHVDelete;
 
 {
-  Okno potrvzeni zadosti o mazani hnaciho vozidla.
+  Confirmation window for engine delete.
 }
 
 interface
@@ -96,4 +96,4 @@ begin
   end;
 end;
 
-end.// unit
+end.

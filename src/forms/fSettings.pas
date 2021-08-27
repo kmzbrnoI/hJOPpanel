@@ -1,7 +1,7 @@
 ﻿unit fSettings;
 
 {
-  Okynko nastaveni.
+  Settings window.
 }
 
 interface
@@ -410,9 +410,8 @@ begin
 end;
 
 procedure TF_Settings.CB_ORRightsChange(Sender: TObject);
-var i: Integer;
 begin
-  for i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
+  for var i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
     if (Self.LB_AutoAuthOR.Selected[i]) then
       GlobConfig.data.auth.ORs.AddOrSetValue(Self.LB_AutoAuthOR.Items[i], TAreaControlRights(Self.CB_ORRights.ItemIndex));
 end;
@@ -498,7 +497,6 @@ end;
 
 procedure TF_Settings.LB_AutoAuthORClick(Sender: TObject);
 var rights, rights2: TAreaControlRights;
-  i: Integer;
 begin
   if (Self.LB_AutoAuthOR.SelCount = 0) then
   begin
@@ -517,11 +515,11 @@ begin
     end else begin
       // vic vybranych polozek -> pokud jsou opravenni stejna, vyplnime, jinak -1
 
-      for i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
+      for var i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
         if (Self.LB_AutoAuthOR.Selected[i]) then
           GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items[i], rights);
 
-      for i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
+      for var i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
         if (Self.LB_AutoAuthOR.Selected[i]) then
         begin
           GlobConfig.data.auth.ORs.TryGetValue(Self.LB_AutoAuthOR.Items[i], rights2);
@@ -553,7 +551,6 @@ end;
 
 procedure TF_Settings.OpenForm();
 var data: TGlobConfigData;
-  i: Integer;
 begin
   data := GlobConfig.data;
 
@@ -608,11 +605,11 @@ begin
 
   Self.CB_ORRights.enabled := false;
   Self.LB_AutoAuthOR.Clear();
-  for i := 0 to Relief.pareas.Count - 1 do
+  for var i := 0 to Relief.pareas.Count - 1 do
     Self.LB_AutoAuthOR.Items.Add(Relief.pareas[i].id);
 
   Self.LB_Timer.ItemIndex := -1;
-  for i := 0 to Self.LB_Timer.Items.Count - 1 do
+  for var i := 0 to Self.LB_Timer.Items.Count - 1 do
     if (Self.LB_Timer.Items.Strings[i] = IntToStr(F_Main.T_Main.Interval)) then
       Self.LB_Timer.ItemIndex := i;
 

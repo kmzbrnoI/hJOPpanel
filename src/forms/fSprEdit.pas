@@ -1,7 +1,7 @@
 ﻿unit fSprEdit;
 
 {
-  Okno editace soupravy.
+  Train edit window.
 }
 
 interface
@@ -13,8 +13,7 @@ uses
 
 const
   _MAX_HV_CNT = 4;
-
-  _HLASENI_SPRTYP_FORBIDDEN: array [0 .. 5] of string = ('Pn', 'Mn', 'Vn', 'Lv', 'Vle', 'Slu');
+  _ANNONUNCE_TRAIN_FORBIDDEN: array [0 .. 5] of string = ('Pn', 'Mn', 'Vn', 'Lv', 'Vle', 'Slu');
 
 type
 
@@ -100,10 +99,8 @@ uses fSprHelp, fMain, TCPClientPanel, ORList;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.E_PoznamkaKeyPress(Sender: TObject; var Key: Char);
-var i: Integer;
 begin
-  // osetreni vstupu
-  for i := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
     begin
       Key := #0;
@@ -147,9 +144,6 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.NewSpr(HVs: THVDb; Sender: string);
-var i: Integer;
-  ts: TCloseTabSheet;
-  form: TF_SprHVEdit;
 begin
   Self.HVDb := HVs;
   Self.OblR := Sender;
@@ -175,16 +169,16 @@ begin
   // smazat vsechny zalozky
   Self.HVs.Clear();
 
-  for i := Self.PC_HVs.PageCount - 1 downto 0 do
+  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
     Self.PC_HVs.Pages[i].Free();
 
   // vytvorit 1 zalozku
-  ts := TCloseTabSheet.Create(Self.PC_HVs);
+  var ts := TCloseTabSheet.Create(Self.PC_HVs);
   ts.PageControl := Self.PC_HVs;
   ts.Caption := 'HV 1';
   ts.OnClose := OnTabClose;
 
-  form := TF_SprHVEdit.Create(ts);
+  var form := TF_SprHVEdit.Create(ts);
   form.Parent := ts;
   form.Show();
   Self.HVs.Add(form);
@@ -200,9 +194,6 @@ end;
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.EditSpr(parsed: TStrings; HVs: THVDb; sender_id: string; owner: string);
-var i: Integer;
-  ts: TCloseTabSheet;
-  form: TF_SprHVEdit;
 begin
   Self.HVDb := HVs;
   Self.OblR := sender_id;
@@ -254,18 +245,18 @@ begin
   // smazat vsechny zalozky
   Self.HVs.Clear();
 
-  for i := Self.PC_HVs.PageCount - 1 downto 0 do
+  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
     Self.PC_HVs.Pages[i].Free();
 
   // vytvorit zalozky podle poctu HV
-  for i := 0 to sprHVs.HVs.Count - 1 do
+  for var i := 0 to sprHVs.HVs.Count - 1 do
   begin
-    ts := TCloseTabSheet.Create(Self.PC_HVs);
+    var ts := TCloseTabSheet.Create(Self.PC_HVs);
     ts.PageControl := Self.PC_HVs;
     ts.Caption := 'HV ' + IntToStr(i + 1);
     ts.OnClose := OnTabClose;
 
-    form := TF_SprHVEdit.Create(ts);
+    var form := TF_SprHVEdit.Create(ts);
     form.Parent := ts;
     form.Show();
     Self.HVs.Add(form);
@@ -284,9 +275,6 @@ end;
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 procedure TF_SoupravaEdit.B_SaveClick(Sender: TObject);
-var sprstr: string;
-  i, j: Integer;
-  err: string;
 begin
   if (Self.E_Nazev.Text = '') then
   begin
@@ -295,7 +283,7 @@ begin
   end;
 
   // kontrola M_Poznamka
-  for j := 0 to Length(_forbidden_chars) - 1 do
+  for var j := 0 to Length(_forbidden_chars) - 1 do
     if (StrScan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
     begin
       Application.MessageBox(PChar('Poznámka k soupravě obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
@@ -323,7 +311,7 @@ begin
     Exit();
   end;
 
-  sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' + Self.M_Poznamka.Text + '};';
+  var sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' + Self.M_Poznamka.Text + '};';
 
   if (Self.CHB_Sipka_L.Checked) then
     sprstr := sprstr + '1'
@@ -339,8 +327,8 @@ begin
 
   sprstr := sprstr + '{';
 
-  err := '';
-  for i := 0 to Self.PC_HVs.PageCount - 1 do
+  var err := '';
+  for var i := 0 to Self.PC_HVs.PageCount - 1 do
   begin
     if (Self.HVs[i].HV = nil) then
     begin
@@ -354,7 +342,7 @@ begin
         .Caption), 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
-    for j := 0 to Length(_forbidden_chars) - 1 do
+    for var j := 0 to Length(_forbidden_chars) - 1 do
       if (StrScan(PChar(Self.HVs[i].M_HV1_Notes.Text), _forbidden_chars[j]) <> nil) then
       begin
         Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
@@ -362,7 +350,7 @@ begin
         Exit();
       end;
 
-    for j := 0 to _MAX_FUNC do
+    for var j := 0 to _MAX_FUNC do
       if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
         err := err + Self.PC_HVs.Pages[i].Caption + ' má aktivovanou funkci ' + IntToStr(j) + ' (' +
           Self.HVs[i].HV.funcDesc[j] + '), která je momentary.' + #13#10;
@@ -410,12 +398,11 @@ begin
 end;
 
 procedure TF_SoupravaEdit.CB_TypChange(Sender: TObject);
-var s: string;
 begin
   if (not Self.CHB_report.Enabled) then
     Exit();
 
-  for s in _HLASENI_SPRTYP_FORBIDDEN do
+  for var s in _ANNONUNCE_TRAIN_FORBIDDEN do
   begin
     if (Self.CB_Typ.Text = s) then
     begin
@@ -437,12 +424,11 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.FormClose(Sender: TObject; var Action: TCloseAction);
-var i: Integer;
 begin
   Self.HVDb := nil;
 
   Self.HVs.Clear();
-  for i := Self.PC_HVs.PageCount - 1 downto 0 do
+  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
     Self.PC_HVs.Pages[i].Free();
 end;
 
@@ -457,12 +443,11 @@ begin
 end;
 
 procedure TF_SoupravaEdit.FormDestroy(Sender: TObject);
-var i: Integer;
 begin
   // smazeme zalozky pro hnaci vozidla
   Self.HVs.Free();
 
-  for i := Self.PC_HVs.PageCount - 1 downto 0 do
+  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
     Self.PC_HVs.Pages[i].Free();
 
   FreeAndNil(Self.sprHVs);
@@ -560,7 +545,6 @@ end;
 procedure TF_SoupravaEdit.PageControlCloseButtonMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
 var
-  i: Integer;
   PageControl: TPageControl;
   TabSheet: TCloseTabSheet;
 begin
@@ -568,7 +552,7 @@ begin
 
   if Button = mbLeft then
   begin
-    for i := 0 to PageControl.PageCount - 1 do
+    for var i := 0 to PageControl.PageCount - 1 do
     begin
       if not(PageControl.Pages[i] is TCloseTabSheet) then
         Continue;
@@ -640,10 +624,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SoupravaEdit.OnTabClose(Sender: TObject);
-var i: Integer;
-  HV: THV;
 begin
-  for i := 0 to Self.PC_HVs.PageCount - 1 do
+  for var i := 0 to Self.PC_HVs.PageCount - 1 do
   begin
     if (Self.PC_HVs.Pages[i] = Sender) then
     begin
@@ -652,7 +634,7 @@ begin
       // preradime HV ze soupravy do obecneho seznamu HV
       if (i < Self.sprHVs.HVs.Count) then
       begin
-        for HV in HVDb.HVs do
+        for var HV in HVDb.HVs do
           if (HV.addr = Self.sprHVs.HVs[i].addr) then
             HV.train := '-';
         Self.sprHVs.Delete(i);
@@ -665,7 +647,7 @@ begin
   (Sender as TTabSheet).Free();
   Self.BB_HV_Add.Enabled := true;
 
-  for i := 0 to Self.PC_HVs.PageCount - 1 do
+  for var i := 0 to Self.PC_HVs.PageCount - 1 do
   begin
     Self.PC_HVs.Pages[i].Caption := 'HV ' + IntToStr(i + 1);
     if (i < Self.sprHVs.HVs.Count) then
@@ -707,4 +689,4 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-end.// unit
+end.

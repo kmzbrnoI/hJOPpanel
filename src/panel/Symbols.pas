@@ -208,14 +208,14 @@ begin
   Self.symbWidth := Self.sets[Integer(typ)].symbolWidth;
   Self.symbHeight := Self.sets[Integer(typ)].symbolHeight;
 
-  F_splash.AddStav('Načítám symboly "symbols" ...');
+  F_splash.ShowState('Načítám symboly "symbols" ...');
   Self.LoadIL(Self.IL_Symbols, Self.sets[Integer(typ)].Names.Symbols, Self.symbWidth, Self.symbHeight);
-  F_splash.AddStav('Načítám symboly "text" ...');
+  F_splash.ShowState('Načítám symboly "text" ...');
   Self.LoadIL(Self.IL_Text, Self.sets[Integer(typ)].Names.Text, Self.symbWidth, Self.symbHeight);
-  F_splash.AddStav('Načítám symboly "DK" ...');
+  F_splash.ShowState('Načítám symboly "DK" ...');
   Self.LoadIL(Self.IL_DK, Self.sets[Integer(typ)].Names.area, Self.symbWidth * _DK_WIDTH_MULT,
     Self.symbHeight * _DK_HEIGHT_MULT);
-  F_splash.AddStav('Načítám symboly "trat" ...');
+  F_splash.ShowState('Načítám symboly "trat" ...');
   Self.LoadIL(Self.IL_Trat, Self.sets[Integer(typ)].Names.railway, Self.symbWidth * _RAILWAY_WIDTH_MULT,
     Self.symbHeight * _RAILWAY_HEIGHT_MULT);
 end;

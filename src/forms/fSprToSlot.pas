@@ -1,7 +1,7 @@
 ﻿unit fSprToSlot;
 
 {
-  Okno predavani LOKO do konkretniho slotu uLI-master.
+  Move engine to uLI-master.
 }
 
 interface
@@ -24,7 +24,7 @@ type
     B_Slots_Ruc: array [1 .. TBridgeClient._SLOTS_CNT] of TButton;
 
     HVs: TWordAr;
-    orId: string;
+    area: string;
 
     procedure CreateSlotsButtons();
     procedure ButtonSlotClick(Sender: TObject);
@@ -53,9 +53,8 @@ uses LokTokens;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SprToSlot.CreateSlotsButtons();
-var i: Integer;
 begin
-  for i := 1 to TBridgeClient._SLOTS_CNT do
+  for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
     Self.B_Slots[i] := TButton.Create(Self.P_Buttons);
     with (Self.B_Slots[i]) do
@@ -98,7 +97,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SprToSlot.RepaintSlots();
-var cnt, i, j: Integer;
+var cnt, j: Integer;
   partWidth: Integer;
 begin
   cnt := BridgeClient.activeSlotsCount;
@@ -114,7 +113,7 @@ begin
   else
     partWidth := 0;
 
-  for i := 1 to TBridgeClient._SLOTS_CNT do
+  for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
     with (Self.B_Slots[i]) do
     begin
@@ -143,7 +142,7 @@ end;
 
 procedure TF_SprToSlot.ButtonSlotClick(Sender: TObject);
 begin
-  tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, false);
+  tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, false);
 
   Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenů...';
   Self.token_req_sent := true;
@@ -151,7 +150,7 @@ end;
 
 procedure TF_SprToSlot.ButtonSlotRucClick(Sender: TObject);
 begin
-  tokens.LokosToMaus(Self.orId, Self.HVs, TButton(Sender).Tag, true);
+  tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, true);
 
   Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenů...';
   Self.token_req_sent := true;
@@ -160,13 +159,12 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_SprToSlot.Open(orId: string; HVs: TWordAr);
-var i: Integer;
 begin
-  Self.orId := orId;
+  Self.area := orId;
   Self.HVs := HVs;
 
   Self.L_Addrs.Caption := '';
-  for i := 0 to Length(HVs) - 2 do
+  for var i := 0 to Length(HVs) - 2 do
     Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[i]) + ', ';
   Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[Length(HVs) - 1]);
 
@@ -175,7 +173,7 @@ begin
 
   Self.RepaintSlots();
 
-  for i := 1 to TBridgeClient._SLOTS_CNT do
+  for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
     if ((Self.B_Slots[i].Visible) and (Self.B_Slots[i].Enabled)) then
     begin

@@ -1,7 +1,7 @@
 ﻿unit fPotvrSekv;
 
 {
-  Okno potvrzovaci sekvence.
+  Confirmation sequence window.
 }
 
 interface
@@ -240,7 +240,7 @@ begin
 end;
 
 procedure TF_PotvrSekv.ShowTexts();
-var i, podm_start, podm_count: Integer;
+var podm_start, podm_count: Integer;
 begin
   Self.PB_SFP_indexes.canvas.Pen.color := Self.PB_SFP_indexes.color;
   Self.PB_SFP_indexes.canvas.Brush.color := Self.PB_SFP_indexes.color;
@@ -263,7 +263,7 @@ begin
     Font.color := clBlack;
     TextOut(0, 0, 'S:');
     TextOut(0, _SYMBOL_HEIGHT, 'F:');
-    for i := 0 to Self.m_senders.Count - 1 do
+    for var i := 0 to Self.m_senders.Count - 1 do
       TextOut(0, 2 * _SYMBOL_HEIGHT + (i * _SYMBOL_HEIGHT), 'P' + IntToStr(i + 1));
   end;
 
@@ -273,7 +273,7 @@ begin
     TextOut(2 * _SYMBOL_WIDTH, 0, Self.m_station);
     TextOut(2 * _SYMBOL_WIDTH, _SYMBOL_HEIGHT, ' ' + Self.m_event);
     Font.color := _FG_COLOR;
-    for i := 0 to Self.m_senders.Count - 1 do
+    for var i := 0 to Self.m_senders.Count - 1 do
       TextOut(2 * _SYMBOL_WIDTH, 2 * _SYMBOL_HEIGHT + (i * _SYMBOL_HEIGHT), Self.m_senders[i]);
   end;
 
@@ -282,14 +282,14 @@ begin
 
   // indexy kontrolovanych podminek
   with (Self.PB_podm_Indexes.canvas) do
-    for i := 0 to podm_count do
+    for var i := 0 to podm_count do
       TextOut(IfThen(i + podm_start > 8, 0, 8), (i * _SYMBOL_HEIGHT), IntToStr(podm_start + i + 1));
 
   // podminky
   with (Self.PB_Podm.canvas) do
   begin
     Font.color := _FG_COLOR;
-    for i := 0 to podm_count - 1 do
+    for var i := 0 to podm_count - 1 do
     begin
       TextOut(2 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), Self.m_conditions[podm_start + i].block);
       if (Self.m_conditions[podm_start + i].condition <> '') then
@@ -305,7 +305,7 @@ begin
 end;
 
 procedure TF_PotvrSekv.ShowFlashing();
-var i, podm_start, podm_count: Integer;
+var podm_start, podm_count: Integer;
   first, second: TColor;
 begin
   if (F_Main.IL_Ostatni.BkColor <> clBlack) then
@@ -314,7 +314,7 @@ begin
   // stanice, udalost, bloky:
   with (Self.PB_SFP.canvas) do
   begin
-    for i := 0 to Self.m_senders.Count + 1 do
+    for var i := 0 to Self.m_senders.Count + 1 do
     begin
       first := IfThen(Self.m_flash, clBlack, $A0A0A0);
       second := IfThen(Self.m_flash, $A0A0A0, clBlack);
@@ -331,7 +331,7 @@ begin
   // podminky
   with (Self.PB_Podm.canvas) do
   begin
-    for i := 0 to podm_count do
+    for var i := 0 to podm_count do
     begin
       first := IfThen(Self.m_flash, clBlack, $A0A0A0);
       second := IfThen(Self.m_flash, $A0A0A0, clBlack);

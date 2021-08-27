@@ -12,20 +12,20 @@ uses
 
 type
   TF_splash = class(TForm)
-    ST_nazev: TStaticText;
+    ST_name: TStaticText;
     ST_Version: TStaticText;
     L_Created: TLabel;
     L_BuildTime: TLabel;
     I_Horasystems: TImage;
-    PB_Prubeh: TProgressBar;
+    PB_Progress: TProgressBar;
     L_1: TLabel;
-    L_Nacitani: TLabel;
+    L_Load: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
-    procedure AddStav(Text: String);
+    procedure ShowState(Text: String);
   end;
 
 var
@@ -39,8 +39,8 @@ uses Verze;
 
 procedure TF_splash.FormCreate(Sender: TObject);
 begin
-  F_splash.Show;
-  Application.ProcessMessages;
+  Self.Show();
+  Application.ProcessMessages();
 end;
 
 procedure TF_splash.FormShow(Sender: TObject);
@@ -49,11 +49,11 @@ begin
   L_BuildTime.Caption := GetLastBuildDate + '  ' + GetLastBuildTime;
 end;
 
-procedure TF_splash.AddStav(Text: String);
+procedure TF_splash.ShowState(Text: String);
 begin
-  F_splash.L_Nacitani.Caption := Text;
-  F_splash.PB_Prubeh.Position := F_splash.PB_Prubeh.Position + 1;
-  F_splash.Refresh;
+  Self.L_Load.Caption := Text;
+  Self.PB_Progress.Position := F_splash.PB_Progress.Position + 1;
+  Self.Refresh();
 end;
 
 end.// unit

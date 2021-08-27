@@ -1,7 +1,7 @@
 ﻿unit fStitVyl;
 
 {
-  Okno editace stitku a vyluky.
+  Edit note & lockout.
 }
 
 interface
@@ -76,11 +76,10 @@ begin
 end;
 
 procedure TF_StitVyl.B_OKClick(Sender: TObject);
-var i, j: Integer;
 begin
   // kontrola teztu na zakazane znaky
-  for i := 1 to Length(Self.E_Popisek.Text) do
-    for j := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 1 to Length(Self.E_Popisek.Text) do
+    for var j := 0 to Length(_forbidden_chars) - 1 do
       if (_forbidden_chars[j] = Self.E_Popisek.Text[i]) then
       begin
         Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
@@ -88,12 +87,11 @@ begin
         Exit();
       end;
 
-  Self.Close;
+  Self.Close();
   Self.callback(Self.OpenStitVyl, Self.E_Popisek.Text);
 end;
 
 procedure TF_StitVyl.E_PopisekKeyPress(Sender: TObject; var Key: Char);
-var i: Integer;
 begin
   if (Key = #13) then
     B_OKClick(Self);
@@ -103,8 +101,7 @@ begin
     Relief.Escape();
   end;
 
-  // osetreni vstupu
-  for i := 0 to Length(_forbidden_chars) - 1 do
+  for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
     begin
       Key := #0;
@@ -115,21 +112,17 @@ end;
 procedure TF_StitVyl.E_PopisekChange(Sender: TObject);
 begin
   if (Self.E_Popisek.Text = '') then
-  begin
-    Self.E_Popisek.Color := clSilver;
-  end else begin
+    Self.E_Popisek.Color := clSilver
+  else
     Self.E_Popisek.Color := clWhite;
-  end; // else E_popisek.Text = ''
 end;
 
 procedure TF_StitVyl.FormShow(Sender: TObject);
 begin
   if (Self.E_Popisek.Text = '') then
-  begin
-    Self.E_Popisek.Color := clSilver;
-  end else begin
+    Self.E_Popisek.Color := clSilver
+  else
     Self.E_Popisek.Color := clWhite;
-  end; // else E_popisek.Text = ''
 end;
 
 procedure TF_StitVyl.PotvrSekvCallBack(reason: TPSEnd);

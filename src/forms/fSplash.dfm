@@ -421,7 +421,7 @@ object F_splash: TF_splash
     Margins.Bottom = 2
     Caption = 'Nac'#237't'#225'n'#237' :'
   end
-  object L_Nacitani: TLabel
+  object L_Load: TLabel
     Left = 72
     Top = 184
     Width = 69
@@ -432,7 +432,7 @@ object F_splash: TF_splash
     Margins.Bottom = 2
     Caption = 'Start programu'
   end
-  object ST_nazev: TStaticText
+  object ST_name: TStaticText
     Left = 0
     Top = 16
     Width = 289
@@ -474,7 +474,7 @@ object F_splash: TF_splash
     ParentFont = False
     TabOrder = 1
   end
-  object PB_Prubeh: TProgressBar
+  object PB_Progress: TProgressBar
     Left = 0
     Top = 201
     Width = 289
