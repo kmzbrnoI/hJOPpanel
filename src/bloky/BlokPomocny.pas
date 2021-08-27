@@ -10,26 +10,20 @@ unit BlokPomocny;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+  BlokTypes;
 
 type
-  TPOtherPanelProp = record
-    symbol, bg: TColor;
-    flash: boolean;
-
-    procedure Change(parsed: TStrings);
-  end;
-
   TPObjOther = class
     block: Integer;
     area: Integer;
     positions: TList<TPoint>;
     symbol: Integer;
-    panelProp: TPOtherPanelProp;
+    panelProp: TGeneralPanelProp;
 
     constructor Create();
     destructor Destroy(); override;
-    procedure Show(obj: TDXDraw; blik: boolean);
+    procedure Show(obj: TDXDraw; flash: boolean);
     procedure Reset();
   end;
 
@@ -45,7 +39,7 @@ type
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean);
+    procedure Show(obj: TDXDraw; flash: boolean);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
 
@@ -54,8 +48,8 @@ type
   end;
 
 const
-  _Def_Helper_Prop: TPOtherPanelProp = (Symbol: $A0A0A0; bg: clBlack; flash: false;);
-  _Assigned_Helper_Prop: TPOtherPanelProp = (Symbol: clFuchsia; bg: clBlack; flash: false;);
+  _Def_Helper_Prop: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
+  _Assigned_Helper_Prop: TGeneralPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
 
 implementation
 
@@ -75,15 +69,15 @@ begin
   inherited;
 end;
 
-procedure TPObjOther.Show(obj: TDXDraw; blik: boolean);
+procedure TPObjOther.Show(obj: TDXDraw; flash: boolean);
 var color: TColor;
 begin
   if (Self.block > -1) then
-    color := Self.PanelProp.Symbol
+    color := Self.PanelProp.fg
   else
-    color := SymbolDefaultColor(Self.Symbol);
+    color := SymbolDefaultColor(Self.symbol);
 
-  if ((Self.PanelProp.flash) and (blik)) then
+  if ((Self.PanelProp.flash) and (flash)) then
     color := clBlack;
 
   for var pos in Self.Positions do
@@ -96,13 +90,6 @@ begin
     Self.PanelProp := _Assigned_Helper_Prop
   else
     Self.PanelProp := _Def_Helper_Prop;
-end;
-
-procedure TPOtherPanelProp.Change(parsed: TStrings);
-begin
-  symbol := StrToColor(parsed[4]);
-  bg := StrToColor(parsed[5]);
-  flash := StrToBool(parsed[6]);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -150,10 +137,10 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPObjOthers.Show(obj: TDXDraw; blik: boolean);
+procedure TPObjOthers.Show(obj: TDXDraw; flash: boolean);
 begin
   for var po in Self.data do
-    po.Show(obj, blik);
+    po.Show(obj, flash);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

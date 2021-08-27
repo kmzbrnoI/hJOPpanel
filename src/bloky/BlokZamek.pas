@@ -1,27 +1,21 @@
 unit BlokZamek;
 
 {
-  Definice bloku usek, jeho vlastnosti a stavu v panelu.
-  Definice databaze bloku typu zamek.
+  Definition of lock block.
+  Definition of lock blocks database.
 }
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+  BlokTypes;
 
 type
-  TLockPanelProp = record
-    fg, bg: TColor;
-    flash: boolean;
-
-    procedure Change(parsed: TStrings);
-  end;
-
   TPLock = class
     block: Integer;
     pos: TPoint;
     area: Integer;
-    panelProp: TLockPanelProp;
+    panelProp: TGeneralPanelProp;
 
     procedure Reset();
   end;
@@ -47,8 +41,8 @@ type
   end;
 
 const
-  _DEF_LOCK_PROP: TLockPanelProp = (fg: clBlack; bg: clFuchsia; flash: false;);
-  _UA_LOCK_PROP: TLockPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
+  _DEF_LOCK_PROP: TGeneralPanelProp = (fg: clBlack; bg: clFuchsia; flash: false;);
+  _UA_LOCK_PROP: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
 
 implementation
 
@@ -152,15 +146,6 @@ end;
 function TPLocks.GetCount(): Integer;
 begin
   Result := Self.data.Count;
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-procedure TLockPanelProp.Change(parsed: TStrings);
-begin
-  fg := StrToColor(parsed[4]);
-  bg := StrToColor(parsed[5]);
-  flash := StrToBool(parsed[6]);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

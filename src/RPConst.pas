@@ -20,6 +20,7 @@ type
   TWordAr = array of Word;
   TIntAr = array of Integer;
 
+function StrToBool(str: string): boolean;
 function GetForbidderChars(): string;
 
 implementation

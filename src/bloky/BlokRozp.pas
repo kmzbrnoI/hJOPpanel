@@ -7,21 +7,15 @@ unit BlokRozp;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+  BlokTypes;
 
 type
-  TDiscPanelProp = record
-    fg, bg: TColor;
-    flash: boolean;
-
-    procedure Change(parsed: TStrings);
-  end;
-
   TPDisconnector = class
     block: Integer;
     pos: TPoint;
     area: Integer;
-    panelProp: TDiscPanelProp;
+    panelProp: TGeneralPanelProp;
 
     procedure Show(obj: TDXDraw; blik: boolean);
     procedure ShowBg(obj: TDXDraw; blik: boolean);
@@ -50,8 +44,8 @@ type
   end;
 
 const
-  _Def_Disc_Prop: TDiscPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
-  _UA_Disc_Prop: TDiscPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
+  _Def_Disc_Prop: TGeneralPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
+  _UA_Disc_Prop: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
 
 implementation
 
@@ -174,15 +168,6 @@ end;
 function TPDisconnectors.GetCount(): Integer;
 begin
   Result := Self.data.Count;
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-procedure TDiscPanelProp.Change(parsed: TStrings);
-begin
-  fg := StrToColor(parsed[4]);
-  bg := StrToColor(parsed[5]);
-  flash := StrToBool(parsed[6]);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

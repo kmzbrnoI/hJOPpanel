@@ -1,7 +1,7 @@
 unit BottomErrors;
 
 {
-  Sprava vypisovani technologickych chyb do spodni casti panelu.
+  Printing of error messages in bottom part of panel.
 }
 
 interface
@@ -81,14 +81,11 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.WriteError(error: string; system: string; stanice: string);
-var len: Integer;
-  msg: string;
-  err: TError;
 begin
   if (Self.errors.Count > _MAX_ERR) then
     Exit();
 
-  err := TError.Create();
+  var err := TError.Create();
   err.err := error;
   err.tech := system;
   err.stanice := stanice;
@@ -97,8 +94,8 @@ begin
   if (Length(system) > _TECH_WIDTH) then
     system := LeftStr(system, _TECH_WIDTH);
 
-  len := (_TECH_WIDTH - Length(system)) div 2;
-  msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
+  var len := (_TECH_WIDTH - Length(system)) div 2;
+  var msg := Format('%*s%s', [len, ' ', system + Format('%-*s', [len, ' '])]);
   if (Length(msg) < _TECH_WIDTH) then
     msg := msg + ' ';
   err.techStr := msg;
@@ -111,9 +108,8 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.RemoveVisibleErrors();
-var i: Integer;
 begin
-  for i := 0 to Self.ErrorShowCount - 1 do
+  for var i := 0 to Self.ErrorShowCount - 1 do
     if (Self.errors.Count > 0) then
       Self.errors.Delete(0);
 
@@ -132,8 +128,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TErrors.Show(obj: TDXDraw);
-var i, top, left, len: Integer;
-  msg: string;
+var msg: string;
 begin
   if (Self.errors.Count = 0) then
     Exit();
@@ -151,11 +146,11 @@ begin
   Symbols.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.height - 1), msg, clBlack, clSilver, obj);
 
   // vypsani samotnych chyb
-  len := Min(Self.ErrorShowCount, Self.errors.Count);
-  top := Relief.height - 1;
-  left := (Relief.width div 2) - (_ERR_WIDTH div 2) + 10;
+  var len := Min(Self.ErrorShowCount, Self.errors.Count);
+  var top := Relief.height - 1;
+  var left := (Relief.width div 2) - (_ERR_WIDTH div 2) + 10;
 
-  for i := 0 to len - 1 do
+  for var i := 0 to len - 1 do
   begin
     msg := ' ' + Self.errors[i].stanice + ' : ' + Self.errors[i].err;
     msg := Format('%-' + IntToStr(_ERR_WIDTH) + 's', [msg]);
