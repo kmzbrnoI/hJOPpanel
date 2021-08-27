@@ -98,7 +98,11 @@ type
     function IsSecondCross(): boolean;
     function SecondCrossPos(): TPoint;
     function GetVetev(pos: TPoint): Integer;
+    function Detected(): boolean;
     class function SymbolIndex(pos: TPoint; Symbols: TList<TReliefSym>): Integer;
+    procedure DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
+    procedure ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
+      usek: TPUsek);
 
   end;
 
@@ -154,13 +158,13 @@ end;
 procedure TPUsek.PaintSouprava(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
   bgZaver: boolean = false);
 var fg, bg: TColor;
-  sipkaLeft, sipkaRight: boolean;
-  souprava: TUsekSouprava;
+  arrowLeft, arrowRight: boolean;
+  train: TUsekSouprava;
 begin
-  souprava := Self.PanelProp.soupravy[spri];
-  pos := Point(pos.X - (Length(souprava.nazev) div 2), pos.Y);
+  train := Self.PanelProp.soupravy[spri];
+  pos := Point(pos.X - (Length(train.nazev) div 2), pos.Y);
 
-  fg := souprava.fg;
+  fg := train.fg;
 
   // urceni barvy
   if (myORs[Self.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) then
@@ -175,44 +179,44 @@ begin
   end else if ((bgZaver) and (Self.PanelProp.KonecJC > TJCType.no)) then
     bg := _Konec_JC[Integer(Self.PanelProp.KonecJC)]
   else
-    bg := souprava.bg;
+    bg := train.bg;
 
-  PanelPainter.TextOutput(pos, souprava.nazev, fg, bg, obj, true);
+  PanelPainter.TextOutput(pos, train.nazev, fg, bg, obj, true);
 
   // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
-  sipkaLeft := (((souprava.sipkaL) and (myORs[Self.OblRizeni].Lichy = 1)) or
-    ((souprava.sipkaS) and (myORs[Self.OblRizeni].Lichy = 0)));
+  arrowLeft := (((train.sipkaL) and (myORs[Self.OblRizeni].Lichy = 1)) or
+    ((train.sipkaS) and (myORs[Self.OblRizeni].Lichy = 0)));
 
-  sipkaRight := (((souprava.sipkaS) and (myORs[Self.OblRizeni].Lichy = 1)) or
-    ((souprava.sipkaL) and (myORs[Self.OblRizeni].Lichy = 0)));
+  arrowRight := (((train.sipkaS) and (myORs[Self.OblRizeni].Lichy = 1)) or
+    ((train.sipkaL) and (myORs[Self.OblRizeni].Lichy = 0)));
 
   // vykresleni ramecku kolem cisla soupravy
-  if (souprava.ramecek <> clBlack) then
+  if (train.ramecek <> clBlack) then
   begin
     obj.Surface.Canvas.Pen.Mode := pmMerge;
-    obj.Surface.Canvas.Pen.Color := souprava.ramecek;
+    obj.Surface.Canvas.Pen.Color := train.ramecek;
     obj.Surface.Canvas.Brush.Color := clBlack;
-    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka, pos.Y * SymbolSet._Symbol_Vyska,
-      (pos.X + Length(souprava.nazev)) * SymbolSet._Symbol_Sirka, (pos.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+      (pos.X + Length(train.nazev)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
     obj.Surface.Canvas.Pen.Mode := pmCopy;
   end;
 
   if (fg = clBlack) then
     fg := bg;
 
-  if (sipkaLeft) then
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y - 1), _Spr_Sipka_Start + 1, fg, clNone, obj, true);
-  if (sipkaRight) then
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(souprava.nazev) - 1, pos.Y - 1), _Spr_Sipka_Start, fg,
+  if (arrowLeft) then
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y - 1), _S_TRAIN_ARROW_L, fg, clNone, obj, true);
+  if (arrowRight) then
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(train.nazev) - 1, pos.Y - 1), _S_TRAIN_ARROW_R, fg,
       clNone, obj, true);
 
-  if ((sipkaLeft) or (sipkaRight)) then
+  if ((arrowLeft) or (arrowRight)) then
   begin
     // vykresleni sipky
     obj.Surface.Canvas.Pen.Color := fg;
-    obj.Surface.Canvas.MoveTo(pos.X * SymbolSet._Symbol_Sirka, pos.Y * SymbolSet._Symbol_Vyska - 1);
-    obj.Surface.Canvas.LineTo((pos.X + Length(souprava.nazev)) * SymbolSet._Symbol_Sirka,
-      pos.Y * SymbolSet._Symbol_Vyska - 1);
+    obj.Surface.Canvas.MoveTo(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight - 1);
+    obj.Surface.Canvas.LineTo((pos.X + Length(train.nazev)) * SymbolSet.symbWidth,
+      pos.Y * SymbolSet.symbHeight - 1);
   end; // if sipkaLeft or sipkaRight
 end;
 
@@ -416,7 +420,7 @@ var sym: TReliefSym;
   vetevi: Integer;
 begin
   sym.Position := pos;
-  sym.SymbolID := _Usek_Start;
+  sym.SymbolID := _S_TRACK_DET_B;
 
   if (Self.Vetve.Count > 0) then
   begin
@@ -476,6 +480,59 @@ begin
     if ((Symbols[i].Position.X = pos.X) and (Symbols[i].Position.Y = pos.Y)) then
       Exit(i);
   Result := -1;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TPUsek.Detected(): boolean;
+begin
+  if (Self.Symbols.Count < 1) then
+    Exit(false);
+  Result := (Self.Symbols[0].SymbolID >= _S_TRACK_DET_B) and (Self.Symbols[0].SymbolID <= _S_TRACK_DET_E);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TPUsek.DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
+begin
+  if ((symbol >= _S_TRACK_DET_B) and (symbol <= _S_TRACK_DET_E)) then
+    symbol := symbol - _S_TRACK_DET_B;
+  if ((symbol >= _S_TRACK_NODET_B) and (symbol <= _S_TRACK_NODET_E)) then
+    symbol := symbol - _S_TRACK_NODET_B;
+
+  if (Self.Detected()) then
+    symbol := symbol + _S_TRACK_DET_B
+  else
+    symbol := symbol + _S_TRACK_NODET_B;
+
+  PanelPainter.Draw(SymbolSet.IL_Symbols, pos, symbol,fg, bg, obj);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TPUsek.ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
+  usek: TPUsek);
+begin
+  if (dksType = dksTop) then
+  begin
+    if ((leftCross) and (rightCross)) then
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, fg, usek.PanelProp.Pozadi, obj)
+    else if (leftCross) then
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 4, fg, usek.PanelProp.Pozadi, obj)
+    else if (rightCross) then
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 2, fg, usek.PanelProp.Pozadi, obj)
+    else
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
+  end else begin
+    if ((leftCross) and (rightCross)) then
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_BOT, fg, usek.PanelProp.Pozadi, obj)
+    else if (leftCross) then
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 3, fg, usek.PanelProp.Pozadi, obj)
+    else if (rightCross) then
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 5, fg, usek.PanelProp.Pozadi, obj)
+    else
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

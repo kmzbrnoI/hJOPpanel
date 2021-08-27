@@ -62,7 +62,6 @@ type
     MereniCasu: TList<TMereniCasu>;
 
     tech_rights: TORControlRights;
-    dk_osv: Boolean;
     dk_blik: Boolean;
     dk_click_server: Boolean;
     stack: TORStack;

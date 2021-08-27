@@ -28,8 +28,6 @@ type
       myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
     procedure ShowDKSVetve(usek: TPUsek; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
       blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
-    procedure ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
-      usek: TPUsek);
 
   public
 
@@ -355,7 +353,7 @@ begin
 
   for symbol in Vetev.Symbols do
   begin
-    if ((symbol.SymbolID < _Usek_Start) and (symbol.SymbolID > _Usek_End)) then
+    if ((symbol.SymbolID < _S_TRACK_DET_B) and (symbol.SymbolID > _S_TRACK_NODET_E)) then
       continue; // tato situace nastava v pripade vykolejek
 
     bg := usek.PanelProp.Pozadi;
@@ -491,36 +489,9 @@ begin
       fg := usek.PanelProp.nebarVetve;
   end;
 
-  Self.ShowDKSCross(usek.root, obj, leftCross, rightCross, usek.dksType, fg, usek);
+  usek.ShowDKSCross(usek.root, obj, leftCross, rightCross, usek.dksType, fg, usek);
   if (usek.IsSecondCross()) then
-    Self.ShowDKSCross(usek.SecondCrossPos(), obj, rightCross, leftCross, InvDKSType(usek.dksType), fg, usek);
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-procedure TPUseky.ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
-  usek: TPUsek);
-begin
-  if (dksType = dksTop) then
-  begin
-    if ((leftCross) and (rightCross)) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _DKS_Top, fg, usek.PanelProp.Pozadi, obj)
-    else if (leftCross) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _Usek_Start + 4, fg, usek.PanelProp.Pozadi, obj)
-    else if (rightCross) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _Usek_Start + 2, fg, usek.PanelProp.Pozadi, obj)
-    else
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _DKS_Top, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
-  end else begin
-    if ((leftCross) and (rightCross)) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _DKS_Bot, fg, usek.PanelProp.Pozadi, obj)
-    else if (leftCross) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _Usek_Start + 3, fg, usek.PanelProp.Pozadi, obj)
-    else if (rightCross) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _Usek_Start + 5, fg, usek.PanelProp.Pozadi, obj)
-    else
-      PanelPainter.Draw(SymbolSet.IL_Symbols, pos, _DKS_Bot, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
-  end;
+    usek.ShowDKSCross(usek.SecondCrossPos(), obj, rightCross, leftCross, InvDKSType(usek.dksType), fg, usek);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

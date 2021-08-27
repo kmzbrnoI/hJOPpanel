@@ -13,33 +13,79 @@ const
 
   // barvy symbolu
   // zde jsou definovany jednotlive barvy
-  _Symbol_Colors: array [0 .. 14] of TColor = ($FF00FF, $A0A0A0, $0000FF, $00FF00, $FFFFFF, $FFFF00, $FF0000, $00FFFF,
-    $000000, $808000, $008080, clPurple, clMaroon, $707070, clGreen);
+  _SYMBOL_COLORS: array [0 .. 14] of TColor = (
+    $FF00FF, // purple
+    $A0A0A0, // gray
+    clRed,
+    clLime,
+    clWhite,
+    clAqua,
+    clBlue,
+    clYellow, // yellow
+    clBlack,
+    clTeal,
+    clOlive,
+    clPurple,
+    clMaroon,
+    $707070,
+    clGreen
+  );
 
-  _Usek_Start = 12;
-  _Usek_End = 23;
-  _Vyhybka_End = 3;
-  _SCom_Start = 24;
-  _SCom_End = 29;
-  _Plny_Symbol = 37;
-  _Prj_Start = 40;
-  _Hvezdicka = 41;
-  _Kolecko = 42;
-  _Uvazka_Start = 43;
-  _Spr_Sipka_Start = 46;
-  _Zamek = 48;
-  _Vykol_Start = 49;
-  _Vykol_End = 54;
-  _Rozp_Start = 55;
-  _DKS_Top = 58;
-  _DKS_Bot = 59;
+  _S_TURNOUT_B = 0;
+  _S_TURNOUT_E = 3;
 
-  // tady je jen napsano, kolikrat se nasobi puvodni rozmery = kolik symbol zabira poli
-  _Trat_Sirka = 2;
-  _Trat_Vyska = 1;
+  _S_DERAIL_B = 12;
+  _S_DERAIL_E = 23;
 
-  _DK_Sirka = 5;
-  _DK_Vyska = 3;
+  _S_TRACK_DET_B = 24;
+  _S_DKS_DET_TOP = 30;
+  _S_DKS_DET_BOT = 31;
+  _S_DKS_DET_R = 32;
+  _S_DKS_DET_L = 33;
+  _S_TRACK_DET_E = 33;
+
+  _S_TRACK_NODET_B = 34;
+  _S_DKS_NODET_TOP = 40;
+  _S_DKS_NODET_BOT = 41;
+  _S_DKS_NODET_R = 42;
+  _S_DKS_NODET_L = 43;
+  _S_TRACK_NODET_E = 43;
+
+  _S_BUMPER_R = 44;
+  _S_BUMPER_L = 45;
+
+  _S_SIGNAL_B = 46;
+  _S_SIGNAL_E = 51;
+
+  _S_CROSSING = 52;
+  _S_RAILWAY_LEFT = 53;
+  _S_RAILWAY_RIGHT = 53;
+  _S_LINKER_TRAIN = 55;
+  _S_LOCK = 56;
+  _S_DISC_TRACK = 57;
+  _S_DISC_ALONE = 58;
+  _S_PLATFORM_B = 59;
+  _S_PLATFORM_E = 61;
+
+  _S_PST_TOP = 62;
+  _S_PST_BOT = 63;
+
+  _S_SEPAR_VERT = 71;
+  _S_SEPAR_HOR = 72;
+
+  _S_KC = 64;
+  _S_FULL = 65;
+  _S_HALF_TOP = 66;
+  _S_HALF_BOT = 67;
+  _S_CIRCLE = 68;
+  _S_TRAIN_ARROW_R = 69;
+  _S_TRAIN_ARROW_L = 70;
+
+  _RAILWAY_WIDTH_MULT = 2;
+  _RAILWAY_HEIGHT_MULT = 1;
+
+  _DK_WIDTH_MULT = 5;
+  _DK_HEIGHT_MULT = 3;
 
 type
   TSymbolSetType = (normal = 0, bigger = 1);
@@ -82,8 +128,8 @@ type
     IL_DK: TImageList;
     IL_Trat: TImageList;
 
-    _Symbol_Sirka: Integer;
-    _Symbol_Vyska: Integer;
+    symbWidth: Integer;
+    symbHeight: Integer;
 
     constructor Create(typ: TSymbolSetType = normal);
     destructor Destroy(); override;
@@ -131,19 +177,19 @@ end; // dtor
 
 procedure TSymbolSet.LoadSet(typ: TSymbolSetType);
 begin
-  Self._Symbol_Sirka := Self.Sets[Integer(typ)].symbol_width;
-  Self._Symbol_Vyska := Self.Sets[Integer(typ)].symbol_height;
+  Self.symbWidth := Self.Sets[Integer(typ)].symbol_width;
+  Self.symbHeight := Self.Sets[Integer(typ)].symbol_height;
 
   F_splash.AddStav('Načítám symboly "symbols" ...');
-  Self.LoadIL(Self.IL_Symbols, Self.Sets[Integer(typ)].Names.Symbols, Self._Symbol_Sirka, Self._Symbol_Vyska);
+  Self.LoadIL(Self.IL_Symbols, Self.Sets[Integer(typ)].Names.Symbols, Self.symbWidth, Self.symbHeight);
   F_splash.AddStav('Načítám symboly "text" ...');
-  Self.LoadIL(Self.IL_Text, Self.Sets[Integer(typ)].Names.Text, Self._Symbol_Sirka, Self._Symbol_Vyska);
+  Self.LoadIL(Self.IL_Text, Self.Sets[Integer(typ)].Names.Text, Self.symbWidth, Self.symbHeight);
   F_splash.AddStav('Načítám symboly "DK" ...');
-  Self.LoadIL(Self.IL_DK, Self.Sets[Integer(typ)].Names.DK, Self._Symbol_Sirka * _DK_Sirka,
-    Self._Symbol_Vyska * _DK_Vyska);
+  Self.LoadIL(Self.IL_DK, Self.Sets[Integer(typ)].Names.DK, Self.symbWidth * _DK_WIDTH_MULT,
+    Self.symbHeight * _DK_HEIGHT_MULT);
   F_splash.AddStav('Načítám symboly "trat" ...');
-  Self.LoadIL(Self.IL_Trat, Self.Sets[Integer(typ)].Names.Trat, Self._Symbol_Sirka * _Trat_Sirka,
-    Self._Symbol_Vyska * _Trat_Vyska);
+  Self.LoadIL(Self.IL_Trat, Self.Sets[Integer(typ)].Names.Trat, Self.symbWidth * _RAILWAY_WIDTH_MULT,
+    Self.symbHeight * _RAILWAY_HEIGHT_MULT);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

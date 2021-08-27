@@ -35,12 +35,12 @@ begin
     // black is default
     obj.Surface.Canvas.Pen.Color := bg;
     obj.Surface.Canvas.Brush.Color := bg;
-    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka, pos.Y * SymbolSet._Symbol_Vyska,
-      (pos.X + 1) * SymbolSet._Symbol_Sirka, (pos.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+      (pos.X + 1) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
   end;
 
   item := GetSymbolIndex(symbol, fg);
-  IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka, pos.Y * SymbolSet._Symbol_Vyska, item);
+  IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight, item);
 
   IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
@@ -59,8 +59,8 @@ begin
   begin
     obj.Surface.Canvas.Pen.Color := bg;
     obj.Surface.Canvas.Brush.Color := bg;
-    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka, pos.Y * SymbolSet._Symbol_Vyska,
-      (pos.X + Length(Text)) * SymbolSet._Symbol_Sirka, (pos.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+      (pos.X + Length(Text)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
   end;
 
   for j := 0 to Length(Text) - 1 do
@@ -139,15 +139,15 @@ begin
     end;
 
     item := (TextIndex * Length(_Symbol_Colors)) + GetColorIndex(fg);
-    SymbolSet.IL_Text.Draw(obj.Surface.Canvas, pos.X * SymbolSet._Symbol_Sirka + (j * SymbolSet._Symbol_Sirka),
-      pos.Y * SymbolSet._Symbol_Vyska, item);
+    SymbolSet.IL_Text.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth + (j * SymbolSet.symbWidth),
+      pos.Y * SymbolSet.symbHeight, item);
   end; // for j
 
   if (underline) then
   begin
     obj.Surface.Canvas.Pen.Color := fg;
-    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet._Symbol_Sirka, (pos.Y + 1) * SymbolSet._Symbol_Vyska - 1,
-      (pos.X + Length(Text)) * SymbolSet._Symbol_Sirka, (pos.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight - 1,
+      (pos.X + Length(Text)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
   end;
 end;
 

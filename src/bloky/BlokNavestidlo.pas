@@ -87,10 +87,10 @@ begin
 
   if (Self.PanelProp.AB) then
   begin
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _SCom_Start + Self.SymbolID + 2, fg,
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID + 2, fg,
       Self.PanelProp.Pozadi, obj);
   end else begin
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _SCom_Start + Self.SymbolID, fg, Self.PanelProp.Pozadi, obj);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID, fg, Self.PanelProp.Pozadi, obj);
   end;
 end;
 

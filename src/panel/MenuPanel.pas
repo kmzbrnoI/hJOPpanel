@@ -115,8 +115,8 @@ begin
 
   Self.fobl_r := obl_r;
 
-  SetCursorPos(absoluteLeftTop.X + (SymbolSet._Symbol_Sirka * 3), absoluteLeftTop.Y + (SymbolSet._Symbol_Vyska * (i + 1)
-    ) + SymbolSet._Symbol_Vyska + (SymbolSet._Symbol_Vyska div 2));
+  SetCursorPos(absoluteLeftTop.X + (SymbolSet.symbWidth * 3), absoluteLeftTop.Y + (SymbolSet.symbHeight * (i + 1)
+    ) + SymbolSet.symbHeight + (SymbolSet.symbHeight div 2));
 
   Self.fshowing := true;
 end;
@@ -138,14 +138,14 @@ begin
   // pozadi menu
   Canvas.Brush.Color := Self._MENU_BACKGROUND;
   Canvas.Pen.Color := Self._MENU_BACKGROUND;
-  Canvas.Rectangle(SymbolSet._Symbol_Sirka, SymbolSet._Symbol_Vyska, SymbolSet._Symbol_Sirka * (Self._MENU_WIDTH + 1),
-    SymbolSet._Symbol_Vyska * (Self.Items.cnt + 3));
+  Canvas.Rectangle(SymbolSet.symbWidth, SymbolSet.symbHeight, SymbolSet.symbWidth * (Self._MENU_WIDTH + 1),
+    SymbolSet.symbHeight * (Self.Items.cnt + 3));
 
   // ramecek
   Canvas.Pen.Color := clBlack;
-  Canvas.Rectangle(Round(SymbolSet._Symbol_Sirka * 1.5), Round(SymbolSet._Symbol_Vyska * 1.5),
-    (SymbolSet._Symbol_Sirka * (Self._MENU_WIDTH + 1)) - Round(SymbolSet._Symbol_Sirka / 2),
-    (SymbolSet._Symbol_Vyska * (Self.Items.cnt + 3)) - Round(SymbolSet._Symbol_Vyska / 2));
+  Canvas.Rectangle(Round(SymbolSet.symbWidth * 1.5), Round(SymbolSet.symbHeight * 1.5),
+    (SymbolSet.symbWidth * (Self._MENU_WIDTH + 1)) - Round(SymbolSet.symbWidth / 2),
+    (SymbolSet.symbHeight * (Self.Items.cnt + 3)) - Round(SymbolSet.symbHeight / 2));
 
   // damotne polozky menu
   Pos.X := _PNL_MENU_ITEM_LEFT_OFFSET;
@@ -202,10 +202,10 @@ begin
     if (Self.Items.data[i].show_text = '-') then
     begin
       Canvas.Pen.Color := clBlack;
-      Canvas.MoveTo(Round((_PNL_MENU_ITEM_LEFT_OFFSET * SymbolSet._Symbol_Sirka) - (SymbolSet._Symbol_Sirka / 2)),
-        (Pos.Y * SymbolSet._Symbol_Vyska) + Round(SymbolSet._Symbol_Vyska / 2));
-      Canvas.LineTo(Round(((_PNL_MENU_ITEM_LEFT_OFFSET + _MENU_WIDTH - 2) * SymbolSet._Symbol_Sirka) +
-        (SymbolSet._Symbol_Sirka / 2)), (Pos.Y * SymbolSet._Symbol_Vyska) + Round(SymbolSet._Symbol_Vyska / 2));
+      Canvas.MoveTo(Round((_PNL_MENU_ITEM_LEFT_OFFSET * SymbolSet.symbWidth) - (SymbolSet.symbWidth / 2)),
+        (Pos.Y * SymbolSet.symbHeight) + Round(SymbolSet.symbHeight / 2));
+      Canvas.LineTo(Round(((_PNL_MENU_ITEM_LEFT_OFFSET + _MENU_WIDTH - 2) * SymbolSet.symbWidth) +
+        (SymbolSet.symbWidth / 2)), (Pos.Y * SymbolSet.symbHeight) + Round(SymbolSet.symbHeight / 2));
     end
     else
       PanelPainter.TextOutput(Pos, str, foreground, background, obj);
@@ -342,13 +342,13 @@ begin
             if ((not Self.Items.data[i].disabled) and (not Self.Items.data[i].header) and
               (Self.Items.data[i].show_text <> '-')) then
               break;
-          mouse.Y := mouse.Y + ((i - Self.fselected) * SymbolSet._Symbol_Vyska);
+          mouse.Y := mouse.Y + ((i - Self.fselected) * SymbolSet.symbHeight);
         end;
         if (Self.fselected = -1) then
         begin
           mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
-          mouse.X := mouse.X + (3 * SymbolSet._Symbol_Sirka);
-          mouse.Y := mouse.Y + Round((2.5 + Self.GetLastItemIndex()) * SymbolSet._Symbol_Vyska);
+          mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
+          mouse.Y := mouse.Y + Round((2.5 + Self.GetLastItemIndex()) * SymbolSet.symbHeight);
         end;
         SetCursorPos(mouse.X, mouse.Y);
       end;
@@ -363,13 +363,13 @@ begin
               (Self.Items.data[i].show_text <> '-')) then
               break;
 
-          mouse.Y := mouse.Y + ((i - Self.fselected) * SymbolSet._Symbol_Vyska);
+          mouse.Y := mouse.Y + ((i - Self.fselected) * SymbolSet.symbHeight);
         end;
         if (Self.fselected = -1) then
         begin
           mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
-          mouse.X := mouse.X + (3 * SymbolSet._Symbol_Sirka);
-          mouse.Y := mouse.Y + Round((2.5 + Self.GetFirstItemIndex()) * SymbolSet._Symbol_Vyska);
+          mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
+          mouse.Y := mouse.Y + Round((2.5 + Self.GetFirstItemIndex()) * SymbolSet.symbHeight);
         end;
         SetCursorPos(mouse.X, mouse.Y);
       end;
@@ -377,8 +377,8 @@ begin
     48 .. 57, 65 .. 90:
       begin
         mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
-        mouse.X := mouse.X + (3 * SymbolSet._Symbol_Sirka);
-        mouse.Y := mouse.Y + Round((2.5 + Self.GetItemIndex(chr(key))) * SymbolSet._Symbol_Vyska);
+        mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
+        mouse.Y := mouse.Y + Round((2.5 + Self.GetItemIndex(chr(key))) * SymbolSet.symbHeight);
         SetCursorPos(mouse.X, mouse.Y);
       end;
 
@@ -386,9 +386,9 @@ begin
     96 .. 105:
       begin
         mouse := Self.Graphics.DrawObject.ClientToScreen(Point(0, 0));
-        mouse.X := mouse.X + (3 * SymbolSet._Symbol_Sirka);
+        mouse.X := mouse.X + (3 * SymbolSet.symbWidth);
         mouse.Y := mouse.Y + Round((2.5 + Self.GetItemIndex(chr(key - VK_NUMPAD0 + ord('0')))) *
-          SymbolSet._Symbol_Vyska);
+          SymbolSet.symbHeight);
         SetCursorPos(mouse.X, mouse.Y);
       end;
 
@@ -449,7 +449,7 @@ end;
 function TPanelMenu.CheckCursorPos(Pos: TPoint): boolean;
 var handled: boolean;
 begin
-  Self.fselected := Pos.Y div (SymbolSet._Symbol_Vyska) - 2;
+  Self.fselected := Pos.Y div (SymbolSet.symbHeight) - 2;
   if ((Self.fselected < 0) or (Self.fselected >= Self.Items.cnt)) then
     Self.fselected := -1;
 

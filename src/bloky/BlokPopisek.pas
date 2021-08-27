@@ -75,15 +75,15 @@ begin
 
     obj.Surface.Canvas.Brush.Color := Self.PanelProp.left;
     obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
-    obj.Surface.Canvas.Rectangle((Self.Position.X - 1) * SymbolSet._Symbol_Sirka,
-      Self.Position.Y * SymbolSet._Symbol_Vyska, (Self.Position.X) * SymbolSet._Symbol_Sirka,
-      (Self.Position.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle((Self.Position.X - 1) * SymbolSet.symbWidth,
+      Self.Position.Y * SymbolSet.symbHeight, (Self.Position.X) * SymbolSet.symbWidth,
+      (Self.Position.Y + 1) * SymbolSet.symbHeight);
 
     obj.Surface.Canvas.Brush.Color := Self.PanelProp.right;
     obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
-    obj.Surface.Canvas.Rectangle((Self.Position.X + 1) * SymbolSet._Symbol_Sirka,
-      Self.Position.Y * SymbolSet._Symbol_Vyska, (Self.Position.X + 2) * SymbolSet._Symbol_Sirka,
-      (Self.Position.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle((Self.Position.X + 1) * SymbolSet.symbWidth,
+      Self.Position.Y * SymbolSet.symbHeight, (Self.Position.X + 2) * SymbolSet.symbWidth,
+      (Self.Position.Y + 1) * SymbolSet.symbHeight);
 
     PanelPainter.TextOutput(Self.Position, Self.Text, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj, false, true);
   end else begin

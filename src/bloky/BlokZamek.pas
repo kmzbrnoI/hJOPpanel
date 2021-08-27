@@ -120,7 +120,7 @@ begin
     else
       fg := zam.PanelProp.Symbol;
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, zam.Pos, _Zamek, fg, zam.PanelProp.Pozadi, obj);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, zam.Pos, _S_LOCK, fg, zam.PanelProp.Pozadi, obj);
   end; // for i
 end;
 

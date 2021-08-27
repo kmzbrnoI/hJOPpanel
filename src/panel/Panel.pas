@@ -338,8 +338,8 @@ begin
 
   Self.CursorDraw.Pos.X := -2;
   Self.CursorDraw.Pozadi := TBitmap.Create();
-  Self.CursorDraw.Pozadi.Width := SymbolSet._Symbol_Sirka + 2; // +2 kvuli okrajum kurzoru
-  Self.CursorDraw.Pozadi.Height := SymbolSet._Symbol_Vyska + 2;
+  Self.CursorDraw.Pozadi.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
+  Self.CursorDraw.Pozadi.Height := SymbolSet.symbHeight + 2;
 
   Self.AE := TApplicationEvents.Create(Self.ParentForm);
   Self.AE.OnMessage := Self.AEMessage;
@@ -357,8 +357,8 @@ begin
 
   Self.FLoad(aFile);
 
-  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet._Symbol_Sirka,
-    Self.Graphics.PanelHeight * SymbolSet._Symbol_Vyska);
+  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet.symbWidth,
+    Self.Graphics.PanelHeight * SymbolSet.symbHeight);
 
   Self.show();
 end;
@@ -435,15 +435,10 @@ begin
 
     PanelPainter.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack, Self.DrawObject);
 
-    // symbol osvetleni se vykresluje vlevo
-    if (OblR.dk_osv) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X - 2, OblR.Poss.DK.Y + 1), _Hvezdicka, clYellow,
-        clBlack, Self.DrawObject);
-
     // symbol zadosti o loko se vykresluje vpravo
     if (((OblR.RegPlease.status = TORRegPleaseStatus.request) or (OblR.RegPlease.status = TORRegPleaseStatus.selected))
       and (not Self.Graphics.blik)) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X + 6, OblR.Poss.DK.Y + 1), _Kolecko, clYellow,
+      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X + 6, OblR.Poss.DK.Y + 1), _S_CIRCLE, clYellow,
         clBlack, Self.DrawObject);
 
   end; // for i
@@ -472,24 +467,24 @@ begin
   begin
     // vodorovne
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol + 1, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _Plny_Symbol + 1, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _Plny_Symbol + 1, clBlack, c1, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_FULL + 1, clBlack, c1, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _Plny_Symbol + 1, c2, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _Plny_Symbol + 1, c2, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _Plny_Symbol + 1, c2, c3, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
   end else begin
     // svisle
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _Plny_Symbol + 1, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _Plny_Symbol, c1, c1, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_FULL, c1, c1, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _Plny_Symbol + 2, c2, clBlack, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _Plny_Symbol, c2, clBlack, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_BOT, c2, clBlack, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_FULL, c2, clBlack, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _Plny_Symbol + 1, clBlack, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _Plny_Symbol, c3, c3, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c3, Self.DrawObject);
+    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_FULL, c3, c3, Self.DrawObject);
   end;
 
   case (PanelTCPClient.status) of
@@ -522,17 +517,17 @@ begin
 
       for i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) - 1 do
         PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
-          _Plny_Symbol, clRed, clBlack, Self.DrawObject);
+          _S_FULL, clRed, clBlack, Self.DrawObject);
 
       for i := (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) to (_delka div 2) - 1 do
         PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
-          _Plny_Symbol, clWhite, clBlack, Self.DrawObject);
+          _S_FULL, clWhite, clBlack, Self.DrawObject);
 
       // vykresleni poloviny symbolu
       if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) mod 2) = 1) then
         PanelPainter.Draw(SymbolSet.IL_Symbols,
           Point(Self.myORs[j].Poss.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2),
-          Self.myORs[j].Poss.Time.Y + k), _Plny_Symbol + 1, clRed, clWhite, Self.DrawObject);
+          Self.myORs[j].Poss.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.DrawObject);
 
     end; // for i
 
@@ -625,19 +620,19 @@ begin
     Exit();
 
   // zkopirujeme si obrazek pod kurzorem jeste pred tim, nez se pres nej prekresli mys
-  Self.CursorDraw.Pozadi.Canvas.CopyRect(Rect(0, 0, SymbolSet._Symbol_Sirka + 2, SymbolSet._Symbol_Vyska + 2),
-    Self.DrawObject.Surface.Canvas, Rect(Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka - 1,
-    Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska - 1, (Self.CursorDraw.Pos.X + 1) * SymbolSet._Symbol_Sirka + 1,
-    (Self.CursorDraw.Pos.Y + 1) * SymbolSet._Symbol_Vyska + 1));
+  Self.CursorDraw.Pozadi.Canvas.CopyRect(Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2),
+    Self.DrawObject.Surface.Canvas, Rect(Self.CursorDraw.Pos.X * SymbolSet.symbWidth - 1,
+    Self.CursorDraw.Pos.Y * SymbolSet.symbHeight - 1, (Self.CursorDraw.Pos.X + 1) * SymbolSet.symbWidth + 1,
+    (Self.CursorDraw.Pos.Y + 1) * SymbolSet.symbHeight + 1));
 
   // vykresleni kurzoru
   Self.DrawObject.Surface.Canvas.Pen.Color := Self.CursorDraw.KurzorRamecek;
   Self.DrawObject.Surface.Canvas.Brush.Color := Self.CursorDraw.KurzorObsah;
   Self.DrawObject.Surface.Canvas.Pen.Mode := pmMerge;
-  Self.DrawObject.Surface.Canvas.Rectangle((Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka) - 1,
-    (Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska) - 1,
-    ((Self.CursorDraw.Pos.X * SymbolSet._Symbol_Sirka) + SymbolSet._Symbol_Sirka) + 1,
-    ((Self.CursorDraw.Pos.Y * SymbolSet._Symbol_Vyska) + SymbolSet._Symbol_Vyska) + 1);
+  Self.DrawObject.Surface.Canvas.Rectangle((Self.CursorDraw.Pos.X * SymbolSet.symbWidth) - 1,
+    (Self.CursorDraw.Pos.Y * SymbolSet.symbHeight) - 1,
+    ((Self.CursorDraw.Pos.X * SymbolSet.symbWidth) + SymbolSet.symbWidth) + 1,
+    ((Self.CursorDraw.Pos.Y * SymbolSet.symbHeight) + SymbolSet.symbHeight) + 1);
   Self.DrawObject.Surface.Canvas.Pen.Mode := pmCopy;
 end;
 
@@ -645,12 +640,12 @@ end;
 // na zadane souradnice (v polickach).
 procedure TRelief.PaintKurzorBg(Pos: TPoint);
 begin
-  Self.DrawObject.Surface.Canvas.CopyRect(Rect(Pos.X * SymbolSet._Symbol_Sirka - 1, Pos.Y * SymbolSet._Symbol_Vyska - 1,
-    (Pos.X + 1) * SymbolSet._Symbol_Sirka + 1, (Pos.Y + 1) * SymbolSet._Symbol_Vyska + 1),
+  Self.DrawObject.Surface.Canvas.CopyRect(Rect(Pos.X * SymbolSet.symbWidth - 1, Pos.Y * SymbolSet.symbHeight - 1,
+    (Pos.X + 1) * SymbolSet.symbWidth + 1, (Pos.Y + 1) * SymbolSet.symbHeight + 1),
 
     Self.CursorDraw.Pozadi.Canvas,
 
-    Rect(0, 0, SymbolSet._Symbol_Sirka + 2, SymbolSet._Symbol_Vyska + 2));
+    Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -666,8 +661,8 @@ begin
   if ((not Self.Enabled) or (Handled)) then
     Exit();
 
-  Self.CursorDraw.Pos.X := X div SymbolSet._Symbol_Sirka;
-  Self.CursorDraw.Pos.Y := Y div SymbolSet._Symbol_Vyska;
+  Self.CursorDraw.Pos.X := X div SymbolSet.symbWidth;
+  Self.CursorDraw.Pos.Y := Y div SymbolSet.symbHeight;
 
   case (Button) of
     mbLeft:
@@ -720,7 +715,7 @@ begin
     Exit();
   end;
 
-  Self.ObjectMouseDown(Point(X div SymbolSet._Symbol_Sirka, Y div SymbolSet._Symbol_Vyska), myBut);
+  Self.ObjectMouseDown(Point(X div SymbolSet.symbWidth, Y div SymbolSet.symbHeight), myBut);
 end;
 
 procedure TRelief.OnMouseTimer(Sender: TObject);
@@ -742,14 +737,14 @@ begin
     Exit();
 
   // pokud se nemeni pozice kurzoru -- ramecku, neni potreba prekreslovat
-  if ((X div SymbolSet._Symbol_Sirka = Self.CursorDraw.Pos.X) and
-    (Y div SymbolSet._Symbol_Vyska = Self.CursorDraw.Pos.Y)) then
+  if ((X div SymbolSet.symbWidth = Self.CursorDraw.Pos.X) and
+    (Y div SymbolSet.symbHeight = Self.CursorDraw.Pos.Y)) then
     Exit;
 
   // vytvorime novou pozici a ulozime ji
   old := Self.CursorDraw.Pos;
-  Self.CursorDraw.Pos.X := X div SymbolSet._Symbol_Sirka;
-  Self.CursorDraw.Pos.Y := Y div SymbolSet._Symbol_Vyska;
+  Self.CursorDraw.Pos.X := X div SymbolSet.symbWidth;
+  Self.CursorDraw.Pos.Y := Y div SymbolSet.symbHeight;
 
   // skryjeme informacni zpravu vlevo dole
   Self.msg.show := false;
@@ -1174,8 +1169,8 @@ var i: Integer;
 begin
   for i := 0 to Self.myORs.Count - 1 do
     if ((Pos.X >= Self.myORs[i].Poss.DK.X) and (Pos.Y >= Self.myORs[i].Poss.DK.Y) and
-      (Pos.X <= Self.myORs[i].Poss.DK.X + (((_DK_Sirka * SymbolSet._Symbol_Sirka) - 1) div SymbolSet._Symbol_Sirka)) and
-      (Pos.Y <= Self.myORs[i].Poss.DK.Y + (((_DK_Vyska * SymbolSet._Symbol_Vyska) - 1) div SymbolSet._Symbol_Vyska)))
+      (Pos.X <= Self.myORs[i].Poss.DK.X + (((_DK_WIDTH_MULT * SymbolSet.symbWidth) - 1) div SymbolSet.symbWidth)) and
+      (Pos.Y <= Self.myORs[i].Poss.DK.Y + (((_DK_HEIGHT_MULT * SymbolSet.symbHeight) - 1) div SymbolSet.symbHeight)))
     then
       Exit(i);
 
@@ -1238,13 +1233,13 @@ begin
 
           case (msg.wParam) of
             VK_LEFT:
-              mouse.X := mouse.X - SymbolSet._Symbol_Sirka;
+              mouse.X := mouse.X - SymbolSet.symbWidth;
             VK_RIGHT:
-              mouse.X := mouse.X + SymbolSet._Symbol_Sirka;
+              mouse.X := mouse.X + SymbolSet.symbWidth;
             VK_UP:
-              mouse.Y := mouse.Y - SymbolSet._Symbol_Vyska;
+              mouse.Y := mouse.Y - SymbolSet.symbHeight;
             VK_DOWN:
-              mouse.Y := mouse.Y + SymbolSet._Symbol_Vyska;
+              mouse.Y := mouse.Y + SymbolSet.symbHeight;
           end;
 
           SetCursorPos(mouse.X, mouse.Y);
@@ -1706,7 +1701,7 @@ begin
   Self.Menu.showing := false;
   Self.dk_root_menu_item := '';
   bPos := Self.DrawObject.ClientToScreen(Point(0, 0));
-  SetCursorPos(Self.menu_lastpos.X * SymbolSet._Symbol_Sirka + bPos.X, Self.menu_lastpos.Y * SymbolSet._Symbol_Vyska
+  SetCursorPos(Self.menu_lastpos.X * SymbolSet.symbWidth + bPos.X, Self.menu_lastpos.Y * SymbolSet.symbHeight
     + bPos.Y);
   Self.show();
 end;
@@ -2027,7 +2022,6 @@ begin
     begin
       Self.myORs[i].tech_rights := TORControlRights.null;
       Self.myORs[i].dk_blik := false;
-      Self.myORs[i].dk_osv := false;
       Self.myORs[i].stack.Enabled := false;
       Self.myORs[i].dk_click_server := false;
       Self.myORs[i].RegPlease.status := TORRegPleaseStatus.none;
@@ -2253,10 +2247,10 @@ end;
 procedure TRelief.UpdateSymbolSet();
 begin
   Self.CursorDraw.Pozadi := TBitmap.Create();
-  Self.CursorDraw.Pozadi.Width := SymbolSet._Symbol_Sirka + 2; // +2 kvuli okrajum kurzoru
-  Self.CursorDraw.Pozadi.Height := SymbolSet._Symbol_Vyska + 2;
-  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet._Symbol_Sirka,
-    Self.Graphics.PanelHeight * SymbolSet._Symbol_Vyska);
+  Self.CursorDraw.Pozadi.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
+  Self.CursorDraw.Pozadi.Height := SymbolSet.symbHeight + 2;
+  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.PanelWidth * SymbolSet.symbWidth,
+    Self.Graphics.PanelHeight * SymbolSet.symbHeight);
   Self.show();
 end;
 

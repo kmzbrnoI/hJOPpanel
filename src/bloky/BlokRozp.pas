@@ -66,8 +66,8 @@ begin
   begin
     obj.Surface.Canvas.Pen.Color := Self.PanelProp.Pozadi;
     obj.Surface.Canvas.Brush.Color := Self.PanelProp.Pozadi;
-    obj.Surface.Canvas.Rectangle(Self.Pos.X * SymbolSet._Symbol_Sirka, Self.Pos.Y * SymbolSet._Symbol_Vyska,
-      (Self.Pos.X + 1) * SymbolSet._Symbol_Sirka, (Self.Pos.Y + 1) * SymbolSet._Symbol_Vyska);
+    obj.Surface.Canvas.Rectangle(Self.Pos.X * SymbolSet.symbWidth, Self.Pos.Y * SymbolSet.symbHeight,
+      (Self.Pos.X + 1) * SymbolSet.symbWidth, (Self.Pos.Y + 1) * SymbolSet.symbHeight);
   end;
 end;
 
@@ -79,7 +79,7 @@ begin
   else
     fg := Self.PanelProp.Symbol;
 
-  PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _Rozp_Start + 1, fg, Self.PanelProp.Pozadi, obj, true);
+  PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _S_DISC_ALONE, fg, Self.PanelProp.Pozadi, obj, true);
 end;
 
 procedure TPRozp.Reset();
