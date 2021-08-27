@@ -58,7 +58,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper;
+uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -85,9 +85,9 @@ begin
       Self.Position.Y * SymbolSet.symbHeight, (Self.Position.X + 2) * SymbolSet.symbWidth,
       (Self.Position.Y + 1) * SymbolSet.symbHeight);
 
-    PanelPainter.TextOutput(Self.Position, Self.Text, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj, false, true);
+    Symbols.TextOutput(Self.Position, Self.Text, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj, false, true);
   end else begin
-    PanelPainter.TextOutput(Self.Position, Self.Text, _Symbol_Colors[Self.Color], clBlack, obj, false, true);
+    Symbols.TextOutput(Self.Position, Self.Text, _Symbol_Colors[Self.Color], clBlack, obj, false, true);
   end;
 end;
 

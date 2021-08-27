@@ -65,7 +65,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper, Panel;
+uses Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -87,10 +87,10 @@ begin
 
   if (Self.PanelProp.AB) then
   begin
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID + 2, fg,
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID + 2, fg,
       Self.PanelProp.Pozadi, obj);
   end else begin
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID, fg, Self.PanelProp.Pozadi, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID, fg, Self.PanelProp.Pozadi, obj);
   end;
 end;
 

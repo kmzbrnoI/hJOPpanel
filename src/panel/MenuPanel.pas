@@ -74,7 +74,7 @@ type
 
 implementation
 
-uses Symbols, parseHelper, PanelPainter;
+uses Symbols, parseHelper;
 
 { format souboru hintu:
   csv soubor, kde na kazdem radku je jeden hint
@@ -208,7 +208,7 @@ begin
         (SymbolSet.symbWidth / 2)), (Pos.Y * SymbolSet.symbHeight) + Round(SymbolSet.symbHeight / 2));
     end
     else
-      PanelPainter.TextOutput(Pos, str, foreground, background, obj);
+      Symbols.TextOutput(Pos, str, foreground, background, obj);
 
     Pos.Y := Pos.Y + 1;
   end; // for i
@@ -217,7 +217,7 @@ begin
   if (Self.fselected > -1) and (Self.Hints.TryGetValue(Self.Items.data[Self.fselected].show_text, str)) then
   begin
     str := Format(' %-' + IntToStr(_HINT_WIDTH) + 's', [str]);
-    PanelPainter.TextOutput(Point(1, 0), str, clYellow, clTeal, obj);
+    Symbols.TextOutput(Point(1, 0), str, clYellow, clTeal, obj);
   end;
 end;
 

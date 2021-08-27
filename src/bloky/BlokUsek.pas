@@ -110,7 +110,7 @@ function InvDKSType(dks: TDKSType): TDKSType;
 
 implementation
 
-uses parseHelper, PanelPainter;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -181,7 +181,7 @@ begin
   else
     bg := train.bg;
 
-  PanelPainter.TextOutput(pos, train.nazev, fg, bg, obj, true);
+  TextOutput(pos, train.nazev, fg, bg, obj, true);
 
   // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
   arrowLeft := (((train.sipkaL) and (myORs[Self.OblRizeni].Lichy = 1)) or
@@ -205,9 +205,9 @@ begin
     fg := bg;
 
   if (arrowLeft) then
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y - 1), _S_TRAIN_ARROW_L, fg, clNone, obj, true);
+    Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y - 1), _S_TRAIN_ARROW_L, fg, clNone, obj, true);
   if (arrowRight) then
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(train.nazev) - 1, pos.Y - 1), _S_TRAIN_ARROW_R, fg,
+    Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(train.nazev) - 1, pos.Y - 1), _S_TRAIN_ARROW_R, fg,
       clNone, obj, true);
 
   if ((arrowLeft) or (arrowRight)) then
@@ -235,9 +235,9 @@ begin
     fg := Self.PanelProp.Symbol;
 
   if (Self.PanelProp.KonecJC = TJCType.no) then
-    PanelPainter.TextOutput(left, Self.KpopisekStr, fg, Self.PanelProp.Pozadi, obj)
+    TextOutput(left, Self.KpopisekStr, fg, Self.PanelProp.Pozadi, obj)
   else
-    PanelPainter.TextOutput(left, Self.KpopisekStr, fg, _Konec_JC[Integer(Self.PanelProp.KonecJC)], obj);
+    TextOutput(left, Self.KpopisekStr, fg, _Konec_JC[Integer(Self.PanelProp.KonecJC)], obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ begin
   else
     symbol := symbol + _S_TRACK_NODET_B;
 
-  PanelPainter.Draw(SymbolSet.IL_Symbols, pos, symbol,fg, bg, obj);
+  Draw(SymbolSet.IL_Symbols, pos, symbol,fg, bg, obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

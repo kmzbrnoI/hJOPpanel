@@ -45,7 +45,7 @@ const
 
 implementation
 
-uses parseHelper, PanelPainter, Symbols;
+uses parseHelper, Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -93,29 +93,29 @@ begin
   if (Self.Blok = -2) then
   begin
     // blok zamerne neprirazen
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, fg, bkcol, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, fg, bkcol, obj);
   end else begin
     case (Self.PanelProp.Poloha) of
       TVyhPoloha.disabled, TVyhPoloha.none:
         begin
-          PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, fg, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, fg, obj);
         end;
       TVyhPoloha.plus:
         begin
-          PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 4 + (4 * Self.PolohaPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 4 + (4 * Self.PolohaPlus), fg,
             bkcol, obj);
         end;
       TVyhPoloha.minus:
         begin
-          PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 8 - (4 * Self.PolohaPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 8 - (4 * Self.PolohaPlus), fg,
             bkcol, obj);
         end;
       TVyhPoloha.both:
         begin
-          PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, clBlue, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, clBlue, obj);
         end;
-    end; // case
-  end; // else blok zamerne neprirazn
+    end;
+  end;
 
 end;
 

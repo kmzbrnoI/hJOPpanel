@@ -56,7 +56,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter, parseHelper;
+uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -79,7 +79,7 @@ begin
   else
     fg := Self.PanelProp.Symbol;
 
-  PanelPainter.Draw(SymbolSet.IL_Symbols, Self.Pos, _S_DISC_ALONE, fg, Self.PanelProp.Pozadi, obj, true);
+  Symbols.Draw(SymbolSet.IL_Symbols, Self.Pos, _S_DISC_ALONE, fg, Self.PanelProp.Pozadi, obj, true);
 end;
 
 procedure TPRozp.Reset();

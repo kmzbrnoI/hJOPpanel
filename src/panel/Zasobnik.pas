@@ -73,7 +73,7 @@ type
 
 implementation
 
-uses TCPCLientPanel, Symbols, PanelPainter, parseHelper;
+uses TCPCLientPanel, Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -263,30 +263,30 @@ begin
   // zasobnik Disabled
   if (not Self.fenabled) then
   begin
-    PanelPainter.TextOutput(Self.pos, Format('%.2d', [Self.index]), clFuchsia, clBlack, obj);
-    PanelPainter.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', clFuchsia, clBlack, obj);
-    PanelPainter.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', clFuchsia, clBlack, obj);
-    PanelPainter.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clFuchsia, clBlack, obj);
-    PanelPainter.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), clFuchsia,
+    Symbols.TextOutput(Self.pos, Format('%.2d', [Self.index]), clFuchsia, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', clFuchsia, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', clFuchsia, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clFuchsia, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), clFuchsia,
       clBlack, obj);
     Exit();
   end;
 
-  PanelPainter.TextOutput(Self.pos, Format('%.2d', [Self.index]), $A0A0A0, clBlack, obj);
+  Symbols.TextOutput(Self.pos, Format('%.2d', [Self.index]), $A0A0A0, clBlack, obj);
 
   case (Self.EZ) of
     TOREZVolba.closed:
-      PanelPainter.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', $A0A0A0, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', $A0A0A0, clBlack, obj);
     TOREZVolba.please:
-      PanelPainter.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clYellow, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clYellow, clBlack, obj);
     TOREZVolba.openned:
-      PanelPainter.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clWhite, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clWhite, clBlack, obj);
   end; // case
 
   if (Self.EZ = TOREZVolba.openned) then
   begin
-    PanelPainter.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
-    PanelPainter.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
 
     jcpos := mousePos.y - Self.pos.y - 1;
     if ((Self.dragged > -1) and ((jcpos < 0) or (jcpos >= Self.stack.Count))) then
@@ -315,29 +315,29 @@ begin
     // pokud neni EZ
     if (Self.volba = VZ) then
     begin
-      PanelPainter.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', clWhite, clBlack, obj);
-      PanelPainter.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', clWhite, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
     end else begin
-      PanelPainter.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
-      PanelPainter.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', clWhite, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', clWhite, clBlack, obj);
     end;
 
     // pokud je alespon jedna cesta v zasobniku, vypiseme ji
     if (Self.stack.Count > 0) then
       Self.ShowStackCMD(0, Self.stack[0].JC, true, false, Self.first_enabled, false, obj);
 
-    PanelPainter.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), $A0A0A0,
+    Symbols.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), $A0A0A0,
       clBlack, obj);
 
     if ((Self.hint <> '') or (Self.UPOenabled)) then
     begin
       if (Self.UPOenabled) then
       begin
-        PanelPainter.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', clYellow, clBlack, obj);
-        PanelPainter.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, clYellow, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', clYellow, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, clYellow, clBlack, obj);
       end else begin
-        PanelPainter.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', $A0A0A0, clBlack, obj);
-        PanelPainter.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, $A0A0A0, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', $A0A0A0, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, $A0A0A0, clBlack, obj);
       end;
     end;
   end;
@@ -382,7 +382,7 @@ begin
       text := text + ' ';
   end;
 
-  PanelPainter.TextOutput(Point(Self.pos.X, Self.pos.y + ypos + 1), ' ' + text, fg, bk, obj);
+  Symbols.TextOutput(Point(Self.pos.X, Self.pos.y + ypos + 1), ' ' + text, fg, bk, obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

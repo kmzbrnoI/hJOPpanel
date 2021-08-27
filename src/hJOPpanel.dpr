@@ -52,7 +52,6 @@ uses
   fSprToSlot in 'forms\fSprToSlot.pas' {F_SprToSlot},
   InterProcessCom in 'InterProcessCom.pas',
   parseHelper in 'net\parseHelper.pas',
-  PanelPainter in 'panel\PanelPainter.pas',
   BlokUvazka in 'bloky\BlokUvazka.pas',
   BlokUvazkaSpr in 'bloky\BlokUvazkaSpr.pas',
   BlokZamek in 'bloky\BlokZamek.pas',

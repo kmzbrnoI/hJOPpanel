@@ -685,8 +685,8 @@ function TF_Main.LargeSSFitsScreen(): Boolean;
 begin
   if (Relief = nil) then
     Exit(True);
-  Result := ((Relief.PanelWidth * SymbolSet.Sets[1].symbol_width <= Screen.DesktopWidth) and
-    (Relief.PanelHeight * SymbolSet.Sets[1].symbol_height <= Screen.DesktopHeight));
+  Result := ((Relief.PanelWidth * SymbolSet.sets[1].symbolWidth <= Screen.DesktopWidth) and
+    (Relief.PanelHeight * SymbolSet.sets[1].symbolHeight <= Screen.DesktopHeight));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

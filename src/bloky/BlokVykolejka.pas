@@ -44,7 +44,7 @@ type
 
 implementation
 
-uses PanelPainter, Symbols;
+uses Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -120,16 +120,16 @@ begin
 
     case (vykol.PanelProp.Poloha) of
       TVyhPoloha.disabled:
-        PanelPainter.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol,
+        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol,
           useky[vykol.usek].PanelProp.Pozadi, clFuchsia, obj);
       TVyhPoloha.none:
-        PanelPainter.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, fg, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, fg, obj);
       TVyhPoloha.plus:
-        PanelPainter.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, fg, bkcol, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, fg, bkcol, obj);
       TVyhPoloha.minus:
-        PanelPainter.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol + 2, fg, bkcol, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol + 2, fg, bkcol, obj);
       TVyhPoloha.both:
-        PanelPainter.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, clBlue, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, clBlue, obj);
     end;
   end; // for i
 end;

@@ -51,7 +51,7 @@ type
 
 implementation
 
-uses TCPClientPanel, fMain, parseHelper, PanelPainter;
+uses TCPClientPanel, fMain, parseHelper, Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -117,16 +117,16 @@ begin
         end; // taRightJustify
     end; // case
 
-    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight - _UPO_HEIGHT + i), str,
+    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - _UPO_HEIGHT + i), str,
       Self.items[Self.current].lines[i].fg, Self.items[Self.current].lines[i].bg, obj);
   end; // for i
 
   // vykresleni informaceo pokracovani
   if ((Self.critical) and (Self.current = Self.items.Count - 1)) then
-    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '          Ukončení: ESCAPE          ', clBlack,
+    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '          Ukončení: ESCAPE          ', clBlack,
       clTeal, obj)
   else
-    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '  Pokračovat: ENTER, konec: ESCAPE  ', clBlack,
+    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), '  Pokračovat: ENTER, konec: ESCAPE  ', clBlack,
       clTeal, obj);
 end;
 

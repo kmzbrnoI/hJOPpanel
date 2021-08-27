@@ -76,7 +76,7 @@ const
 
 implementation
 
-uses Symbols, PanelPainter, parseHelper, Panel;
+uses Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +94,7 @@ var Pos: TPoint;
 begin
   // vykreslit staticke pozice:
   for Pos in Self.StaticPositions do
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Pos, _S_CROSSING, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, Pos, _S_CROSSING, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
 
   // vykreslit blikajici pozice podle stavu prejezdu:
   if ((Self.PanelProp.stav = TBlkPrjPanelStav.disabled) or (Self.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
@@ -107,7 +107,7 @@ begin
       if (blikPoint.PanelUsek > -1) then
         useky[blikPoint.PanelUsek].RemoveSymbolFromPrejezd(blikPoint.Pos);
 
-      PanelPainter.Draw(SymbolSet.IL_Symbols, blikPoint.Pos, _S_CROSSING, Self.PanelProp.Symbol,
+      Symbols.Draw(SymbolSet.IL_Symbols, blikPoint.Pos, _S_CROSSING, Self.PanelProp.Symbol,
         Self.PanelProp.Pozadi, obj);
     end;
   end else begin

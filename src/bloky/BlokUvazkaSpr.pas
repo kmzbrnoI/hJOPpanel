@@ -77,7 +77,7 @@ const
 
 implementation
 
-uses PanelPainter, parseHelper, StrUtils, TCPClientPanel;
+uses Symbols, parseHelper, StrUtils, TCPClientPanel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -200,11 +200,11 @@ begin
       if (UvazkaSpr.show_index >= UvazkaSpr.strings.Count) then // tato podminka musi byt vne predchozi podminky
         UvazkaSpr.show_index := 0;
 
-      PanelPainter.TextOutput(Point(uvs.Pos.X, top), UvazkaSpr.strings[UvazkaSpr.show_index], UvazkaSpr.color, clBlack,
+      Symbols.TextOutput(Point(uvs.Pos.X, top), UvazkaSpr.strings[UvazkaSpr.show_index], UvazkaSpr.color, clBlack,
         obj, UvazkaSpr.show_index = 0);
 
       if (UvazkaSpr.show_index = 0) then
-        PanelPainter.TextOutput(Point(uvs.Pos.X + 7, top), UvazkaSpr.time, UvazkaSpr.time_color, clBlack, obj);
+        Symbols.TextOutput(Point(uvs.Pos.X + 7, top), UvazkaSpr.time, UvazkaSpr.time_color, clBlack, obj);
 
       top := top + incr;
     end; // for j

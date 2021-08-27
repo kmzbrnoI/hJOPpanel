@@ -285,7 +285,7 @@ implementation
 uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
   fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
   fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
-  PanelPainter, parseHelper;
+  parseHelper;
 
 constructor TRelief.Create(aParentForm: TForm);
 begin
@@ -434,12 +434,12 @@ begin
         fg := clYellow;
     end;
 
-    PanelPainter.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_DK, OblR.Poss.DK, OblR.Poss.DKOr, fg, clBlack, Self.DrawObject);
 
     // symbol zadosti o loko se vykresluje vpravo
     if (((OblR.RegPlease.status = TORRegPleaseStatus.request) or (OblR.RegPlease.status = TORRegPleaseStatus.selected))
       and (not Self.Graphics.blik)) then
-      PanelPainter.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X + 6, OblR.Poss.DK.Y + 1), _S_CIRCLE, clYellow,
+      Symbols.Draw(SymbolSet.IL_Symbols, Point(OblR.Poss.DK.X + 6, OblR.Poss.DK.Y + 1), _S_CIRCLE, clYellow,
         clBlack, Self.DrawObject);
 
   end; // for i
@@ -468,35 +468,35 @@ begin
   begin
     // vodorovne
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_FULL + 1, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_FULL + 1, clBlack, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_HALF_TOP, c2, c3, Self.DrawObject);
   end else begin
     // svisle
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_FULL, c1, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y), _S_HALF_TOP, clBlack, c1, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X, Pos.Y + 1), _S_FULL, c1, c1, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_BOT, c2, clBlack, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_FULL, c2, clBlack, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y), _S_HALF_BOT, c2, clBlack, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 1, Pos.Y + 1), _S_FULL, c2, clBlack, Self.DrawObject);
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c3, Self.DrawObject);
-    PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_FULL, c3, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y), _S_HALF_TOP, clBlack, c3, Self.DrawObject);
+    Symbols.Draw(SymbolSet.IL_Symbols, Point(Pos.X + 2, Pos.Y + 1), _S_FULL, c3, c3, Self.DrawObject);
   end;
 
   case (PanelTCPClient.status) of
     TPanelConnectionStatus.closed:
-      PanelPainter.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.DrawObject);
     TPanelConnectionStatus.opening:
-      PanelPainter.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Otevírám spojení...', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Otevírám spojení...', clFuchsia, clBlack, Self.DrawObject);
     TPanelConnectionStatus.handshake:
-      PanelPainter.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Probíhá handshake...', clFuchsia, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Probíhá handshake...', clFuchsia, clBlack, Self.DrawObject);
     TPanelConnectionStatus.opened:
-      PanelPainter.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Připojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
+      Symbols.TextOutput(Point(Pos.X + 5, Pos.Y + 1), 'Připojeno k serveru', $A0A0A0, clBlack, Self.DrawObject);
   end;
 end;
 
@@ -510,23 +510,23 @@ begin
   begin
     for k := 0 to Self.myORs[j].MereniCasu.Count - 1 do
     begin
-      PanelPainter.TextOutput(Point(Self.myORs[j].Poss.Time.X, Self.myORs[j].Poss.Time.Y + k), 'MER.CASU', clRed,
+      Symbols.TextOutput(Point(Self.myORs[j].Poss.Time.X, Self.myORs[j].Poss.Time.Y + k), 'MER.CASU', clRed,
         clWhite, Self.DrawObject);
 
       DateTimeToString(Time1, 'ss', Now - Self.myORs[j].MereniCasu[k].Start);
       DateTimeToString(Time2, 'ss', Self.myORs[j].MereniCasu[k].Length);
 
       for i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) - 1 do
-        PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
           _S_FULL, clRed, clBlack, Self.DrawObject);
 
       for i := (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2) to (_delka div 2) - 1 do
-        PanelPainter.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.myORs[j].Poss.Time.X + 8 + i, Self.myORs[j].Poss.Time.Y + k),
           _S_FULL, clWhite, clBlack, Self.DrawObject);
 
       // vykresleni poloviny symbolu
       if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) mod 2) = 1) then
-        PanelPainter.Draw(SymbolSet.IL_Symbols,
+        Symbols.Draw(SymbolSet.IL_Symbols,
           Point(Self.myORs[j].Poss.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _delka) div 2),
           Self.myORs[j].Poss.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.DrawObject);
 
@@ -544,7 +544,7 @@ end;
 procedure TRelief.ShowMsg();
 begin
   if (Self.msg.show) then
-    PanelPainter.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), Self.msg.msg, clRed, clWhite, Self.DrawObject);
+    Symbols.TextOutput(Point(0, Self.Graphics.PanelHeight - 1), Self.msg.msg, clRed, clWhite, Self.DrawObject);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2098,7 +2098,7 @@ begin
   for i := 0 to Min(Self.infoTimers.Count, 2) - 1 do
   begin
     str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].konec - Now) + ' ';
-    PanelPainter.TextOutput(Point(Self.PanelWidth - _INFOTIMER_WIDTH, Self.PanelHeight - i - 1), str, clRed, clWhite,
+    Symbols.TextOutput(Point(Self.PanelWidth - _INFOTIMER_WIDTH, Self.PanelHeight - i - 1), str, clRed, clWhite,
       Self.DrawObject);
   end; // for i
 end;

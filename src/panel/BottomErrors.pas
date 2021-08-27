@@ -52,7 +52,7 @@ var
 
 implementation
 
-uses fMain, Sounds, PanelPainter;
+uses fMain, Sounds, Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -144,11 +144,11 @@ begin
   else
     msg := StringOfChar(' ', _TECH_WIDTH);
 
-  PanelPainter.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
+  Symbols.TextOutput(Point(_TECH_LEFT, Relief.PanelHeight - 1), msg, clRed, clWhite, obj);
 
   // vypsani poctu chyb
   msg := Format('%2d', [Self.errors.Count]);
-  PanelPainter.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
+  Symbols.TextOutput(Point(_TECH_LEFT + _TECH_WIDTH, Relief.PanelHeight - 1), msg, clBlack, clSilver, obj);
 
   // vypsani samotnych chyb
   len := Min(Self.ErrorShowCount, Self.errors.Count);
@@ -160,7 +160,7 @@ begin
     msg := ' ' + Self.errors[i].stanice + ' : ' + Self.errors[i].err;
     msg := Format('%-' + IntToStr(_ERR_WIDTH) + 's', [msg]);
 
-    PanelPainter.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
+    Symbols.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
 
     top := top - 1;
   end;

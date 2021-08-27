@@ -1,12 +1,13 @@
 ﻿unit Symbols;
 
 {
-  Zakladni operace se symboly, definice pozic symbolu v souboru.
+  Basic operations with relief symbols, definition of symbols colors, symbol
+  positions etc.
 }
 
 interface
 
-uses SysUtils, Controls, Graphics, Classes, Windows, Forms;
+uses SysUtils, Controls, Graphics, Classes, Windows, Forms, DXDraws, ImgList;
 
 const
   _Symbols_DefColor = clBlack; // barva pro nacitani souboru
@@ -109,11 +110,11 @@ type
   );
 
   TOneSymbolSet = record
-    Names: record
-      Symbols, Text, DK, Trat: string;
+    names: record
+      symbols, text, area, railway: string;
     end;
 
-    symbol_width, symbol_height: Integer;
+    symbolWidth, symbolHeight: Integer;
   end;
 
   // 1 bitmapovy symbol na reliefu (ze symbolu se skladaji useky)
@@ -125,17 +126,17 @@ type
   TSymbolSet = class
   public const
     // tady jsou nadefinovane Resource nazvy ImageListu jendotlivych setu a rozmery jejich symbolu
-    Sets: array [0 .. 1] of TOneSymbolSet = (
+    sets: array [0 .. 1] of TOneSymbolSet = (
       // normal
-      (Names: (Symbols: 'symbols8'; Text: 'text8'; DK: 'dk8'; Trat: 'trat8';); symbol_width: 8; symbol_height: 12;),
+      (names: (symbols: 'symbols8'; text: 'text8'; area: 'dk8'; railway: 'trat8';); symbolWidth: 8; symbolHeight: 12;),
 
       // bigger
-      (Names: (Symbols: 'symbols16'; Text: 'text16'; DK: 'dk16'; Trat: 'trat16';); symbol_width: 16;
-      symbol_height: 24;));
+      (names: (symbols: 'symbols16'; text: 'text16'; area: 'dk16'; railway: 'trat16';); symbolWidth: 16;
+      symbolHeight: 24;));
 
   private
 
-    procedure LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Byte;
+    procedure LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Cardinal;
       MaskColor: TColor = clPurple);
     procedure ReplaceColor(ABitmap: Graphics.TBitmap; ASource, ATarget: TColor; Rect: TRect);
 
@@ -162,6 +163,11 @@ function SymbolDrawColor(symbol: Integer): SymbolColor;
 function SymbolDefaultColor(symbol: Integer): TColor;
 function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 
+procedure Draw(IL: TImageList; pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw;
+  transparent: boolean = false);
+procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; underline: boolean = false;
+  transparent: boolean = false);
+
 var
   SymbolSet: TSymbolSet;
 
@@ -183,7 +189,7 @@ begin
   Self.IL_Trat := TImageList.Create(nil);
 
   Self.LoadSet(typ);
-end; // ctor
+end;
 
 destructor TSymbolSet.Destroy();
 begin
@@ -192,66 +198,66 @@ begin
   FreeAndNil(Self.IL_DK);
   FreeAndNil(Self.IL_Trat);
 
-  inherited Destroy();
-end; // dtor
+  inherited;
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TSymbolSet.LoadSet(typ: TSymbolSetType);
 begin
-  Self.symbWidth := Self.Sets[Integer(typ)].symbol_width;
-  Self.symbHeight := Self.Sets[Integer(typ)].symbol_height;
+  Self.symbWidth := Self.sets[Integer(typ)].symbolWidth;
+  Self.symbHeight := Self.sets[Integer(typ)].symbolHeight;
 
   F_splash.AddStav('Načítám symboly "symbols" ...');
-  Self.LoadIL(Self.IL_Symbols, Self.Sets[Integer(typ)].Names.Symbols, Self.symbWidth, Self.symbHeight);
+  Self.LoadIL(Self.IL_Symbols, Self.sets[Integer(typ)].Names.Symbols, Self.symbWidth, Self.symbHeight);
   F_splash.AddStav('Načítám symboly "text" ...');
-  Self.LoadIL(Self.IL_Text, Self.Sets[Integer(typ)].Names.Text, Self.symbWidth, Self.symbHeight);
+  Self.LoadIL(Self.IL_Text, Self.sets[Integer(typ)].Names.Text, Self.symbWidth, Self.symbHeight);
   F_splash.AddStav('Načítám symboly "DK" ...');
-  Self.LoadIL(Self.IL_DK, Self.Sets[Integer(typ)].Names.DK, Self.symbWidth * _DK_WIDTH_MULT,
+  Self.LoadIL(Self.IL_DK, Self.sets[Integer(typ)].Names.area, Self.symbWidth * _DK_WIDTH_MULT,
     Self.symbHeight * _DK_HEIGHT_MULT);
   F_splash.AddStav('Načítám symboly "trat" ...');
-  Self.LoadIL(Self.IL_Trat, Self.Sets[Integer(typ)].Names.Trat, Self.symbWidth * _RAILWAY_WIDTH_MULT,
+  Self.LoadIL(Self.IL_Trat, Self.sets[Integer(typ)].Names.railway, Self.symbWidth * _RAILWAY_WIDTH_MULT,
     Self.symbHeight * _RAILWAY_HEIGHT_MULT);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TSymbolSet.LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Byte;
+procedure TSymbolSet.LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Cardinal;
   MaskColor: TColor = clPurple);
 var AllImages, ColouredImages: Graphics.TBitmap;
-  i, symbol: Byte;
 begin
   IL := TImageList.Create(nil);
+  AllImages := Graphics.TBitmap.Create();
+  ColouredImages := Graphics.TBitmap.Create();
 
-  AllImages := Graphics.TBitmap.Create;
   try
-    AllImages.LoadFromResourceName(HInstance, ResourceName);
-  except
-    raise Exception.Create('Nelze načíst symboly ' + ResourceName + #13#10 + 'Zdroj neexistuje');
-    Exit();
-  end;
+    try
+      AllImages.LoadFromResourceName(HInstance, ResourceName);
+    except
+      raise Exception.Create('Nelze načíst symboly ' + ResourceName + #13#10 + 'Zdroj neexistuje');
+      Exit();
+    end;
 
-  ColouredImages := Graphics.TBitmap.Create;
-  ColouredImages.PixelFormat := pf32Bit;
+    ColouredImages.PixelFormat := pf32Bit;
+    IL.SetSize(PartWidth, PartHeight);
+    ColouredImages.SetSize(PartWidth * Length(_SYMBOL_COLORS), PartHeight);
 
-  IL.SetSize(PartWidth, PartHeight);
-  ColouredImages.SetSize(PartWidth * Length(_Symbol_Colors), PartHeight);
-
-  for symbol := 0 to (AllImages.Width div PartWidth) - 1 do
-  begin
-    for i := 0 to Length(_Symbol_Colors) - 1 do
+    for var symbol: Cardinal := 0 to (AllImages.Width div PartWidth) - 1 do
     begin
-      ColouredImages.Canvas.CopyRect(Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight), AllImages.Canvas,
-        Rect(symbol * PartWidth, 0, (symbol * PartWidth) + PartWidth, PartHeight));
-      Self.ReplaceColor(ColouredImages, _Symbols_DefColor, _Symbol_Colors[i],
-        Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight));
-    end; // for i
+      for var i: Cardinal := 0 to Length(_Symbol_Colors) - 1 do
+      begin
+        ColouredImages.Canvas.CopyRect(Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight), AllImages.Canvas,
+          Rect(symbol * PartWidth, 0, (symbol * PartWidth) + PartWidth, PartHeight));
+        Self.ReplaceColor(ColouredImages, _Symbols_DefColor, _Symbol_Colors[i],
+          Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight));
+      end; // for i
 
-    IL.AddMasked(ColouredImages, MaskColor);
-  end; // for symbol
-
-  ColouredImages.Free;
-  AllImages.Free;
+      IL.AddMasked(ColouredImages, MaskColor);
+    end;
+  finally
+    ColouredImages.Free();
+    AllImages.Free();
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -260,11 +266,7 @@ procedure TSymbolSet.ReplaceColor(ABitmap: Graphics.TBitmap; ASource, ATarget: T
 type
   TRGBBytes = array [0 .. 2] of Byte;
 var
-  i: Integer;
-  X: Integer;
-  Y: Integer;
   Size: Integer;
-  Pixels: PByteArray;
   SourceColor: TRGBBytes;
   TargetColor: TRGBBytes;
 const
@@ -279,7 +281,7 @@ begin
     raise Exception.Create('Bitmap must be 24-bit or 32-bit format!');
   end;
 
-  for i := 0 to TripleSize - 1 do
+  for var i := 0 to TripleSize - 1 do
   begin
     // fill the array of bytes with color channel values in BGR order,
     // the same would do for the SourceColor from ASource parameter:
@@ -292,12 +294,12 @@ begin
     TargetColor[i] := Byte(ATarget shr (16 - (i * 8)));
   end;
 
-  for Y := Rect.Top to Rect.Bottom - 1 do
+  for var Y := Rect.Top to Rect.Bottom - 1 do
   begin
     // get a pointer to the currently iterated row pixel byte array
-    Pixels := ABitmap.ScanLine[Y];
+    var Pixels: PByteArray := ABitmap.ScanLine[Y];
     // iterate the row horizontally pixel by pixel
-    for X := Rect.Left to Rect.Right - 1 do
+    for var X := Rect.Left to Rect.Right - 1 do
     begin
       // now imagine, that you have an array of bytes in which the groups of
       // bytes represent a single pixel - e.g. the used Pixels array for the
@@ -410,11 +412,138 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
+procedure Draw(IL: TImageList; pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw;
+  transparent: boolean = false);
+var item: Integer;
+begin
+  // transparent is faster
+
+  if (transparent) then
+    IL.DrawingStyle := TDrawingStyle.dsTransparent
+  else
+    IL.DrawingStyle := TDrawingStyle.dsNormal;
+
+  if ((bg <> clBlack) and (not transparent)) then
+  begin
+    // black is default
+    obj.Surface.Canvas.Pen.Color := bg;
+    obj.Surface.Canvas.Brush.Color := bg;
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+      (pos.X + 1) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
+  end;
+
+  item := SymbolIndex(symbol, fg);
+  IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight, item);
+  IL.DrawingStyle := TDrawingStyle.dsNormal;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; underline: boolean = false;
+  transparent: boolean = false);
+var TextIndex: Integer;
+begin
+  // transparent is faster
+
+  if (not transparent) then
+  begin
+    obj.Surface.Canvas.Pen.Color := bg;
+    obj.Surface.Canvas.Brush.Color := bg;
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+      (pos.X + Length(Text)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
+  end;
+
+  for var j := 0 to Length(Text) - 1 do
+  begin
+    case (Text[j + 1]) of
+      #32 .. #90:
+        TextIndex := ord(Text[j + 1]) - 32;
+      #97 .. #122:
+        TextIndex := ord(Text[j + 1]) - 97 + 59;
+      'š':
+        TextIndex := 90;
+      'ť':
+        TextIndex := 91;
+      'ž':
+        TextIndex := 92;
+      'á':
+        TextIndex := 93;
+      'č':
+        TextIndex := 94;
+      'é':
+        TextIndex := 95;
+      'ě':
+        TextIndex := 96;
+      'í':
+        TextIndex := 97;
+      'ď':
+        TextIndex := 98;
+      'ň':
+        TextIndex := 99;
+      'ó':
+        TextIndex := 100;
+      'ř':
+        TextIndex := 101;
+      'ů':
+        TextIndex := 102;
+      'ú':
+        TextIndex := 103;
+      'ý':
+        TextIndex := 104;
+
+      'Š':
+        TextIndex := 105;
+      'Ť':
+        TextIndex := 106;
+      'Ž':
+        TextIndex := 107;
+      'Á':
+        TextIndex := 108;
+      'Č':
+        TextIndex := 109;
+      'É':
+        TextIndex := 110;
+      'Ě':
+        TextIndex := 111;
+      'Í':
+        TextIndex := 112;
+      'Ď':
+        TextIndex := 113;
+      'Ň':
+        TextIndex := 114;
+      'Ó':
+        TextIndex := 115;
+      'Ř':
+        TextIndex := 116;
+      'Ů':
+        TextIndex := 117;
+      'Ú':
+        TextIndex := 118;
+      'Ý':
+        TextIndex := 119;
+    else
+      TextIndex := 0;
+    end;
+
+    SymbolSet.IL_Text.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth + (j * SymbolSet.symbWidth),
+      pos.Y * SymbolSet.symbHeight, SymbolIndex(TextIndex, fg));
+  end; // for j
+
+  if (underline) then
+  begin
+    obj.Surface.Canvas.Pen.Color := fg;
+    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight - 1,
+      (pos.X + Length(Text)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
+  end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
 initialization
 
 finalization
 
-if Assigned(SymbolSet) then
+if (Assigned(SymbolSet)) then
   FreeAndNil(SymbolSet);
 
-end.// unit
+end.

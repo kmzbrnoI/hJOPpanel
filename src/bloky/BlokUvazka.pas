@@ -55,7 +55,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper;
+uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -116,8 +116,8 @@ begin
     case (uv.PanelProp.smer) of
       TUvazkaSmer.disabled, TUvazkaSmer.zadny:
         begin
-          PanelPainter.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
-          PanelPainter.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
             uv.PanelProp.Pozadi, obj);
         end;
 
@@ -127,13 +127,13 @@ begin
             ((uv.PanelProp.smer = opacny) and (uv.defalt_dir = 1))) then
           begin
             // sipka zleva doprava
-            PanelPainter.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_TRACK_DET_B, fg, uv.PanelProp.Pozadi, obj);
-            PanelPainter.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
+            Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_TRACK_DET_B, fg, uv.PanelProp.Pozadi, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
               uv.PanelProp.Pozadi, obj);
           end else begin
             // sipka zprava doleva
-            PanelPainter.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
-            PanelPainter.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_TRACK_DET_B, fg,
+            Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_TRACK_DET_B, fg,
               uv.PanelProp.Pozadi, obj);
           end;
         end;

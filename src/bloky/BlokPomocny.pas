@@ -60,7 +60,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper, Panel;
+uses Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +89,7 @@ begin
     color := clBlack;
 
   for p in Self.Positions do
-    PanelPainter.Draw(SymbolSet.IL_Symbols, p, Self.Symbol, color, Self.PanelProp.Pozadi, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, p, Self.Symbol, color, Self.PanelProp.Pozadi, obj);
 end;
 
 procedure TPPomocnyObj.Reset();

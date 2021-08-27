@@ -49,7 +49,7 @@ type
 
 implementation
 
-uses ParseHelper, PanelPainter, Panel;
+uses ParseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -282,8 +282,8 @@ begin
             if (Integer(usek.PanelProp.KonecJC) > 0) then
               bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
-        PanelPainter.Draw(SymbolSet.IL_Symbols, sym.Position, sym.SymbolID, fg, bg, obj);
-      end; // for j
+        Symbols.Draw(SymbolSet.IL_Symbols, sym.Position, sym.SymbolID, fg, bg, obj);
+      end;
 
     end else begin
 
@@ -369,7 +369,7 @@ begin
         if (Integer(usek.PanelProp.KonecJC) > 0) then
           bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, symbol.Position, symbol.SymbolID, fg, bg, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, symbol.Position, symbol.SymbolID, fg, bg, obj);
   end; // for i
 
   if (Vetev.node1.vyh > -1) then

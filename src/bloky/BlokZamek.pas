@@ -53,7 +53,7 @@ const
 
 implementation
 
-uses PanelPainter, Symbols, parseHelper;
+uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -120,8 +120,8 @@ begin
     else
       fg := zam.PanelProp.Symbol;
 
-    PanelPainter.Draw(SymbolSet.IL_Symbols, zam.Pos, _S_LOCK, fg, zam.PanelProp.Pozadi, obj);
-  end; // for i
+    Symbols.Draw(SymbolSet.IL_Symbols, zam.Pos, _S_LOCK, fg, zam.PanelProp.Pozadi, obj);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

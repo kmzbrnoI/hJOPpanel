@@ -44,7 +44,7 @@ var
 
 implementation
 
-uses TCPCLientPanel, Symbols, PanelPainter, BottomErrors;
+uses TCPCLientPanel, Symbols, BottomErrors;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -109,15 +109,14 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRucList.Show(obj: TDXDraw);
-var i: Integer;
-  left, top: Integer;
+var left, top: Integer;
 begin
   left := (Self.Graphics.PanelWidth div 2) - 5;
   top := Self.Graphics.PanelHeight - 1;
 
-  for i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount) - 1 do
+  for var i := 0 to Min(Self.lokos.Count, Errors.ErrorShowCount) - 1 do
   begin
-    PanelPainter.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
+    Symbols.TextOutput(Point(left, top), Self.lokos[i].str, clBlack, clWhite, obj);
     Dec(top);
   end;
 end;
