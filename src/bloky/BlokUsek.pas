@@ -12,22 +12,21 @@ uses Classes, Graphics, Types, Generics.Collections, Symbols, SysUtils,
   BlokTypes, PanelOR, DXDraws, Math;
 
 const
-  _Konec_JC: array [0 .. 3] of TColor = (clBlack, clGreen, clWhite, clTeal);
-  // zadna, vlakova, posunova, nouzova (privolavaci)
+  _JC_END: array [0 .. 3] of TColor = (clBlack, clGreen, clWhite, clTeal);
 
 type
-  TUsekSouprava = record
-    nazev: string;
-    sipkaL, sipkaS: boolean;
-    fg, bg, ramecek: TColor;
+  TTrackTrain = record
+    name: string;
+    arrowL, arrowS: boolean;
+    fg, bg, border: TColor;
     posindex: Integer; // index pozice, na ktere je umistena tato konkretni souprava
   end;
 
-  TUsekPanelProp = class
-    blikani: boolean;
-    Symbol, Pozadi, nebarVetve: TColor;
-    KonecJC: TJCType;
-    soupravy: TList<TUsekSouprava>;
+  TTrackPanelProp = class
+    flash: boolean;
+    fg, bg, notColorBranches: TColor;
+    jcend: TJCType;
+    trains: TList<TTrackTrain>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -36,45 +35,44 @@ type
     procedure InitUA();
   end;
 
-  // useku rozdeleny na vetve je reprezentovan takto:
+  // usek rozdeleny na vetve je reprezentovan takto:
 
   // ukoncovaci element vetve = vyhybka
-  TVetevEnd = record
-    vyh: Integer; // pokud usek nema vyhybky -> vyh1 = -1, vyh2 = -1 (nastava u useku bez vyhybky a u koncovych vetvi)
+  TBranchEnd = record
+    turnout: Integer; // pokud usek nema vyhybky -> vyh1 = -1, vyh2 = -1 (nastava u useku bez vyhybky a u koncovych vetvi)
     // referuje na index v poli vyhybek (nikoliv na technologicke ID vyhybky!)
     // kazda vetev je ukoncena maximalne 2-ma vyhybkama - koren muze byt ukoncen 2-ma vyhybkama, pak jen jedna
     ref_plus, ref_minus: Integer; // reference  na vetev, kterou se pokracuje, pokud je vyh v poloze + resp. poloze -
     // posledni vetev resp. usek bez vyhybky ma obe reference = -1
   end;
 
-  // vetev useku
-  TVetev = record // vetev useku
+  TTrackBranch = record // vetev useku
 
-    node1: TVetevEnd; // reference na 1. vyhybku, ktera ukoncuje tuto vetev
-    node2: TVetevEnd; // reference na 2. vyhybku, ktera ukoncuje tuto vetev
+    node1: TBranchEnd; // reference na 1. vyhybku, ktera ukoncuje tuto vetev
+    node2: TBranchEnd; // reference na 2. vyhybku, ktera ukoncuje tuto vetev
     visible: boolean; // pokud je vetve viditelna, je zde true; jinak false
 
-    Symbols: TList<TReliefSym>;
+    symbols: TList<TReliefSym>;
   end;
 
   TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
 
   // 1 usek na reliefu
-  TPUsek = class
-    Blok: Integer;
+  TPTrack = class
+    block: Integer;
 
-    OblRizeni: Integer;
-    PanelProp: TUsekPanelProp;
+    area: Integer;
+    panelProp: TTrackPanelProp;
     root: TPoint;
     DKStype: TDKSType;
 
-    Symbols: TList<TReliefSym>;
+    symbols: TList<TReliefSym>;
     JCClick: TList<TPoint>;
-    KPopisek: TList<TPoint>;
-    soupravy: TList<TPoint>; // je zaruceno, ze tento seznam je usporadany v lichem smeru (resi se pri nacitani souboru)
-    KpopisekStr: string;
+    labels: TList<TPoint>;
+    trains: TList<TPoint>; // je zaruceno, ze tento seznam je usporadany v lichem smeru (resi se pri nacitani souboru)
+    name: string;
 
-    Vetve: TList<TVetev>; // vetve useku
+    branches: TList<TTrackBranch>; // vetve useku
     // vetev 0 je vzdy koren
     // zde je ulozen binarni strom v pseudo-forme
     // na 0. indexu je koren, kazdy vrchol pak obsahuje referenci na jeho deti
@@ -85,24 +83,24 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    function SprPaintsOnRailNum(): boolean;
+    function TrainPaintsOnRailNum(): boolean;
     procedure Reset();
 
-    procedure PaintSouprava(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
+    procedure PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
       bgZaver: boolean = false);
-    procedure ShowSoupravy(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
-    procedure PaintCisloKoleje(pos: TPoint; obj: TDXDraw; hidden: boolean);
-    procedure AddSymbolFromPrejezd(pos: TPoint);
-    procedure RemoveSymbolFromPrejezd(pos: TPoint);
+    procedure ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
+    procedure PaintTrackName(pos: TPoint; obj: TDXDraw; hidden: boolean);
+    procedure AddSymbolFromCrossing(pos: TPoint);
+    procedure RemoveSymbolFromCrossing(pos: TPoint);
 
     function IsSecondCross(): boolean;
     function SecondCrossPos(): TPoint;
-    function GetVetev(pos: TPoint): Integer;
+    function GetBranch(pos: TPoint): Integer;
     function Detected(): boolean;
     class function SymbolIndex(pos: TPoint; Symbols: TList<TReliefSym>): Integer;
     procedure DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
     procedure ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
-      usek: TPUsek);
+      usek: TPTrack);
 
   end;
 
@@ -114,90 +112,89 @@ uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPUsek.Create();
+constructor TPTrack.Create();
 begin
   inherited;
-  Self.PanelProp := TUsekPanelProp.Create();
+  Self.panelProp := TTrackPanelProp.Create();
 end;
 
-destructor TPUsek.Destroy();
-var vetev: TVetev;
+destructor TPTrack.Destroy();
 begin
-  for vetev in Self.Vetve do
-    vetev.Symbols.Free();
+  for var branch in Self.branches do
+    branch.Symbols.Free();
 
-  Self.PanelProp.Free();
-  Self.Symbols.Free();
+  Self.panelProp.Free();
+  Self.symbols.Free();
   Self.JCClick.Free();
-  Self.KPopisek.Free();
-  Self.soupravy.Free();
-  Self.Vetve.Free();
+  Self.labels.Free();
+  Self.trains.Free();
+  Self.branches.Free();
   inherited;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUsek.SprPaintsOnRailNum(): boolean;
+function TPTrack.TrainPaintsOnRailNum(): boolean;
 begin
-  Result := (Self.soupravy.Count = 1) and (Self.KPopisek.Count > 0) and
-    ((Self.soupravy[0].X = Self.KPopisek[0].X) and (Self.soupravy[0].Y = Self.KPopisek[0].Y));
+  Result := (Self.trains.Count = 1) and (Self.labels.Count > 0) and
+    ((Self.trains[0].X = Self.labels[0].X) and (Self.trains[0].Y = Self.labels[0].Y));
 end;
 
-procedure TPUsek.Reset();
+procedure TPTrack.Reset();
 begin
-  Self.PanelProp.soupravy.Clear();
-  if (Self.Blok > -2) then
-    Self.PanelProp.InitDefault()
+  Self.panelProp.trains.Clear();
+  if (Self.block > -2) then
+    Self.panelProp.InitDefault()
   else
-    Self.PanelProp.InitUA();
+    Self.panelProp.InitUA();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 // vykresleni soupravy na dane pozici
-procedure TPUsek.PaintSouprava(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
+procedure TPTrack.PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TORPanel>; obj: TDXDraw; blik: boolean;
   bgZaver: boolean = false);
 var fg, bg: TColor;
   arrowLeft, arrowRight: boolean;
-  train: TUsekSouprava;
+  train: TTrackTrain;
 begin
-  train := Self.PanelProp.soupravy[spri];
-  pos := Point(pos.X - (Length(train.nazev) div 2), pos.Y);
+  train := Self.panelProp.trains[spri];
+  pos := Point(pos.X - (Length(train.name) div 2), pos.Y);
 
   fg := train.fg;
 
   // urceni barvy
-  if (myORs[Self.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) then
+  if (myORs[Self.area].RegPlease.status = TORRegPleaseStatus.selected) then
   begin
     if (blik) then
     begin
       fg := clBlack;
-      bg := Self.PanelProp.Pozadi;
+      bg := Self.panelProp.bg;
     end
     else
       bg := clYellow;
-  end else if ((bgZaver) and (Self.PanelProp.KonecJC > TJCType.no)) then
-    bg := _Konec_JC[Integer(Self.PanelProp.KonecJC)]
+  end else if ((bgZaver) and (Self.panelProp.jcend > TJCType.no)) then
+    bg := _JC_END[Integer(Self.panelProp.jcend)]
   else
     bg := train.bg;
 
-  TextOutput(pos, train.nazev, fg, bg, obj, true);
+  TextOutput(pos, train.name, fg, bg, obj, true);
 
   // Lichy : 0 = zleva doprava ->, 1 = zprava doleva <-
-  arrowLeft := (((train.sipkaL) and (myORs[Self.OblRizeni].Lichy = 1)) or
-    ((train.sipkaS) and (myORs[Self.OblRizeni].Lichy = 0)));
+  arrowLeft := (((train.arrowL) and (myORs[Self.area].Lichy = 1)) or
+    ((train.arrowS) and (myORs[Self.area].Lichy = 0)));
 
-  arrowRight := (((train.sipkaS) and (myORs[Self.OblRizeni].Lichy = 1)) or
-    ((train.sipkaL) and (myORs[Self.OblRizeni].Lichy = 0)));
+  arrowRight := (((train.arrowS) and (myORs[Self.area].Lichy = 1)) or
+    ((train.arrowL) and (myORs[Self.area].Lichy = 0)));
 
   // vykresleni ramecku kolem cisla soupravy
-  if (train.ramecek <> clBlack) then
+  if (train.border <> clBlack) then
   begin
     obj.Surface.Canvas.Pen.Mode := pmMerge;
-    obj.Surface.Canvas.Pen.Color := train.ramecek;
+    obj.Surface.Canvas.Pen.Color := train.border;
     obj.Surface.Canvas.Brush.Color := clBlack;
     obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
-      (pos.X + Length(train.nazev)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
+      (pos.X + Length(train.name)) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
     obj.Surface.Canvas.Pen.Mode := pmCopy;
   end;
 
@@ -207,7 +204,7 @@ begin
   if (arrowLeft) then
     Draw(SymbolSet.IL_Symbols, Point(pos.X, pos.Y - 1), _S_TRAIN_ARROW_L, fg, clNone, obj, true);
   if (arrowRight) then
-    Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(train.nazev) - 1, pos.Y - 1), _S_TRAIN_ARROW_R, fg,
+    Draw(SymbolSet.IL_Symbols, Point(pos.X + Length(train.name) - 1, pos.Y - 1), _S_TRAIN_ARROW_R, fg,
       clNone, obj, true);
 
   if ((arrowLeft) or (arrowRight)) then
@@ -215,7 +212,7 @@ begin
     // vykresleni sipky
     obj.Surface.Canvas.Pen.Color := fg;
     obj.Surface.Canvas.MoveTo(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight - 1);
-    obj.Surface.Canvas.LineTo((pos.X + Length(train.nazev)) * SymbolSet.symbWidth,
+    obj.Surface.Canvas.LineTo((pos.X + Length(train.name)) * SymbolSet.symbWidth,
       pos.Y * SymbolSet.symbHeight - 1);
   end; // if sipkaLeft or sipkaRight
 end;
@@ -223,75 +220,73 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // vykresleni cisla koleje
-procedure TPUsek.PaintCisloKoleje(pos: TPoint; obj: TDXDraw; hidden: boolean);
+procedure TPTrack.PaintTrackName(pos: TPoint; obj: TDXDraw; hidden: boolean);
 var left: TPoint;
   fg: TColor;
 begin
-  left := Point(pos.X - (Length(Self.KpopisekStr) div 2), pos.Y);
+  left := Point(pos.X - (Length(Self.name) div 2), pos.Y);
 
   if (hidden) then
     fg := clBlack
   else
-    fg := Self.PanelProp.Symbol;
+    fg := Self.panelProp.fg;
 
-  if (Self.PanelProp.KonecJC = TJCType.no) then
-    TextOutput(left, Self.KpopisekStr, fg, Self.PanelProp.Pozadi, obj)
+  if (Self.panelProp.jcend = TJCType.no) then
+    TextOutput(left, Self.name, fg, Self.panelProp.bg, obj)
   else
-    TextOutput(left, Self.KpopisekStr, fg, _Konec_JC[Integer(Self.PanelProp.KonecJC)], obj);
+    TextOutput(left, Self.name, fg, _JC_END[Integer(Self.panelProp.jcend)], obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 // zobrazi soupravy na celem useku
 
-procedure TPUsek.ShowSoupravy(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
-var i, step, index: Integer;
-  s: TUsekSouprava;
+procedure TPTrack.ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>);
 begin
   // Posindex neni potreba mazat, protoze se vzdy se zmenou stavu bloku
   // prepisuje automaticky na -1.
 
-  if ((Self.PanelProp.soupravy.Count = 0) or (Self.soupravy.Count = 0)) then
+  if ((Self.panelProp.trains.Count = 0) or (Self.trains.Count = 0)) then
     Exit()
 
-  else if (Self.PanelProp.soupravy.Count = 1) then
+  else if (Self.panelProp.trains.Count = 1) then
   begin
-    Self.PaintSouprava(Self.soupravy[Self.soupravy.Count div 2], 0, myORs, obj, blik, Self.SprPaintsOnRailNum());
+    Self.PaintTrain(Self.trains[Self.trains.Count div 2], 0, myORs, obj, blik, Self.TrainPaintsOnRailNum());
 
-    if (Self.PanelProp.soupravy[0].posindex <> 0) then
+    if (Self.panelProp.trains[0].posindex <> 0) then
     begin
-      s := Self.PanelProp.soupravy[0];
-      s.posindex := Self.soupravy.Count div 2;
-      Self.PanelProp.soupravy[0] := s;
+      var s := Self.panelProp.trains[0];
+      s.posindex := Self.trains.Count div 2;
+      Self.panelProp.trains[0] := s;
     end;
 
   end else begin
     // vsechny soupravy, ktere se vejdou, krome posledni
-    index := 0;
-    step := Max(Self.soupravy.Count div Self.PanelProp.soupravy.Count, 1);
-    for i := 0 to Min(Self.soupravy.Count, Self.PanelProp.soupravy.Count) - 2 do
+    var index: Integer := 0;
+    var step: Integer := Max(Self.trains.Count div Self.panelProp.trains.Count, 1);
+    for var i := 0 to Min(Self.trains.Count, Self.panelProp.trains.Count) - 2 do
     begin
-      Self.PaintSouprava(Self.soupravy[index], i, myORs, obj, blik);
+      Self.PaintTrain(Self.trains[index], i, myORs, obj, blik);
 
-      if (Self.PanelProp.soupravy[i].posindex <> index) then
+      if (Self.panelProp.trains[i].posindex <> index) then
       begin
-        s := Self.PanelProp.soupravy[i];
+        var s := Self.panelProp.trains[i];
         s.posindex := index;
-        Self.PanelProp.soupravy[i] := s;
+        Self.panelProp.trains[i] := s;
       end;
 
       index := index + step;
     end;
 
     // posledni souprava na posledni pozici
-    if (Self.soupravy.Count > 0) then
+    if (Self.trains.Count > 0) then
     begin
-      Self.PaintSouprava(Self.soupravy[Self.soupravy.Count - 1], Self.PanelProp.soupravy.Count - 1, myORs, obj, blik);
+      Self.PaintTrain(Self.trains[Self.trains.Count - 1], Self.panelProp.trains.Count - 1, myORs, obj, blik);
 
-      if (Self.PanelProp.soupravy[Self.PanelProp.soupravy.Count - 1].posindex <> Self.soupravy.Count - 1) then
+      if (Self.panelProp.trains[Self.panelProp.trains.Count - 1].posindex <> Self.trains.Count - 1) then
       begin
-        s := Self.PanelProp.soupravy[Self.PanelProp.soupravy.Count - 1];
-        s.posindex := Self.soupravy.Count - 1;
-        Self.PanelProp.soupravy[Self.PanelProp.soupravy.Count - 1] := s;
+        var s := Self.panelProp.trains[Self.panelProp.trains.Count - 1];
+        s.posindex := Self.trains.Count - 1;
+        Self.panelProp.trains[Self.panelProp.trains.Count - 1] := s;
       end;
     end;
   end;
@@ -299,97 +294,95 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TUsekPanelProp.Create();
+constructor TTrackPanelProp.Create();
 begin
   inherited;
   Self.InitDefault();
-  Self.soupravy := TList<TUsekSouprava>.Create();
+  Self.trains := TList<TTrackTrain>.Create();
 end;
 
-destructor TUsekPanelProp.Destroy();
+destructor TTrackPanelProp.Destroy();
 begin
-  Self.soupravy.Free();
+  Self.trains.Free();
   inherited;
 end;
 
-procedure TUsekPanelProp.InitDefault();
+procedure TTrackPanelProp.InitDefault();
 begin
-  Self.blikani := false;
-  Self.Symbol := clFuchsia;
-  Self.Pozadi := clBlack;
-  Self.nebarVetve := $A0A0A0;
-  Self.KonecJC := no;
+  Self.flash := false;
+  Self.fg := clFuchsia;
+  Self.bg := clBlack;
+  Self.notColorBranches := $A0A0A0;
+  Self.jcend := no;
 end;
 
-procedure TUsekPanelProp.InitUA();
+procedure TTrackPanelProp.InitUA();
 begin
-  Self.blikani := false;
-  Self.Symbol := $A0A0A0;
-  Self.Pozadi := clBlack;
-  Self.nebarVetve := $A0A0A0;
-  Self.KonecJC := no;
+  Self.flash := false;
+  Self.fg := $A0A0A0;
+  Self.bg := clBlack;
+  Self.notColorBranches := $A0A0A0;
+  Self.jcend := no;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUsekPanelProp.Change(parsed: TStrings);
-var soupravy, souprava: TStrings;
-  i: Integer;
-  us: TUsekSouprava;
+procedure TTrackPanelProp.Change(parsed: TStrings);
 begin
-  Symbol := StrToColor(parsed[4]);
-  Pozadi := StrToColor(parsed[5]);
-  blikani := StrToBool(parsed[6]);
-  KonecJC := TJCType(StrToInt(parsed[7]));
-  nebarVetve := StrToColor(parsed[8]);
+  fg := StrToColor(parsed[4]);
+  bg := StrToColor(parsed[5]);
+  flash := StrToBool(parsed[6]);
+  jcend := TJCType(StrToInt(parsed[7]));
+  notColorBranches := StrToColor(parsed[8]);
 
-  Self.soupravy.Clear();
+  Self.trains.Clear();
 
   if (parsed.Count > 9) then
   begin
-    soupravy := TStringList.Create();
-    souprava := TStringList.Create();
+    var trains: TStrings := TStringList.Create();
+    var train: TStrings := TStringList.Create();
 
     try
-      ExtractStringsEx([')'], ['('], parsed[9], soupravy);
+      ExtractStringsEx([')'], ['('], parsed[9], trains);
 
-      for i := 0 to soupravy.Count - 1 do
+      for var i := 0 to trains.Count - 1 do
       begin
-        souprava.Clear();
-        ExtractStringsEx([';'], [], soupravy[i], souprava);
+        train.Clear();
+        ExtractStringsEx([';'], [], trains[i], train);
 
-        us.nazev := souprava[0];
-        us.sipkaL := ((souprava[1] <> '') and (souprava[1][1] = '1'));
-        us.sipkaS := ((souprava[1] <> '') and (souprava[1][2] = '1'));
-        us.fg := StrToColor(souprava[2]);
-        us.bg := StrToColor(souprava[3]);
+        var us: TTrackTrain;
+        us.name := train[0];
+        us.arrowL := ((train[1] <> '') and (train[1][1] = '1'));
+        us.arrowS := ((train[1] <> '') and (train[1][2] = '1'));
+        us.fg := StrToColor(train[2]);
+        us.bg := StrToColor(train[3]);
         us.posindex := -1;
 
-        if (souprava.Count > 4) then
-          us.ramecek := StrToColor(souprava[4])
+        if (train.Count > 4) then
+          us.border := StrToColor(train[4])
         else
-          us.ramecek := clBlack;
+          us.border := clBlack;
 
-        Self.soupravy.Add(us);
+        Self.trains.Add(us);
       end;
 
     finally
-      soupravy.Free();
-      souprava.Free();
+      trains.Free();
+      train.Free();
     end;
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUsek.IsSecondCross(): boolean;
+function TPTrack.IsSecondCross(): boolean;
 begin
-  Result := (Self.Vetve[0].node1.ref_minus <> -1) or (Self.Vetve[1].node1.ref_minus <> -1);
+  Result := (Self.branches[0].node1.ref_minus <> -1) or (Self.branches[1].node1.ref_minus <> -1);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUsek.SecondCrossPos(): TPoint;
+function TPTrack.SecondCrossPos(): TPoint;
 begin
   if (Self.DKStype = dksTop) then
     Result := Point(Self.root.X, Self.root.Y + 1)
@@ -415,68 +408,62 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUsek.AddSymbolFromPrejezd(pos: TPoint);
+procedure TPTrack.AddSymbolFromCrossing(pos: TPoint);
 var sym: TReliefSym;
-  vetevi: Integer;
 begin
   sym.Position := pos;
   sym.SymbolID := _S_TRACK_DET_B;
 
-  if (Self.Vetve.Count > 0) then
+  if (Self.branches.Count > 0) then
   begin
-    vetevi := Self.GetVetev(Point(pos.X - 1, pos.Y));
-    if (vetevi > -1) then
-      if (SymbolIndex(pos, Self.Vetve[vetevi].Symbols) = -1) then
-        Self.Vetve[vetevi].Symbols.Add(sym);
+    var branchi := Self.GetBranch(Point(pos.X - 1, pos.Y));
+    if (branchi > -1) then
+      if (SymbolIndex(pos, Self.branches[branchi].Symbols) = -1) then
+        Self.branches[branchi].Symbols.Add(sym);
 
   end else begin
-    if (Self.SymbolIndex(pos, Self.Symbols) = -1) then
-      Self.Symbols.Add(sym);
+    if (Self.SymbolIndex(pos, Self.symbols) = -1) then
+      Self.symbols.Add(sym);
   end;
 end;
 
-procedure TPUsek.RemoveSymbolFromPrejezd(pos: TPoint);
-var vetevi: Integer;
-  symboli: Integer;
+procedure TPTrack.RemoveSymbolFromCrossing(pos: TPoint);
 begin
-  if (Self.Vetve.Count > 0) then
+  if (Self.branches.Count > 0) then
   begin
-    vetevi := Self.GetVetev(Point(pos.X - 1, pos.Y));
-    if (vetevi > -1) then
+    var branchi := Self.GetBranch(Point(pos.X - 1, pos.Y));
+    if (branchi > -1) then
     begin
-      symboli := SymbolIndex(pos, Self.Vetve[vetevi].Symbols);
+      var symboli := SymbolIndex(pos, Self.branches[branchi].Symbols);
       if (symboli > -1) then
-        Self.Vetve[vetevi].Symbols.Delete(symboli);
+        Self.branches[branchi].Symbols.Delete(symboli);
     end;
   end else begin
-    symboli := Self.SymbolIndex(pos, Self.Symbols);
+    var symboli := Self.SymbolIndex(pos, Self.symbols);
     if (symboli > -1) then
-      Self.Symbols.Delete(symboli);
+      Self.symbols.Delete(symboli);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUsek.GetVetev(pos: TPoint): Integer;
-var vetevi: Integer;
-  i: Integer;
+function TPTrack.GetBranch(pos: TPoint): Integer;
 begin
-  for vetevi := 0 to Self.Vetve.Count - 1 do
+  for var branchi := 0 to Self.branches.Count - 1 do
   begin
-    for i := 0 to Self.Vetve[vetevi].Symbols.Count - 1 do
-      if ((Self.Vetve[vetevi].Symbols[i].Position.X = pos.X) and (Self.Vetve[vetevi].Symbols[i].Position.Y = pos.Y))
+    for var i := 0 to Self.branches[branchi].Symbols.Count - 1 do
+      if ((Self.branches[branchi].Symbols[i].Position.X = pos.X) and (Self.branches[branchi].Symbols[i].Position.Y = pos.Y))
       then
-        Exit(vetevi);
+        Exit(branchi);
   end;
   Result := -1;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-class function TPUsek.SymbolIndex(pos: TPoint; Symbols: TList<TReliefSym>): Integer;
-var i: Integer;
+class function TPTrack.SymbolIndex(pos: TPoint; Symbols: TList<TReliefSym>): Integer;
 begin
-  for i := 0 to Symbols.Count - 1 do
+  for var i := 0 to Symbols.Count - 1 do
     if ((Symbols[i].Position.X = pos.X) and (Symbols[i].Position.Y = pos.Y)) then
       Exit(i);
   Result := -1;
@@ -484,16 +471,16 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUsek.Detected(): boolean;
+function TPTrack.Detected(): boolean;
 begin
-  if (Self.Symbols.Count < 1) then
+  if (Self.symbols.Count < 1) then
     Exit(false);
-  Result := (Self.Symbols[0].SymbolID >= _S_TRACK_DET_B) and (Self.Symbols[0].SymbolID <= _S_TRACK_DET_E);
+  Result := (Self.symbols[0].SymbolID >= _S_TRACK_DET_B) and (Self.symbols[0].SymbolID <= _S_TRACK_DET_E);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUsek.DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
+procedure TPTrack.DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
 begin
   if ((symbol >= _S_TRACK_DET_B) and (symbol <= _S_TRACK_DET_E)) then
     symbol := symbol - _S_TRACK_DET_B;
@@ -510,28 +497,28 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUsek.ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
-  usek: TPUsek);
+procedure TPTrack.ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
+  usek: TPTrack);
 begin
   if (dksType = dksTop) then
   begin
     if ((leftCross) and (rightCross)) then
-      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, fg, usek.panelProp.bg, obj)
     else if (leftCross) then
-      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 4, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 4, fg, usek.panelProp.bg, obj)
     else if (rightCross) then
-      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 2, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 2, fg, usek.panelProp.bg, obj)
     else
-      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.panelProp.notColorBranches, usek.panelProp.bg, obj)
   end else begin
     if ((leftCross) and (rightCross)) then
-      Self.DrawTrackSymbol(pos, _S_DKS_DET_BOT, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_BOT, fg, usek.panelProp.bg, obj)
     else if (leftCross) then
-      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 3, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 3, fg, usek.panelProp.bg, obj)
     else if (rightCross) then
-      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 5, fg, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_TRACK_DET_B + 5, fg, usek.panelProp.bg, obj)
     else
-      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.PanelProp.nebarVetve, usek.PanelProp.Pozadi, obj)
+      Self.DrawTrackSymbol(pos, _S_DKS_DET_TOP, usek.panelProp.notColorBranches, usek.panelProp.bg, obj)
   end;
 end;
 

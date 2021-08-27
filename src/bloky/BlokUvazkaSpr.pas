@@ -11,12 +11,12 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
-  TPUvazkaID = record
+  TPLinkerId = record
     index: Integer;
-    soupravaI: Integer;
+    traini: Integer;
   end;
 
-  TUvazkaSpr = class
+  TLinkerTrain = class
     strings: TStrings;
     show_index: Integer;
     time: string;
@@ -27,8 +27,8 @@ type
     destructor Destroy(); override;
   end;
 
-  TUvazkaSprPanelProp = class
-    spr: TObjectList<TUvazkaSpr>;
+  TLinkerTrainPanelProp = class
+    train: TObjectList<TLinkerTrain>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -37,43 +37,43 @@ type
 
   TUvazkaSprVertDir = (top = 0, bottom = 1);
 
-  TPUvazkaSpr = class
-    Blok: Integer;
-    Pos: TPoint;
+  TPLinkerTrain = class
+    block: Integer;
+    pos: TPoint;
     vertical_dir: TUvazkaSprVertDir;
     spr_cnt: Integer;
-    OblRizeni: Integer;
-    PanelProp: TUvazkaSprPanelProp;
+    area: Integer;
+    panelProp: TLinkerTrainPanelProp;
 
     constructor Create();
     destructor Destroy(); override;
   end;
 
-  TPUvazkySpr = class
+  TPLinkersTrain = class
   private
     change_time: TDateTime;
 
-    function GetItem(index: Integer): TPUvazkaSpr;
+    function GetItem(index: Integer): TPLinkerTrain;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPUvazkaSpr>;
+    data: TObjectList<TPLinkerTrain>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; version: Word);
     procedure Show(obj: TDXDraw);
-    function GetIndex(Pos: TPoint): TPUvazkaID;
+    function GetIndex(Pos: TPoint): TPLinkerId;
     procedure Reset(orindex: Integer = -1);
 
-    property Items[index: Integer]: TPUvazkaSpr read GetItem; default;
+    property Items[index: Integer]: TPLinkerTrain read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
 const
-  _UVAZKY_BLIK_PERIOD = 1500; // perioda blikani soupravy u uvazky v ms
-  _UVAZKY_WIDTH = 9;
+  _LINKER_FLASH_PERIOD = 1500; // perioda blikani soupravy u uvazky v ms
+  _LINKER_WIDTH = 9;
 
 implementation
 
@@ -81,41 +81,41 @@ uses Symbols, parseHelper, StrUtils, TCPClientPanel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPUvazkaSpr.Create();
+constructor TPLinkerTrain.Create();
 begin
   inherited;
-  Self.PanelProp := TUvazkaSprPanelProp.Create();
+  Self.panelProp := TLinkerTrainPanelProp.Create();
 end;
 
-destructor TPUvazkaSpr.Destroy();
+destructor TPLinkerTrain.Destroy();
 begin
-  Self.PanelProp.Free();
-  inherited;
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-constructor TUvazkaSprPanelProp.Create();
-begin
-  inherited;
-  Self.spr := TObjectList<TUvazkaSpr>.Create();
-end;
-
-destructor TUvazkaSprPanelProp.Destroy();
-begin
-  Self.spr.Free();
+  Self.panelProp.Free();
   inherited;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TUvazkaSpr.Create();
+constructor TLinkerTrainPanelProp.Create();
+begin
+  inherited;
+  Self.train := TObjectList<TLinkerTrain>.Create();
+end;
+
+destructor TLinkerTrainPanelProp.Destroy();
+begin
+  Self.train.Free();
+  inherited;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+constructor TLinkerTrain.Create();
 begin
   inherited;
   Self.strings := TStringList.Create();
 end;
 
-destructor TUvazkaSpr.Destroy();
+destructor TLinkerTrain.Destroy();
 begin
   Self.strings.Free();
   inherited;
@@ -123,14 +123,14 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPUvazkySpr.Create();
+constructor TPLinkersTrain.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPUvazkaSpr>.Create();
+  Self.data := TObjectList<TPLinkerTrain>.Create();
   Self.change_time := Now;
 end;
 
-destructor TPUvazkySpr.Destroy();
+destructor TPLinkersTrain.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -138,130 +138,124 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazkySpr.Load(ini: TMemIniFile; version: Word);
-var i, Count: Integer;
-  uvs: TPUvazkaSpr;
+procedure TPLinkersTrain.Load(ini: TMemIniFile; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'UvS', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'UvS', 0);
+  for var i := 0 to count - 1 do
   begin
-    uvs := TPUvazkaSpr.Create();
+    var lt := TPLinkerTrain.Create();
 
-    uvs.Blok := ini.ReadInteger('UvS' + IntToStr(i), 'B', -1);
-    uvs.OblRizeni := ini.ReadInteger('UvS' + IntToStr(i), 'OR', -1);
-    uvs.Pos.X := ini.ReadInteger('UvS' + IntToStr(i), 'X', 0);
-    uvs.Pos.Y := ini.ReadInteger('UvS' + IntToStr(i), 'Y', 0);
-    uvs.vertical_dir := TUvazkaSprVertDir(ini.ReadInteger('UvS' + IntToStr(i), 'VD', 0));
-    uvs.spr_cnt := ini.ReadInteger('UvS' + IntToStr(i), 'C', 1);
-    uvs.PanelProp := TUvazkaSprPanelProp.Create();
-    uvs.PanelProp.spr := TObjectList<TUvazkaSpr>.Create();
+    lt.block := ini.ReadInteger('UvS' + IntToStr(i), 'B', -1);
+    lt.area := ini.ReadInteger('UvS' + IntToStr(i), 'OR', -1);
+    lt.pos.X := ini.ReadInteger('UvS' + IntToStr(i), 'X', 0);
+    lt.pos.Y := ini.ReadInteger('UvS' + IntToStr(i), 'Y', 0);
+    lt.vertical_dir := TUvazkaSprVertDir(ini.ReadInteger('UvS' + IntToStr(i), 'VD', 0));
+    lt.spr_cnt := ini.ReadInteger('UvS' + IntToStr(i), 'C', 1);
+    lt.panelProp := TLinkerTrainPanelProp.Create();
+    lt.panelProp.train := TObjectList<TLinkerTrain>.Create();
 
-    Self.data.Add(uvs);
-  end; // for i
+    Self.data.Add(lt);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazkySpr.Show(obj: TDXDraw);
-var top, incr: Integer;
-  Change: boolean;
-  UvazkaSpr: TUvazkaSpr;
-  uvs: TPUvazkaSpr;
+procedure TPLinkersTrain.Show(obj: TDXDraw);
+var change: Boolean;
 begin
   if (Now > change_time) then
   begin
-    change_time := Now + EncodeTime(0, 0, _UVAZKY_BLIK_PERIOD div 1000, _UVAZKY_BLIK_PERIOD mod 1000);
-    Change := true;
+    change_time := Now + EncodeTime(0, 0, _LINKER_FLASH_PERIOD div 1000, _LINKER_FLASH_PERIOD mod 1000);
+    change := true;
   end
   else
-    Change := false;
+    change := false;
 
-  for uvs in Self.data do
+  for var uvs in Self.data do
   begin
-    if (not Assigned(uvs.PanelProp.spr)) then
+    if (not Assigned(uvs.panelProp.train)) then
       continue;
 
-    top := uvs.Pos.Y;
+    var top := uvs.pos.Y;
+    var incr: Integer;
     if (uvs.vertical_dir = TUvazkaSprVertDir.top) then
       incr := -1
     else
       incr := 1;
 
-    for UvazkaSpr in uvs.PanelProp.spr do
+    for var linkerTrain in uvs.panelProp.train do
     begin
-      if (not Assigned(UvazkaSpr.strings)) then
+      if (not Assigned(linkerTrain.strings)) then
         continue;
 
       // kontrola preblikavani
-      if ((Change) and (UvazkaSpr.strings.Count > 1)) then
-        Inc(UvazkaSpr.show_index);
-      if (UvazkaSpr.show_index >= UvazkaSpr.strings.Count) then // tato podminka musi byt vne predchozi podminky
-        UvazkaSpr.show_index := 0;
+      if ((Change) and (linkerTrain.strings.Count > 1)) then
+        Inc(linkerTrain.show_index);
+      if (linkerTrain.show_index >= linkerTrain.strings.Count) then // tato podminka musi byt vne predchozi podminky
+        linkerTrain.show_index := 0;
 
-      Symbols.TextOutput(Point(uvs.Pos.X, top), UvazkaSpr.strings[UvazkaSpr.show_index], UvazkaSpr.color, clBlack,
-        obj, UvazkaSpr.show_index = 0);
+      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[linkerTrain.show_index], linkerTrain.color, clBlack,
+        obj, linkerTrain.show_index = 0);
 
-      if (UvazkaSpr.show_index = 0) then
-        Symbols.TextOutput(Point(uvs.Pos.X + 7, top), UvazkaSpr.time, UvazkaSpr.time_color, clBlack, obj);
+      if (linkerTrain.show_index = 0) then
+        Symbols.TextOutput(Point(uvs.pos.X + 7, top), linkerTrain.time, linkerTrain.time_color, clBlack, obj);
 
       top := top + incr;
-    end; // for j
-  end; // for i
+    end;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazkySpr.Reset(orindex: Integer = -1);
-var uvs: TPUvazkaSpr;
+procedure TPLinkersTrain.Reset(orindex: Integer = -1);
 begin
-  for uvs in Self.data do
-    if (((orindex < 0) or (uvs.OblRizeni = orindex)) and (uvs.Blok > -2)) then
-      uvs.PanelProp.spr.Clear();
+  for var lt in Self.data do
+    if (((orindex < 0) or (lt.area = orindex)) and (lt.block > -2)) then
+      lt.panelProp.train.Clear();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazkySpr.GetItem(index: Integer): TPUvazkaSpr;
+function TPLinkersTrain.GetItem(index: Integer): TPLinkerTrain;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazkySpr.GetCount(): Integer;
+function TPLinkersTrain.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazkySpr.GetIndex(Pos: TPoint): TPUvazkaID;
-var i, spr_index, incr, top: Integer;
-  uvs: TPUvazkaSpr;
+function TPLinkersTrain.GetIndex(Pos: TPoint): TPLinkerId;
 begin
   Result.index := -1;
 
-  for i := 0 to Self.data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
   begin
-    uvs := Self.data[i];
+    var lt := Self.data[i];
 
-    if ((Pos.X < uvs.Pos.X) or (Pos.X >= uvs.Pos.X + _UVAZKY_WIDTH)) then
+    if ((Pos.X < lt.pos.X) or (Pos.X >= lt.pos.X + _LINKER_WIDTH)) then
       continue;
 
-    top := uvs.Pos.Y;
-    if (uvs.vertical_dir = TUvazkaSprVertDir.top) then
+    var incr: Integer;
+    var top := lt.pos.Y;
+    if (lt.vertical_dir = TUvazkaSprVertDir.top) then
       incr := -1
     else
       incr := 1;
 
-    for spr_index := 0 to uvs.PanelProp.spr.Count - 1 do
+    for var spr_index := 0 to lt.panelProp.train.Count - 1 do
     begin
       if (Pos.Y = top) then
       begin
         Result.index := i;
-        Result.soupravaI := spr_index;
+        Result.traini := spr_index;
         Exit();
       end;
       top := top + incr;
@@ -271,65 +265,60 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazkaSprPanelProp.Change(parsed: TStrings);
-var j: Integer;
-  sprs_data: TStrings;
-  str: string;
-  UvazkaSpr: TUvazkaSpr;
-  new_version: boolean;
+procedure TLinkerTrainPanelProp.Change(parsed: TStrings);
 begin
   if (parsed.Count < 9) then
     Exit();
 
-  new_version := PanelTCPClient.IsServerVersionAtLeast('1.1');
-  Self.spr.Clear();
-  sprs_data := TStringList.Create();
+  var new_version := PanelTCPClient.IsServerVersionAtLeast('1.1');
+  Self.train.Clear();
+  var sprs_data: TStrings := TStringList.Create();
 
   try
     ExtractStringsEx([','], [], parsed[8], sprs_data);
 
-    for str in sprs_data do
+    for var str in sprs_data do
     begin
-      UvazkaSpr := TUvazkaSpr.Create();
+      var lt := TLinkerTrain.Create();
 
-      ExtractStringsEx(['|'], [], str, UvazkaSpr.strings);
+      ExtractStringsEx(['|'], [], str, lt.strings);
       if (LeftStr(str, 1) = '$') then
       begin
-        UvazkaSpr.strings[0] := RightStr(UvazkaSpr.strings[0], Length(UvazkaSpr.strings[0]) - 1);
-        UvazkaSpr.color := clYellow;
+        lt.strings[0] := RightStr(lt.strings[0], Length(lt.strings[0]) - 1);
+        lt.color := clYellow;
       end else begin
         if (new_version) then
         begin
-          UvazkaSpr.color := StrToColor(UvazkaSpr.strings[1]);
-          UvazkaSpr.strings.Delete(1);
+          lt.color := StrToColor(lt.strings[1]);
+          lt.strings.Delete(1);
         end
         else
-          UvazkaSpr.color := clWhite;
+          lt.color := clWhite;
       end;
 
-      if (LeftStr(UvazkaSpr.strings[1], 1) = '$') then
+      if (LeftStr(lt.strings[1], 1) = '$') then
       begin
-        UvazkaSpr.time := RightStr(UvazkaSpr.strings[1], Length(UvazkaSpr.strings[1]) - 1);
-        UvazkaSpr.time_color := clYellow;
+        lt.time := RightStr(lt.strings[1], Length(lt.strings[1]) - 1);
+        lt.time_color := clYellow;
       end else begin
-        UvazkaSpr.time := UvazkaSpr.strings[1];
+        lt.time := lt.strings[1];
         if (new_version) then
         begin
-          UvazkaSpr.time_color := StrToColor(UvazkaSpr.strings[2]);
-          UvazkaSpr.strings.Delete(2);
+          lt.time_color := StrToColor(lt.strings[2]);
+          lt.strings.Delete(2);
         end
         else
-          UvazkaSpr.time_color := clAqua;
+          lt.time_color := clAqua;
       end;
 
-      UvazkaSpr.strings.Delete(1);
+      lt.strings.Delete(1);
 
       // kontrola preteceni textu
-      for j := 0 to UvazkaSpr.strings.Count - 1 do
-        if (Length(UvazkaSpr.strings[j]) > _UVAZKY_WIDTH) then
-          UvazkaSpr.strings[j] := LeftStr(UvazkaSpr.strings[j], 8) + '.';
+      for var j := 0 to lt.strings.Count - 1 do
+        if (Length(lt.strings[j]) > _LINKER_WIDTH) then
+          lt.strings[j] := LeftStr(lt.strings[j], 8) + '.';
 
-      Self.spr.Add(UvazkaSpr);
+      Self.train.Add(lt);
     end;
   finally
     sprs_data.Free();

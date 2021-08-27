@@ -63,7 +63,7 @@ type
   // odkaz technologickeho id na index v prislusnem seznamu symbolu
   // slouzi pro rychly pristup k symbolum pri CHANGE
   TTechBlokToSymbol = record
-    blk_type: Integer;
+    blk_type: TBlkType;
     symbol_index: Integer;
   end;
 
@@ -108,18 +108,18 @@ type
 
     Tech_blok: TDictionary<Integer, TList<TTechBlokToSymbol>>; // mapuje id technologickeho bloku na
 
-    Useky: TPUseky;
-    Vyhybky: TPVyhybky;
-    Navestidla: TPNavestidla;
-    Uvazky: TPUvazky;
-    UvazkySpr: TPUvazkySpr;
-    Zamky: TPZamky;
-    Prejezdy: TPPrejezdy;
-    Vykol: TPVykolejky;
-    Rozp: TPRozpojovace;
-    Texty: TPTexty;
-    PopiskyBloku: TPTexty;
-    PomocneObj: TPPomocneObj;
+    tracks: TPTracks;
+    turnouts: TPTurnouts;
+    signals: TPSignals;
+    linkers: TPLinkers;
+    linkersTrains: TPLinkersTrain;
+    locks: TPLocks;
+    crossings: TPCrossings;
+    derails: TPDerails;
+    disconnectors: TPDisconnectors;
+    texts: TPTexts;
+    blockLabels: TPTexts;
+    otherObj: TPObjOthers;
 
     SystemOK: record
       Poloha: boolean;
@@ -192,8 +192,8 @@ type
     function GetPanelWidth(): SmallInt;
     function GetPanelHeight(): SmallInt;
 
-    class function GetTechBlk(typ: Integer; symbol_index: Integer): TTechBlokToSymbol;
-    procedure AddToTechBlk(typ: Integer; blok_id: Integer; symbol_index: Integer);
+    class function GetTechBlk(typ: TBlkType; symbol_index: Integer): TTechBlokToSymbol;
+    procedure AddToTechBlk(typ: TBlkType; blok_id: Integer; symbol_index: Integer);
 
     procedure UpdateLoginString();
     function GetLoginString(): string;
@@ -262,7 +262,7 @@ type
       guest: boolean);
 
     // Change blok
-    procedure ORBlkChange(Sender: string; BlokID: Integer; BlokTyp: Integer; parsed: TStrings);
+    procedure ORBlkChange(Sender: string; BlokID: Integer; blockType: TBlkType; parsed: TStrings);
 
     procedure ORInfoTimer(id: Integer; time_min: Integer; time_sec: Integer; str: string);
     procedure ORInfoTimerRemove(id: Integer);
@@ -291,18 +291,18 @@ constructor TRelief.Create(aParentForm: TForm);
 begin
   inherited Create;
 
-  Self.Useky := TPUseky.Create();
-  Self.Vyhybky := TPVyhybky.Create();
-  Self.Navestidla := TPNavestidla.Create();
-  Self.Vykol := TPVykolejky.Create();
-  Self.Rozp := TPRozpojovace.Create();
-  Self.Prejezdy := TPPrejezdy.Create();
-  Self.Texty := TPTexty.Create();
-  Self.PopiskyBloku := TPTexty.Create();
-  Self.Uvazky := TPUvazky.Create();
-  Self.UvazkySpr := TPUvazkySpr.Create();
-  Self.Zamky := TPZamky.Create();
-  Self.PomocneObj := TPPomocneObj.Create();
+  Self.tracks := TPTracks.Create();
+  Self.turnouts := TPTurnouts.Create();
+  Self.signals := TPSignals.Create();
+  Self.derails := TPDerails.Create();
+  Self.disconnectors := TPDisconnectors.Create();
+  Self.crossings := TPCrossings.Create();
+  Self.texts := TPTexts.Create();
+  Self.blockLabels := TPTexts.Create();
+  Self.linkers := TPLinkers.Create();
+  Self.linkersTrains := TPLinkersTrain.Create();
+  Self.locks := TPLocks.Create();
+  Self.otherObj := TPObjOthers.Create();
 
   Self.ParentForm := aParentForm;
   Self.myORs := TObjectList<TORPanel>.Create();
@@ -370,18 +370,18 @@ begin
   Self.mouseTimer.Free();
 
   Self.myORs.Free();
-  Self.Vyhybky.Free();
-  Self.Useky.Free();
-  Self.Navestidla.Free();
-  Self.Vykol.Free();
-  Self.Rozp.Free();
-  Self.Prejezdy.Free();
-  Self.Uvazky.Free();
-  Self.UvazkySpr.Free();
-  Self.Zamky.Free();
-  Self.Texty.Free();
-  Self.PopiskyBloku.Free();
-  Self.PomocneObj.Free();
+  Self.turnouts.Free();
+  Self.tracks.Free();
+  Self.signals.Free();
+  Self.derails.Free();
+  Self.disconnectors.Free();
+  Self.crossings.Free();
+  Self.linkers.Free();
+  Self.linkersTrains.Free();
+  Self.locks.Free();
+  Self.texts.Free();
+  Self.blockLabels.Free();
+  Self.otherObj.Free();
 
   if (Assigned(Self.infoTimers)) then
     FreeAndNil(Self.infoTimers);
@@ -562,19 +562,19 @@ begin
     Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
     if (Self.ShowDetails) then
-      Self.PopiskyBloku.show(Self.DrawObject);
-    Self.Texty.show(Self.DrawObject);
-    Self.UvazkySpr.show(Self.DrawObject);
-    Self.Uvazky.show(Self.DrawObject, Self.Graphics.blik);
-    Self.Navestidla.show(Self.DrawObject, Self.Graphics.blik);
-    Self.Prejezdy.show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
-    Self.PomocneObj.show(Self.DrawObject, Self.Graphics.blik);
-    Self.Rozp.ShowBg(Self.DrawObject, Self.Graphics.blik);
-    Self.Useky.show(Self.DrawObject, Self.Graphics.blik, Self.myORs, Navestidla.startJC, Self.Vyhybky.data);
-    Self.Vyhybky.show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
-    Self.Zamky.show(Self.DrawObject, Self.Graphics.blik);
-    Self.Rozp.show(Self.DrawObject, Self.Graphics.blik);
-    Self.Vykol.show(Self.DrawObject, Self.Graphics.blik, Self.Useky.data);
+      Self.blockLabels.show(Self.DrawObject);
+    Self.texts.show(Self.DrawObject);
+    Self.linkersTrains.show(Self.DrawObject);
+    Self.linkers.show(Self.DrawObject, Self.Graphics.blik);
+    Self.signals.show(Self.DrawObject, Self.Graphics.blik);
+    Self.crossings.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
+    Self.otherObj.show(Self.DrawObject, Self.Graphics.blik);
+    Self.disconnectors.ShowBg(Self.DrawObject, Self.Graphics.blik);
+    Self.tracks.show(Self.DrawObject, Self.Graphics.blik, Self.myORs, signals.startJC, Self.turnouts.data);
+    Self.turnouts.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
+    Self.locks.show(Self.DrawObject, Self.Graphics.blik);
+    Self.disconnectors.show(Self.DrawObject, Self.Graphics.blik);
+    Self.derails.show(Self.DrawObject, Self.Graphics.blik, Self.tracks.data);
 
     Self.ShowDK();
     Self.ShowOpravneni();
@@ -812,8 +812,8 @@ end;
 procedure TRelief.ObjectMouseClick(Position: TPoint; Button: TPanelButton);
 var i, index: Integer;
   Handled: boolean;
-  uid: TPUsekID;
-  uvid: TPUvazkaID;
+  uid: TPTrackId;
+  uvid: TPLinkerId;
 label
   EscCheck;
 begin
@@ -862,82 +862,82 @@ begin
   end;
 
   // prejezd
-  index := Self.Prejezdy.GetIndex(Position);
+  index := Self.crossings.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Prejezdy[index].Blok < 0) then
+    if (Self.crossings[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Prejezdy[index].OblRizeni].id, Button, Self.Prejezdy[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.crossings[index].area].id, Button, Self.crossings[index].block);
     goto EscCheck;
   end;
 
   // souctova hlaska
-  index := Self.Texty.GetIndex(Position);
+  index := Self.texts.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Texty[index].Blok < 0) then
+    if (Self.texts[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Texty[index].OblRizeni].id, Button, Self.Texty[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.texts[index].area].id, Button, Self.texts[index].block);
     goto EscCheck;
   end;
 
   // rozpojovac
-  index := Self.Rozp.GetIndex(Position);
+  index := Self.disconnectors.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Rozp[index].Blok < 0) then
+    if (Self.disconnectors[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Rozp[index].OblRizeni].id, Button, Self.Rozp[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.disconnectors[index].area].id, Button, Self.disconnectors[index].block);
     goto EscCheck;
   end;
 
   // vykolejka
-  index := Self.Vykol.GetIndex(Position);
+  index := Self.derails.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Vykol[index].Blok < 0) then
+    if (Self.derails[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Vykol[index].OblRizeni].id, Button, Self.Vykol[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.derails[index].area].id, Button, Self.derails[index].block);
     goto EscCheck;
   end;
 
   // usek
-  uid := Self.Useky.GetIndex(Position);
+  uid := Self.tracks.GetIndex(Position);
   if (uid.index <> -1) then
   begin
-    if (Self.Useky[uid.index].Blok < 0) then
+    if (Self.tracks[uid.index].block < 0) then
       goto EscCheck;
 
     // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na souprave v tomto useku
-    if ((Self.myORs[Self.Useky[uid.index].OblRizeni].RegPlease.status = TORRegPleaseStatus.selected) and
+    if ((Self.myORs[Self.tracks[uid.index].area].RegPlease.status = TORRegPleaseStatus.selected) and
       (Button = ENTER)) then
       // zadost o vydani seznamu hnacich vozidel na danem useku
-      PanelTCPClient.SendLn(Self.myORs[Self.Useky[uid.index].OblRizeni].id + ';LOK-REQ;U-PLEASE;' +
-        IntToStr(Self.Useky[uid.index].Blok) + ';' + IntToStr(uid.soupravaI))
+      PanelTCPClient.SendLn(Self.myORs[Self.tracks[uid.index].area].id + ';LOK-REQ;U-PLEASE;' +
+        IntToStr(Self.tracks[uid.index].block) + ';' + IntToStr(uid.traini))
     else
-      PanelTCPClient.PanelClick(Self.myORs[Self.Useky[uid.index].OblRizeni].id, Button, Self.Useky[uid.index].Blok,
-        IntToStr(uid.soupravaI));
+      PanelTCPClient.PanelClick(Self.myORs[Self.tracks[uid.index].area].id, Button, Self.tracks[uid.index].block,
+        IntToStr(uid.traini));
 
     goto EscCheck;
   end;
 
   // navestidlo
-  index := Self.Navestidla.GetIndex(Position);
+  index := Self.signals.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Navestidla[index].Blok < 0) then
+    if (Self.signals[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Navestidla[index].OblRizeni].id, Button, Self.Navestidla[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.signals[index].area].id, Button, Self.signals[index].block);
     goto EscCheck;
   end;
 
   // vyhybka
-  index := Self.Vyhybky.GetIndex(Position);
+  index := Self.turnouts.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Vyhybky[index].Blok < 0) then
+    if (turnouts[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Vyhybky[index].OblRizeni].id, Button, Vyhybky[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[turnouts[index].area].id, Button, turnouts[index].block);
     goto EscCheck;
   end;
 
@@ -954,43 +954,43 @@ begin
   end;
 
   // uvazka
-  index := Self.Uvazky.GetIndex(Position);
+  index := Self.linkers.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Uvazky[index].Blok < 0) then
+    if (Self.linkers[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Uvazky[index].OblRizeni].id, Button, Self.Uvazky[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.linkers[index].area].id, Button, Self.linkers[index].block);
     goto EscCheck;
   end;
 
   // uvazka soupravy
-  uvid := Self.UvazkySpr.GetIndex(Position);
+  uvid := Self.linkersTrains.GetIndex(Position);
   if (uvid.index <> -1) then
   begin
-    if (Self.UvazkySpr[uvid.index].Blok < 0) then
+    if (Self.linkersTrains[uvid.index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.UvazkySpr[uvid.index].OblRizeni].id, Button,
-      Self.UvazkySpr[uvid.index].Blok, IntToStr(uvid.soupravaI));
+    PanelTCPClient.PanelClick(Self.myORs[Self.linkersTrains[uvid.index].area].id, Button,
+      Self.linkersTrains[uvid.index].block, IntToStr(uvid.traini));
     goto EscCheck;
   end;
 
   // zamek
-  index := Self.Zamky.GetIndex(Position);
+  index := Self.locks.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.Zamky[index].Blok < 0) then
+    if (Self.locks[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.Zamky[index].OblRizeni].id, Button, Self.Zamky[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.locks[index].area].id, Button, Self.locks[index].block);
     goto EscCheck;
   end;
 
   // pomocny objekt
-  index := Self.PomocneObj.GetIndex(Position);
+  index := Self.otherObj.GetIndex(Position);
   if (index <> -1) then
   begin
-    if (Self.PomocneObj[index].Blok < 0) then
+    if (Self.otherObj[index].block < 0) then
       goto EscCheck;
-    PanelTCPClient.PanelClick(Self.myORs[Self.PomocneObj[index].OblRizeni].id, Button, Self.PomocneObj[index].Blok);
+    PanelTCPClient.PanelClick(Self.myORs[Self.otherObj[index].area].id, Button, Self.otherObj[index].block);
     goto EscCheck;
   end;
 
@@ -1050,8 +1050,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.FLoad(aFile: string);
-var i: Integer;
-  inifile: TMemIniFile;
+var inifile: TMemIniFile;
   sect_str: TStrings;
   ver: string;
   verWord: Word;
@@ -1070,7 +1069,7 @@ begin
     // kontrola verze
     ver := inifile.ReadString('G', 'ver', 'invalid');
     versionOk := false;
-    for i := 0 to Length(_FileVersion_accept) - 1 do
+    for var i := 0 to Length(_FileVersion_accept) - 1 do
     begin
       if (ver = _FileVersion_accept[i]) then
       begin
@@ -1100,7 +1099,7 @@ begin
     try
       inifile.ReadSection('OR', sect_str);
       Self.myORs.Clear();
-      for i := 0 to sect_str.Count - 1 do
+      for var i := 0 to sect_str.Count - 1 do
         Self.myORs.Add(TORPanel.Create(inifile.ReadString('OR', sect_str[i], ''), Self.Graphics));
     finally
       sect_str.Free();
@@ -1108,57 +1107,57 @@ begin
 
     // vytvorime okynka zprav
     TF_Messages.frm_cnt := Self.myORs.Count;
-    for i := 0 to Self.myORs.Count - 1 do
+    for var i := 0 to Self.myORs.Count - 1 do
       TF_Messages.frm_db[i] := TF_Messages.Create(Self.myORs[i].Name, Self.myORs[i].id);
 
-    Self.Useky.Load(inifile, Self.myORs, verWord);
-    Self.Navestidla.Load(inifile, verWord);
-    Self.Vyhybky.Load(inifile, verWord);
-    Self.Vykol.Load(inifile, verWord);
-    Self.Prejezdy.Load(inifile, Self.Useky, verWord);
-    Self.Uvazky.Load(inifile, verWord);
-    Self.UvazkySpr.Load(inifile, verWord);
-    Self.Zamky.Load(inifile, verWord);
-    Self.Rozp.Load(inifile, verWord);
-    Self.Texty.Load(inifile, 'T', verWord);
-    Self.PopiskyBloku.Load(inifile, 'TP', verWord);
-    Self.PomocneObj.Load(inifile, verWord);
+    Self.tracks.Load(inifile, Self.myORs, verWord);
+    Self.signals.Load(inifile, verWord);
+    Self.turnouts.Load(inifile, verWord);
+    Self.derails.Load(inifile, verWord);
+    Self.crossings.Load(inifile, Self.tracks, verWord);
+    Self.linkers.Load(inifile, verWord);
+    Self.linkersTrains.Load(inifile, verWord);
+    Self.locks.Load(inifile, verWord);
+    Self.disconnectors.Load(inifile, verWord);
+    Self.texts.Load(inifile, 'T', verWord);
+    Self.blockLabels.Load(inifile, 'TP', verWord);
+    Self.otherObj.Load(inifile, verWord);
 
     Self.Tech_blok.Clear();
 
-    for i := 0 to Self.Useky.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_USEK, Self.Useky[i].Blok, i);
+    for var i := 0 to Self.tracks.data.Count - 1 do
+      Self.AddToTechBlk(btTrack, Self.tracks[i].block, i);
 
-    for i := 0 to Self.Vyhybky.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_VYH, Self.Vyhybky[i].Blok, i);
+    for var i := 0 to Self.turnouts.data.Count - 1 do
+      Self.AddToTechBlk(btTurnout, Self.turnouts[i].block, i);
 
-    for i := 0 to Self.Uvazky.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_UVAZKA, Self.Uvazky[i].Blok, i);
+    for var i := 0 to Self.linkers.data.Count - 1 do
+      Self.AddToTechBlk(btLinker, Self.linkers[i].block, i);
 
-    for i := 0 to Self.UvazkySpr.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_UVAZKA_SPR, Self.UvazkySpr[i].Blok, i);
+    for var i := 0 to Self.linkersTrains.data.Count - 1 do
+      Self.AddToTechBlk(btLinkerSpr, Self.linkersTrains[i].block, i);
 
-    for i := 0 to Self.Zamky.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_ZAMEK, Self.Zamky[i].Blok, i);
+    for var i := 0 to Self.locks.data.Count - 1 do
+      Self.AddToTechBlk(btLock, Self.locks[i].block, i);
 
-    for i := 0 to Self.Prejezdy.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_PREJEZD, Self.Prejezdy[i].Blok, i);
+    for var i := 0 to Self.crossings.data.Count - 1 do
+      Self.AddToTechBlk(btCrossing, Self.crossings[i].block, i);
 
-    for i := 0 to Self.Navestidla.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_SCOM, Self.Navestidla[i].Blok, i);
+    for var i := 0 to Self.signals.data.Count - 1 do
+      Self.AddToTechBlk(btSignal, Self.signals[i].block, i);
 
-    for i := 0 to Self.Vykol.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_VYKOL, Self.Vykol[i].Blok, i);
+    for var i := 0 to Self.derails.data.Count - 1 do
+      Self.AddToTechBlk(btDerail, Self.derails[i].block, i);
 
-    for i := 0 to Self.Rozp.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_ROZP, Self.Rozp[i].Blok, i);
+    for var i := 0 to Self.disconnectors.data.Count - 1 do
+      Self.AddToTechBlk(btDisconnector, Self.disconnectors[i].block, i);
 
-    for i := 0 to Self.PomocneObj.data.Count - 1 do
-      Self.AddToTechBlk(_BLK_POMOCNY, Self.PomocneObj[i].Blok, i);
+    for var i := 0 to Self.otherObj.data.Count - 1 do
+      Self.AddToTechBlk(btOther, Self.otherObj[i].block, i);
 
-    for i := 0 to Self.Texty.Count - 1 do
-      if (Self.Texty[i].Blok > -1) then
-        Self.AddToTechBlk(_BLK_SH, Self.Texty[i].Blok, i);
+    for var i := 0 to Self.texts.Count - 1 do
+      if (Self.texts[i].block > -1) then
+        Self.AddToTechBlk(btSummary, Self.texts[i].block, i);
 
   finally
     inifile.Free;
@@ -1531,91 +1530,89 @@ end;
 // komunikace s oblastmi rizeni:
 // change blok stav:
 
-procedure TRelief.ORBlkChange(Sender: string; BlokID: Integer; BlokTyp: Integer; parsed: TStrings);
-var i: Integer;
-  Symbols: TList<TTechBlokToSymbol>;
+procedure TRelief.ORBlkChange(Sender: string; BlokID: Integer; blockType: TBlkType; parsed: TStrings);
 begin
   // ziskame vsechny bloky na panelu, ktere navazuji na dane technologicke ID:
   if (not Self.Tech_blok.ContainsKey(BlokID)) then
     Exit();
-  Symbols := Self.Tech_blok[BlokID];
+  var symbols := Self.Tech_blok[BlokID];
 
-  for i := 0 to Symbols.Count - 1 do
+  for var i := 0 to Symbols.Count - 1 do
   begin
-    case (BlokTyp) of
-      _BLK_USEK:
+    case (blockType) of
+      btTrack:
         begin
-          if ((Symbols[i].blk_type = _BLK_USEK) and
-            (Sender = Self.myORs[Self.Useky[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Useky[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btTrack) and
+            (Sender = Self.myORs[Self.tracks[Symbols[i].symbol_index].area].id)) then
+            Self.tracks[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_VYH:
+      btTurnout:
         begin
-          if ((Symbols[i].blk_type = _BLK_VYH) and (Sender = Self.myORs[Vyhybky[Symbols[i].symbol_index].OblRizeni].id))
+          if ((Symbols[i].blk_type = btTurnout) and (Sender = Self.myORs[turnouts[Symbols[i].symbol_index].area].id))
           then
-            Self.Vyhybky[Symbols[i].symbol_index].PanelProp.Change(parsed);
+            Self.turnouts[Symbols[i].symbol_index].PanelProp.Change(parsed);
 
-          if ((Symbols[i].blk_type = _BLK_VYKOL) and
-            (Sender = Self.myORs[Self.Vykol[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Vykol[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btDerail) and
+            (Sender = Self.myORs[Self.derails[Symbols[i].symbol_index].area].id)) then
+            Self.derails[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_SCOM:
+      btSignal:
         begin
-          if ((Symbols[i].blk_type = _BLK_SCOM) and
-            (Sender = Self.myORs[Self.Navestidla[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Navestidla[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btSignal) and
+            (Sender = Self.myORs[Self.signals[Symbols[i].symbol_index].area].id)) then
+            Self.signals[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_PREJEZD:
+      btCrossing:
         begin
-          if ((Symbols[i].blk_type = _BLK_PREJEZD) and
-            (Sender = Self.myORs[Self.Prejezdy[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Prejezdy[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btCrossing) and
+            (Sender = Self.myORs[Self.crossings[Symbols[i].symbol_index].area].id)) then
+            Self.crossings[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_ZAMEK:
+      btLock:
         begin
-          if ((Symbols[i].blk_type = _BLK_ZAMEK) and
-            (Sender = Self.myORs[Self.Zamky[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Zamky[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btLock) and
+            (Sender = Self.myORs[Self.locks[Symbols[i].symbol_index].area].id)) then
+            Self.locks[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_ROZP:
+      btDisconnector:
         begin
-          if ((Symbols[i].blk_type = _BLK_ROZP) and
-            (Sender = Self.myORs[Self.Rozp[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Rozp[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btDisconnector) and
+            (Sender = Self.myORs[Self.disconnectors[Symbols[i].symbol_index].area].id)) then
+            Self.disconnectors[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_UVAZKA:
+      btLinker:
         begin
-          if ((Symbols[i].blk_type = _BLK_UVAZKA) and
-            (Sender = Self.myORs[Self.Uvazky[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Uvazky[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btLinker) and
+            (Sender = Self.myORs[Self.linkers[Symbols[i].symbol_index].area].id)) then
+            Self.linkers[Symbols[i].symbol_index].PanelProp.Change(parsed);
 
-          if ((Symbols[i].blk_type = _BLK_UVAZKA_SPR) and
-            (Sender = Self.myORs[Self.UvazkySpr[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.UvazkySpr[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btLinkerSpr) and
+            (Sender = Self.myORs[Self.linkersTrains[Symbols[i].symbol_index].area].id)) then
+            Self.linkersTrains[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
-      _BLK_SH:
+      btSummary:
         begin
-          if ((Symbols[i].blk_type = _BLK_SH) and
-            (Sender = Self.myORs[Self.Texty[Symbols[i].symbol_index].OblRizeni].id)) then
-            Self.Texty[Symbols[i].symbol_index].PanelProp.Change(parsed);
+          if ((Symbols[i].blk_type = btSummary) and
+            (Sender = Self.myORs[Self.texts[Symbols[i].symbol_index].area].id)) then
+            Self.texts[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
     end; // case
 
-    if ((Symbols[i].blk_type = _BLK_POMOCNY) and
-      (Sender = Self.myORs[Self.PomocneObj[Symbols[i].symbol_index].OblRizeni].id)) then
-      Self.PomocneObj[Symbols[i].symbol_index].PanelProp.Change(parsed);
-  end; // for
+    if ((Symbols[i].blk_type = btOther) and
+      (Sender = Self.myORs[Self.otherObj[Symbols[i].symbol_index].area].id)) then
+      Self.otherObj[Symbols[i].symbol_index].PanelProp.Change(parsed);
+  end;
 
-  if (BlokTyp = _BLK_SCOM) then
-    Self.Navestidla.UpdateStartJC();
+  if (blockType = btSignal) then
+    Self.signals.UpdateStartJC();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2004,18 +2001,18 @@ begin
     Self.Graphics.DrawObject.Enabled := true;
   end;
 
-  Self.Useky.Reset(orindex);
-  Self.Vyhybky.Reset(orindex);
-  Self.Navestidla.Reset(orindex);
-  Self.Prejezdy.Reset(orindex);
-  Self.Uvazky.Reset(orindex);
-  Self.UvazkySpr.Reset(orindex);
-  Self.Zamky.Reset(orindex);
-  Self.Vykol.Reset(orindex);
-  Self.Rozp.Reset(orindex);
-  Self.Texty.Reset(orindex);
-  Self.PopiskyBloku.Reset(orindex);
-  Self.PomocneObj.Reset(orindex);
+  Self.tracks.Reset(orindex);
+  Self.turnouts.Reset(orindex);
+  Self.signals.Reset(orindex);
+  Self.crossings.Reset(orindex);
+  Self.linkers.Reset(orindex);
+  Self.linkersTrains.Reset(orindex);
+  Self.locks.Reset(orindex);
+  Self.derails.Reset(orindex);
+  Self.disconnectors.Reset(orindex);
+  Self.texts.Reset(orindex);
+  Self.blockLabels.Reset(orindex);
+  Self.otherObj.Reset(orindex);
 
   for i := 0 to Self.myORs.Count - 1 do
   begin
@@ -2146,7 +2143,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-class function TRelief.GetTechBlk(typ: Integer; symbol_index: Integer): TTechBlokToSymbol;
+class function TRelief.GetTechBlk(typ: TBlkType; symbol_index: Integer): TTechBlokToSymbol;
 begin
   Result.blk_type := typ;
   Result.symbol_index := symbol_index;
@@ -2154,7 +2151,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.AddToTechBlk(typ: Integer; blok_id: Integer; symbol_index: Integer);
+procedure TRelief.AddToTechBlk(typ: TBlkType; blok_id: Integer; symbol_index: Integer);
 var Symbols: TList<TTechBlokToSymbol>;
   val: TTechBlokToSymbol;
 begin

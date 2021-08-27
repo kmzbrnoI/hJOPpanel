@@ -1,8 +1,8 @@
 unit BlokRozp;
 
 {
-  Definice bloku rozpojovac, jeho vlastnosti a stavu v panelu.
-  Definice databaze rozpojovacu.
+  Definition of a disconnector block.
+  Definition of a disconnector blocks database.
 }
 
 interface
@@ -10,31 +10,31 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
-  TRozpPanelProp = record
-    Symbol, Pozadi: TColor;
-    blik: boolean;
+  TDiscPanelProp = record
+    fg, bg: TColor;
+    flash: boolean;
 
     procedure Change(parsed: TStrings);
   end;
 
-  TPRozp = class
-    Blok: Integer;
-    Pos: TPoint;
-    OblRizeni: Integer;
-    PanelProp: TRozpPanelProp;
+  TPDisconnector = class
+    block: Integer;
+    pos: TPoint;
+    area: Integer;
+    panelProp: TDiscPanelProp;
 
     procedure Show(obj: TDXDraw; blik: boolean);
     procedure ShowBg(obj: TDXDraw; blik: boolean);
     procedure Reset();
   end;
 
-  TPRozpojovace = class
+  TPDisconnectors = class
   private
-    function GetItem(index: Integer): TPRozp;
+    function GetItem(index: Integer): TPDisconnector;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPRozp>;
+    data: TObjectList<TPDisconnector>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -45,14 +45,13 @@ type
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
 
-    property Items[index: Integer]: TPRozp read GetItem; default;
+    property Items[index: Integer]: TPDisconnector read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
 const
-  _Def_Rozp_Prop: TRozpPanelProp = (Symbol: clFuchsia; Pozadi: clBlack; blik: false;);
-
-  _UA_Rozp_Prop: TRozpPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; blik: false;);
+  _Def_Disc_Prop: TDiscPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
+  _UA_Disc_Prop: TDiscPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
 
 implementation
 
@@ -60,45 +59,45 @@ uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozp.ShowBg(obj: TDXDraw; blik: boolean);
+procedure TPDisconnector.ShowBg(obj: TDXDraw; blik: boolean);
 begin
-  if (Self.PanelProp.Pozadi <> clBlack) then
+  if (Self.PanelProp.bg <> clBlack) then
   begin
-    obj.Surface.Canvas.Pen.Color := Self.PanelProp.Pozadi;
-    obj.Surface.Canvas.Brush.Color := Self.PanelProp.Pozadi;
+    obj.Surface.Canvas.Pen.Color := Self.PanelProp.bg;
+    obj.Surface.Canvas.Brush.Color := Self.PanelProp.bg;
     obj.Surface.Canvas.Rectangle(Self.Pos.X * SymbolSet.symbWidth, Self.Pos.Y * SymbolSet.symbHeight,
       (Self.Pos.X + 1) * SymbolSet.symbWidth, (Self.Pos.Y + 1) * SymbolSet.symbHeight);
   end;
 end;
 
-procedure TPRozp.Show(obj: TDXDraw; blik: boolean);
+procedure TPDisconnector.Show(obj: TDXDraw; blik: boolean);
 var fg: TColor;
 begin
-  if ((Self.PanelProp.blik) and (blik)) then
+  if ((Self.PanelProp.flash) and (blik)) then
     fg := clBlack
   else
-    fg := Self.PanelProp.Symbol;
+    fg := Self.PanelProp.fg;
 
-  Symbols.Draw(SymbolSet.IL_Symbols, Self.Pos, _S_DISC_ALONE, fg, Self.PanelProp.Pozadi, obj, true);
+  Symbols.Draw(SymbolSet.IL_Symbols, Self.Pos, _S_DISC_ALONE, fg, Self.PanelProp.bg, obj, true);
 end;
 
-procedure TPRozp.Reset();
+procedure TPDisconnector.Reset();
 begin
-  if (Self.Blok > -2) then
-    Self.PanelProp := _Def_Rozp_Prop
+  if (Self.block > -2) then
+    Self.panelProp := _Def_Disc_Prop
   else
-    Self.PanelProp := _UA_Rozp_Prop;
+    Self.panelProp := _UA_Disc_Prop;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPRozpojovace.Create();
+constructor TPDisconnectors.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPRozp>.Create();
+  Self.data := TObjectList<TPDisconnector>.Create();
 end;
 
-destructor TPRozpojovace.Destroy();
+destructor TPDisconnectors.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -106,91 +105,84 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozpojovace.Load(ini: TMemIniFile; version: Word);
-var Count, i: Integer;
-  rozp: TPRozp;
+procedure TPDisconnectors.Load(ini: TMemIniFile; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'R', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'R', 0);
+  for var i := 0 to Count - 1 do
   begin
-    rozp := TPRozp.Create();
+    var disc := TPDisconnector.Create();
 
-    rozp.Blok := ini.ReadInteger('R' + IntToStr(i), 'B', -1);
-    rozp.OblRizeni := ini.ReadInteger('R' + IntToStr(i), 'OR', -1);
-    rozp.Pos.X := ini.ReadInteger('R' + IntToStr(i), 'X', 0);
-    rozp.Pos.Y := ini.ReadInteger('R' + IntToStr(i), 'Y', 0);
+    disc.block := ini.ReadInteger('R' + IntToStr(i), 'B', -1);
+    disc.area := ini.ReadInteger('R' + IntToStr(i), 'OR', -1);
+    disc.pos.X := ini.ReadInteger('R' + IntToStr(i), 'X', 0);
+    disc.pos.Y := ini.ReadInteger('R' + IntToStr(i), 'Y', 0);
 
-    // default settings:
-    if (rozp.Blok = -2) then
-      rozp.PanelProp := _UA_Rozp_Prop
+    if (disc.block = -2) then
+      disc.panelProp := _UA_Disc_Prop
     else
-      rozp.PanelProp := _Def_Rozp_Prop;
+      disc.panelProp := _Def_Disc_Prop;
 
-    Self.data.Add(rozp);
-  end; // for i
+    Self.data.Add(disc);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozpojovace.Show(obj: TDXDraw; blik: boolean);
-var rozp: TPRozp;
+procedure TPDisconnectors.Show(obj: TDXDraw; blik: boolean);
 begin
-  for rozp in Self.data do
-    rozp.Show(obj, blik);
+  for var disc in Self.data do
+    disc.Show(obj, blik);
 end;
 
-procedure TPRozpojovace.ShowBg(obj: TDXDraw; blik: boolean);
-var rozp: TPRozp;
+procedure TPDisconnectors.ShowBg(obj: TDXDraw; blik: boolean);
 begin
-  for rozp in Self.data do
-    rozp.ShowBg(obj, blik);
+  for var disc in Self.data do
+    disc.ShowBg(obj, blik);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPRozpojovace.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
+function TPDisconnectors.GetIndex(Pos: TPoint): Integer;
 begin
   Result := -1;
 
-  for i := 0 to Self.data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
     if ((Pos.X = Self.data[i].Pos.X) and (Pos.Y = Self.data[i].Pos.Y)) then
       Exit(i);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPRozpojovace.Reset(orindex: Integer = -1);
-var rozp: TPRozp;
+procedure TPDisconnectors.Reset(orindex: Integer = -1);
 begin
-  for rozp in Self.data do
-    if ((orindex < 0) or (rozp.OblRizeni = orindex)) then
-      rozp.Reset();
+  for var disc in Self.data do
+    if ((orindex < 0) or (disc.area = orindex)) then
+      disc.Reset();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPRozpojovace.GetItem(index: Integer): TPRozp;
+function TPDisconnectors.GetItem(index: Integer): TPDisconnector;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPRozpojovace.GetCount(): Integer;
+function TPDisconnectors.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRozpPanelProp.Change(parsed: TStrings);
+procedure TDiscPanelProp.Change(parsed: TStrings);
 begin
-  Symbol := StrToColor(parsed[4]);
-  Pozadi := StrToColor(parsed[5]);
-  blik := StrToBool(parsed[6]);
+  fg := StrToColor(parsed[4]);
+  bg := StrToColor(parsed[5]);
+  flash := StrToBool(parsed[6]);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

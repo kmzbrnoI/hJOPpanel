@@ -1,8 +1,8 @@
 unit BlokPrejezd;
 
 {
-  Definice bloku prejezd, jeho vlastnosti a stavu v panelu.
-  Definice databaze bloku typu prejezd.
+  Definition of "crossing" blocks.
+  Definition of a databse of crossings.
 }
 
 interface
@@ -10,69 +10,63 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
   BlokUsek, BlokyUsek;
 
-const
-  _MAX_PRJ_LEN = 64;
-
 type
-  TBlkPrjPanelStav = (disabled = -5, err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
+  TBlkCrossingPanelState = (disabled = -5, err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
 
-  // data pro vykreslovani
-  TPrjPanelProp = record
-    Symbol, Pozadi: TColor;
-    stav: TBlkPrjPanelStav;
+  TCrossingPanelProp = record
+    fg, bg: TColor;
+    state: TBlkCrossingPanelState;
 
     procedure Change(data: TStrings);
   end;
 
-  // jeden blikajici blok prejezdu
-  // je potreba v nem take ulozit, jaky technologicky blok se ma vykreslit, pokud je prejezd uzavren
-  TBlikPoint = record
-    Pos: TPoint;
-    PanelUsek: Integer; // pozor, tady je usek panelu!, toto je zmena oproti editoru a mergeru !
+  // A flashing position of a crossing
+  TCrosFlashPoint = record
+    pos: TPoint;
+    panelTrack: Integer; // pozor, tady je usek panelu!, toto je zmena oproti editoru a mergeru !
   end;
 
-  // 1 blok prejezdu na reliefu:
-  TPPrejezd = class
-    Blok: Integer;
+  TPCrossing = class
+    block: Integer;
 
-    StaticPositions: TList<TPoint>;
-    BlikPositions: TList<TBlikPoint>;
+    staticPoss: TList<TPoint>;
+    flashPoss: TList<TCrosFlashPoint>;
 
-    OblRizeni: Integer;
-    PanelProp: TPrjPanelProp;
+    area: Integer;
+    panelProp: TCrossingPanelProp;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Reset();
-    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
+    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
   end;
 
-  TPPrejezdy = class
+  TPCrossings = class
   private
-    function GetItem(index: Integer): TPPrejezd;
+    function GetItem(index: Integer): TPCrossing;
     function GetCount(): Integer;
 
   public
 
-    data: TObjectList<TPPrejezd>;
+    data: TObjectList<TPCrossing>;
 
     constructor Create();
     destructor Destroy(); override;
 
-    procedure Load(ini: TMemIniFile; useky: TPUseky; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
+    procedure Load(ini: TMemIniFile; useky: TPTracks; version: Word);
+    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
-    function GetPrj(tech_id: Integer): Integer;
+    function GetCros(tech_id: Integer): Integer;
 
-    property Items[index: Integer]: TPPrejezd read GetItem; default;
+    property Items[index: Integer]: TPCrossing read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
 const
-  _Def_Prj_Prop: TPrjPanelProp = (Symbol: clBlack; Pozadi: clFuchsia; stav: otevreno);
-  _UA_Prj_Prop: TPrjPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; stav: otevreno);
+  _Def_Cros_Prop: TCrossingPanelProp = (fg: clBlack; bg: clFuchsia; state: otevreno);
+  _UA_Cros_Prop: TCrossingPanelProp = (fg: $A0A0A0; bg: clBlack; state: otevreno);
 
 implementation
 
@@ -80,58 +74,56 @@ uses Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezd.Reset();
+procedure TPCrossing.Reset();
 begin
-  if (Self.Blok > -2) then
-    Self.PanelProp := _Def_Prj_Prop
+  if (Self.block > -2) then
+    Self.PanelProp := _Def_Cros_Prop
   else
-    Self.PanelProp := _UA_Prj_Prop;
+    Self.PanelProp := _UA_Cros_Prop;
 end;
 
-procedure TPPrejezd.Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
-var Pos: TPoint;
-  blikPoint: TBlikPoint;
+procedure TPCrossing.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
   // vykreslit staticke pozice:
-  for Pos in Self.StaticPositions do
-    Symbols.Draw(SymbolSet.IL_Symbols, Pos, _S_CROSSING, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj);
+  for var pos in Self.staticPoss do
+    Symbols.Draw(SymbolSet.IL_Symbols, Pos, _S_CROSSING, Self.PanelProp.fg, Self.PanelProp.bg, obj);
 
   // vykreslit blikajici pozice podle stavu prejezdu:
-  if ((Self.PanelProp.stav = TBlkPrjPanelStav.disabled) or (Self.PanelProp.stav = TBlkPrjPanelStav.otevreno) or
-    (Self.PanelProp.stav = TBlkPrjPanelStav.anulace) or (Self.PanelProp.stav = TBlkPrjPanelStav.err) or
-    ((Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) and (blik))) then
+  if ((Self.PanelProp.state = TBlkCrossingPanelState.disabled) or (Self.PanelProp.state = TBlkCrossingPanelState.otevreno) or
+    (Self.PanelProp.state = TBlkCrossingPanelState.anulace) or (Self.PanelProp.state = TBlkCrossingPanelState.err) or
+    ((Self.PanelProp.state = TBlkCrossingPanelState.vystraha) and (blik))) then
   begin
     // nestaticke pozice proste vykreslime:
-    for blikPoint in Self.BlikPositions do
+    for var flashPoint in Self.flashPoss do
     begin
-      if (blikPoint.PanelUsek > -1) then
-        useky[blikPoint.PanelUsek].RemoveSymbolFromPrejezd(blikPoint.Pos);
+      if (flashPoint.panelTrack > -1) then
+        useky[flashPoint.panelTrack].RemoveSymbolFromCrossing(flashPoint.Pos);
 
-      Symbols.Draw(SymbolSet.IL_Symbols, blikPoint.Pos, _S_CROSSING, Self.PanelProp.Symbol,
-        Self.PanelProp.Pozadi, obj);
+      Symbols.Draw(SymbolSet.IL_Symbols, flashPoint.Pos, _S_CROSSING, Self.PanelProp.fg,
+        Self.PanelProp.bg, obj);
     end;
   end else begin
     // na nestatickych pozicich vykreslime usek
     // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
 
-    if (Self.PanelProp.stav = TBlkPrjPanelStav.vystraha) then
+    if (Self.PanelProp.state = TBlkCrossingPanelState.vystraha) then
       Exit();
 
-    for blikPoint in Self.BlikPositions do
-      if (blikPoint.PanelUsek > -1) then
-        useky[blikPoint.PanelUsek].AddSymbolFromPrejezd(blikPoint.Pos);
+    for var flashPoint in Self.flashPoss do
+      if (flashPoint.panelTrack > -1) then
+        useky[flashPoint.panelTrack].AddSymbolFromCrossing(flashPoint.Pos);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPPrejezdy.Create();
+constructor TPCrossings.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPPrejezd>.Create();
+  Self.data := TObjectList<TPCrossing>.Create();
 end;
 
-destructor TPPrejezdy.Destroy();
+destructor TPCrossings.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -139,113 +131,103 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Load(ini: TMemIniFile; useky: TPUseky; version: Word);
-var i, j, Count: Integer;
-  prj: TPPrejezd;
-  obj: string;
-  posCount: Integer;
-  blikPoint: TBlikPoint;
+procedure TPCrossings.Load(ini: TMemIniFile; useky: TPTracks; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'PRJ', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'PRJ', 0);
+  for var i := 0 to Count - 1 do
   begin
-    prj := TPPrejezd.Create();
+    var crossing := TPCrossing.Create();
 
-    prj.Blok := ini.ReadInteger('PRJ' + IntToStr(i), 'B', -1);
-    prj.OblRizeni := ini.ReadInteger('PRJ' + IntToStr(i), 'OR', -1);
+    crossing.block := ini.ReadInteger('PRJ' + IntToStr(i), 'B', -1);
+    crossing.area := ini.ReadInteger('PRJ' + IntToStr(i), 'OR', -1);
 
-    obj := ini.ReadString('PRJ' + IntToStr(i), 'BP', '');
-    posCount := (Length(obj) div 9);
-    for j := 0 to posCount - 1 do
+    var obj := ini.ReadString('PRJ' + IntToStr(i), 'BP', '');
+    var posCount := (Length(obj) div 9);
+    for var j := 0 to posCount - 1 do
     begin
-      blikPoint.Pos.X := StrToIntDef(copy(obj, j * 9 + 1, 3), 0);
-      blikPoint.Pos.Y := StrToIntDef(copy(obj, j * 9 + 4, 3), 0);
+      var flashPoint: TCrosFlashPoint;
+      flashPoint.Pos.X := StrToIntDef(copy(obj, j * 9 + 1, 3), 0);
+      flashPoint.Pos.Y := StrToIntDef(copy(obj, j * 9 + 4, 3), 0);
       if (version >= _FILEVERSION_13) then
-        blikPoint.PanelUsek := StrToIntDef(copy(obj, j * 9 + 7, 3), 0)
+        flashPoint.panelTrack := StrToIntDef(copy(obj, j * 9 + 7, 3), 0)
       else
-        blikPoint.PanelUsek := useky.GetUsek(StrToIntDef(copy(obj, j * 9 + 7, 3), 0));
-      prj.BlikPositions.Add(blikPoint);
-    end; // for j
+        flashPoint.panelTrack := useky.GetTrack(StrToIntDef(copy(obj, j * 9 + 7, 3), 0));
+      crossing.flashPoss.Add(flashPoint);
+    end;
 
     obj := ini.ReadString('PRJ' + IntToStr(i), 'SP', '');
     posCount := (Length(obj) div 6);
-    for j := 0 to posCount - 1 do
-      prj.StaticPositions.Add(Point(StrToIntDef(copy(obj, j * 6 + 1, 3), 0), StrToIntDef(copy(obj, j * 6 + 4, 3), 0)));
+    for var j := 0 to posCount - 1 do
+      crossing.staticPoss.Add(Point(StrToIntDef(copy(obj, j * 6 + 1, 3), 0), StrToIntDef(copy(obj, j * 6 + 4, 3), 0)));
 
     // default settings:
-    if (prj.Blok = -2) then
-      prj.PanelProp := _UA_Prj_Prop
+    if (crossing.block = -2) then
+      crossing.PanelProp := _UA_Cros_Prop
     else
-      prj.PanelProp := _Def_Prj_Prop;
+      crossing.PanelProp := _Def_Cros_Prop;
 
-    Self.data.Add(prj);
+    Self.data.Add(crossing);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
-var prj: TPPrejezd;
+procedure TPCrossings.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
-  for prj in Self.data do
+  for var prj in Self.data do
     prj.Show(obj, blik, useky);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPPrejezdy.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
-  askPos: TPoint;
-  blikPoint: TBlikPoint;
+function TPCrossings.GetIndex(Pos: TPoint): Integer;
 begin
   Result := -1;
 
   // kontrola prejezdu:
-  for i := 0 to Self.data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
   begin
-    for askPos in Self.data[i].StaticPositions do
+    for var askPos in Self.data[i].staticPoss do
       if ((Pos.X = askPos.X) and (Pos.Y = askPos.Y)) then
         Exit(i);
 
-    for blikPoint in Self.data[i].BlikPositions do
-      if ((Pos.X = blikPoint.Pos.X) and (Pos.Y = blikPoint.Pos.Y)) then
+    for var flashPos in Self.data[i].flashPoss do
+      if ((Pos.X = flashPos.Pos.X) and (Pos.Y = flashPos.Pos.Y)) then
         Exit(i);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPPrejezdy.Reset(orindex: Integer = -1);
-var prj: TPPrejezd;
+procedure TPCrossings.Reset(orindex: Integer = -1);
 begin
-  for prj in Self.data do
-    if ((orindex < 0) or (prj.OblRizeni = orindex)) then
-      prj.Reset();
+  for var crossing in Self.data do
+    if ((orindex < 0) or (crossing.area = orindex)) then
+      crossing.Reset();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPPrejezdy.GetItem(index: Integer): TPPrejezd;
+function TPCrossings.GetItem(index: Integer): TPCrossing;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPPrejezdy.GetCount(): Integer;
+function TPCrossings.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPPrejezdy.GetPrj(tech_id: Integer): Integer;
-var i: Integer;
+function TPCrossings.GetCros(tech_id: Integer): Integer;
 begin
-  for i := 0 to Self.data.Count - 1 do
-    if (tech_id = Self.data[i].Blok) then
+  for var i := 0 to Self.data.Count - 1 do
+    if (tech_id = Self.data[i].block) then
       Exit(i);
 
   Result := -1;
@@ -253,26 +235,26 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPrjPanelProp.Change(data: TStrings);
+procedure TCrossingPanelProp.Change(data: TStrings);
 begin
-  Symbol := StrToColor(data[4]);
-  Pozadi := StrToColor(data[5]);
-  stav := TBlkPrjPanelStav(StrToInt(data[7]));
+  fg := StrToColor(data[4]);
+  bg := StrToColor(data[5]);
+  state := TBlkCrossingPanelState(StrToInt(data[7]));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPPrejezd.Create();
+constructor TPCrossing.Create();
 begin
   inherited;
-  Self.StaticPositions := TList<TPoint>.Create();
-  Self.BlikPositions := TList<TBlikPoint>.Create();
+  Self.staticPoss := TList<TPoint>.Create();
+  Self.flashPoss := TList<TCrosFlashPoint>.Create();
 end;
 
-destructor TPPrejezd.Destroy();
+destructor TPCrossing.Destroy();
 begin
-  Self.StaticPositions.Free();
-  Self.BlikPositions.Free();
+  Self.staticPoss.Free();
+  Self.flashPoss.Free();
   inherited;
 end;
 

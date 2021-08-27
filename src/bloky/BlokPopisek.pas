@@ -1,8 +1,9 @@
 unit BlokPopisek;
 
 {
-  Definice bloku popisek a jeho vlastnosti.
-  Definice databaze popisku.
+  Definition of "text" block. Text block represents any text. Text block
+  could be connected to technological block (and thus clickable).
+  Definition of a databse of text blocks.
 }
 
 interface
@@ -12,27 +13,27 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
 
 type
   TTextPanelProp = record
-    Symbol, Pozadi: TColor;
+    symbol, bg: TColor;
     left, right: TColor;
-    blikani: boolean;
+    flash: boolean;
 
     procedure Change(parsed: TStrings);
     procedure Reset();
   end;
 
   TPText = class
-    Text: string;
-    Position: TPoint;
-    Color: Integer;
-    Blok: Integer;
-    OblRizeni: Integer;
-    PanelProp: TTextPanelProp;
+    text: string;
+    position: TPoint;
+    color: Integer;
+    block: Integer;
+    area: Integer;
+    panelProp: TTextPanelProp;
 
     procedure Reset();
     procedure Show(obj: TDXDraw);
   end;
 
-  TPTexty = class
+  TPTexts = class
   private
     function GetItem(index: Integer): TPText;
     function GetCount(): Integer;
@@ -53,8 +54,8 @@ type
   end;
 
 const
-  _Def_Popisek_Prop: TTextPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; left: clFuchsia; right: clFuchsia;
-    blikani: false);
+  _Def_Text_Prop: TTextPanelProp = (Symbol: $A0A0A0; bg: clBlack; left: clFuchsia; right: clFuchsia;
+    flash: false);
 
 implementation
 
@@ -69,10 +70,8 @@ end;
 
 procedure TPText.Show(obj: TDXDraw);
 begin
-  if (Self.Blok > -1) then
+  if (Self.block > -1) then
   begin
-    // popisek ma referenci na souctovou hlasku
-
     obj.Surface.Canvas.Brush.Color := Self.PanelProp.left;
     obj.Surface.Canvas.Pen.Color := obj.Surface.Canvas.Brush.Color;
     obj.Surface.Canvas.Rectangle((Self.Position.X - 1) * SymbolSet.symbWidth,
@@ -85,7 +84,7 @@ begin
       Self.Position.Y * SymbolSet.symbHeight, (Self.Position.X + 2) * SymbolSet.symbWidth,
       (Self.Position.Y + 1) * SymbolSet.symbHeight);
 
-    Symbols.TextOutput(Self.Position, Self.Text, Self.PanelProp.Symbol, Self.PanelProp.Pozadi, obj, false, true);
+    Symbols.TextOutput(Self.Position, Self.Text, Self.PanelProp.Symbol, Self.PanelProp.bg, obj, false, true);
   end else begin
     Symbols.TextOutput(Self.Position, Self.Text, _Symbol_Colors[Self.Color], clBlack, obj, false, true);
   end;
@@ -93,13 +92,13 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPTexty.Create();
+constructor TPTexts.Create();
 begin
   inherited;
   Self.data := TObjectList<TPText>.Create();
 end;
 
-destructor TPTexty.Destroy();
+destructor TPTexts.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -107,69 +106,64 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Load(ini: TMemIniFile; key: string; version: Word);
-var i, Count: Integer;
-  popisek: TPText;
+procedure TPTexts.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', key, 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', key, 0);
+  for var i := 0 to count - 1 do
   begin
-    popisek := TPText.Create();
+    var text: TPText := TPText.Create();
 
-    popisek.Text := ini.ReadString(key + IntToStr(i), 'T', '0');
-    popisek.Position.X := ini.ReadInteger(key + IntToStr(i), 'X', 0);
-    popisek.Position.Y := ini.ReadInteger(key + IntToStr(i), 'Y', 0);
-    popisek.Color := ini.ReadInteger(key + IntToStr(i), 'C', 0);
-    popisek.Blok := ini.ReadInteger(key + IntToStr(i), 'B', -1);
-    popisek.OblRizeni := ini.ReadInteger(key + IntToStr(i), 'OR', -1);
+    text.text := ini.ReadString(key + IntToStr(i), 'T', '0');
+    text.position.X := ini.ReadInteger(key + IntToStr(i), 'X', 0);
+    text.position.Y := ini.ReadInteger(key + IntToStr(i), 'Y', 0);
+    text.color := ini.ReadInteger(key + IntToStr(i), 'C', 0);
+    text.block := ini.ReadInteger(key + IntToStr(i), 'B', -1);
+    text.area := ini.ReadInteger(key + IntToStr(i), 'OR', -1);
 
-    popisek.PanelProp := _Def_Popisek_Prop;
+    text.panelProp := _Def_Text_Prop;
 
-    Self.data.Add(popisek);
+    Self.data.Add(text);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Reset(orindex: Integer = -1);
-var popisek: TPText;
+procedure TPTexts.Reset(orindex: Integer = -1);
 begin
-  for popisek in Self.data do
-    if ((orindex < 0) or (popisek.OblRizeni = orindex)) then
-      popisek.Reset();
+  for var text in Self.data do
+    if ((orindex < 0) or (text.area = orindex)) then
+      text.Reset();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPTexty.GetItem(index: Integer): TPText;
+function TPTexts.GetItem(index: Integer): TPText;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPTexty.GetCount(): Integer;
+function TPTexts.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPTexty.Show(obj: TDXDraw);
-var popisek: TPText;
+procedure TPTexts.Show(obj: TDXDraw);
 begin
-  for popisek in Self.data do
-    popisek.Show(obj);
+  for var text in Self.data do
+    text.Show(obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPTexty.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
+function TPTexts.GetIndex(Pos: TPoint): Integer;
 begin
-  for i := 0 to Self.data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
   begin
     if ((Pos.X >= Self.data[i].Position.X - 1) and (Pos.X <= Self.data[i].Position.X + 1) and
       (Pos.Y = Self.data[i].Position.Y)) then
@@ -183,9 +177,9 @@ end;
 
 procedure TTextPanelProp.Change(parsed: TStrings);
 begin
-  Self.Symbol := StrToColor(parsed[4]);
-  Self.Pozadi := StrToColor(parsed[5]);
-  Self.blikani := (parsed[6] = '1');
+  Self.symbol := StrToColor(parsed[4]);
+  Self.bg := StrToColor(parsed[5]);
+  Self.flash := (parsed[6] = '1');
   Self.left := StrToColor(parsed[7]);
   Self.right := StrToColor(parsed[8]);
 end;
@@ -194,7 +188,7 @@ end;
 
 procedure TTextPanelProp.Reset();
 begin
-  Self := _Def_Popisek_Prop;
+  Self := _Def_Text_Prop;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,7 @@
 unit BlokNavestidlo;
 
 {
-  Definice bloku navestidla, jeho vlastnosti a stavu v panelu.
-  Definice databaze navestidel.
+  Definition of "signal" block. Definition of a database of signals.
 }
 
 interface
@@ -10,38 +9,38 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
 
 type
-  TNavPanelProp = record
-    Symbol, Pozadi, Okoli: TColor;
+  TSignalPanelProp = record
+    symbol, bg, surr: TColor;
     AB: Boolean;
-    blikani: Boolean;
+    flash: Boolean;
 
     procedure Change(data: TStrings);
   end;
 
-  TPNavestidlo = class
-    Blok: Integer;
-    Position: TPoint;
-    SymbolID: Integer;
+  TPSignal = class
+    block: Integer;
+    position: TPoint;
+    symbolID: Integer;
 
-    OblRizeni: Integer;
-    PanelProp: TNavPanelProp;
+    area: Integer;
+    panelProp: TSignalPanelProp;
 
     procedure Reset();
     procedure Show(obj: TDXDraw; blik: Boolean);
   end;
 
   TStartJC = record
-    Pos: TPoint;
-    Color: TColor;
+    pos: TPoint;
+    color: TColor;
   end;
 
-  TPNavestidla = class
+  TPSignals = class
   private
-    function GetItem(index: Integer): TPNavestidlo;
+    function GetItem(index: Integer): TPSignal;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPNavestidlo>;
+    data: TObjectList<TPSignal>;
     startJC: TList<TStartJC>;
 
     constructor Create();
@@ -54,14 +53,13 @@ type
 
     procedure UpdateStartJC();
 
-    property Items[index: Integer]: TPNavestidlo read GetItem; default;
+    property Items[index: Integer]: TPSignal read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
 const
-  _Def_Nav_Prop: TNavPanelProp = (Symbol: clBlack; Pozadi: clFuchsia; Okoli: clBlack; AB: false; blikani: false);
-
-  _UA_Nav_Prop: TNavPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; Okoli: clBlack; AB: false; blikani: false);
+  _Def_Signal_Prop: TSignalPanelProp = (symbol: clBlack; bg: clFuchsia; surr: clBlack; AB: false; flash: false);
+  _UA_Signal_Prop: TSignalPanelProp = (symbol: $A0A0A0; bg: clBlack; surr: clBlack; AB: false; flash: false);
 
 implementation
 
@@ -69,41 +67,38 @@ uses Symbols, parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidlo.Reset();
+procedure TPSignal.Reset();
 begin
-  if (Self.Blok > -2) then
-    Self.PanelProp := _Def_Nav_Prop
+  if (Self.block > -2) then
+    Self.panelProp := _Def_Signal_Prop
   else
-    Self.PanelProp := _UA_Nav_Prop;
+    Self.panelProp := _UA_Signal_Prop;
 end;
 
-procedure TPNavestidlo.Show(obj: TDXDraw; blik: Boolean);
+procedure TPSignal.Show(obj: TDXDraw; blik: Boolean);
 var fg: TColor;
 begin
-  if ((Self.PanelProp.blikani) and (blik)) then
+  if ((Self.panelProp.flash) and (blik)) then
     fg := clBlack
   else
-    fg := Self.PanelProp.Symbol;
+    fg := Self.panelProp.symbol;
 
-  if (Self.PanelProp.AB) then
-  begin
-    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID + 2, fg,
-      Self.PanelProp.Pozadi, obj);
-  end else begin
-    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID, fg, Self.PanelProp.Pozadi, obj);
-  end;
+  if (Self.panelProp.AB) then
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID + 2, fg, Self.panelProp.bg, obj)
+  else
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, _S_SIGNAL_B + Self.SymbolID, fg, Self.panelProp.bg, obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPNavestidla.Create();
+constructor TPSignals.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPNavestidlo>.Create();
+  Self.data := TObjectList<TPSignal>.Create();
   Self.startJC := TList<TStartJC>.Create();
 end;
 
-destructor TPNavestidla.Destroy();
+destructor TPSignals.Destroy();
 begin
   Self.data.Free();
   Self.startJC.Free();
@@ -112,65 +107,59 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidla.Load(ini: TMemIniFile; version: Word);
-var i, Count: Integer;
-  nav: TPNavestidlo;
+procedure TPSignals.Load(ini: TMemIniFile; version: Word);
+var count: Integer;
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'N', 0);
-  for i := 0 to Count - 1 do
+  count := ini.ReadInteger('P', 'N', 0);
+  for var i := 0 to count-1 do
   begin
-    nav := TPNavestidlo.Create();
+    var signal: TPSignal := TPSignal.Create();
 
-    nav.Blok := ini.ReadInteger('N' + IntToStr(i), 'B', -1);
-    nav.Position.X := ini.ReadInteger('N' + IntToStr(i), 'X', 0);
-    nav.Position.Y := ini.ReadInteger('N' + IntToStr(i), 'Y', 0);
-    nav.SymbolID := ini.ReadInteger('N' + IntToStr(i), 'S', 0);
+    signal.block := ini.ReadInteger('N' + IntToStr(i), 'B', -1);
+    signal.Position.X := ini.ReadInteger('N' + IntToStr(i), 'X', 0);
+    signal.Position.Y := ini.ReadInteger('N' + IntToStr(i), 'Y', 0);
+    signal.SymbolID := ini.ReadInteger('N' + IntToStr(i), 'S', 0);
     if (version < _FILEVERSION_20) then
-      nav.SymbolID := TranscodeSymbolFromBpnlV3(nav.SymbolID);
+      signal.SymbolID := TranscodeSymbolFromBpnlV3(signal.SymbolID);
 
-    // OR
-    nav.OblRizeni := ini.ReadInteger('N' + IntToStr(i), 'OR', -1);
+    signal.area := ini.ReadInteger('N' + IntToStr(i), 'OR', -1);
 
-    // default settings:
-    if (nav.Blok = -2) then
-      nav.PanelProp := _UA_Nav_Prop
+    if (signal.block = -2) then
+      signal.panelProp := _UA_Signal_Prop
     else
-      nav.PanelProp := _Def_Nav_Prop;
+      signal.panelProp := _Def_Signal_Prop;
 
-    Self.data.Add(nav);
-  end; // for i
+    Self.data.Add(signal);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidla.Show(obj: TDXDraw; blik: Boolean);
-var nav: TPNavestidlo;
+procedure TPSignals.Show(obj: TDXDraw; blik: Boolean);
 begin
-  for nav in Self.data do
+  for var nav: TPSignal in Self.data do
     nav.Show(obj, blik);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPNavestidla.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
+function TPSignals.GetIndex(Pos: TPoint): Integer;
 begin
   Result := -1;
 
-  for i := 0 to Self.data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
     if ((Pos.X = Self.data[i].Position.X) and (Pos.Y = Self.data[i].Position.Y)) then
       Exit(i);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidla.Reset(orindex: Integer = -1);
-var nav: TPNavestidlo;
+procedure TPSignals.Reset(orindex: Integer = -1);
 begin
-  for nav in Self.data do
-    if ((orindex < 0) or (nav.OblRizeni = orindex)) then
+  for var nav: TPSignal in Self.data do
+    if ((orindex < 0) or (nav.area = orindex)) then
       nav.Reset();
 
   Self.startJC.Clear();
@@ -178,53 +167,57 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPNavestidla.GetItem(index: Integer): TPNavestidlo;
+function TPSignals.GetItem(index: Integer): TPSignal;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPNavestidla.GetCount(): Integer;
+function TPSignals.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPNavestidla.UpdateStartJC();
-var nav: TPNavestidlo;
-  sjc: TStartJC;
+procedure TPSignals.UpdateStartJC();
 begin
   Self.startJC.Clear();
 
-  for nav in Self.data do
+  for var nav: TPSignal in Self.data do
   begin
-    if (nav.PanelProp.Okoli <> clBlack) then
+    if (nav.panelProp.surr <> clBlack) then
     begin
-      sjc.Color := nav.PanelProp.Okoli;
-      sjc.Pos := Point(nav.Position.X - 1, nav.Position.Y);
-      Self.startJC.Add(sjc);
+      begin
+        var sjc: TStartJC;
+        sjc.Color := nav.panelProp.surr;
+        sjc.Pos := Point(nav.Position.X - 1, nav.Position.Y);
+        Self.startJC.Add(sjc);
+      end;
 
-      sjc.Color := nav.PanelProp.Okoli;
-      sjc.Pos := Point(nav.Position.X + 1, nav.Position.Y);
-      Self.startJC.Add(sjc);
+      begin
+        var sjc: TStartJC;
+        sjc.Color := nav.panelProp.surr;
+        sjc.Pos := Point(nav.Position.X + 1, nav.Position.Y);
+        Self.startJC.Add(sjc);
+      end;
     end;
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TNavPanelProp.Change(data: TStrings);
+procedure TSignalPanelProp.Change(data: TStrings);
 begin
-  Symbol := StrToColor(data[4]);
-  Pozadi := StrToColor(data[5]);
-  blikani := StrToBool(data[6]);
+  symbol := StrToColor(data[4]);
+  bg := StrToColor(data[5]);
+  flash := StrToBool(data[6]);
   AB := StrToBool(data[7]);
   if (data.Count >= 9) then
-    Okoli := StrToColor(data[8])
+    surr := StrToColor(data[8])
   else
-    Okoli := clBlack;
+    surr := clBlack;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

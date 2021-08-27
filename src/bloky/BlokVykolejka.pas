@@ -1,8 +1,8 @@
 unit BlokVykolejka;
 
 {
-  Definice bloku vykolejka, jeho vlastnosti a stavu v panelu.
-  Definice databaze vykolejek.
+  Definition of a "derial" block.
+  Definition of a databse of derails.
 }
 
 interface
@@ -11,34 +11,34 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
   BlokVyhybka, BlokUsek;
 
 type
-  TPVykolejka = class
-    Blok: Integer;
-    Pos: TPoint;
-    OblRizeni: Integer;
-    PanelProp: TVyhPanelProp;
+  TPDerail = class
+    block: Integer;
+    pos: TPoint;
+    area: Integer;
+    panelProp: TTurnoutPanelProp;
 
     symbol: Integer;
-    usek: Integer; // index useku, na kterem je vykolejka
-    vetev: Integer; // cislo vetve, ve kterem je vykolejka
+    track: Integer; // index useku, na kterem je vykolejka
+    branch: Integer; // cislo vetve, ve kterem je vykolejka
   end;
 
-  TPVykolejky = class
+  TPDerails = class
   private
-    function GetItem(index: Integer): TPVykolejka;
+    function GetItem(index: Integer): TPDerail;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPVykolejka>;
+    data: TObjectList<TPDerail>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
+    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
     function GetIndex(Pos: TPoint): Integer;
-    procedure Reset(orindex: Integer = -1);
+    procedure Reset(area: Integer = -1);
 
-    property Items[index: Integer]: TPVykolejka read GetItem; default;
+    property Items[index: Integer]: TPDerail read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
@@ -48,13 +48,13 @@ uses Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPVykolejky.Create();
+constructor TPDerails.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPVykolejka>.Create();
+  Self.data := TObjectList<TPDerail>.Create();
 end;
 
-destructor TPVykolejky.Destroy();
+destructor TPDerails.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -62,81 +62,78 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVykolejky.Load(ini: TMemIniFile; version: Word);
-var i, Count: Integer;
-  vykol: TPVykolejka;
+procedure TPDerails.Load(ini: TMemIniFile; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'Vyk', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'Vyk', 0);
+  for var i := 0 to count - 1 do
   begin
-    vykol := TPVykolejka.Create();
+    var derail := TPDerail.Create();
 
-    vykol.Blok := ini.ReadInteger('Vyk' + IntToStr(i), 'B', -1);
-    vykol.OblRizeni := ini.ReadInteger('Vyk' + IntToStr(i), 'OR', -1);
-    vykol.Pos.X := ini.ReadInteger('Vyk' + IntToStr(i), 'X', 0);
-    vykol.Pos.Y := ini.ReadInteger('Vyk' + IntToStr(i), 'Y', 0);
-    vykol.usek := ini.ReadInteger('Vyk' + IntToStr(i), 'O', -1);
-    vykol.vetev := ini.ReadInteger('Vyk' + IntToStr(i), 'V', -1);
-    vykol.symbol := ini.ReadInteger('Vyk' + IntToStr(i), 'T', 0);
+    derail.block := ini.ReadInteger('Vyk' + IntToStr(i), 'B', -1);
+    derail.area := ini.ReadInteger('Vyk' + IntToStr(i), 'OR', -1);
+    derail.pos.X := ini.ReadInteger('Vyk' + IntToStr(i), 'X', 0);
+    derail.pos.Y := ini.ReadInteger('Vyk' + IntToStr(i), 'Y', 0);
+    derail.track := ini.ReadInteger('Vyk' + IntToStr(i), 'O', -1);
+    derail.branch := ini.ReadInteger('Vyk' + IntToStr(i), 'V', -1);
+    derail.symbol := ini.ReadInteger('Vyk' + IntToStr(i), 'T', 0);
 
     // default settings:
-    if (vykol.Blok = -2) then
-      vykol.PanelProp := _UA_Vyh_Prop
+    if (derail.block = -2) then
+      derail.panelProp := _UA_TURNOUT_PROP
     else
-      vykol.PanelProp := _Def_Vyh_Prop;
+      derail.panelProp := _DEF_TURNOUT_PROP;
 
-    Self.data.Add(vykol);
-  end; // for i
+    Self.data.Add(derail);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVykolejky.Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
-var fg, bkcol: TColor;
-  visible: boolean;
-  vykol: TPVykolejka;
+procedure TPDerails.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
-  for vykol in Self.data do
+  for var derail in Self.data do
   begin
-    visible := ((vykol.PanelProp.Poloha = TVyhPoloha.disabled) or (vykol.vetev < 0) or
-      (vykol.vetev >= useky[vykol.usek].Vetve.Count) or (useky[vykol.usek].Vetve[vykol.vetev].visible));
+    var visible := ((derail.PanelProp.position = TVyhPoloha.disabled) or (derail.branch < 0) or
+      (derail.branch >= useky[derail.track].branches.Count) or (useky[derail.track].branches[derail.branch].visible));
 
-    if ((vykol.PanelProp.blikani) and (blik) and (visible)) then
+    var fg: TColor;
+    if ((derail.PanelProp.flash) and (blik) and (visible)) then
       fg := clBlack
     else
     begin
-      if ((visible) or (vykol.PanelProp.symbol = clAqua)) then
-        fg := vykol.PanelProp.symbol
+      if ((visible) or (derail.PanelProp.fg = clAqua)) then
+        fg := derail.PanelProp.fg
       else
-        fg := useky[vykol.usek].PanelProp.nebarVetve;
+        fg := useky[derail.track].panelProp.notColorBranches;
     end;
 
-    if (vykol.PanelProp.Pozadi = clBlack) then
-      bkcol := useky[vykol.usek].PanelProp.Pozadi
+    var bkcol: TColor;
+    if (derail.PanelProp.bg = clBlack) then
+      bkcol := useky[derail.track].panelProp.bg
     else
-      bkcol := vykol.PanelProp.Pozadi;
+      bkcol := derail.PanelProp.bg;
 
-    case (vykol.PanelProp.Poloha) of
+    case (derail.PanelProp.position) of
       TVyhPoloha.disabled:
-        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol,
-          useky[vykol.usek].PanelProp.Pozadi, clFuchsia, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol,
+          useky[derail.track].panelProp.bg, clFuchsia, obj);
       TVyhPoloha.none:
-        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, fg, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, bkcol, fg, obj);
       TVyhPoloha.plus:
-        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, fg, bkcol, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, fg, bkcol, obj);
       TVyhPoloha.minus:
-        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol + 2, fg, bkcol, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol + 2, fg, bkcol, obj);
       TVyhPoloha.both:
-        Symbols.Draw(SymbolSet.IL_Symbols, vykol.Pos, _S_DERAIL_B + vykol.symbol, bkcol, clBlue, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, bkcol, clBlue, obj);
     end;
   end; // for i
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVykolejky.GetIndex(Pos: TPoint): Integer;
+function TPDerails.GetIndex(Pos: TPoint): Integer;
 var i: Integer;
 begin
   for i := 0 to Self.data.Count - 1 do
@@ -148,31 +145,30 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVykolejky.Reset(orindex: Integer = -1);
-var vyk: TPVykolejka;
+procedure TPDerails.Reset(area: Integer = -1);
 begin
-  for vyk in Self.data do
+  for var derail in Self.data do
   begin
-    if ((orindex < 0) or (vyk.OblRizeni = orindex)) then
+    if ((area < 0) or (derail.area = area)) then
     begin
-      if (vyk.Blok > -2) then
-        vyk.PanelProp := _Def_Vyh_Prop
+      if (derail.block > -2) then
+        derail.panelProp := _DEF_TURNOUT_PROP
       else
-        vyk.PanelProp := _UA_Vyh_Prop;
+        derail.panelProp := _UA_TURNOUT_PROP;
     end;
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVykolejky.GetItem(index: Integer): TPVykolejka;
+function TPDerails.GetItem(index: Integer): TPDerail;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVykolejky.GetCount(): Integer;
+function TPDerails.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;

@@ -113,7 +113,7 @@ implementation
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
   ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
   GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
-  fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt;
+  fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt, BlokTypes;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -651,7 +651,7 @@ end;
 procedure TPanelTCPClient.ParseORChange();
 begin
   try
-    Relief.ORBlkChange(parsed[0], StrToInt(parsed[3]), StrToInt(parsed[2]), parsed);
+    Relief.ORBlkChange(parsed[0], StrToInt(parsed[3]), TBlkType(StrToInt(parsed[2])), parsed);
   except
     Exit(); // pokud nastane nejaky problem s parsovanim, data proste zahodime
   end;

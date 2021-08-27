@@ -1,7 +1,7 @@
 unit BlokyUsek;
 
 {
-  Definice databaze useku.
+  Definition of a databse of tracks.
 }
 
 interface
@@ -9,41 +9,37 @@ interface
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
   Symbols, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, BlokUsek;
 
-const
-  _Konec_JC: array [0 .. 3] of TColor = (clBlack, clGreen, clWhite, clTeal);
-  // zadna, vlakova, posunova, nouzova (privolavaci)
-
 type
-  TPUsekID = record
+  TPTrackId = record
     index: Integer;
-    soupravaI: Integer;
+    traini: Integer;
   end;
 
-  TPUseky = class
+  TPTracks = class
   private
-    function GetItem(index: Integer): TPUsek;
+    function GetItem(index: Integer): TPTrack;
     function GetCount(): Integer;
 
-    procedure ShowUsekVetve(usek: TPUsek; vetevI: Integer; visible: boolean; var showed: array of boolean;
-      myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
-    procedure ShowDKSVetve(usek: TPUsek; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
-      blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
+    procedure ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
+      myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+    procedure ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
+      blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 
   public
 
-    data: TObjectList<TPUsek>;
+    data: TObjectList<TPTrack>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
     procedure Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
-      vyhybky: TList<TPVyhybka>);
-    function GetIndex(pos: TPoint): TPUsekID;
+      turnouts: TList<TPTurnout>);
+    function GetIndex(pos: TPoint): TPTrackId;
     procedure Reset(orindex: Integer = -1);
-    function GetUsek(tech_id: Integer): Integer;
+    function GetTrack(tech_id: Integer): Integer;
 
-    property Items[index: Integer]: TPUsek read GetItem; default;
+    property Items[index: Integer]: TPTrack read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
@@ -53,13 +49,13 @@ uses ParseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPUseky.Create();
+constructor TPTracks.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPUsek>.Create();
+  Self.data := TObjectList<TPTrack>.Create();
 end;
 
-destructor TPUseky.Destroy();
+destructor TPTracks.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -67,146 +63,139 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUseky.Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
-var i, j, k, Count, count2, count3: Integer;
-  usek: TPUsek;
-  obj: string;
-  symbol: TReliefSym;
-  pos: TPoint;
-  Vetev: TVetev;
+procedure TPTracks.Load(ini: TMemIniFile; myORs: TList<TORPanel>; version: Word);
 begin
-  Count := ini.ReadInteger('P', 'U', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'U', 0);
+  for var i := 0 to count - 1 do
   begin
-    usek := TPUsek.Create();
+    var track := TPTrack.Create();
 
-    usek.Blok := ini.ReadInteger('U' + IntToStr(i), 'B', -1);
-    usek.OblRizeni := ini.ReadInteger('U' + IntToStr(i), 'OR', -1);
-    usek.root := GetPos(ini.ReadString('U' + IntToStr(i), 'R', '-1;-1'));
-    usek.dksType := TDKSType(ini.ReadInteger('U' + IntToStr(i), 'DKS', Integer(dksNone)));
+    track.block := ini.ReadInteger('U' + IntToStr(i), 'B', -1);
+    track.area := ini.ReadInteger('U' + IntToStr(i), 'OR', -1);
+    track.root := GetPos(ini.ReadString('U' + IntToStr(i), 'R', '-1;-1'));
+    track.dksType := TDKSType(ini.ReadInteger('U' + IntToStr(i), 'DKS', Integer(dksNone)));
 
-    // Symbols
-    usek.Symbols := TList<TReliefSym>.Create();
-    obj := ini.ReadString('U' + IntToStr(i), 'S', '');
-    for j := 0 to (Length(obj) div 8) - 1 do
+    track.symbols := TList<TReliefSym>.Create();
+    var obj := ini.ReadString('U' + IntToStr(i), 'S', '');
+    for var j := 0 to (Length(obj) div 8) - 1 do
     begin
       try
+        var symbol: TReliefSym;
         symbol.Position.X := StrToInt(copy(obj, j * 8 + 1, 3));
         symbol.Position.Y := StrToInt(copy(obj, j * 8 + 4, 3));
         symbol.SymbolID := StrToInt(copy(obj, j * 8 + 7, 2));
         if (version < _FILEVERSION_20) then
           symbol.SymbolID := TranscodeSymbolFromBpnlV3(symbol.SymbolID);
+        track.symbols.Add(symbol);
       except
         continue;
       end;
-      usek.Symbols.Add(symbol);
-    end; // for j
+    end;
 
-    // JCClick
-    usek.JCClick := TList<TPoint>.Create();
+    track.JCClick := TList<TPoint>.Create();
     obj := ini.ReadString('U' + IntToStr(i), 'C', '');
-    for j := 0 to (Length(obj) div 6) - 1 do
+    for var j := 0 to (Length(obj) div 6) - 1 do
     begin
       try
+        var pos: TPoint;
         pos.X := StrToInt(copy(obj, j * 6 + 1, 3));
         pos.Y := StrToInt(copy(obj, j * 6 + 4, 3));
+        track.JCClick.Add(pos);
       except
         continue;
       end;
-      usek.JCClick.Add(pos);
-    end; // for j
+    end;
 
-    // KPopisek
     obj := ini.ReadString('U' + IntToStr(i), 'P', '');
-    usek.KPopisek := TList<TPoint>.Create();
-    for j := 0 to (Length(obj) div 6) - 1 do
+    track.labels := TList<TPoint>.Create();
+    for var j := 0 to (Length(obj) div 6) - 1 do
     begin
       try
+        var pos: TPoint;
         pos.X := StrToIntDef(copy(obj, j * 6 + 1, 3), 0);
         pos.Y := StrToIntDef(copy(obj, j * 6 + 4, 3), 0);
+        track.labels.Add(pos);
       except
         continue;
       end;
-      usek.KPopisek.Add(pos);
-    end; // for j
+    end;
 
-    // Nazev
-    usek.KpopisekStr := ini.ReadString('U' + IntToStr(i), 'N', '');
+    track.name := ini.ReadString('U' + IntToStr(i), 'N', '');
 
-    // Soupravy
     obj := ini.ReadString('U' + IntToStr(i), 'Spr', '');
-    usek.Soupravy := TList<TPoint>.Create();
-    for j := 0 to (Length(obj) div 6) - 1 do
+    track.trains := TList<TPoint>.Create();
+    for var j := 0 to (Length(obj) div 6) - 1 do
     begin
       try
+        var pos: TPoint;
         pos.X := StrToIntDef(copy(obj, j * 6 + 1, 3), 0);
         pos.Y := StrToIntDef(copy(obj, j * 6 + 4, 3), 0);
+        track.trains.Add(pos);
       except
         continue;
       end;
-      usek.Soupravy.Add(pos);
-    end; // for j
+    end;
 
     // usporadame seznam souprav podle licheho smeru
-    if (myORs[usek.OblRizeni].Lichy = 1) then
-      usek.Soupravy.Reverse();
+    if (myORs[track.area].Lichy = 1) then
+      track.trains.Reverse();
 
     // pokud nejsou pozice na soupravu, kreslime soupravu na cislo koleje
-    if ((usek.Soupravy.Count = 0) and (usek.KpopisekStr <> '') and (usek.KPopisek.Count <> 0)) then
-      usek.Soupravy.Add(usek.KPopisek[0]);
+    if ((track.trains.Count = 0) and (track.name <> '') and (track.labels.Count <> 0)) then
+      track.trains.Add(track.labels[0]);
 
     // nacitani vetvi:
-    usek.Vetve := TList<TVetev>.Create();
-    count2 := ini.ReadInteger('U' + IntToStr(i), 'VC', 0);
-    for j := 0 to count2 - 1 do
+    track.branches := TList<TTrackBranch>.Create();
+    var count2 := ini.ReadInteger('U' + IntToStr(i), 'VC', 0);
+    for var j := 0 to count2 - 1 do
     begin
+      var branch: TTrackBranch;
       obj := ini.ReadString('U' + IntToStr(i), 'V' + IntToStr(j), '');
 
-      Vetev.Symbols := TList<TReliefSym>.Create();
-      Vetev.node1.vyh := StrToIntDef(copy(obj, 0, 3), 0);
-      Vetev.node1.ref_plus := StrToIntDef(copy(obj, 4, 2), 0);
-      Vetev.node1.ref_minus := StrToIntDef(copy(obj, 6, 2), 0);
+      branch.Symbols := TList<TReliefSym>.Create();
+      branch.node1.turnout := StrToIntDef(copy(obj, 0, 3), 0);
+      branch.node1.ref_plus := StrToIntDef(copy(obj, 4, 2), 0);
+      branch.node1.ref_minus := StrToIntDef(copy(obj, 6, 2), 0);
 
-      Vetev.node2.vyh := StrToIntDef(copy(obj, 8, 3), 0);
-      Vetev.node2.ref_plus := StrToIntDef(copy(obj, 11, 2), 0);
-      Vetev.node2.ref_minus := StrToIntDef(copy(obj, 13, 2), 0);
+      branch.node2.turnout := StrToIntDef(copy(obj, 8, 3), 0);
+      branch.node2.ref_plus := StrToIntDef(copy(obj, 11, 2), 0);
+      branch.node2.ref_minus := StrToIntDef(copy(obj, 13, 2), 0);
 
       obj := RightStr(obj, Length(obj) - 14);
-      count3 := Length(obj) div 9;
-      for k := 0 to count3 - 1 do
+      var count3 := Length(obj) div 9;
+      for var k := 0 to count3 - 1 do
       begin
+        var symbol: TReliefSym;
         symbol.Position.X := StrToIntDef(copy(obj, 9 * k + 1, 3), 0);
         symbol.Position.Y := StrToIntDef(copy(obj, (9 * k + 4), 3), 0);
         symbol.SymbolID := StrToIntDef(copy(obj, (9 * k + 7), 3), 0);
-        Vetev.Symbols.Add(symbol);
+        branch.symbols.Add(symbol);
       end;
 
-      usek.Vetve.Add(Vetev);
-    end; // for j
+      track.branches.Add(branch);
+    end;
 
     // default settings:
-    if (usek.Blok = -2) then
-      usek.PanelProp.InitUA()
+    if (track.block = -2) then
+      track.panelProp.InitUA()
     else
-      usek.PanelProp.InitDefault();
+      track.panelProp.InitDefault();
 
-    usek.PanelProp.Soupravy := TList<TUsekSouprava>.Create();
+    track.panelProp.trains := TList<TTrackTrain>.Create();
 
-    Self.data.Add(usek);
+    Self.data.Add(track);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUseky.GetIndex(pos: TPoint): TPUsekID;
-var i, j: Integer;
-  us: TUsekSouprava;
+function TPTracks.GetIndex(pos: TPoint): TPTrackId;
 begin
   Result.index := -1;
 
-  for i := 0 to Self.data.Count - 1 do
-    for j := 0 to Self.data[i].Symbols.Count - 1 do
-      if ((pos.X = Self.data[i].Symbols[j].Position.X) and (pos.Y = Self.data[i].Symbols[j].Position.Y)) then
+  for var i := 0 to Self.data.Count - 1 do
+    for var j := 0 to Self.data[i].symbols.Count - 1 do
+      if ((pos.X = Self.data[i].symbols[j].Position.X) and (pos.Y = Self.data[i].symbols[j].Position.Y)) then
       begin
         Result.index := i;
         Break;
@@ -214,21 +203,21 @@ begin
 
   if (Result.index = -1) then
     Exit();
-  Result.soupravaI := -1;
+  Result.traini := -1;
 
   // zjisteni indexu soupravy
-  for i := 0 to Self.data[Result.index].PanelProp.Soupravy.Count - 1 do
+  for var i := 0 to Self.data[Result.index].panelProp.trains.Count - 1 do
   begin
-    us := Self.data[Result.index].PanelProp.Soupravy[i];
+    var us := Self.data[Result.index].panelProp.trains[i];
 
     if (us.posindex < 0) then
       continue;
 
-    if ((pos.X >= Self.data[Result.index].Soupravy[us.posindex].X - (Length(us.nazev) div 2)) and
-      (pos.X < Self.data[Result.index].Soupravy[us.posindex].X + (Length(us.nazev) div 2) + (Length(us.nazev) mod 2)))
+    if ((pos.X >= Self.data[Result.index].trains[us.posindex].X - (Length(us.name) div 2)) and
+      (pos.X < Self.data[Result.index].trains[us.posindex].X + (Length(us.name) div 2) + (Length(us.name) mod 2)))
     then
     begin
-      Result.soupravaI := i;
+      Result.traini := i;
       Exit();
     end;
   end;
@@ -236,203 +225,190 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUseky.Reset(orindex: Integer = -1);
-var usek: TPUsek;
+procedure TPTracks.Reset(orindex: Integer = -1);
 begin
-  for usek in Self.data do
-    if ((orindex < 0) or (usek.OblRizeni = orindex)) then
-      usek.Reset();
+  for var track in Self.data do
+    if ((orindex < 0) or (track.area = orindex)) then
+      track.Reset();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUseky.Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
-  vyhybky: TList<TPVyhybka>);
-var j, k: Integer;
-  showed: array of boolean;
-  fg, bg: TColor;
-  sjc: TStartJC;
-  sym: TReliefSym;
-  p: TPoint;
-  usek: TPUsek;
+procedure TPTracks.Show(obj: TDXDraw; blik: boolean; myORs: TList<TORPanel>; startJC: TList<TStartJC>;
+  turnouts: TList<TPTurnout>);
+var fg: TColor;
+    showed: array of Boolean;
 begin
-  for usek in Self.data do
+  for var track in Self.data do
   begin
     // vykresleni symbolu useku
 
-    if (((usek.PanelProp.blikani) or ((usek.PanelProp.Soupravy.Count > 0) and
-      (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected))) and (blik)) then
+    if (((track.panelProp.flash) or ((track.panelProp.trains.Count > 0) and
+      (myORs[track.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik)) then
       fg := clBlack
     else
-      fg := usek.PanelProp.symbol;
+      fg := track.panelProp.fg;
 
-    if ((usek.Vetve.Count = 0) or (usek.PanelProp.symbol = clFuchsia)) then
+    if ((track.branches.Count = 0) or (track.panelProp.fg = clFuchsia)) then
     begin
       // pokud nejsou vetve, nebo je usek disabled, vykresim ho cely (bez ohledu na vetve)
-      for sym in usek.Symbols do
+      for var sym in track.symbols do
       begin
-        bg := usek.PanelProp.Pozadi;
+        var bg := track.panelProp.bg;
 
-        for sjc in startJC do
+        for var sjc in startJC do
           if ((sjc.pos.X = sym.Position.X) and (sjc.pos.Y = sym.Position.Y)) then
             bg := sjc.Color;
 
-        for k := 0 to usek.JCClick.Count - 1 do
-          if ((usek.JCClick[k].X = sym.Position.X) and (usek.JCClick[k].Y = sym.Position.Y)) then
-            if (Integer(usek.PanelProp.KonecJC) > 0) then
-              bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
+        for var k := 0 to track.JCClick.Count - 1 do
+          if ((track.JCClick[k].X = sym.Position.X) and (track.JCClick[k].Y = sym.Position.Y)) then
+            if (Integer(track.panelProp.jcend) > 0) then
+              bg := _JC_END[Integer(track.panelProp.jcend)];
 
         Symbols.Draw(SymbolSet.IL_Symbols, sym.Position, sym.SymbolID, fg, bg, obj);
       end;
 
     end else begin
-
-      SetLength(showed, usek.Vetve.Count);
-      for j := 0 to usek.Vetve.Count - 1 do
+      SetLength(showed, track.branches.Count);
+      for var j := 0 to track.branches.Count - 1 do
         showed[j] := false;
 
       // pokud jsou vetve a usek neni disabled, kreslim vetve
-      if (usek.dksType <> dksNone) then
-        ShowDKSVetve(usek, true, showed, myORs, blik, obj, startJC, vyhybky)
+      if (track.dksType <> dksNone) then
+        ShowDKSBranches(track, true, showed, myORs, blik, obj, startJC, turnouts)
       else
-        ShowUsekVetve(usek, 0, true, showed, myORs, blik, obj, startJC, vyhybky);
+        ShowBranches(track, 0, true, showed, myORs, blik, obj, startJC, turnouts);
     end;
 
     // vykresleni cisla koleje
     // kdyz by mela cislo koleje prekryt souprava, nevykreslovat cislo koleje
     // (cislo soupravy muze byt kratsi nez cislo koleje)
-    if ((usek.Soupravy.Count > 0) and (usek.KPopisek.Count > 0)) then
+    if ((track.trains.Count > 0) and (track.labels.Count > 0)) then
     begin
-      if (usek.SprPaintsOnRailNum() and (usek.PanelProp.Soupravy.Count > 0)) then
+      if (track.TrainPaintsOnRailNum() and (track.panelProp.trains.Count > 0)) then
       begin
-        for j := 1 to usek.KPopisek.Count - 1 do // na nulte pozici je cislo soupravy
-          usek.PaintCisloKoleje(usek.KPopisek[j], obj, fg = clBlack);
+        for var j := 1 to track.labels.Count - 1 do // na nulte pozici je cislo soupravy
+          track.PaintTrackName(track.labels[j], obj, fg = clBlack);
       end else begin
-        for p in usek.KPopisek do
-          usek.PaintCisloKoleje(p, obj, fg = clBlack);
+        for var p in track.labels do
+          track.PaintTrackName(p, obj, fg = clBlack);
       end;
     end;
 
-    // vykresleni souprav
-    usek.ShowSoupravy(obj, blik, myORs);
-  end; // for i
+    track.ShowTrains(obj, blik, myORs);
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 // Rekurzivne kresli vetve bezneho bloku
-procedure TPUseky.ShowUsekVetve(usek: TPUsek; vetevI: Integer; visible: boolean; var showed: array of boolean;
-  myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
-var fg, bg: TColor;
-  Vetev: TVetev;
-  sjc: TStartJC;
-  p: TPoint;
-  vyh: TPVyhybka;
-  symbol: TReliefSym;
+procedure TPTracks.ShowBranches(usek: TPTrack; vetevI: Integer; visible: boolean; var showed: array of boolean;
+  myORs: TList<TORPanel>; blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
+var fg: TColor;
 begin
   if (vetevI < 0) then
     Exit();
   if (showed[vetevI]) then
     Exit();
   showed[vetevI] := true;
-  Vetev := usek.Vetve[vetevI];
+  var branch := usek.branches[vetevI];
 
-  Vetev.visible := visible;
-  usek.Vetve[vetevI] := Vetev;
+  branch.visible := visible;
+  usek.branches[vetevI] := branch;
 
-  if (((usek.PanelProp.blikani) or ((usek.PanelProp.Soupravy.Count > 0) and
-    (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
+  if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
+    (myORs[usek.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
     fg := clBlack
   else
   begin
     if (visible) then
-      fg := usek.PanelProp.symbol
+      fg := usek.panelProp.fg
     else
-      fg := usek.PanelProp.nebarVetve;
+      fg := usek.panelProp.notColorBranches;
   end;
 
-  bg := usek.PanelProp.Pozadi;
+  var bg := usek.panelProp.bg;
 
-  for symbol in Vetev.Symbols do
+  for var symbol in branch.Symbols do
   begin
     if ((symbol.SymbolID < _S_TRACK_DET_B) and (symbol.SymbolID > _S_TRACK_NODET_E)) then
       continue; // tato situace nastava v pripade vykolejek
 
-    bg := usek.PanelProp.Pozadi;
+    bg := usek.panelProp.bg;
 
-    for sjc in startJC do
+    for var sjc in startJC do
       if ((sjc.pos.X = symbol.Position.X) and (sjc.pos.Y = symbol.Position.Y)) then
         bg := sjc.Color;
 
-    for p in usek.JCClick do
+    for var p in usek.JCClick do
       if ((p.X = symbol.Position.X) and (p.Y = symbol.Position.Y)) then
-        if (Integer(usek.PanelProp.KonecJC) > 0) then
-          bg := _Konec_JC[Integer(usek.PanelProp.KonecJC)];
+        if (Integer(usek.panelProp.jcend) > 0) then
+          bg := _JC_END[Integer(usek.panelProp.jcend)];
 
     Symbols.Draw(SymbolSet.IL_Symbols, symbol.Position, symbol.SymbolID, fg, bg, obj);
   end; // for i
 
-  if (Vetev.node1.vyh > -1) then
+  if (branch.node1.turnout > -1) then
   begin
-    vyh := vyhybky[Vetev.node1.vyh];
+    var vyh := turnouts[branch.node1.turnout];
     vyh.visible := visible;
 
     // nastaveni barvy neprirazene vyhybky
-    if (vyh.Blok = -2) then
+    if (vyh.block = -2) then
     begin
-      vyh.PanelProp.symbol := fg;
-      vyh.PanelProp.Pozadi := bg;
+      vyh.panelProp.fg := fg;
+      vyh.panelProp.bg := bg;
     end;
 
-    case (vyh.PanelProp.Poloha) of
+    case (vyh.panelProp.position) of
       TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:
         begin
-          ShowUsekVetve(usek, Vetev.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
-          ShowUsekVetve(usek, Vetev.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, vyhybky);
+          ShowBranches(usek, branch.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
+          ShowBranches(usek, branch.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
         end; // case disable, both, none
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(vyh.PanelProp.Poloha) xor vyh.PolohaPlus) = 0) then
+          if ((Integer(vyh.panelProp.position) xor vyh.orientationPlus) = 0) then
           begin
-            ShowUsekVetve(usek, Vetev.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
-            ShowUsekVetve(usek, Vetev.node1.ref_minus, false, showed, myORs, blik, obj, startJC, vyhybky);
+            ShowBranches(usek, branch.node1.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(usek, branch.node1.ref_minus, false, showed, myORs, blik, obj, startJC, turnouts);
           end else begin
-            ShowUsekVetve(usek, Vetev.node1.ref_plus, false, showed, myORs, blik, obj, startJC, vyhybky);
-            ShowUsekVetve(usek, Vetev.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, vyhybky);
+            ShowBranches(usek, branch.node1.ref_plus, false, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(usek, branch.node1.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
           end;
         end; // case disable, both, none
     end; // case
   end;
 
-  if (Vetev.node2.vyh > -1) then
+  if (branch.node2.turnout > -1) then
   begin
-    vyh := vyhybky[Vetev.node2.vyh];
+    var vyh := turnouts[branch.node2.turnout];
     vyh.visible := visible;
 
     // nastaveni barvy neprirazene vyhybky
-    if (vyh.Blok = -2) then
+    if (vyh.block = -2) then
     begin
-      vyh.PanelProp.symbol := fg;
-      vyh.PanelProp.Pozadi := bg;
+      vyh.panelProp.fg := fg;
+      vyh.panelProp.bg := bg;
     end;
 
-    case (vyh.PanelProp.Poloha) of
+    case (vyh.panelProp.position) of
       TVyhPoloha.disabled, TVyhPoloha.both, TVyhPoloha.none:
         begin
-          ShowUsekVetve(usek, Vetev.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
-          ShowUsekVetve(usek, Vetev.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, vyhybky);
+          ShowBranches(usek, branch.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
+          ShowBranches(usek, branch.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
         end; // case disable, both, none
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(vyh.PanelProp.Poloha) xor vyh.PolohaPlus) = 0) then
+          if ((Integer(vyh.panelProp.position) xor vyh.orientationPlus) = 0) then
           begin
-            ShowUsekVetve(usek, Vetev.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, vyhybky);
-            ShowUsekVetve(usek, Vetev.node2.ref_minus, false, showed, myORs, blik, obj, startJC, vyhybky);
+            ShowBranches(usek, branch.node2.ref_plus, visible, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(usek, branch.node2.ref_minus, false, showed, myORs, blik, obj, startJC, turnouts);
           end else begin
-            ShowUsekVetve(usek, Vetev.node2.ref_plus, false, showed, myORs, blik, obj, startJC, vyhybky);
-            ShowUsekVetve(usek, Vetev.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, vyhybky);
+            ShowBranches(usek, branch.node2.ref_plus, false, showed, myORs, blik, obj, startJC, turnouts);
+            ShowBranches(usek, branch.node2.ref_minus, visible, showed, myORs, blik, obj, startJC, turnouts);
           end;
         end; // case disable, both, none
     end; // case
@@ -442,53 +418,50 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // Zobrazuje vetve bloku, ktery je dvojita kolejova spojka.
-procedure TPUseky.ShowDKSVetve(usek: TPUsek; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
-  blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; vyhybky: TList<TPVyhybka>);
-var polLeft, polRight: TVyhPoloha;
-  leftHidden, rightHidden: boolean;
-  leftCross, rightCross: boolean;
-  fg: TColor;
+procedure TPTracks.ShowDKSBranches(usek: TPTrack; visible: boolean; var showed: array of boolean; myORs: TList<TORPanel>;
+  blik: boolean; obj: TDXDraw; startJC: TList<TStartJC>; turnouts: TList<TPTurnout>);
 begin
-  if (usek.Vetve.Count < 3) then
+  if (usek.branches.Count < 3) then
     Exit();
-  if (usek.Vetve[0].node1.vyh < 0) then
+  if (usek.branches[0].node1.turnout < 0) then
     Exit();
-  if (usek.Vetve[1].node1.vyh < 0) then
+  if (usek.branches[1].node1.turnout < 0) then
     Exit();
 
   // 1) zjistime si polohy vyhybek
-  polLeft := vyhybky[usek.Vetve[0].node1.vyh].PanelProp.Poloha;
-  polRight := vyhybky[usek.Vetve[1].node1.vyh].PanelProp.Poloha;
+  var polLeft := turnouts[usek.branches[0].node1.turnout].panelProp.position;
+  var polRight := turnouts[usek.branches[1].node1.turnout].panelProp.position;
 
   // 2) rozhodneme o tom co barvit
-  leftHidden := ((polLeft = TVyhPoloha.plus) and (polRight = TVyhPoloha.minus));
-  rightHidden := ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.plus));
+  var leftHidden := ((polLeft = TVyhPoloha.plus) and (polRight = TVyhPoloha.minus));
+  var rightHidden := ((polLeft = TVyhPoloha.minus) and (polRight = TVyhPoloha.plus));
 
-  leftCross := (polLeft <> TVyhPoloha.plus) and (not leftHidden);
-  rightCross := (polRight <> TVyhPoloha.plus) and (not rightHidden);
+  var leftCross := (polLeft <> TVyhPoloha.plus) and (not leftHidden);
+  var rightCross := (polRight <> TVyhPoloha.plus) and (not rightHidden);
 
-  ShowUsekVetve(usek, 0, leftCross, showed, myORs, blik, obj, startJC, vyhybky);
-  ShowUsekVetve(usek, 1, rightCross, showed, myORs, blik, obj, startJC, vyhybky);
-  ShowUsekVetve(usek, 2, not(leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and
-    (polRight = TVyhPoloha.minus))), showed, myORs, blik, obj, startJC, vyhybky);
-  if (usek.Vetve.Count > 3) then
-    ShowUsekVetve(usek, 3, not leftHidden, showed, myORs, blik, obj, startJC, vyhybky);
-  if (usek.Vetve.Count > 4) then
-    ShowUsekVetve(usek, 4, not rightHidden, showed, myORs, blik, obj, startJC, vyhybky);
+  ShowBranches(usek, 0, leftCross, showed, myORs, blik, obj, startJC, turnouts);
+  ShowBranches(usek, 1, rightCross, showed, myORs, blik, obj, startJC, turnouts);
+  ShowBranches(usek, 2, not(leftHidden or rightHidden or ((polLeft = TVyhPoloha.minus) and
+    (polRight = TVyhPoloha.minus))), showed, myORs, blik, obj, startJC, turnouts);
+  if (usek.branches.Count > 3) then
+    ShowBranches(usek, 3, not leftHidden, showed, myORs, blik, obj, startJC, turnouts);
+  if (usek.branches.Count > 4) then
+    ShowBranches(usek, 4, not rightHidden, showed, myORs, blik, obj, startJC, turnouts);
 
-  vyhybky[usek.Vetve[0].node1.vyh].visible := not leftHidden;
-  vyhybky[usek.Vetve[1].node1.vyh].visible := not rightHidden;
+  turnouts[usek.branches[0].node1.turnout].visible := not leftHidden;
+  turnouts[usek.branches[1].node1.turnout].visible := not rightHidden;
 
   // 3) vykreslime stredovy kriz
-  if (((usek.PanelProp.blikani) or ((usek.PanelProp.Soupravy.Count > 0) and
-    (myORs[usek.OblRizeni].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
+  var fg: TColor;
+  if (((usek.panelProp.flash) or ((usek.panelProp.trains.Count > 0) and
+    (myORs[usek.area].RegPlease.status = TORRegPleaseStatus.selected))) and (blik) and (visible)) then
     fg := clBlack
   else
   begin
     if (visible) then
-      fg := usek.PanelProp.symbol
+      fg := usek.panelProp.fg
     else
-      fg := usek.PanelProp.nebarVetve;
+      fg := usek.panelProp.notColorBranches;
   end;
 
   usek.ShowDKSCross(usek.root, obj, leftCross, rightCross, usek.dksType, fg, usek);
@@ -498,25 +471,24 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUseky.GetItem(index: Integer): TPUsek;
+function TPTracks.GetItem(index: Integer): TPTrack;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUseky.GetCount(): Integer;
+function TPTracks.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUseky.GetUsek(tech_id: Integer): Integer;
-var i: Integer;
+function TPTracks.GetTrack(tech_id: Integer): Integer;
 begin
-  for i := 0 to Self.data.Count - 1 do
-    if (tech_id = Self.data[i].Blok) then
+  for var i := 0 to Self.data.Count - 1 do
+    if (tech_id = Self.data[i].block) then
       Exit(i);
 
   Result := -1;

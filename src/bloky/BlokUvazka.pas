@@ -1,8 +1,8 @@
 unit BlokUvazka;
 
 {
-  Definice bloku uvazka, jeho vlastnosti a stavu v panelu.
-  Definice databaze bloku typu uvazka.
+  Linker block definition.
+  Databse of linkers definition.
 }
 
 interface
@@ -10,31 +10,31 @@ interface
 uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws, Classes;
 
 type
-  TUvazkaSmer = (disabled = -1, zadny = 0, zakladni = 1, opacny = 2);
+  TLinkerDir = (disabled = -1, zadny = 0, zakladni = 1, opacny = 2);
 
-  TUvazkaPanelProp = record
-    Symbol, Pozadi: TColor;
-    blik: boolean;
-    smer: TUvazkaSmer;
+  TLinkerPanelProp = record
+    fg, bg: TColor;
+    flash: boolean;
+    dir: TLinkerDir;
 
     procedure Change(parsed: TStrings);
   end;
 
-  TPUvazka = class
-    Blok: Integer;
-    Pos: TPoint;
-    defalt_dir: Integer;
-    OblRizeni: Integer;
-    PanelProp: TUvazkaPanelProp;
+  TPLinker = class
+    block: Integer;
+    pos: TPoint;
+    defaltDir: Integer;
+    area: Integer;
+    panelProp: TLinkerPanelProp;
   end;
 
-  TPUvazky = class
+  TPLinkers = class
   private
-    function GetItem(index: Integer): TPUvazka;
+    function GetItem(index: Integer): TPLinker;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPUvazka>;
+    data: TObjectList<TPLinker>;
 
     constructor Create();
     destructor Destroy(); override;
@@ -44,14 +44,13 @@ type
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
 
-    property Items[index: Integer]: TPUvazka read GetItem; default;
+    property Items[index: Integer]: TPLinker read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
 const
-  _Def_Uvazka_Prop: TUvazkaPanelProp = (Symbol: clBlack; Pozadi: clFuchsia; blik: false; smer: disabled;);
-
-  _UA_Uvazka_Prop: TUvazkaPanelProp = (Symbol: $A0A0A0; Pozadi: clBlack; blik: false; smer: zadny;);
+  _Def_Linker_Prop: TLinkerPanelProp = (fg: clBlack; bg: clFuchsia; flash: false; dir: disabled;);
+  _UA_Linker_Prop: TLinkerPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false; dir: zadny;);
 
 implementation
 
@@ -59,13 +58,13 @@ uses Symbols, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPUvazky.Create();
+constructor TPLinkers.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPUvazka>.Create();
+  Self.data := TObjectList<TPLinker>.Create();
 end;
 
-destructor TPUvazky.Destroy();
+destructor TPLinkers.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -73,68 +72,65 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazky.Load(ini: TMemIniFile; version: Word);
-var i, Count: Integer;
-  uv: TPUvazka;
+procedure TPLinkers.Load(ini: TMemIniFile; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'Uv', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'Uv', 0);
+  for var i := 0 to Count - 1 do
   begin
-    uv := TPUvazka.Create();
+    var linker := TPLinker.Create();
 
-    uv.Blok := ini.ReadInteger('Uv' + IntToStr(i), 'B', -1);
-    uv.OblRizeni := ini.ReadInteger('Uv' + IntToStr(i), 'OR', -1);
-    uv.Pos.X := ini.ReadInteger('Uv' + IntToStr(i), 'X', 0);
-    uv.Pos.Y := ini.ReadInteger('Uv' + IntToStr(i), 'Y', 0);
-    uv.defalt_dir := ini.ReadInteger('Uv' + IntToStr(i), 'D', 0);
+    linker.block := ini.ReadInteger('Uv' + IntToStr(i), 'B', -1);
+    linker.area := ini.ReadInteger('Uv' + IntToStr(i), 'OR', -1);
+    linker.pos.X := ini.ReadInteger('Uv' + IntToStr(i), 'X', 0);
+    linker.pos.Y := ini.ReadInteger('Uv' + IntToStr(i), 'Y', 0);
+    linker.defaltDir := ini.ReadInteger('Uv' + IntToStr(i), 'D', 0);
 
     // default settings:
-    if (uv.Blok = -2) then
-      uv.PanelProp := _UA_Uvazka_Prop
+    if (linker.block = -2) then
+      linker.panelProp := _UA_Linker_Prop
     else
-      uv.PanelProp := _Def_Uvazka_Prop;
+      linker.panelProp := _Def_Linker_Prop;
 
-    Self.data.Add(uv);
+    Self.data.Add(linker);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazky.Show(obj: TDXDraw; blik: boolean);
+procedure TPLinkers.Show(obj: TDXDraw; blik: boolean);
 var fg: TColor;
-  uv: TPUvazka;
 begin
-  for uv in Self.data do
+  for var linker in Self.data do
   begin
-    if ((uv.PanelProp.blik) and (blik)) then
+    if ((linker.panelProp.flash) and (blik)) then
       fg := clBlack
     else
-      fg := uv.PanelProp.Symbol;
+      fg := linker.panelProp.fg;
 
-    case (uv.PanelProp.smer) of
-      TUvazkaSmer.disabled, TUvazkaSmer.zadny:
+    case (linker.panelProp.dir) of
+      TLinkerDir.disabled, TLinkerDir.zadny:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
-          Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
-            uv.PanelProp.Pozadi, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, linker.pos, _S_RAILWAY_LEFT, fg, linker.panelProp.bg, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Point(linker.pos.X + 1, linker.pos.Y), _S_RAILWAY_RIGHT, fg,
+            linker.panelProp.bg, obj);
         end;
 
-      TUvazkaSmer.zakladni, TUvazkaSmer.opacny:
+      TLinkerDir.zakladni, TLinkerDir.opacny:
         begin
-          if (((uv.PanelProp.smer = zakladni) and (uv.defalt_dir = 0)) or
-            ((uv.PanelProp.smer = opacny) and (uv.defalt_dir = 1))) then
+          if (((linker.panelProp.dir = zakladni) and (linker.defaltDir = 0)) or
+            ((linker.panelProp.dir = opacny) and (linker.defaltDir = 1))) then
           begin
             // sipka zleva doprava
-            Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_TRACK_DET_B, fg, uv.PanelProp.Pozadi, obj);
-            Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_RAILWAY_RIGHT, fg,
-              uv.PanelProp.Pozadi, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, linker.pos, _S_TRACK_DET_B, fg, linker.panelProp.bg, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, Point(linker.pos.X + 1, linker.pos.Y), _S_RAILWAY_RIGHT, fg,
+              linker.panelProp.bg, obj);
           end else begin
             // sipka zprava doleva
-            Symbols.Draw(SymbolSet.IL_Symbols, uv.Pos, _S_RAILWAY_LEFT, fg, uv.PanelProp.Pozadi, obj);
-            Symbols.Draw(SymbolSet.IL_Symbols, Point(uv.Pos.X + 1, uv.Pos.Y), _S_TRACK_DET_B, fg,
-              uv.PanelProp.Pozadi, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, linker.pos, _S_RAILWAY_LEFT, fg, linker.panelProp.bg, obj);
+            Symbols.Draw(SymbolSet.IL_Symbols, Point(linker.pos.X + 1, linker.pos.Y), _S_TRACK_DET_B, fg,
+              linker.panelProp.bg, obj);
           end;
         end;
     end;
@@ -143,55 +139,53 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazky.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
+function TPLinkers.GetIndex(Pos: TPoint): Integer;
 begin
   Result := -1;
 
-  for i := 0 to Self.data.Count - 1 do
-    if ((Pos.X >= Self.data[i].Pos.X) and (Pos.Y = Self.data[i].Pos.Y) and (Pos.X <= Self.data[i].Pos.X + 1)) then
+  for var i := 0 to Self.data.Count - 1 do
+    if ((Pos.X >= Self.data[i].pos.X) and (Pos.Y = Self.data[i].pos.Y) and (Pos.X <= Self.data[i].pos.X + 1)) then
       Exit(i);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPUvazky.Reset(orindex: Integer = -1);
-var uvazka: TPUvazka;
+procedure TPLinkers.Reset(orindex: Integer = -1);
 begin
-  for uvazka in Self.data do
+  for var linker in Self.data do
   begin
-    if ((orindex < 0) or (uvazka.OblRizeni = orindex)) then
+    if ((orindex < 0) or (linker.area = orindex)) then
     begin
-      if (uvazka.Blok > -2) then
-        uvazka.PanelProp := _Def_Uvazka_Prop
+      if (linker.block > -2) then
+        linker.panelProp := _Def_Linker_Prop
       else
-        uvazka.PanelProp := _UA_Uvazka_Prop;
+        linker.panelProp := _UA_Linker_Prop;
     end;
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazky.GetItem(index: Integer): TPUvazka;
+function TPLinkers.GetItem(index: Integer): TPLinker;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPUvazky.GetCount(): Integer;
+function TPLinkers.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazkaPanelProp.Change(parsed: TStrings);
+procedure TLinkerPanelProp.Change(parsed: TStrings);
 begin
-  Symbol := StrToColor(parsed[4]);
-  Pozadi := StrToColor(parsed[5]);
-  blik := StrToBool(parsed[6]);
-  smer := TUvazkaSmer(StrToInt(parsed[7]));
+  fg := StrToColor(parsed[4]);
+  bg := StrToColor(parsed[5]);
+  flash := StrToBool(parsed[6]);
+  dir := TLinkerDir(StrToInt(parsed[7]));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

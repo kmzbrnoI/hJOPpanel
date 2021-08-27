@@ -1,7 +1,7 @@
 unit BlokyVyhybka;
 
 {
-  Definice databaze vyhybek.
+  Databse of turnouts.
 }
 
 interface
@@ -10,23 +10,23 @@ uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils
   BlokUsek, BlokVyhybka;
 
 type
-  TPVyhybky = class
+  TPTurnouts = class
   private
-    function GetItem(index: Integer): TPVyhybka;
+    function GetItem(index: Integer): TPTurnout;
     function GetCount(): Integer;
 
   public
-    data: TObjectList<TPVyhybka>;
+    data: TObjectList<TPTurnout>;
 
     constructor Create();
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; version: Word);
-    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
+    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
     function GetIndex(Pos: TPoint): Integer;
     procedure Reset(orindex: Integer = -1);
 
-    property Items[index: Integer]: TPVyhybka read GetItem; default;
+    property Items[index: Integer]: TPTurnout read GetItem; default;
     property Count: Integer read GetCount;
   end;
 
@@ -36,13 +36,13 @@ uses Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPVyhybky.Create();
+constructor TPTurnouts.Create();
 begin
   inherited;
-  Self.data := TObjectList<TPVyhybka>.Create();
+  Self.data := TObjectList<TPTurnout>.Create();
 end;
 
-destructor TPVyhybky.Destroy();
+destructor TPTurnouts.Destroy();
 begin
   Self.data.Free();
   inherited;
@@ -50,79 +50,74 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybky.Load(ini: TMemIniFile; version: Word);
-var Count, i: Integer;
-  vyh: TPVyhybka;
+procedure TPTurnouts.Load(ini: TMemIniFile; version: Word);
 begin
   Self.data.Clear();
 
-  Count := ini.ReadInteger('P', 'V', 0);
-  for i := 0 to Count - 1 do
+  var count := ini.ReadInteger('P', 'V', 0);
+  for var i := 0 to count - 1 do
   begin
-    vyh := TPVyhybka.Create();
+    var turnout := TPTurnout.Create();
 
-    vyh.Blok := ini.ReadInteger('V' + IntToStr(i), 'B', -1);
-    vyh.SymbolID := ini.ReadInteger('V' + IntToStr(i), 'S', 0);
-    vyh.PolohaPlus := ini.ReadInteger('V' + IntToStr(i), 'P', 0);
-    vyh.Position.X := ini.ReadInteger('V' + IntToStr(i), 'X', 0);
-    vyh.Position.Y := ini.ReadInteger('V' + IntToStr(i), 'Y', 0);
-    vyh.obj := ini.ReadInteger('V' + IntToStr(i), 'O', -1);
+    turnout.block := ini.ReadInteger('V' + IntToStr(i), 'B', -1);
+    turnout.symbolID := ini.ReadInteger('V' + IntToStr(i), 'S', 0);
+    turnout.orientationPlus := ini.ReadInteger('V' + IntToStr(i), 'P', 0);
+    turnout.position.X := ini.ReadInteger('V' + IntToStr(i), 'X', 0);
+    turnout.position.Y := ini.ReadInteger('V' + IntToStr(i), 'Y', 0);
+    turnout.obj := ini.ReadInteger('V' + IntToStr(i), 'O', -1);
 
     // OR
-    vyh.OblRizeni := ini.ReadInteger('V' + IntToStr(i), 'OR', -1);
+    turnout.area := ini.ReadInteger('V' + IntToStr(i), 'OR', -1);
 
     // default settings:
-    vyh.visible := true;
-    if (vyh.Blok = -2) then
-      vyh.PanelProp := _UA_Vyh_Prop
+    turnout.visible := true;
+    if (turnout.block = -2) then
+      turnout.panelProp := _UA_TURNOUT_PROP
     else
-      vyh.PanelProp := _Def_Vyh_Prop;
+      turnout.panelProp := _DEF_TURNOUT_PROP;
 
-    Self.data.Add(vyh);
+    Self.data.Add(turnout);
   end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybky.Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
-var vyh: TPVyhybka;
+procedure TPTurnouts.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
-  for vyh in Self.data do
-    vyh.Show(obj, blik, useky);
+  for var turnout in Self.data do
+    turnout.Show(obj, blik, useky);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVyhybky.GetIndex(Pos: TPoint): Integer;
-var i: Integer;
+function TPTurnouts.GetIndex(Pos: TPoint): Integer;
 begin
   Result := -1;
 
-  for i := 0 to Self.data.Count - 1 do
-    if ((Pos.X = Self.data[i].Position.X) and (Pos.Y = Self.data[i].Position.Y)) then
+  for var i := 0 to Self.data.Count - 1 do
+    if ((Pos.X = Self.data[i].position.X) and (Pos.Y = Self.data[i].position.Y)) then
       Exit(i);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybky.Reset(orindex: Integer = -1);
-var vyh: TPVyhybka;
+procedure TPTurnouts.Reset(orindex: Integer = -1);
 begin
-  for vyh in Self.data do
-    if (((orindex < 0) or (vyh.OblRizeni = orindex))) then
-      vyh.Reset();
+  for var turnout in Self.data do
+    if (((orindex < 0) or (turnout.area = orindex))) then
+      turnout.Reset();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVyhybky.GetItem(index: Integer): TPVyhybka;
+function TPTurnouts.GetItem(index: Integer): TPTurnout;
 begin
   Result := Self.data[index];
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPVyhybky.GetCount(): Integer;
+function TPTurnouts.GetCount(): Integer;
 begin
   Result := Self.data.Count;
 end;

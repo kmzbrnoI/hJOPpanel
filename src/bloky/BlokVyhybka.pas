@@ -1,9 +1,7 @@
 unit BlokVyhybka;
 
 {
-  Definice bloku vyhybka.
-  Sem patri pouze definice bloku, nikoliv definice databaze vyhybek
-  (kvuli pouzivani v jinych unitach).
+  Turnout block definition.
 }
 
 interface
@@ -13,35 +11,32 @@ uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlokUsek
 type
   TVyhPoloha = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
 
-  // data pro vykreslovani
-  TVyhPanelProp = record
-    blikani: boolean;
-    Symbol, Pozadi: TColor;
-    Poloha: TVyhPoloha;
+  TTurnoutPanelProp = record
+    flash: boolean;
+    fg, bg: TColor;
+    position: TVyhPoloha;
 
     procedure Change(parsed: TStrings);
   end;
 
-  // 1 vyhybka na reliefu
-  TPVyhybka = class
-    Blok: Integer;
-    PolohaPlus: Byte;
-    Position: TPoint;
-    SymbolID: Integer;
+  TPTurnout = class
+    block: Integer;
+    orientationPlus: Cardinal;
+    position: TPoint;
+    symbolID: Integer;
     obj: Integer;
 
-    OblRizeni: Integer;
-    PanelProp: TVyhPanelProp;
+    area: Integer;
+    panelProp: TTurnoutPanelProp;
     visible: boolean; // na zaklade viditelnosti ve vetvich je rekonstruovana viditelnost vyhybky
 
     procedure Reset();
-    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
-  end; // Navestidlo
+    procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
+  end;
 
 const
-  _Def_Vyh_Prop: TVyhPanelProp = (blikani: false; Symbol: clFuchsia; Pozadi: clBlack; Poloha: TVyhPoloha.disabled);
-
-  _UA_Vyh_Prop: TVyhPanelProp = (blikani: false; Symbol: $A0A0A0; Pozadi: clBlack; Poloha: TVyhPoloha.both);
+  _DEF_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: clFuchsia; bg: clBlack; position: TVyhPoloha.disabled);
+  _UA_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: $A0A0A0; bg: clBlack; position: TVyhPoloha.both);
 
 implementation
 
@@ -49,70 +44,69 @@ uses parseHelper, Symbols;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TVyhPanelProp.Change(parsed: TStrings);
+procedure TTurnoutPanelProp.Change(parsed: TStrings);
 begin
-  Symbol := StrToColor(parsed[4]);
-  Pozadi := StrToColor(parsed[5]);
-  blikani := StrToBool(parsed[6]);
-  Poloha := TVyhPoloha(StrToInt(parsed[7]));
+  fg := StrToColor(parsed[4]);
+  bg := StrToColor(parsed[5]);
+  flash := StrToBool(parsed[6]);
+  position := TVyhPoloha(StrToInt(parsed[7]));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybka.Reset();
+procedure TPTurnout.Reset();
 begin
-  if (Self.Blok > -2) then
-    Self.PanelProp := _Def_Vyh_Prop
+  if (Self.block > -2) then
+    Self.panelProp := _DEF_TURNOUT_PROP
   else
-    Self.PanelProp := _UA_Vyh_Prop;
+    Self.panelProp := _UA_TURNOUT_PROP;
 
   Self.visible := true;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPVyhybka.Show(obj: TDXDraw; blik: boolean; useky: TList<TPUsek>);
+procedure TPTurnout.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 var fg: Integer;
   bkcol: TColor;
 begin
-  if ((Self.PanelProp.blikani) and (blik) and (Self.visible)) then
+  if ((Self.panelProp.flash) and (blik) and (Self.visible)) then
     fg := clBlack
   else
   begin
-    if ((Self.visible) or (Self.PanelProp.Symbol = clAqua) or (Self.PanelProp.Symbol = clFuchsia)) then
-      fg := Self.PanelProp.Symbol
+    if ((Self.visible) or (Self.panelProp.fg = clAqua) or (Self.panelProp.fg = clFuchsia)) then
+      fg := Self.panelProp.fg
     else
-      fg := useky[Self.obj].PanelProp.nebarVetve;
+      fg := useky[Self.obj].panelProp.notColorBranches;
   end;
 
-  if (Self.PanelProp.Pozadi = clBlack) then
-    bkcol := useky[Self.obj].PanelProp.Pozadi
+  if (Self.panelProp.bg = clBlack) then
+    bkcol := useky[Self.obj].panelProp.bg
   else
-    bkcol := Self.PanelProp.Pozadi;
+    bkcol := Self.panelProp.bg;
 
-  if (Self.Blok = -2) then
+  if (Self.block = -2) then
   begin
-    // blok zamerne neprirazen
-    Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, fg, bkcol, obj);
+    Symbols.Draw(SymbolSet.IL_Symbols, Self.position, Self.symbolID, fg, bkcol, obj);
   end else begin
-    case (Self.PanelProp.Poloha) of
+    case (Self.panelProp.position) of
       TVyhPoloha.disabled, TVyhPoloha.none:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, fg, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, Self.symbolID, bkcol, fg, obj);
         end;
       TVyhPoloha.plus:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 4 + (4 * Self.PolohaPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 4 + (4 * Self.orientationPlus), fg,
             bkcol, obj);
         end;
       TVyhPoloha.minus:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, (Self.SymbolID) + 8 - (4 * Self.PolohaPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 8 - (4 * Self.orientationPlus), fg,
             bkcol, obj);
         end;
       TVyhPoloha.both:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.Position, Self.SymbolID, bkcol, clBlue, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, Self.symbolID, bkcol, clBlue, obj);
         end;
     end;
   end;
