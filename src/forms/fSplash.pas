@@ -1,7 +1,7 @@
 unit fSplash;
 
 {
-  Vyskakovaci okno zobrazovane pri spousteni.
+  Splash window shown when starting the application.
 }
 
 interface
