@@ -1,8 +1,7 @@
-﻿
-unit Panel;
+﻿unit Panel;
 
 {
-  Hlavni logika celeho panelu.
+  Main panel logic.
 }
 
 interface
