@@ -1,4 +1,5 @@
-﻿unit Panel;
+﻿
+unit Panel;
 
 {
   Hlavni logika celeho panelu.
@@ -9,7 +10,7 @@ interface
 uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
   ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
   StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO,
-  PngImage, DirectX, PanelOR, BlockTypes, Types,
+  PngImage, DirectX, PanelOR, BlockTypes, Types, BlockPst,
   BlockLinker, BlockLinkerTrain, BlockLock, BlockCrossing, BlocksTrack, BlocksTurnout,
   BlockSignal, BlockTurnout, BlockTrack, BlockDerail, BlockDisconnector, BlockText,
   BlockOther;
@@ -115,6 +116,7 @@ type
     disconnectors: TPDisconnectors;
     texts: TPTexts;
     blockLabels: TPTexts;
+    psts: TPPsts;
     otherObj: TPObjOthers;
 
     systemOK: record
@@ -221,7 +223,7 @@ type
     procedure HideCursor();
     procedure HideMenu();
 
-    procedure ORDisconnect(orindex: Integer = -1);
+    procedure ORDisconnect(areai: Integer = -1);
     procedure Escape(send: boolean = true);
 
     procedure UpdateSymbolSet();
@@ -298,6 +300,7 @@ begin
   Self.linkers := TPLinkers.Create();
   Self.linkersTrains := TPLinkersTrain.Create();
   Self.locks := TPLocks.Create();
+  Self.psts := TPPsts.Create();
   Self.otherObj := TPObjOthers.Create();
 
   Self.parentForm := aParentForm;
@@ -376,6 +379,7 @@ begin
   Self.locks.Free();
   Self.texts.Free();
   Self.blockLabels.Free();
+  Self.Psts.Free();
   Self.otherObj.Free();
 
   if (Assigned(Self.infoTimers)) then
@@ -565,6 +569,7 @@ begin
     Self.locks.show(Self.drawObject, Self.Graphics.flash);
     Self.disconnectors.show(Self.drawObject, Self.Graphics.flash);
     Self.derails.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
+    Self.psts.show(Self.drawObject, Self.Graphics.flash);
 
     Self.ShowAreas();
     Self.ShowRights();
@@ -958,7 +963,15 @@ begin
     goto EscCheck;
   end;
 
-  // pomocny objekt
+  index := Self.psts.GetIndex(Position);
+  if (index <> -1) then
+  begin
+    if (psts[index].block < 0) then
+      goto EscCheck;
+    PanelTCPClient.PanelClick(Self.areas[psts[index].area].id, Button, psts[index].block);
+    goto EscCheck;
+  end;
+
   index := Self.otherObj.GetIndex(Position);
   if (index <> -1) then
   begin
@@ -1087,6 +1100,7 @@ begin
     Self.disconnectors.Load(inifile, verWord);
     Self.texts.Load(inifile, 'T', verWord);
     Self.blockLabels.Load(inifile, 'TP', verWord);
+    Self.psts.Load(inifile, verWord);
     Self.otherObj.Load(inifile, verWord);
 
     Self.techBlok.Clear();
@@ -1117,6 +1131,9 @@ begin
 
     for var i := 0 to Self.disconnectors.data.Count - 1 do
       Self.AddToTechBlk(btDisconnector, Self.disconnectors[i].block, i);
+
+    for var i := 0 to Self.psts.data.Count - 1 do
+      Self.AddToTechBlk(btPst, Self.psts[i].block, i);
 
     for var i := 0 to Self.otherObj.data.Count - 1 do
       Self.AddToTechBlk(btOther, Self.otherObj[i].block, i);
@@ -1355,18 +1372,18 @@ end;
 procedure TRelief.ORAuthoriseResponse(Sender: string; Rights: TAreaControlRights; comment: string = '';
   username: string = '');
 begin
-  var orindex := Self.GetORIndex(Sender);
-  if (orindex = -1) then
+  var areai := Self.GetORIndex(Sender);
+  if (areai = -1) then
     Exit;
 
-  var tmp := Self.areas[orindex].tech_rights;
-  Self.areas[orindex].tech_rights := Rights;
-  Self.areas[orindex].username := username;
+  var tmp := Self.areas[areai].tech_rights;
+  Self.areas[areai].tech_rights := Rights;
+  Self.areas[areai].username := username;
   Self.UpdateLoginString();
 
   if ((Rights < tmp) and (Rights < write)) then
   begin
-    Self.areas[orindex].countdown.Clear();
+    Self.areas[areai].countdown.Clear();
     while (SoundsPlay.IsPlaying(_SND_TRAT_ZADOST)) do
       SoundsPlay.DeleteSound(_SND_TRAT_ZADOST);
   end;
@@ -1375,10 +1392,10 @@ begin
     PanelTCPClient.PanelFirstGet(Sender);
 
   if (Rights = TAreaControlRights.null) then
-    Self.ORDisconnect(orindex);
+    Self.ORDisconnect(areai);
 
   if ((Rights > TAreaControlRights.null) and (tmp = TAreaControlRights.null)) then
-    Self.areas[orindex].stack.Enabled := true;
+    Self.areas[areai].stack.Enabled := true;
 
   if ((Rights >= TAreaControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
     (BridgeClient.toLogin.password <> '')) then
@@ -1390,9 +1407,9 @@ begin
   if (F_Auth.listening) then
   begin
     if (Rights = TAreaControlRights.null) then
-      F_Auth.AuthError(orindex, comment)
+      F_Auth.AuthError(areai, comment)
     else
-      F_Auth.AuthOK(orindex);
+      F_Auth.AuthOK(areai);
   end;
 
   if (comment <> '') then
@@ -1482,8 +1499,7 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
-// komunikace s oblastmi rizeni:
-// change blok stav:
+// -- Communication with areas --
 
 procedure TRelief.ORBlkChange(Sender: string; BlokID: Integer; blockType: TBlkType; parsed: TStrings);
 begin
@@ -1539,6 +1555,13 @@ begin
           if ((Symbols[i].blk_type = btDisconnector) and
             (Sender = Self.areas[Self.disconnectors[Symbols[i].symbol_index].area].id)) then
             Self.disconnectors[Symbols[i].symbol_index].PanelProp.Change(parsed);
+        end;
+
+      btPst:
+        begin
+          if ((Symbols[i].blk_type = btPst) and
+            (Sender = Self.areas[Self.psts[Symbols[i].symbol_index].area].id)) then
+            Self.psts[Symbols[i].symbol_index].PanelProp.Change(parsed);
         end;
 
       btLinker:
@@ -1936,9 +1959,9 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.ORDisconnect(orindex: Integer = -1);
+procedure TRelief.ORDisconnect(areai: Integer = -1);
 begin
-  if (orindex = -1) then
+  if (areai = -1) then
   begin
     Self.Menu.showing := false;
     Self.UPO.showing := false;
@@ -1946,22 +1969,23 @@ begin
     Self.Graphics.dxd.Enabled := true;
   end;
 
-  Self.tracks.Reset(orindex);
-  Self.turnouts.Reset(orindex);
-  Self.signals.Reset(orindex);
-  Self.crossings.Reset(orindex);
-  Self.linkers.Reset(orindex);
-  Self.linkersTrains.Reset(orindex);
-  Self.locks.Reset(orindex);
-  Self.derails.Reset(orindex);
-  Self.disconnectors.Reset(orindex);
-  Self.texts.Reset(orindex);
-  Self.blockLabels.Reset(orindex);
-  Self.otherObj.Reset(orindex);
+  Self.tracks.Reset(areai);
+  Self.turnouts.Reset(areai);
+  Self.signals.Reset(areai);
+  Self.crossings.Reset(areai);
+  Self.linkers.Reset(areai);
+  Self.linkersTrains.Reset(areai);
+  Self.locks.Reset(areai);
+  Self.derails.Reset(areai);
+  Self.disconnectors.Reset(areai);
+  Self.texts.Reset(areai);
+  Self.blockLabels.Reset(areai);
+  Self.psts.Reset(areai);
+  Self.otherObj.Reset(areai);
 
   for var i := 0 to Self.areas.Count - 1 do
   begin
-    if ((orindex < 0) or (i = orindex)) then
+    if ((areai < 0) or (i = areai)) then
     begin
       Self.areas[i].tech_rights := TAreaControlRights.null;
       Self.areas[i].dk_blik := false;
@@ -2404,17 +2428,17 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.ORHlaseniMsg(Sender: string; data: TStrings);
-var orindex: Integer;
+var areai: Integer;
 begin
-  orindex := -1;
+  areai := -1;
   for var i := 0 to Self.areas.Count - 1 do
     if (Self.areas[i].id = Sender) then
     begin
-      orindex := i;
+      areai := i;
       Break;
     end;
 
-  if (orindex = -1) then
+  if (areai = -1) then
     Exit();
   if (data.Count < 3) then
     Exit();
@@ -2422,11 +2446,11 @@ begin
   data[2] := UpperCase(data[2]);
   if ((data[2] = 'AVAILABLE') and (data.Count > 3)) then
   begin
-    Self.areas[orindex].announcement := (data[3] = '1');
+    Self.areas[areai].announcement := (data[3] = '1');
 
     if (Self.dkRootMenuItem = 'DK') then
-      Self.ShowDKMenu(orindex);
-    if ((Self.dkRootMenuItem = 'HLASENI') and (not Self.areas[orindex].announcement)) then
+      Self.ShowDKMenu(areai);
+    if ((Self.dkRootMenuItem = 'HLASENI') and (not Self.areas[areai].announcement)) then
       Self.HideMenu();
   end;
 end;
