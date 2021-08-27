@@ -1,4 +1,4 @@
-unit BlokPomocny;
+unit BlockOther;
 
 {
   "Other" block definition.
@@ -11,7 +11,7 @@ unit BlokPomocny;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlokTypes;
+  BlockTypes;
 
 type
   TPObjOther = class

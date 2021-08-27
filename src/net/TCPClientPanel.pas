@@ -113,7 +113,7 @@ implementation
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
   ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
   GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
-  fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt, BlokTypes;
+  fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt, BlockTypes;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,4 @@
-unit BlokVyhybka;
+unit BlockTurnout;
 
 {
   Turnout block definition.
@@ -6,7 +6,7 @@ unit BlokVyhybka;
 
 interface
 
-uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlokUsek;
+uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlockTrack;
 
 type
   TVyhPoloha = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);

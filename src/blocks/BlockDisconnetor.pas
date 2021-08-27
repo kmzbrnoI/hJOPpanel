@@ -1,4 +1,4 @@
-unit BlokRozp;
+unit BlockDisconnetor;
 
 {
   Definition of a disconnector block.

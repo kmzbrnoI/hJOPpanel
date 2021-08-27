@@ -232,21 +232,21 @@
         </DCCReference>
         <DCCReference Include="InterProcessCom.pas"/>
         <DCCReference Include="net\parseHelper.pas"/>
-        <DCCReference Include="bloky\BlokUvazka.pas"/>
-        <DCCReference Include="bloky\BlokUvazkaSpr.pas"/>
-        <DCCReference Include="bloky\BlokZamek.pas"/>
-        <DCCReference Include="bloky\BlokPrejezd.pas"/>
-        <DCCReference Include="bloky\BlokUsek.pas"/>
+        <DCCReference Include="blocks\BlockLinker.pas"/>
+        <DCCReference Include="blocks\BlockLinkerTrain.pas"/>
+        <DCCReference Include="blocks\BlockLock.pas"/>
+        <DCCReference Include="blocks\BlockCrossing.pas"/>
+        <DCCReference Include="blocks\BlockTrack.pas"/>
         <DCCReference Include="PanelOR.pas"/>
-        <DCCReference Include="bloky\BlokVyhybka.pas"/>
-        <DCCReference Include="bloky\BlokNavestidlo.pas"/>
-        <DCCReference Include="bloky\BlokyUsek.pas"/>
-        <DCCReference Include="bloky\BlokyVyhybka.pas"/>
-        <DCCReference Include="bloky\BlokVykolejka.pas"/>
-        <DCCReference Include="bloky\BlokRozp.pas"/>
-        <DCCReference Include="bloky\BlokPopisek.pas"/>
-        <DCCReference Include="bloky\BlokPomocny.pas"/>
-        <DCCReference Include="bloky\BlokTypes.pas"/>
+        <DCCReference Include="blocks\BlockTurnout.pas"/>
+        <DCCReference Include="blocks\BlockSignal.pas"/>
+        <DCCReference Include="blocks\BlocksTrack.pas"/>
+        <DCCReference Include="blocks\BlocksTurnout.pas"/>
+        <DCCReference Include="blocks\BlockDerail.pas"/>
+        <DCCReference Include="blocks\BlockDisconnector.pas"/>
+        <DCCReference Include="blocks\BlockText.pas"/>
+        <DCCReference Include="blocks\BlockOther.pas"/>
+        <DCCReference Include="blocks\BlockTypes.pas"/>
         <DCCReference Include="forms\fOdlozeniOdjezdu.pas">
             <Form>F_OOdj</Form>
         </DCCReference>

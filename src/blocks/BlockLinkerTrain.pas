@@ -1,4 +1,4 @@
-unit BlokUvazkaSpr;
+unit BlockLinkerTrain;
 
 {
   Definice bloku uvazka-spr, jeho vlastnosti a stavu v panelu.

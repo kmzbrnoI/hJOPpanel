@@ -1,4 +1,4 @@
-unit BlokVykolejka;
+unit BlockDerail;
 
 {
   Definition of a "derial" block.
@@ -8,7 +8,7 @@ unit BlokVykolejka;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlokVyhybka, BlokUsek;
+  BlockTurnout, BlockTrack;
 
 type
   TPDerail = class

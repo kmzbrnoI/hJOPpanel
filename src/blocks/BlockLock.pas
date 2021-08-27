@@ -1,4 +1,4 @@
-unit BlokZamek;
+unit BlockLock;
 
 {
   Definition of lock block.
@@ -8,7 +8,7 @@ unit BlokZamek;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlokTypes;
+  BlockTypes;
 
 type
   TPLock = class

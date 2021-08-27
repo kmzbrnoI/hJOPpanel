@@ -1,4 +1,4 @@
-unit BlokUvazka;
+unit BlockLinker;
 
 {
   Linker block definition.

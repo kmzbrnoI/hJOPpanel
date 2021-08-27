@@ -1,4 +1,4 @@
-unit BlokyUsek;
+unit BlocksTrack;
 
 {
   Definition of a databse of tracks.
@@ -7,7 +7,7 @@ unit BlokyUsek;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  Symbols, PanelOR, StrUtils, BlokNavestidlo, BlokVyhybka, BlokUsek;
+  Symbols, PanelOR, StrUtils, BlockSignal, BlockTurnout, BlockTrack;
 
 type
   TPTrackId = record

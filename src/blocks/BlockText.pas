@@ -1,4 +1,4 @@
-unit BlokPopisek;
+unit BlockText;
 
 {
   Definition of "text" block. Text block represents any text. Text block

@@ -1,4 +1,4 @@
-unit BlokNavestidlo;
+unit BlockSignal;
 
 {
   Definition of "signal" block. Definition of a database of signals.

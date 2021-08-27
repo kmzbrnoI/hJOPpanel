@@ -9,10 +9,10 @@ interface
 uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
   ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
   StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO,
-  PngImage, DirectX, PanelOR, BlokTypes, Types,
-  BlokUvazka, BlokUvazkaSpr, BlokZamek, BlokPrejezd, BlokyUsek, BlokyVyhybka,
-  BlokNavestidlo, BlokVyhybka, BlokUsek, BlokVykolejka, BlokRozp, BlokPopisek,
-  BlokPomocny;
+  PngImage, DirectX, PanelOR, BlockTypes, Types,
+  BlockLinker, BlockLinkerTrain, BlockLock, BlockCrossing, BlocksTrack, BlocksTurnout,
+  BlockSignal, BlockTurnout, BlockTrack, BlockDerail, BlockDisconnector, BlockText,
+  BlockOther;
 
 const
   _INFOTIMER_WIDTH = 30;

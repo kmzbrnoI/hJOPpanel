@@ -1,4 +1,4 @@
-unit BlokUsek;
+unit BlockTrack;
 
 {
   Definice bloku usek.
@@ -9,7 +9,7 @@ unit BlokUsek;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, Symbols, SysUtils,
-  BlokTypes, PanelOR, DXDraws, Math;
+  BlockTypes, PanelOR, DXDraws, Math;
 
 const
   _JC_END: array [0 .. 3] of TColor = (clBlack, clGreen, clWhite, clTeal);

@@ -1,4 +1,4 @@
-unit BlokPrejezd;
+unit BlockCrossing;
 
 {
   Definition of "crossing" blocks.
@@ -8,7 +8,7 @@ unit BlokPrejezd;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlokUsek, BlokyUsek;
+  BlockTrack, BlocksTrack;
 
 type
   TBlkCrossingPanelState = (disabled = -5, err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);

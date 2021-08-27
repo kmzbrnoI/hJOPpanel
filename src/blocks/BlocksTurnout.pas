@@ -1,4 +1,4 @@
-unit BlokyVyhybka;
+unit BlocksTurnout;
 
 {
   Databse of turnouts.
@@ -7,7 +7,7 @@ unit BlokyVyhybka;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlokUsek, BlokVyhybka;
+  BlockTrack, BlockTurnout;
 
 type
   TPTurnouts = class
