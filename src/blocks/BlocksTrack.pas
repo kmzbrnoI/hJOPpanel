@@ -169,6 +169,8 @@ begin
         symbol.Position.X := StrToIntDef(copy(obj, 9 * k + 1, 3), 0);
         symbol.Position.Y := StrToIntDef(copy(obj, (9 * k + 4), 3), 0);
         symbol.SymbolID := StrToIntDef(copy(obj, (9 * k + 7), 3), 0);
+        if (version < _FILEVERSION_20) then
+          symbol.SymbolID := TranscodeSymbolFromBpnlV3(symbol.SymbolID);
         branch.symbols.Add(symbol);
       end;
 
