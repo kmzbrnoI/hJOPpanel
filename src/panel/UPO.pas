@@ -93,6 +93,7 @@ begin
     case (Self.items[Self.current].lines[i].align) of
       taCenter:
         begin
+          str := '';
           for var j := 0 to ((_UPO_WIDTH - Length(Self.items[Self.current].lines[i].str)) div 2) - 1 do
             str := str + ' ';
           str := str + Self.items[Self.current].lines[i].str;
