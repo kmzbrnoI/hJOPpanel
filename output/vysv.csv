@@ -13,6 +13,13 @@ S+;Přestavit výhybku do polohy plus
 S-;Přestavit výhybku do polohy mínus
 NS+;Nouzové stavění do polohy plus
 NS-;Nouzové stavění do polohy mínus
+POL+;Simulace: poloha +
+POL-;Simulace: poloha +
+NEPOL;Simulace: nepoloha
+RAD+;Simulace: řadič do polohy +
+RAD-;Simulace: řadič do polohy -
+RAD?;Simulace: řadič do střední polohy
+
 STIT;Editace štítku
 VYL;Editace výluky
 NUZ>;Nouzové uvolnění závěru
@@ -23,6 +30,8 @@ ZAST>;Zavedení zastávky
 ZAST<;Zrušení zastávky
 KC;Konec jízdní cesty
 VB;Variantní bod
+OBSAZ;Simulace: obsazení KO
+UVOL;Simulace: uvolnění KO
 
 VC>;Počátek vlakové cesty
 VC<;Zrušení počátku vlakové cesty
@@ -88,3 +97,10 @@ ZUK;Zrušení uvolnění klíče
 HLÁŠENÍ odjezd;Hlášení odjezdu vlaku
 HLÁŠENÍ příjezd;Hlášení příjezdu vlaku
 HLÁŠENÍ průjezd;Hlášení průjezdu vlaku
+
+PST>;Předání obsluhy na PSt
+PST<;Převzetí obsluhy z PSt
+HOUK;Houkačka na PSt
+NPST;Nouzové zrušení obsluhy PSt
+PO<;Simulace: převzetí obsluhy PSt
+PO>;Simulace: předání PSt do obsluhy
