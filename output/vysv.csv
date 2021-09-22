@@ -100,7 +100,8 @@ HLÁŠENÍ průjezd;Hlášení průjezdu vlaku
 
 PST>;Předání obsluhy na PSt
 PST<;Převzetí obsluhy z PSt
-HOUK;Houkačka na PSt
+HOUK>;Zapnutí houkačky na PSt
+HOUK<;Vypnutí houkačky na PSt
 NPST;Nouzové zrušení obsluhy PSt
 PO<;Simulace: převzetí obsluhy PSt
 PO>;Simulace: předání PSt do obsluhy
