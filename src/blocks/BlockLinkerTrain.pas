@@ -21,7 +21,8 @@ type
     show_index: Integer;
     time: string;
     time_color: TColor;
-    color: TColor;
+    fg: TColor;
+    bg: TColor;
 
     constructor Create();
     destructor Destroy(); override;
@@ -190,13 +191,13 @@ begin
       if (not Assigned(linkerTrain.strings)) then
         continue;
 
-      // kontrola preblikavani
+      // preblikavani
       if ((Change) and (linkerTrain.strings.Count > 1)) then
         Inc(linkerTrain.show_index);
       if (linkerTrain.show_index >= linkerTrain.strings.Count) then // tato podminka musi byt vne predchozi podminky
         linkerTrain.show_index := 0;
 
-      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[linkerTrain.show_index], linkerTrain.color, clBlack,
+      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[linkerTrain.show_index], linkerTrain.fg, linkerTrain.bg,
         obj, linkerTrain.show_index = 0);
 
       if (linkerTrain.show_index = 0) then
@@ -267,12 +268,13 @@ end;
 
 procedure TLinkerTrainPanelProp.Change(parsed: TStrings);
 begin
+  Self.train.Clear();
+
   if (parsed.Count < 9) then
     Exit();
 
-  var new_version := PanelTCPClient.IsServerVersionAtLeast('1.1');
-  Self.train.Clear();
   var sprs_data: TStrings := TStringList.Create();
+  var train: TStrings := TStringList.Create();
 
   try
     ExtractStringsEx([','], [], parsed[8], sprs_data);
@@ -281,47 +283,38 @@ begin
     begin
       var lt := TLinkerTrain.Create();
 
-      ExtractStringsEx(['|'], [], str, lt.strings);
-      if (LeftStr(str, 1) = '$') then
+      train.Clear();
+      ExtractStringsEx(['|'], [], str, train);
+      lt.fg := StrToColor(train[1]);
+
+      var i: Integer;
+      if (Length(train[2]) = 6) then
       begin
-        lt.strings[0] := RightStr(lt.strings[0], Length(lt.strings[0]) - 1);
-        lt.color := clYellow;
+        lt.bg := StrToColor(train[2]);
+        i := 3;
       end else begin
-        if (new_version) then
-        begin
-          lt.color := StrToColor(lt.strings[1]);
-          lt.strings.Delete(1);
-        end
-        else
-          lt.color := clWhite;
+        lt.bg := clBlack;
+        i := 2;
       end;
 
-      if (LeftStr(lt.strings[1], 1) = '$') then
+      lt.time := train[i];
+      lt.time_color := StrToColor(train[i+1]);
+      i := i + 2;
+
+      lt.strings.Add(train[0]);
+      for var j := i to train.Count - 1 do
       begin
-        lt.time := RightStr(lt.strings[1], Length(lt.strings[1]) - 1);
-        lt.time_color := clYellow;
-      end else begin
-        lt.time := lt.strings[1];
-        if (new_version) then
-        begin
-          lt.time_color := StrToColor(lt.strings[2]);
-          lt.strings.Delete(2);
-        end
+        if (Length(train[j]) > _LINKER_WIDTH) then
+          lt.strings.Add(LeftStr(train[j], 8) + '.')
         else
-          lt.time_color := clAqua;
+          lt.strings.Add(train[j]);
       end;
-
-      lt.strings.Delete(1);
-
-      // kontrola preteceni textu
-      for var j := 0 to lt.strings.Count - 1 do
-        if (Length(lt.strings[j]) > _LINKER_WIDTH) then
-          lt.strings[j] := LeftStr(lt.strings[j], 8) + '.';
 
       Self.train.Add(lt);
     end;
   finally
     sprs_data.Free();
+    train.Free();
   end;
 end;
 
