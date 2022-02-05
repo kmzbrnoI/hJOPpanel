@@ -3,11 +3,11 @@
         <ProjectGuid>{44A7AE91-162E-45C9-84D4-51A50AB72A6F}</ProjectGuid>
         <ProjectVersion>19.2</ProjectVersion>
         <MainSource>hJOPpanel.dpr</MainSource>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -131,8 +131,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <DCC_UnitSearchPath>D:\UsersData\vlak\Delphi\Komponenty\DelphiX_1.20\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <Icon_MainIcon>..\icons\hJOPpanel.ico</Icon_MainIcon>
+        <DCC_UnitSearchPath>C:\vlak\delphi\components\DelphiX_1.20\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.16.0.0;InternalName=hJOPpanel;LegalCopyright=Jan Horáček;LegalTrademarks=;OriginalFilename=hJOPpanel.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MinorVer>16</VerInfo_MinorVer>
@@ -310,6 +309,13 @@
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k270.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp270.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclBaseExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclBaseExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclDebugExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclDebugExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclProjectAnalysisExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclProjectAnalysisExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclFavoriteFoldersExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclFavoriteFoldersExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclRepositoryExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclRepositoryExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclSIMDViewExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclSIMDViewExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclStackTraceViewerExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclStackTraceViewerExpert270.bpl not found</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
