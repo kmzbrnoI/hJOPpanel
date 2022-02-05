@@ -75,6 +75,7 @@ PŘESUŇ vlak>;Přesunout vlak na jinou kolej
 PŘESUŇ vlak<;Ukončit přesouvání vlaku
 JEĎ vlak;Odjet s vlakem ze zastávky
 RUČ vlak;Převzít vlak do ručního ovladače
+STOP vlak;Nouzové zastavení vlaku
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
 PODJ;Editovat předvídaný odjezd
 
