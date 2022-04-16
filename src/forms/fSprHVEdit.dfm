@@ -99,10 +99,6 @@ object F_SprHVEdit: TF_SprHVEdit
     object TS_F15_F28: TTabSheet
       Caption = 'F15-F28'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 137
-      ExplicitHeight = 0
     end
   end
 end

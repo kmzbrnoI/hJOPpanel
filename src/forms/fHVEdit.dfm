@@ -402,7 +402,7 @@ object F_HVEdit: TF_HVEdit
       OnDblClick = LV_Pom_ReleaseDblClick
     end
     object LV_Funkce: TListView
-      Left = 397
+      Left = 398
       Top = 39
       Width = 268
       Height = 420
@@ -410,7 +410,7 @@ object F_HVEdit: TF_HVEdit
       Columns = <
         item
           Caption = 'Funkce'
-          MaxWidth = 50
+          MaxWidth = 100
           MinWidth = 50
         end
         item

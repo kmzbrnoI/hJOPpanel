@@ -376,8 +376,8 @@ end;
 procedure TF_Auth.ShowErrorMessage();
 begin
   Self.P_Message.Visible := true;
-  Self.P_Body.Top := 110;
-  Self.Height := P_Body.Top + P_Body.Height + 30;
+  Self.P_Body.Top := Self.P_Message.Height + 20;
+  Self.Height := P_Body.Top + P_Body.Height + P_Message.Top + 20;
 
   Self.ST_Error.Visible := true;
   Self.P_Message.Color := $DEDEF2;
@@ -386,9 +386,9 @@ end;
 
 procedure TF_Auth.HideErrorMessage();
 begin
-  Self.Height := P_Body.Top + P_Body.Height + 30;
-  Self.P_Message.Visible := false;
   Self.P_Body.Top := 8;
+  Self.Height := P_Body.Top + P_Body.Height + P_Message.Top + 20;
+  Self.P_Message.Visible := false;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -459,22 +459,23 @@ end;
 procedure TF_Auth.UpdateCheckboxLayout();
 var Top: Integer;
 begin
-  Top := 327;
+  Top := Self.GB_RemberDesc.Top + Self.GB_RemberDesc.Height + 10;
 
   if (Self.CHB_IPC_auth.Visible) then
   begin
     Self.CHB_IPC_auth.Top := Top;
-    Top := Top + 20;
+    Top := Top + Self.CHB_IPC_auth.Height;
   end;
 
   if (Self.CHB_uLI_Daemon.Visible) then
   begin
     Self.CHB_uLI_Daemon.Top := Top;
-    Top := Top + 20;
+    Top := Top + Self.CHB_uLI_Daemon.Height;
   end;
 
-  Self.P_Body.Height := Top + P_Buttons.Height;
-  Self.Height := P_Body.Top + P_Body.Height + 30;
+  Self.P_Buttons.Top := Top;
+  Self.P_Body.Height := Top + Self.P_Buttons.Height;
+  Self.Height := Self.P_Body.Top + Self.P_Body.Height + Self.P_Message.Top + 20;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

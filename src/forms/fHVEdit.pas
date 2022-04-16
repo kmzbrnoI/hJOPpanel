@@ -550,13 +550,11 @@ begin
 end;
 
 procedure TF_HVEdit.SB_Rel_AddClick(Sender: TObject);
-var LI: TListItem;
-  i: Integer;
 begin
   F_HV_Pom.OpenForm(-1, 0);
   if (F_HV_Pom.saved) then
   begin
-    i := 0;
+    var i: Integer := 0;
     while ((i < Self.LV_Pom_Release.Items.Count) and (StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption) <
       F_HV_Pom.SE_CV.Value)) do
       Inc(i);
@@ -566,7 +564,7 @@ begin
     begin
       Self.LV_Pom_Release.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
     end else begin
-      LI := Self.LV_Pom_Release.Items.Insert(i);
+      var LI: TListItem := Self.LV_Pom_Release.Items.Insert(i);
       LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
       LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
     end;
@@ -580,13 +578,11 @@ begin
 end;
 
 procedure TF_HVEdit.SB_Take_AddClick(Sender: TObject);
-var i: Integer;
-  LI: TListItem;
 begin
   F_HV_Pom.OpenForm(-1, 0);
   if (F_HV_Pom.saved) then
   begin
-    i := 0;
+    var i: Integer := 0;
     while ((i < Self.LV_Pom_Load.Items.Count) and (StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption) <
       F_HV_Pom.SE_CV.Value)) do
       Inc(i);
@@ -596,7 +592,7 @@ begin
     begin
       Self.LV_Pom_Load.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
     end else begin
-      LI := Self.LV_Pom_Load.Items.Insert(i);
+      var LI: TListItem := Self.LV_Pom_Load.Items.Insert(i);
       LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
       LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
     end;
@@ -656,7 +652,7 @@ begin
     with (Self.RB_M[i]) do
     begin
       Parent := Self.P_types[i];
-      Left := 20;
+      Left := Height+2;
       Top := 2;
     end;
   end;

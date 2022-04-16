@@ -154,7 +154,6 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TF_SprHVEdit.GetHV(addr: Word): THV;
-var HV: THV;
 begin
   // nejdrive hledame lokomotivu ve hnacim vozidle k souprave
   if (Assigned(Self.sprHV)) then
@@ -163,7 +162,7 @@ begin
 
   // pak hledame hnaci vozidlo v HVs, ktere mame k dispozici
   if (Assigned(Self.HVs)) then
-    for HV in Self.HVs.HVs do
+    for var HV in Self.HVs.HVs do
       if (HV.addr = addr) then
         Exit(HV);
 
@@ -203,17 +202,16 @@ begin
       AutoSize := false;
       Width := 160;
 
-      atop := atop + 16;
+      atop := atop + Height - 1;
       if (i = 14) then
-        atop := 16;
+        atop := Height - 1;
     end; // with
   end; // for i
 end;
 
 procedure TF_SprHVEdit.DestroyCHBFunkce();
-var i: Integer;
 begin
-  for i := 0 to _MAX_FUNC do
+  for var i := 0 to _MAX_FUNC do
     Self.CHB_funkce[i].Free();
 end;
 
