@@ -165,7 +165,7 @@ function TPTexts.GetIndex(Pos: TPoint): Integer;
 begin
   for var i := 0 to Self.data.Count - 1 do
   begin
-    if ((Pos.X >= Self.data[i].Position.X - 1) and (Pos.X <= Self.data[i].Position.X + 1) and
+    if ((Pos.X >= Self.data[i].Position.X) and (Pos.X < (Self.data[i].Position.X + Length(Self.data[i].text))) and
       (Pos.Y = Self.data[i].Position.Y)) then
       Exit(i);
   end;
