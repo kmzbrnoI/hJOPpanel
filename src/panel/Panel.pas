@@ -1264,8 +1264,9 @@ begin
 end;
 
 function TRelief.AddMereniCasu(Sender: string; Delka: TDateTime; id: Integer): byte;
+var areai: Integer;
 begin
-  for var areai := 0 to Self.areas.Count - 1 do
+  for areai := 0 to Self.areas.Count - 1 do
     if (Self.areas[areai].id = Sender) then
       Break;
   if (areai = Self.areas.Count) then
@@ -1281,8 +1282,9 @@ begin
 end;
 
 procedure TRelief.StopMereniCasu(Sender: string; id: Integer);
+var areai: Integer;
 begin
-  for var areai := 0 to Self.areas.Count - 1 do
+  for areai := 0 to Self.areas.Count - 1 do
     if (Self.areas[areai].id = Sender) then
       Break;
   if (areai = Self.areas.Count) then
