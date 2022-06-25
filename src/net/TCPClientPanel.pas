@@ -557,9 +557,9 @@ begin
   else if (parsed[1] = 'CAS') then
   begin
     if (UpperCase(parsed[2]) = 'START') then
-      Relief.AddMereniCasu(parsed[0], EncodeTime(0, 0, StrToInt(parsed[4]), 0), StrToInt(parsed[3]));
+      Relief.AddCountdown(parsed[0], EncodeTime(0, 0, StrToInt(parsed[4]), 0), StrToInt(parsed[3]));
     if (UpperCase(parsed[2]) = 'STOP') then
-      Relief.StopMereniCasu(parsed[0], StrToInt(parsed[3]));
+      Relief.RemoveCountdown(parsed[0], StrToInt(parsed[3]));
   end
 
   else if (parsed[1] = 'MSG') then

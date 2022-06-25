@@ -150,14 +150,14 @@ type
 
     procedure ShowAreas();
     procedure ShowRights();
-    procedure ShowTimeCountdown();
+    procedure ShowCountdown();
     procedure ShowMsg();
     procedure ShowStacks();
     procedure ShowInfoTimers();
 
     function GetDK(Pos: TPoint): Integer;
-    function GetOR(id: string): TAreaPanel;
-    function GetORIndex(id: string): Integer;
+    function GetArea(id: string): TAreaPanel;
+    function GetAreaIndex(id: string): Integer;
 
     procedure AEMessage(var msg: tagMSG; var Handled: boolean);
 
@@ -214,8 +214,8 @@ type
     procedure Initialize(var DrawObject: TDXDraw; aFile: string; hints_file: string);
     procedure show();
 
-    function AddMereniCasu(Sender: string; Delka: TDateTime; id: Integer): byte;
-    procedure StopMereniCasu(Sender: string; id: Integer);
+    procedure AddCountdown(Sender: string; length: TDateTime; id: Integer);
+    procedure RemoveCountdown(Sender: string; id: Integer);
 
     procedure Image(filename: string);
 
@@ -495,41 +495,40 @@ begin
   end;
 end;
 
-procedure TRelief.ShowTimeCountdown();
+procedure TRelief.ShowCountdown();
 const _LENGTH = 16;
 begin
-  for var j := 0 to Self.areas.Count - 1 do
+  for var area in Self.areas do
   begin
-    for var k := 0 to Self.areas[j].countdown.Count - 1 do
+    for var k := 0 to area.countdown.Count - 1 do
     begin
-      Symbols.TextOutput(Point(Self.areas[j].positions.time.X, Self.areas[j].positions.time.Y + k), 'MER.CASU', clRed,
+      Symbols.TextOutput(Point(area.positions.time.X, area.positions.time.Y + k), 'MER.CASU', clRed,
         clWhite, Self.drawObject);
 
       var time1, time2: string;
-      DateTimeToString(time1, 'ss', Now - Self.areas[j].countdown[k].Start);
-      DateTimeToString(time2, 'ss', Self.areas[j].countdown[k].Length);
+      DateTimeToString(time1, 'ss', Now - area.countdown[k].Start);
+      DateTimeToString(time2, 'ss', area.countdown[k].Length);
 
       for var i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2) - 1 do
-        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.areas[j].positions.Time.X + 8 + i, Self.areas[j].positions.Time.Y + k),
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
           _S_FULL, clRed, clBlack, Self.drawObject);
 
       for var i := (Round((StrToIntDef(time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) div 2) to (_LENGTH div 2) - 1 do
-        Symbols.Draw(SymbolSet.IL_Symbols, Point(Self.areas[j].positions.Time.X + 8 + i, Self.areas[j].positions.Time.Y + k),
+        Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
           _S_FULL, clWhite, clBlack, Self.drawObject);
 
       // vykresleni poloviny symbolu
       if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) mod 2) = 1) then
         Symbols.Draw(SymbolSet.IL_Symbols,
-          Point(Self.areas[j].positions.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2),
-          Self.areas[j].positions.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.drawObject);
-
-    end; // for i
+          Point(area.positions.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2),
+          area.positions.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.drawObject);
+    end;
 
     // detekce konce mereni casu
-    for var k := Self.areas[j].countdown.Count - 1 downto 0 do
+    for var k := area.countdown.Count - 1 downto 0 do
     begin
-      if (Now >= Self.areas[j].countdown[k].Length + Self.areas[j].countdown[k].Start) then
-        Self.areas[j].countdown.Delete(k);
+      if (Now >= area.countdown[k].Length + area.countdown[k].Start) then
+        area.countdown.Delete(k);
     end;
   end;
 end;
@@ -573,7 +572,7 @@ begin
     Self.ShowAreas();
     Self.ShowRights();
     Self.ShowStacks();
-    Self.ShowTimeCountdown();
+    Self.ShowCountdown();
     RucList.show(Self.drawObject);
     Self.ShowMsg();
     Self.ShowInfoTimers();
@@ -1263,39 +1262,33 @@ begin
     PanelTCPClient.PanelClick('-', TPanelButton.Escape);
 end;
 
-function TRelief.AddMereniCasu(Sender: string; Delka: TDateTime; id: Integer): byte;
-var areai: Integer;
+procedure TRelief.AddCountdown(Sender: string; length: TDateTime; id: Integer);
 begin
-  for areai := 0 to Self.areas.Count - 1 do
-    if (Self.areas[areai].id = Sender) then
-      Break;
-  if (areai = Self.areas.Count) then
-    Exit(2);
-
-  var mc: TCountdown;
-  mc.Start := Now;
-  mc.Length := Delka;
-  mc.id := id;
-  Self.areas[areai].countdown.Add(mc);
-
-  Result := 0;
+  var area := Self.GetArea(Sender);
+  if (area <> nil) then
+  begin
+    var mc: TCountdown;
+    mc.Start := Now;
+    mc.Length := length;
+    mc.id := id;
+    area.countdown.Add(mc);
+  end;
 end;
 
-procedure TRelief.StopMereniCasu(Sender: string; id: Integer);
-var areai: Integer;
+procedure TRelief.RemoveCountdown(Sender: string; id: Integer);
 begin
-  for areai := 0 to Self.areas.Count - 1 do
-    if (Self.areas[areai].id = Sender) then
-      Break;
-  if (areai = Self.areas.Count) then
-    Exit;
+  var area := Self.GetArea(Sender);
+  if (area = nil) then
+    Exit();
 
-  for var i := 0 to Self.areas[areai].countdown.Count - 1 do
-    if (Self.areas[areai].countdown[i].id = id) then
+  for var i := 0 to area.countdown.Count - 1 do
+  begin
+    if (area.countdown[i].id = id) then
     begin
-      Self.areas[areai].countdown.Delete(i);
+      area.countdown.Delete(i);
       Break;
     end;
+  end;
 end;
 
 procedure TRelief.Image(filename: string);
@@ -1373,7 +1366,7 @@ end;
 procedure TRelief.ORAuthoriseResponse(Sender: string; Rights: TAreaControlRights; comment: string = '';
   username: string = '');
 begin
-  var areai := Self.GetORIndex(Sender);
+  var areai := Self.GetAreaIndex(Sender);
   if (areai = -1) then
     Exit;
 
@@ -1425,7 +1418,7 @@ end;
 
 procedure TRelief.ORNUZ(Sender: string; status: TNUZstatus);
 begin
-  var area := Self.GetOR(Sender);
+  var area := Self.GetArea(Sender);
   if (area = nil) then
     Exit;
 
@@ -1651,7 +1644,7 @@ end;
 
 procedure TRelief.ORDkShowMenu(Sender: string; rootItem, menuItems: string);
 begin
-  var area := Self.GetOR(Sender);
+  var area := Self.GetArea(Sender);
   if (area = nil) then
     Exit();
 
@@ -1661,7 +1654,7 @@ begin
   if (rootItem = 'LOKO') then
     menuItems := Self.DKMenuLOKOItems(area) + ',' + menuItems;
 
-  Self.Menu.ShowMenu(menuItems, Self.GetORIndex(Sender), Self.DrawObject.ClientToScreen(Point(0, 0)));
+  Self.Menu.ShowMenu(menuItems, Self.GetAreaIndex(Sender), Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2485,16 +2478,16 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TRelief.GetOR(id: string): TAreaPanel;
+function TRelief.GetArea(id: string): TAreaPanel;
 var i: Integer;
 begin
-  i := Self.GetORIndex(id);
+  i := Self.GetAreaIndex(id);
   if (i = -1) then
     Exit(nil);
   Result := Self.areas[i];
 end;
 
-function TRelief.GetORIndex(id: string): Integer;
+function TRelief.GetAreaIndex(id: string): Integer;
 begin
   for var i := 0 to Self.areas.Count - 1 do
     if (Self.areas[i].id = id) then
