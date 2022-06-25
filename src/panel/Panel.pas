@@ -450,8 +450,8 @@ begin
 
   if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
   begin
-    c1 := clLime;
-    c2 := clRed;
+    c1 := IfThen(Self.systemOK.position, clRed, clLime);
+    c2 := IfThen(Self.systemOK.position, clLime, clRed);
     c3 := clBlue;
   end else begin
     c1 := clPurple;
