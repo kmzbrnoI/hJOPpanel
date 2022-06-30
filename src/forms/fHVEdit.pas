@@ -613,7 +613,7 @@ begin
 
   // Scale for different Windows scale (e.g. 125 %)
   Self.LV_Funkce.Columns[1].Width := Self.LV_Funkce.Width -
-    Self.LV_Funkce.Columns[0].Width - Self.LV_Funkce.Columns[2].Width - 40;
+    Self.LV_Funkce.Columns[0].Width - Self.LV_Funkce.Columns[2].Width - GetSystemMetrics(SM_CXVSCROLL) - 10;
 
   for var i := 0 to _MAX_FUNC do
   begin
