@@ -410,13 +410,11 @@ object F_HVEdit: TF_HVEdit
       Columns = <
         item
           Caption = 'Funkce'
-          MaxWidth = 100
           MinWidth = 50
         end
         item
           Caption = 'V'#253'znam'
-          MaxWidth = 150
-          MinWidth = 150
+          MinWidth = 100
           Width = 150
         end
         item

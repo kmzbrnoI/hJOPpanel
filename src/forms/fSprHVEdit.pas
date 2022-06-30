@@ -200,7 +200,7 @@ begin
       Left := 2;
       Caption := 'F' + IntToStr(i);
       AutoSize := false;
-      Width := 160;
+      Width := Self.TS_F0_F14.Width - 2*Left;
 
       atop := atop + Height - 1;
       if (i = 14) then

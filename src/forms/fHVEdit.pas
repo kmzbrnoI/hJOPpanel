@@ -611,6 +611,10 @@ procedure TF_HVEdit.InitFunkce();
 begin
   Self.LV_Funkce.Clear();
 
+  // Scale for different Windows scale (e.g. 125 %)
+  Self.LV_Funkce.Columns[1].Width := Self.LV_Funkce.Width -
+    Self.LV_Funkce.Columns[0].Width - Self.LV_Funkce.Columns[2].Width - 40;
+
   for var i := 0 to _MAX_FUNC do
   begin
     var LI := Self.LV_Funkce.Items.Add;
