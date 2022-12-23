@@ -174,7 +174,7 @@ type
     procedure DKMenuClickINFO(Sender: Integer; item: string);
     procedure DKMenuClickHLASENI(Sender: Integer; item: string);
 
-    procedure DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
+    procedure DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TList<Integer>;
       guest: boolean);
 
     function DKMenuLOKOItems(Sender: TAreaPanel): string;
@@ -197,8 +197,8 @@ type
 
     // procedure prehlasovani (Ctrl+R)
     function AnyORWritable(): boolean;
-    procedure AuthReadCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
-    procedure AuthWriteCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
+    procedure AuthReadCallback(Sender: TObject; username: string; password: string; areais: TList<Integer>; guest: boolean);
+    procedure AuthWriteCallback(Sender: TObject; username: string; password: string; areais: TList<Integer>; guest: boolean);
 
     procedure OnMouseTimer(Sender: TObject);
     procedure SetShowDetails(show: boolean);
@@ -255,7 +255,7 @@ type
     procedure ORDkShowMenu(Sender: string; rootItem, menuItems: string);
     procedure ORNUZ(Sender: string; status: TNUZstatus);
     procedure ORConnectionOpenned();
-    procedure ORConnectionOpenned_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
+    procedure ORConnectionOpenned_AuthCallback(Sender: TObject; username: string; password: string; ors: TList<Integer>;
       guest: boolean);
 
     // Change blok
@@ -1438,45 +1438,38 @@ end;
 
 procedure TRelief.ORConnectionOpenned();
 begin
-  // zjistime pocet OR s zadanym opravnenim > null
-  var cnt := GlobConfig.GetAuthNonNullORSCnt();
-  if (cnt = 0) then
-    Exit();
+  // do \areas si priradime vsechna or s zadanym opravnenim > null
+  var areas := TList<Integer>.Create();
+  try
+    var rights: TAreaControlRights;
+    for var i := 0 to Self.areas.Count - 1 do
+      if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) and (IsReadable(rights))) then
+        areas.Add(i);
 
-  // do \ors si priradime vsechna or s zadanym opravnenim > null
-  var ors: TIntAr;
-  SetLength(ors, cnt);
-  var j := 0;
-  var rights: TAreaControlRights;
-  for var i := 0 to Self.areas.Count - 1 do
-  begin
-    if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) and (IsReadable(rights))) then
+    if (areas.Count = 0) then
+      Exit();
+
+    if (GlobConfig.data.Auth.autoauth) then
     begin
-      ors[j] := i;
-      Inc(j);
+      F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.ORConnectionOpenned_AuthCallback, areas, true);
+      Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password, areas, false);
+
+      if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
+        (not PanelTCPClient.openned_by_ipc)) then
+      begin
+        BridgeClient.toLogin.username := GlobConfig.data.Auth.username;
+        BridgeClient.toLogin.password := GlobConfig.data.Auth.password;
+      end;
+
+    end else begin
+      F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, areas, true);
     end;
-  end;
-
-  if (GlobConfig.data.Auth.autoauth) then
-  begin
-    F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.ORConnectionOpenned_AuthCallback,
-      ors, true);
-    Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password,
-      ors, false);
-
-    if ((GlobConfig.data.uLI.use) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
-      (not PanelTCPClient.openned_by_ipc)) then
-    begin
-      BridgeClient.toLogin.username := GlobConfig.data.Auth.username;
-      BridgeClient.toLogin.password := GlobConfig.data.Auth.password;
-    end;
-
-  end else begin
-    F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, ors, true);
+  finally
+    areas.Free();
   end;
 end;
 
-procedure TRelief.ORConnectionOpenned_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
+procedure TRelief.ORConnectionOpenned_AuthCallback(Sender: TObject; username: string; password: string; ors: TList<Integer>;
   guest: boolean);
 var rights: TAreaControlRights;
 begin
@@ -1486,7 +1479,7 @@ begin
     begin
       if (IsReadable(rights)) then
       begin
-        if (IsWritable(rights)) then
+        if ((IsWritable(rights)) and (guest)) then
           rights := TAreaControlRights.read;
         Self.areas[i].login := username;
         PanelTCPClient.PanelAuthorise(Self.areas[i].id, rights, username, password)
@@ -1687,13 +1680,10 @@ begin
   menu_str := '$' + Self.areas[areai].Name + ',-,';
 
   case (Self.areas[areai].tech_rights) of
-    TAreaControlRights.null, TAreaControlRights.read, TAreaControlRights.superuser:
+    TAreaControlRights.null, TAreaControlRights.read, TAreaControlRights.superuser, TAreaControlRights.other:
       menu_str := menu_str + 'MP,';
     TAreaControlRights.write:
       menu_str := menu_str + 'DP,';
-    TAreaControlRights.other:
-      if (Self.rootMenu) then
-        menu_str := menu_str + 'MP,';
   end; // case
 
   if (Self.rootMenu) then
@@ -1751,26 +1741,29 @@ end;
 // DKMenu clicks:
 
 procedure TRelief.DKMenuClickMP(Sender: Integer; item: string);
-var ors: TIntAr;
 begin
-  SetLength(ors, 1);
-  ors[0] := Sender;
+  var areas := TList<Integer>.Create();
+  try
+    areas.Add(Sender);
 
-  if ((GlobConfig.data.Auth.autoauth) and (Self.areas[Sender].tech_rights <> TAreaControlRights.superuser)) then
-  begin
-    if (item = 'MP') then
+    if ((GlobConfig.data.Auth.autoauth) and (Self.areas[Sender].tech_rights <> TAreaControlRights.superuser)) then
     begin
-      F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.AuthWriteCallback, ors, false);
-      Self.AuthWriteCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password, ors, false);
+      if (item = 'MP') then
+      begin
+        F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.AuthWriteCallback, areas, false);
+        Self.AuthWriteCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password, areas, false);
+      end else begin
+        F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.AuthReadCallback, areas, true);
+        Self.AuthReadCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password, areas, false);
+      end;
     end else begin
-      F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.Auth.username, 2, Self.AuthReadCallback, ors, true);
-      Self.AuthReadCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password, ors, false);
+      if (item = 'MP') then
+        F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, areas, false)
+      else
+        F_Auth.OpenForm('Vyžadována autorizace', Self.AuthReadCallback, areas, true)
     end;
-  end else begin
-    if (item = 'MP') then
-      F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, ors, false)
-    else
-      F_Auth.OpenForm('Vyžadována autorizace', Self.AuthReadCallback, ors, true)
+  finally
+    areas.Free();
   end;
 end;
 
@@ -1782,14 +1775,17 @@ begin
 end;
 
 procedure TRelief.DKMenuClickSUPERUSER(Sender: Integer; item: string);
-var ors: TIntAr;
 begin
-  SetLength(ors, 1);
-  ors[0] := Sender;
-  F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, ors, false);
+  var areas := TList<Integer>.Create();
+  try
+    areas.Add(Sender);
+    F_Auth.OpenForm('Vyžadována autorizace', Self.DKMenuClickSUPERUSER_AuthCallback, areas, false);
+  finally
+    areas.Free();
+  end;
 end;
 
-procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TIntAr;
+procedure TRelief.DKMenuClickSUPERUSER_AuthCallback(Sender: TObject; username: string; password: string; ors: TList<Integer>;
   guest: boolean);
 begin
   Self.areas[ors[0]].login := username;
@@ -1828,7 +1824,7 @@ begin
     TAreaControlRights.superuser:
       rs := 'superuser';
     TAreaControlRights.other:
-      rs := 'ke pozorování, OŘ ovládá jiné pracoviště';
+      rs := 'k pozorování, OŘ ovládá jiné pracoviště';
   else
     rs := 'nedefinováno';
   end;
@@ -2275,16 +2271,20 @@ begin
       GlobConfig.data.Auth.username := '';
       GlobConfig.data.Auth.password := '';
 
-      var fors: TIntAr;
-      SetLength(fors, Self.areas.Count);
-      for var i := 0 to Self.areas.Count - 1 do
-      begin
-        fors[i] := i;
-        Self.areas[i].login := '';
-        PanelTCPClient.PanelAuthorise(Self.areas[i].id, TAreaControlRights.null, '', '');
+      var _areas := TList<Integer>.Create();
+      try
+        for var i := 0 to Self.areas.Count - 1 do
+        begin
+          _areas.Add(i);
+          Self.areas[i].login := '';
+          PanelTCPClient.PanelAuthorise(Self.areas[i].id, TAreaControlRights.null, '', '');
+        end;
+
+        F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, _areas, true);
+      finally
+        _areas.Free();
       end;
 
-      F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true);
       Exit();
     end;
 
@@ -2304,22 +2304,24 @@ begin
     end;
 
     // vytvorime pole indexu oblasti rizeni pro autorizacni proces
-    var fors: TIntAr;
-    SetLength(fors, Self.reAuth.old_ors.Count);
-    for var i := 0 to Self.reAuth.old_ors.Count - 1 do
-      fors[i] := Self.reAuth.old_ors[i];
+    var areas := TList<Integer>.Create();
+    try
+      areas.AddRange(Self.reAuth.old_ors);
 
-    // zapomeneme ulozeneho uzivatele
-    if ((GlobConfig.data.Auth.autoauth) and (GlobConfig.data.Auth.username = Self.reAuth.old_login)) then
-    begin
-      GlobConfig.data.Auth.autoauth := false;
-      GlobConfig.data.Auth.username := '';
-      GlobConfig.data.Auth.password := '';
+      // zapomeneme ulozeneho uzivatele
+      if ((GlobConfig.data.Auth.autoauth) and (GlobConfig.data.Auth.username = Self.reAuth.old_login)) then
+      begin
+        GlobConfig.data.Auth.autoauth := false;
+        GlobConfig.data.Auth.username := '';
+        GlobConfig.data.Auth.password := '';
+      end;
+
+      // na OR v seznamu 'Self.reAuth.old_ors' prihlasime hosta
+      F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, areas, true);
+      Self.AuthReadCallback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, areas, false);
+    finally
+      areas.Free();
     end;
-
-    // na OR v seznamu 'Self.reAuth.old_ors' prihlasime hosta
-    F_Auth.Listen('Vyžadována autorizace', GlobConfig.data.guest.username, 0, Self.AuthReadCallback, fors, true);
-    Self.AuthReadCallback(Self, GlobConfig.data.guest.username, GlobConfig.data.guest.password, fors, false);
 
     // v pripade povolene IPC odhlasime i zbyle panely
     if (GlobConfig.data.Auth.ipc_send) then
@@ -2337,29 +2339,31 @@ begin
         Exit();
 
       // do \ors si priradime vsechna or s zadanym opravnenim > null
-      var fors: TIntAr;
-      SetLength(fors, cnt);
-      var j := 0;
-      var rights: TAreaControlRights;
-      for var i := 0 to Self.areas.Count - 1 do
-        if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) and (IsReadable(Rights))) then
-        begin
-          fors[j] := i;
-          Inc(j);
-        end;
+      var areas := TList<Integer>.Create();
+      try
+        var rights: TAreaControlRights;
+        for var i := 0 to Self.areas.Count - 1 do
+          if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) and (IsReadable(Rights))) then
+            areas.Add(i);
 
-      F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, fors, true)
+        F_Auth.OpenForm('Vyžadována autorizace', Self.ORConnectionOpenned_AuthCallback, areas, true)
+      finally
+        areas.Free();
+      end;
+
     end else begin
       // OR zapamatovany -> prihlasujeme uzivatele jen na tyto OR
 
       // vytvorime pole indexu oblasti rizeni pro autorizacni proces
-      var fors: TIntAr;
-      SetLength(fors, Self.reAuth.old_ors.Count);
-      for var i := 0 to Self.reAuth.old_ors.Count - 1 do
-        fors[i] := Self.reAuth.old_ors[i];
+      var areas := TList<Integer>.Create();
+      try
+        areas.AddRange(Self.reAuth.old_ors);
 
-      // na OR v seznamu 'Self.reAuth.old_ors' prihlasime skutecneho uzivatele
-      F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, fors, false, Self.reAuth.old_login);
+        // na OR v seznamu 'Self.reAuth.old_ors' prihlasime skutecneho uzivatele
+        F_Auth.OpenForm('Vyžadována autorizace', Self.AuthWriteCallback, areas, false, Self.reAuth.old_login);
+      finally
+        areas.Free();
+      end;
 
       Self.reAuth.old_login := '';
       Self.reAuth.old_ors.Clear();
@@ -2370,31 +2374,23 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.IPAAuth();
-var rights: TAreaControlRights;
 begin
   if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
   begin
     // existujici spojeni -> autorizovat
-
-    // zjistime pocet OR s (zadanym opravnenim > null) nebo (prave autorizovanych)
-    var cnt := 0;
-    for var i := 0 to Self.areas.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (IsReadable(Rights)) or (IsReadable(Self.areas[i]))) then
-        Inc(cnt);
-
     // do \ors si priradime vsechna or s (zadanym opravennim > null) nebo (prave autorizovanych)
-    var ors: TIntAr;
-    SetLength(ors, cnt);
-    var j := 0;
-    for var i := 0 to Self.areas.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (IsReadable(Rights)) or (IsReadable(Self.areas[i]))) then
-      begin
-        ors[j] := i;
-        Inc(j);
-      end;
+    var areas := TList<Integer>.Create();
+    var rights: TAreaControlRights;
+    try
+      for var i := 0 to Self.areas.Count - 1 do
+        if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (IsReadable(Rights)) or (IsReadable(Self.areas[i]))) then
+          areas.Add(i);
 
-    Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password,
-      ors, false);
+      Self.ORConnectionOpenned_AuthCallback(Self, GlobConfig.data.Auth.username, GlobConfig.data.Auth.password,
+        areas, false);
+    finally
+      areas.Free();
+    end;
   end else begin
     // nove spojeni -> pripojit
     try
@@ -2408,21 +2404,21 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.AuthReadCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
+procedure TRelief.AuthReadCallback(Sender: TObject; username: string; password: string; areais: TList<Integer>; guest: boolean);
 begin
-  for var i := 0 to Length(ors) - 1 do
+  for var areai in areais do
   begin
-    Self.areas[ors[i]].login := username;
-    PanelTCPClient.PanelAuthorise(Self.areas[ors[i]].id, read, username, password);
+    Self.areas[areai].login := username;
+    PanelTCPClient.PanelAuthorise(Self.areas[areai].id, read, username, password);
   end;
 end;
 
-procedure TRelief.AuthWriteCallback(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean);
+procedure TRelief.AuthWriteCallback(Sender: TObject; username: string; password: string; areais: TList<Integer>; guest: boolean);
 begin
-  for var i := 0 to Length(ors) - 1 do
+  for var areai in areais do
   begin
-    Self.areas[ors[i]].login := username;
-    PanelTCPClient.PanelAuthorise(Self.areas[ors[i]].id, write, username, password);
+    Self.areas[areai].login := username;
+    PanelTCPClient.PanelAuthorise(Self.areas[areai].id, write, username, password);
   end;
 end;
 

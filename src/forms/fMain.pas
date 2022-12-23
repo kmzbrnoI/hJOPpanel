@@ -10,7 +10,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DXDraws, ComCtrls, ExtCtrls, ImgList, Panel, AppEvnts, ActnList,
   Buttons, StdCtrls, GlobalConfig, StrUtils, ShellApi, RPConst, System.Actions,
-  System.ImageList, Types;
+  System.ImageList, Types, Generics.Collections;
 
 const
   _MUTE_MIN = 3; // maximum mute time of sounds
@@ -82,7 +82,7 @@ type
     procedure ShowAboutDialog();
     procedure RunuLIDaemon();
     procedure OnuLIAuthStatusChanged(Sender: TObject);
-    procedure uLILoginFilled(Sender: TObject; username: string; password: string; ors: TIntAr; guest: Boolean);
+    procedure uLILoginFilled(Sender: TObject; username: string; password: string; ors: TList<Integer>; guest: Boolean);
 
   protected
     procedure WndProc(var Message: TMessage); override;
@@ -478,14 +478,19 @@ begin
   Self.uliauth_time := Now + EncodeTime(0, 0, _ULIAUTH_TIMEOUT_SEC, 0);
   Self.uliauth_enabled := True;
 
-  if (not BridgeClient.opened) then
-    Self.RunuLIDaemon()
-  else
-  begin
-    if (GlobConfig.data.auth.password = '') then
-      F_Auth.OpenForm('uLI-daemon vyžaduje autentizaci', Self.uLILoginFilled, nil, false)
+  var areas := TList<Integer>.Create();
+  try
+    if (not BridgeClient.opened) then
+      Self.RunuLIDaemon()
     else
-      BridgeClient.auth();
+    begin
+      if (GlobConfig.data.auth.password = '') then
+        F_Auth.OpenForm('uLI-daemon vyžaduje autentizaci', Self.uLILoginFilled, areas, false)
+      else
+        BridgeClient.auth();
+    end;
+  finally
+    areas.Free();
   end;
 
   Self.UpdateuLIIcon();
@@ -598,7 +603,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_Main.uLILoginFilled(Sender: TObject; username: string; password: string; ors: TIntAr; guest: Boolean);
+procedure TF_Main.uLILoginFilled(Sender: TObject; username: string; password: string; ors: TList<Integer>; guest: Boolean);
 begin
   if (BridgeClient.toLogin.password = '') then
     F_Auth.AuthError(0, 'Je třeba povolit autorizaci uLI-daemon!')

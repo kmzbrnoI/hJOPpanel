@@ -40,7 +40,7 @@ const
   );
 
 type
-  TAuthFilledCallback = procedure(Sender: TObject; username: string; password: string; ors: TIntAr; guest: boolean)
+  TAuthFilledCallback = procedure(Sender: TObject; username: string; password: string; ors: TList<Integer>; guest: boolean)
     of object;
 
   TF_Auth = class(TForm)
@@ -76,7 +76,7 @@ type
     callback: TAuthFilledCallback; // called on "OK" press
     auth_errors: TDictionary<Integer, string>; // authorization errors (id_or:error)
     auth_remaining: TList<Integer>; // areas remaining for authorization
-    auth_areas: TIntAr; // areas to authorization
+    auth_areas: TList<Integer>; // areas to authorization
     flistening: boolean; // are we listening to AUTH messages?
 
     procedure RefreshErrorMessage();
@@ -91,10 +91,10 @@ type
     procedure UpdateCheckboxLayout();
 
   public
-    procedure OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TIntAr; allow_guest: boolean;
+    procedure OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TList<Integer>; allow_guest: boolean;
       username: string = '');
     procedure Listen(caption: string; username: string; remember_level: Integer; callback: TAuthFilledCallback;
-      or_ids: TIntAr; allow_guest: boolean);
+      or_ids: TList<Integer>; allow_guest: boolean);
     // neotvirat okno, ale pokud dojde k chybe, zobrazit okno a chybu a umoznit zaadt login znovu
 
     procedure AuthError(or_index: Integer; error: string); // zavolat pri prichodu chyby autorizace
@@ -119,8 +119,7 @@ uses GlobalConfig, fMain, TCPClientPanel, uLIclient, InterProcessCom;
 procedure TF_Auth.B_ApplyClick(Sender: TObject);
 begin
   Self.auth_remaining.Clear();
-  for var i := 0 to Length(Self.auth_areas) - 1 do
-    Self.auth_remaining.Add(Self.auth_areas[i]);
+  Self.auth_remaining.AddRange(Self.auth_areas);
   Self.flistening := true;
 
   if (Sender = Self.B_Guest) then
@@ -190,6 +189,7 @@ procedure TF_Auth.FormCreate(Sender: TObject);
 begin
   Self.auth_errors := TDictionary<Integer, string>.Create();
   Self.auth_remaining := TList<Integer>.Create();
+  Self.auth_areas := TList<Integer>.Create();
   Self.flistening := false;
 end;
 
@@ -197,6 +197,7 @@ procedure TF_Auth.FormDestroy(Sender: TObject);
 begin
   Self.auth_errors.Free();
   Self.auth_remaining.Free();
+  Self.auth_areas.Free();
 end;
 
 procedure TF_Auth.FormKeyPress(Sender: TObject; var Key: Char);
@@ -212,7 +213,7 @@ begin
   F_Main.A_ReAuth.Enabled := false;
 end;
 
-procedure TF_Auth.OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TIntAr; allow_guest: boolean;
+procedure TF_Auth.OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TList<Integer>; allow_guest: boolean;
   username: string = '');
 begin
   Self.flistening := false;
@@ -245,17 +246,18 @@ begin
 end;
 
 procedure TF_Auth.Listen(caption: string; username: string; remember_level: Integer; callback: TAuthFilledCallback;
-  or_ids: TIntAr; allow_guest: boolean);
+  or_ids: TList<Integer>; allow_guest: boolean);
 begin
   Self.flistening := true;
   Self.callback := callback;
 
-  Self.auth_areas := or_ids;
+  Self.auth_areas.Clear();
+  Self.auth_areas.AddRange(or_ids);
+
   Self.auth_errors.Clear();
 
   Self.auth_remaining.Clear();
-  for var i := 0 to Length(Self.auth_areas) - 1 do
-    Self.auth_remaining.Add(Self.auth_areas[i]);
+  Self.auth_remaining.AddRange(or_ids);
 
   Self.E_username.Text := username;
   Self.E_Password.Text := '';
