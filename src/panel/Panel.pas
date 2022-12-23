@@ -162,8 +162,8 @@ type
     procedure AEMessage(var msg: tagMSG; var Handled: boolean);
 
     // DK menu popup
-    procedure ShowDKMenu(obl_rizeni: Integer);
-    procedure ShowRegMenu(obl_rizeni: Integer);
+    procedure ShowDKMenu(areai: Integer);
+    procedure ShowRegMenu(areai: Integer);
 
     // DK menu clicks:
     procedure DKMenuClickMP(Sender: Integer; item: string);
@@ -422,6 +422,8 @@ begin
           fg := $A0A0A0;
         superuser:
           fg := clYellow;
+        other:
+          fg := clRed;
       else
         fg := clFuchsia;
       end;
@@ -818,7 +820,7 @@ begin
   var Handled := false;
   for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.areas[i].tech_rights < TAreaControlRights.write) then
+    if (not IsWritable(Self.areas[i])) then
       continue;
     if ((Self.areas[i].RegPlease.status > TAreaRegPleaseStatus.none) and (Position.X = Self.areas[i].positions.DK.X + 6) and
       (Position.Y = Self.areas[i].positions.DK.Y + 1)) then
@@ -842,7 +844,7 @@ begin
   Handled := false;
   for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
+    if (not IsReadable(Self.areas[i])) then
       continue;
     Self.areas[i].stack.mouseClick(Position, Button, Handled);
     if (Handled) then
@@ -1000,7 +1002,7 @@ begin
   Handled := false;
   for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
+    if (not IsReadable(Self.areas[i])) then
       continue;
     Self.areas[i].stack.MouseUp(Position, Button, Handled);
     if (Handled) then
@@ -1016,7 +1018,7 @@ begin
   Handled := false;
   for var i := 0 to Self.areas.Count - 1 do
   begin
-    if (Self.areas[i].tech_rights = TAreaControlRights.null) then
+    if (not IsReadable(Self.areas[i])) then
       continue;
     Self.areas[i].stack.MouseDown(Position, Button, Handled);
     if (Handled) then
@@ -1370,40 +1372,42 @@ begin
   if (areai = -1) then
     Exit;
 
-  var tmp := Self.areas[areai].tech_rights;
+  var previous := Self.areas[areai].tech_rights;
   Self.areas[areai].tech_rights := Rights;
   Self.areas[areai].username := username;
   Self.UpdateLoginString();
 
-  if ((Rights < tmp) and (Rights < write)) then
+  if ((IsWritable(previous)) and (not IsWritable(Rights))) then
   begin
     Self.areas[areai].countdown.Clear();
     while (SoundsPlay.IsPlaying(_SND_TRAT_ZADOST)) do
       SoundsPlay.DeleteSound(_SND_TRAT_ZADOST);
   end;
 
-  if ((tmp = TAreaControlRights.null) and (Rights > tmp)) then
-    PanelTCPClient.PanelFirstGet(Sender);
-
-  if (Rights = TAreaControlRights.null) then
+  if (IsReadable(Rights)) then
+  begin
+    if (not IsReadable(previous)) then
+    begin
+      PanelTCPClient.PanelFirstGet(Sender);
+      Self.areas[areai].stack.Enabled := true;
+    end;
+  end else begin
     Self.ORDisconnect(areai);
+  end;
 
-  if ((Rights > TAreaControlRights.null) and (tmp = TAreaControlRights.null)) then
-    Self.areas[areai].stack.Enabled := true;
-
-  if ((Rights >= TAreaControlRights.write) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
-    (BridgeClient.toLogin.password <> '')) then
+  if ((IsWritable(Rights)) and (BridgeClient.authStatus = TuLIAuthStatus.no) and
+      (BridgeClient.toLogin.password <> '')) then
     BridgeClient.Auth();
 
-  if (Rights >= TAreaControlRights.read) then
+  if (IsReadable(Rights)) then
     IPC.CheckAuth();
 
   if (F_Auth.listening) then
   begin
-    if (Rights = TAreaControlRights.null) then
-      F_Auth.AuthError(areai, comment)
+    if (IsReadable(Rights)) then
+      F_Auth.AuthOK(areai)
     else
-      F_Auth.AuthOK(areai);
+      F_Auth.AuthError(areai, comment);
   end;
 
   if (comment <> '') then
@@ -1445,11 +1449,13 @@ begin
   var j := 0;
   var rights: TAreaControlRights;
   for var i := 0 to Self.areas.Count - 1 do
-    if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) and (rights > TAreaControlRights.null)) then
+  begin
+    if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) and (IsReadable(rights))) then
     begin
       ors[j] := i;
       Inc(j);
     end;
+  end;
 
   if (GlobConfig.data.Auth.autoauth) then
   begin
@@ -1478,9 +1484,9 @@ begin
   begin
     if (GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) then
     begin
-      if (rights > TAreaControlRights.null) then
+      if (IsReadable(rights)) then
       begin
-        if ((rights > TAreaControlRights.read) and (guest)) then
+        if (IsWritable(rights)) then
           rights := TAreaControlRights.read;
         Self.areas[i].login := username;
         PanelTCPClient.PanelAuthorise(Self.areas[i].id, rights, username, password)
@@ -1672,39 +1678,40 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 // DKMenu popup:
 
-procedure TRelief.ShowDKMenu(obl_rizeni: Integer);
+procedure TRelief.ShowDKMenu(areai: Integer);
 var menu_str: string;
 begin
   if (PanelTCPClient.status <> TPanelConnectionStatus.opened) then
     Exit();
 
-  menu_str := '$' + Self.areas[obl_rizeni].Name + ',-,';
+  menu_str := '$' + Self.areas[areai].Name + ',-,';
 
-  case (Self.areas[obl_rizeni].tech_rights) of
+  case (Self.areas[areai].tech_rights) of
     TAreaControlRights.null, TAreaControlRights.read, TAreaControlRights.superuser:
       menu_str := menu_str + 'MP,';
     TAreaControlRights.write:
       menu_str := menu_str + 'DP,';
+    TAreaControlRights.other:
+      if (Self.rootMenu) then
+        menu_str := menu_str + 'MP,';
   end; // case
 
   if (Self.rootMenu) then
     menu_str := menu_str + '!SUPERUSER,';
 
-  if (Integer(Self.areas[obl_rizeni].tech_rights) >= 2) then
+  if (IsWritable(Self.areas[areai])) then
   begin
-    // mame pravo zapisovat
-
-    PanelTCPClient.PanelUpdateOsv(Self.areas[obl_rizeni].id);
+    PanelTCPClient.PanelUpdateOsv(Self.areas[areai].id);
 
     // LOKO
     menu_str := menu_str + 'LOKO,';
 
     // OSV
-    if (Self.areas[obl_rizeni].lights.Count > 0) then
+    if (Self.areas[areai].lights.Count > 0) then
       menu_str := menu_str + 'OSV,';
 
     // NUZ
-    case (Self.areas[obl_rizeni].NUZ_status) of
+    case (Self.areas[areai].NUZ_status) of
       TNUZstatus.blk_in_nuz:
         menu_str := menu_str + '!NUZ>,';
       TNUZstatus.nuzing:
@@ -1717,18 +1724,18 @@ begin
     begin
       if (ModelTime.started) then
       begin
-        if (Self.areas[obl_rizeni].Rights.ModelTimeStop) then
+        if (Self.areas[areai].Rights.ModelTimeStop) then
           menu_str := menu_str + 'CAS<,';
       end else begin
-        if (Self.areas[obl_rizeni].Rights.ModelTimeStart) then
+        if (Self.areas[areai].Rights.ModelTimeStart) then
           menu_str := menu_str + 'CAS>,';
       end;
     end;
 
-    if ((Self.areas[obl_rizeni].Rights.ModelTimeSet) and (not ModelTime.started)) then
+    if ((Self.areas[areai].Rights.ModelTimeSet) and (not ModelTime.started)) then
       menu_str := menu_str + 'CAS,';
 
-    if (Self.areas[obl_rizeni].announcement) then
+    if (Self.areas[areai].announcement) then
       menu_str := menu_str + 'HLÁŠENÍ,';
   end;
 
@@ -1737,7 +1744,7 @@ begin
   Self.dkRootMenuItem := 'DK';
   Self.menuLastpos := Self.CursorDraw.Pos;
 
-  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0, 0)));
+  Self.Menu.ShowMenu(menu_str, areai, Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1749,7 +1756,7 @@ begin
   SetLength(ors, 1);
   ors[0] := Sender;
 
-  if ((GlobConfig.data.Auth.autoauth) and (Self.areas[Sender].tech_rights < TAreaControlRights.superuser)) then
+  if ((GlobConfig.data.Auth.autoauth) and (Self.areas[Sender].tech_rights <> TAreaControlRights.superuser)) then
   begin
     if (item = 'MP') then
     begin
@@ -1815,11 +1822,13 @@ begin
 
   case (Self.areas[Sender].tech_rights) of
     TAreaControlRights.read:
-      rs := 'ke čtení';
+      rs := 'k pozorování, OŘ nikdo neovládá';
     TAreaControlRights.write:
-      rs := 'k zápisu';
+      rs := 'k řízení';
     TAreaControlRights.superuser:
       rs := 'superuser';
+    TAreaControlRights.other:
+      rs := 'ke pozorování, OŘ ovládá jiné pracoviště';
   else
     rs := 'nedefinováno';
   end;
@@ -1845,23 +1854,23 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.ShowRegMenu(obl_rizeni: Integer);
+procedure TRelief.ShowRegMenu(areai: Integer);
 var menu_str: string;
 begin
   if ((PanelTCPClient.status <> TPanelConnectionStatus.opened) or
-    (Self.areas[obl_rizeni].RegPlease.status = TAreaRegPleaseStatus.none)) then
+    (Self.areas[areai].RegPlease.status = TAreaRegPleaseStatus.none)) then
     Exit();
 
-  menu_str := '$' + Self.areas[obl_rizeni].Name + ',$Žádost o loko,-,INFO,ODMÍTNI';
+  menu_str := '$' + Self.areas[areai].Name + ',$Žádost o loko,-,INFO,ODMÍTNI';
 
-  Self.areas[obl_rizeni].RegPlease.status := TAreaRegPleaseStatus.request;
+  Self.areas[areai].RegPlease.status := TAreaRegPleaseStatus.request;
 
   Self.dkRootMenuItem := 'REG-PLEASE';
   Self.menuLastpos := Self.CursorDraw.Pos;
 
-  Self.Menu.ShowMenu(menu_str, obl_rizeni, Self.DrawObject.ClientToScreen(Point(0, 0)));
+  Self.Menu.ShowMenu(menu_str, areai, Self.DrawObject.ClientToScreen(Point(0, 0)));
 
-  PanelTCPClient.PanelLokList(Self.areas[obl_rizeni].id);
+  PanelTCPClient.PanelLokList(Self.areas[areai].id);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2240,7 +2249,7 @@ end;
 function TRelief.AnyORWritable(): boolean;
 begin
   for var area in Self.areas do
-    if (area.tech_rights > TAreaControlRights.read) then
+    if (IsWritable(area)) then
       Exit(true);
   Result := false;
 end;
@@ -2290,7 +2299,7 @@ begin
         (Self.reAuth.old_login = '')) then
         Self.reAuth.old_login := Self.areas[i].login;
       if ((Self.reAuth.old_login <> '') and (Self.reAuth.old_login = Self.areas[i].login) and
-        (Self.areas[i].tech_rights >= TAreaControlRights.write)) then
+          (IsWritable(Self.areas[i].tech_rights))) then
         Self.reAuth.old_ors.Add(i);
     end;
 
@@ -2333,7 +2342,7 @@ begin
       var j := 0;
       var rights: TAreaControlRights;
       for var i := 0 to Self.areas.Count - 1 do
-        if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) and (Rights > TAreaControlRights.null)) then
+        if ((GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) and (IsReadable(Rights))) then
         begin
           fors[j] := i;
           Inc(j);
@@ -2370,8 +2379,7 @@ begin
     // zjistime pocet OR s (zadanym opravnenim > null) nebo (prave autorizovanych)
     var cnt := 0;
     for var i := 0 to Self.areas.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (Rights > TAreaControlRights.null) or
-        (Self.areas[i].tech_rights > TAreaControlRights.null)) then
+      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (IsReadable(Rights)) or (IsReadable(Self.areas[i]))) then
         Inc(cnt);
 
     // do \ors si priradime vsechna or s (zadanym opravennim > null) nebo (prave autorizovanych)
@@ -2379,8 +2387,7 @@ begin
     SetLength(ors, cnt);
     var j := 0;
     for var i := 0 to Self.areas.Count - 1 do
-      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (Rights > TAreaControlRights.null) or
-        (Self.areas[i].tech_rights > TAreaControlRights.null)) then
+      if ((not GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, Rights)) or (IsReadable(Rights)) or (IsReadable(Self.areas[i]))) then
       begin
         ors[j] := i;
         Inc(j);

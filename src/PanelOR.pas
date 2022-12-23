@@ -10,7 +10,7 @@ uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,
   PGraphics;
 
 type
-  TAreaControlRights = (null = 0, read = 1, write = 2, superuser = 3);
+  TAreaControlRights = (null = 0, read = 1, write = 2, superuser = 3, other = 4);
   TAreaDkOrientation = (dkBot = 0, dkTop = 1);
 
   TAreaRights = record
@@ -78,6 +78,12 @@ type
     constructor Create(line: string; Graphics: TPanelGraphics);
     destructor Destroy(); override;
   end;
+
+  function IsWritable(right: TAreaControlRights): Boolean; overload;
+  function IsWritable(area: TAreaPanel): Boolean; overload;
+
+  function IsReadable(right: TAreaControlRights): Boolean; overload;
+  function IsReadable(area: TAreaPanel): Boolean; overload;
 
 implementation
 
@@ -168,6 +174,27 @@ begin
   inherited;
 end;
 
+/// /////////////////////////////////////////////////////////////////////////////
+
+function IsWritable(right: TAreaControlRights): Boolean;
+begin
+  Result := (right = TAreaControlRights.write) or (right = TAreaControlRights.superuser);
+end;
+
+function IsWritable(area: TAreaPanel): Boolean;
+begin
+  Result := IsWritable(area.tech_rights);
+end;
+
+function IsReadable(right: TAreaControlRights): Boolean;
+begin
+  Result := (right > TAreaControlRights.null);
+end;
+
+function IsReadable(area: TAreaPanel): Boolean;
+begin
+  Result := IsReadable(area.tech_rights);
+end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 end.
