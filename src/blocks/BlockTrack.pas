@@ -20,6 +20,7 @@ type
     arrowL, arrowS: boolean;
     fg, bg, border: TColor;
     posindex: Integer; // index pozice, na ktere je umistena tato konkretni souprava
+    flash: Boolean;
   end;
 
   TTrackPanelProp = class
@@ -108,7 +109,7 @@ function InvDKSType(dks: TDKSType): TDKSType;
 
 implementation
 
-uses parseHelper;
+uses parseHelper, RPConst;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -170,13 +171,15 @@ begin
     begin
       fg := clBlack;
       bg := Self.panelProp.bg;
-    end
-    else
+    end else
       bg := clYellow;
   end else if ((bgZaver) and (Self.panelProp.jcend > TJCType.no)) then
     bg := _JC_END[Integer(Self.panelProp.jcend)]
   else
     bg := train.bg;
+
+  if ((train.flash) and (blik)) then
+    Exit();
 
   TextOutput(pos, train.name, fg, bg, obj, true);
 
@@ -357,10 +360,15 @@ begin
         us.bg := StrToColor(train[3]);
         us.posindex := -1;
 
-        if (train.Count > 4) then
+        if ((train.Count > 4) and (train[4] <> '-')) then
           us.border := StrToColor(train[4])
         else
           us.border := clBlack;
+
+        if (train.Count > 5) then
+          us.flash := RPConst.StrToBool(train[5])
+        else
+          us.flash := false;
 
         Self.trains.Add(us);
       end;

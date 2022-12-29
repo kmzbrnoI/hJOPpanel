@@ -558,7 +558,7 @@ begin
     if (Self.showDetails) then
       Self.blockLabels.show(Self.drawObject);
     Self.texts.show(Self.drawObject);
-    Self.linkersTrains.show(Self.drawObject);
+    Self.linkersTrains.show(Self.drawObject, Self.Graphics.flash);
     Self.linkers.show(Self.drawObject, Self.Graphics.flash);
     Self.signals.show(Self.drawObject, Self.Graphics.flash);
     Self.crossings.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);

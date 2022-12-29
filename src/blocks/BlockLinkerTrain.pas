@@ -22,6 +22,7 @@ type
     time_color: TColor;
     fg: TColor;
     bg: TColor;
+    flash: Boolean;
 
     constructor Create();
     destructor Destroy(); override;
@@ -63,7 +64,7 @@ type
     destructor Destroy(); override;
 
     procedure Load(ini: TMemIniFile; version: Word);
-    procedure Show(obj: TDXDraw);
+    procedure Show(obj: TDXDraw; flash: Boolean);
     function GetIndex(Pos: TPoint): TPLinkerId;
     procedure Reset(orindex: Integer = -1);
 
@@ -76,7 +77,7 @@ const
 
 implementation
 
-uses Symbols, parseHelper, StrUtils, TCPClientPanel;
+uses Symbols, parseHelper, StrUtils, TCPClientPanel, RPConst;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -161,7 +162,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPLinkersTrain.Show(obj: TDXDraw);
+procedure TPLinkersTrain.Show(obj: TDXDraw; flash: Boolean);
 begin
   for var uvs in Self.data do
   begin
@@ -177,11 +178,11 @@ begin
 
     for var linkerTrain in uvs.panelProp.train do
     begin
-      if (not Assigned(linkerTrain.strings)) then
-        continue;
-
-      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[0], linkerTrain.fg, linkerTrain.bg, obj, true);
-      Symbols.TextOutput(Point(uvs.pos.X + 7, top), linkerTrain.time, linkerTrain.time_color, clBlack, obj);
+      if ((Assigned(linkerTrain.strings)) and ((not linkerTrain.flash) or (not flash))) then
+      begin
+        Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[0], linkerTrain.fg, linkerTrain.bg, obj, true);
+        Symbols.TextOutput(Point(uvs.pos.X + 7, top), linkerTrain.time, linkerTrain.time_color, clBlack, obj);
+      end;
 
       top := top + incr;
     end;
@@ -289,6 +290,11 @@ begin
         else
           lt.strings.Add(train[j]);
       end;
+
+      if (train.Count >= 8) then
+        lt.flash := RPConst.StrToBool(train[7])
+      else
+        lt.flash := false;
 
       Self.train.Add(lt);
     end;

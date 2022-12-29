@@ -287,7 +287,7 @@ begin
     // (cislo soupravy muze byt kratsi nez cislo koleje)
     if ((track.trains.Count > 0) and (track.labels.Count > 0)) then
     begin
-      if (track.TrainPaintsOnRailNum() and (track.panelProp.trains.Count > 0)) then
+      if (track.TrainPaintsOnRailNum() and (track.panelProp.trains.Count > 0) and ((not flash) or (not track.panelProp.trains[0].flash))) then
       begin
         for var j := 1 to track.labels.Count - 1 do // na nulte pozici je cislo soupravy
           track.PaintTrackName(track.labels[j], obj, fg = clBlack);
