@@ -18,7 +18,6 @@ type
 
   TLinkerTrain = class
     strings: TStrings;
-    show_index: Integer;
     time: string;
     time_color: TColor;
     fg: TColor;
@@ -73,7 +72,6 @@ type
   end;
 
 const
-  _LINKER_FLASH_PERIOD = 1500; // perioda blikani soupravy u uvazky v ms
   _LINKER_WIDTH = 9;
 
 implementation
@@ -164,16 +162,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TPLinkersTrain.Show(obj: TDXDraw);
-var change: Boolean;
 begin
-  if (Now > change_time) then
-  begin
-    change_time := Now + EncodeTime(0, 0, _LINKER_FLASH_PERIOD div 1000, _LINKER_FLASH_PERIOD mod 1000);
-    change := true;
-  end
-  else
-    change := false;
-
   for var uvs in Self.data do
   begin
     if (not Assigned(uvs.panelProp.train)) then
@@ -191,17 +180,8 @@ begin
       if (not Assigned(linkerTrain.strings)) then
         continue;
 
-      // preblikavani
-      if ((Change) and (linkerTrain.strings.Count > 1)) then
-        Inc(linkerTrain.show_index);
-      if (linkerTrain.show_index >= linkerTrain.strings.Count) then // tato podminka musi byt vne predchozi podminky
-        linkerTrain.show_index := 0;
-
-      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[linkerTrain.show_index], linkerTrain.fg, linkerTrain.bg,
-        obj, linkerTrain.show_index = 0);
-
-      if (linkerTrain.show_index = 0) then
-        Symbols.TextOutput(Point(uvs.pos.X + 7, top), linkerTrain.time, linkerTrain.time_color, clBlack, obj);
+      Symbols.TextOutput(Point(uvs.pos.X, top), linkerTrain.strings[0], linkerTrain.fg, linkerTrain.bg, obj, true);
+      Symbols.TextOutput(Point(uvs.pos.X + 7, top), linkerTrain.time, linkerTrain.time_color, clBlack, obj);
 
       top := top + incr;
     end;
