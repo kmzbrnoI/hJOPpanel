@@ -93,8 +93,6 @@ end;
 
 procedure TF_StitVyl.E_PopisekKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (Key = #13) then
-    B_OKClick(Self);
   if (Key = #27) then
   begin
     Self.Close;

@@ -5,7 +5,7 @@ object F_StitVyl: TF_StitVyl
   BorderStyle = bsToolWindow
   Caption = '[typ] bloku [blok]'
   ClientHeight = 57
-  ClientWidth = 513
+  ClientWidth = 698
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -32,26 +32,27 @@ object F_StitVyl: TF_StitVyl
   object E_Popisek: TEdit
     Left = 8
     Top = 24
-    Width = 417
-    Height = 23
+    Width = 604
+    Height = 24
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
+    AutoSize = False
     Font.Charset = EASTEUROPE_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Fixedsys'
     Font.Style = []
-    MaxLength = 50
+    MaxLength = 72
     ParentFont = False
     TabOrder = 0
     OnChange = E_PopisekChange
     OnKeyPress = E_PopisekKeyPress
   end
   object B_OK: TButton
-    Left = 432
-    Top = 24
+    Left = 616
+    Top = 23
     Width = 75
     Height = 25
     Margins.Left = 2
@@ -59,6 +60,7 @@ object F_StitVyl: TF_StitVyl
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
+    Default = True
     TabOrder = 1
     OnClick = B_OKClick
   end
