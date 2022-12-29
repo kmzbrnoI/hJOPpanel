@@ -219,7 +219,9 @@ begin
   Self.flistening := false;
   Self.callback := callback;
 
-  Self.auth_areas := or_ids;
+  Self.auth_areas.Clear();
+  Self.auth_areas.AddRange(or_ids);
+
   Self.auth_errors.Clear();
 
   Self.RefreshErrorMessage();
