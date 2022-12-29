@@ -177,7 +177,13 @@ end;
 
 procedure TF_Messages.PC_ClientsChange(Sender: TObject);
 begin
-  Self.Caption := Self.PC_Clients.ActivePage.Caption + ' - ' + Self.name + ' - zprávy';
+  // rStrip
+  var s: string := Self.PC_Clients.ActivePage.Caption;
+  var i: Integer := Length(s);
+  while ((i > 0) and (s[i] = ' ')) do
+    i := i - 1;
+
+  Self.Caption := Copy(s, 0, i) + ' - ' + Self.name + ' - zprávy';
 end;
 
 procedure TF_Messages.PC_ClientsDragDrop(Sender, Source: TObject; X, Y: Integer);
