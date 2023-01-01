@@ -6,8 +6,8 @@ MSG;Zprávy
 CAS>;Spustit modelový čas
 CAS<;Zastavit modelový čas
 CAS;Nastavit modelový čas
-HLÁŠENÍ;Spouštění staničního hlášení
-INFO;Zobrazit informace
+HLÁŠENÍ;Staniční hlášení
+INFO;Zobrazit informace o dopravně
 
 S+;Přestavit výhybku do polohy plus
 S-;Přestavit výhybku do polohy mínus
@@ -20,14 +20,14 @@ RAD+;Simulace: řadič do polohy +
 RAD-;Simulace: řadič do polohy -
 RAD?;Simulace: řadič do střední polohy
 
-STIT;Editace štítku
-VYL;Editace výluky
+STIT;Zavedení / úprava varovného štítku
+VYL;Zavedení / úprava výluky
 NUZ>;Nouzové uvolnění závěru
 NUZ<;Zrušení nouzového uvolnění závěru
 ZAV>;Zavedení nouzového závěru
 ZAV<;Zrušení nouzového závěru
-ZAST>;Zavedení zastávky
-ZAST<;Zrušení zastávky
+ZAST>;Aktivace zastávky
+ZAST<;Deaktivace zastávky
 KC;Konec jízdní cesty
 VB;Variantní bod
 OBSAZ;Simulace: obsazení KO
@@ -39,11 +39,11 @@ PC>;Počátek posunové cesty
 PC<;Zrušení počátku posunové cesty
 ZAM>;Zamknutí návěstidla do STŮJ
 ZAM<;Odemknutí návěstidla
-STUJ;Zrušení návěsti
+STUJ;Přestavení návěstíla na STŮJ
 DN;Dodatečná návěst
 RC;Rušení jízdní cesty
-AB>;Automatické stavění
-AB<;Zrušení automatického stavění
+AB>;Zavedení automatického stavění VC
+AB<;Zrušení automatického stavění VC
 PN>;Zapnutí přivolávací návěsti
 PN<;Zrušení přivolávací návěsti
 PP>;Počátek nouzové posunové cesty
@@ -67,17 +67,17 @@ BP>;Zavedení blokové podmínky
 BP<;Zrušení blokové podmínky
 
 NOVÝ vlak;Zavedení nové soupravy
-EDIT vlak;Editace soupravy
+EDIT vlak;Úprava soupravy
 ZRUŠ vlak;Odstranění soupravy z kolejiště
 UVOL vlak;Odstranění soupravy z bloku
-VEZMI vlak;Navrátit vlak do kontroly automatu
+VEZMI vlak;Vrátit vlak do kontroly počítače
 PŘESUŇ vlak>;Přesunout vlak na jinou kolej
 PŘESUŇ vlak<;Ukončit přesouvání vlaku
 JEĎ vlak;Rozjet vlak (zrušit zastavení)
-RUČ vlak;Převzít vlak do ručního ovladače
+RUČ vlak;Otevřít okno ručního řízení vlaku
 STOP vlak;Nouzové zastavení vlaku
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
-PODJ;Editovat předvídaný odjezd
+PODJ;Upravit předvídaný odjezd vlaku
 INFO vlak;Zobrazit informace o vlaku
 
 ZVUK<;Trvale vypnout zvuky všech HV na celém kolejišti
@@ -86,12 +86,12 @@ ZVUK ztlum;Dočasně vypnout zvuky všech HV na celém kolejišti
 ZVUK obnov;Zapnout dříve ztišené zvuky HV
 
 NOVÁ loko;Vytvořit novou lokomotivu
-EDIT loko;Editovat lokomotivu
+EDIT loko;Upravit parametry lokomotiv
 SMAZAT loko;Smazat lokomotivu
-PŘEDAT loko;Předat lokomotivu do stanice
+PŘEDAT loko;Předat lokomotivu do jiné stanice
 HLEDAT loko;Vyhledat lokomotivu v databázi serveru
-RUČ loko;Převzít loko do ručního ovladače
-MAUS loko;Převzít loko na multiMaus (uLI-master)
+RUČ loko;Lokomotivu do ručního ovladače
+MAUS loko;Převzít lokomotivu na multiMaus (uLI-master)
 
 UK;Uvolnění klíče
 ZUK;Zrušení uvolnění klíče
