@@ -73,11 +73,12 @@ UVOL vlak;Odstranění soupravy z bloku
 VEZMI vlak;Navrátit vlak do kontroly automatu
 PŘESUŇ vlak>;Přesunout vlak na jinou kolej
 PŘESUŇ vlak<;Ukončit přesouvání vlaku
-JEĎ vlak;Odjet s vlakem ze zastávky
+JEĎ vlak;Rozjet vlak (zrušit zastavení)
 RUČ vlak;Převzít vlak do ručního ovladače
 STOP vlak;Nouzové zastavení vlaku
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
 PODJ;Editovat předvídaný odjezd
+INFO vlak;Zobrazit informace o vlaku
 
 ZVUK<;Trvale vypnout zvuky všech HV na celém kolejišti
 ZVUK>;Zapnout zvuky všech HV na celém kolejišti
