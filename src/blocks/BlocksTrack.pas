@@ -371,7 +371,7 @@ begin
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
+          if ((Cardinal(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
           begin
             ShowBranches(track, branch.node1.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
             ShowBranches(track, branch.node1.ref_minus, false, showed, myORs, flash, obj, startJC, turnouts);
@@ -404,7 +404,7 @@ begin
 
       TVyhPoloha.plus, TVyhPoloha.minus:
         begin
-          if ((Integer(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
+          if ((Cardinal(turnout.panelProp.position) xor turnout.orientationPlus) = 0) then
           begin
             ShowBranches(track, branch.node2.ref_plus, visible, showed, myORs, flash, obj, startJC, turnouts);
             ShowBranches(track, branch.node2.ref_minus, false, showed, myORs, flash, obj, startJC, turnouts);

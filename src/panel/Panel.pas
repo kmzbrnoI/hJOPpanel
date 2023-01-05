@@ -1314,9 +1314,9 @@ begin
       var PYStart := Cardinal(Bmp.ScanLine[Y]);
       for var X := 0 to Bmp.Width - 1 do
       begin
-        PB := Pointer(PYStart + 3 * X);
-        PG := Pointer(PYStart + 3 * X + 1);
-        PR := Pointer(PYStart + 3 * X + 2);
+        PB := Pointer(Integer(PYStart) + 3 * X);
+        PG := Pointer(Integer(PYStart) + 3 * X + 1);
+        PR := Pointer(Integer(PYStart) + 3 * X + 2);
 
         var aColor := PR^ + (PG^ shl 8) + (PB^ shl 16);
         if (aColor = clBlack) then

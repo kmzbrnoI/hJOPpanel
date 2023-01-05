@@ -151,7 +151,7 @@ begin
     SetLength(Indexes, Self.HVs.Count + 1);
     CB.Items.Add(IntToStr(special.addr) + ' : ' + special.name + ' (' + special.designation + ')');
     Indexes[0] := special.addr;
-    if (special.addr = addr) then
+    if (Integer(special.addr) = addr) then
       CB.ItemIndex := 0;
     index := 1;
   end else begin
@@ -165,7 +165,7 @@ begin
     begin
       CB.Items.Add(IntToStr(Self.HVs[i].addr) + ' : ' + Self.HVs[i].name + ' (' + Self.HVs[i].designation + ')');
       Indexes[index] := Self.HVs[i].addr;
-      if (Self.HVs[i].addr = addr) then
+      if (Integer(Self.HVs[i].addr) = addr) then
         CB.ItemIndex := i;
       index := index + 1;
     end;

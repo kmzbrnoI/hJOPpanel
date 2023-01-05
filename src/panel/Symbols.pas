@@ -240,9 +240,9 @@ begin
 
     ColouredImages.PixelFormat := pf32Bit;
     IL.SetSize(PartWidth, PartHeight);
-    ColouredImages.SetSize(PartWidth * Length(_SYMBOL_COLORS), PartHeight);
+    ColouredImages.SetSize(Integer(PartWidth) * Length(_SYMBOL_COLORS), PartHeight);
 
-    for var symbol: Cardinal := 0 to (AllImages.Width div PartWidth) - 1 do
+    for var symbol: Cardinal := 0 to (Cardinal(AllImages.Width) div PartWidth) - 1 do
     begin
       for var i: Cardinal := 0 to Length(_Symbol_Colors) - 1 do
       begin

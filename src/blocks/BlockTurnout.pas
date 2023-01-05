@@ -96,12 +96,12 @@ begin
         end;
       TVyhPoloha.plus:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 4 + (4 * Self.orientationPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 4 + (4 * Integer(Self.orientationPlus)), fg,
             bkcol, obj);
         end;
       TVyhPoloha.minus:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 8 - (4 * Self.orientationPlus), fg,
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, (Self.symbolID) + 8 - (4 * Integer(Self.orientationPlus)), fg,
             bkcol, obj);
         end;
       TVyhPoloha.both:
