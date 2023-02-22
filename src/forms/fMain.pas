@@ -93,7 +93,7 @@ type
 
     procedure OnReliefLoginChange(Sender: TObject; user: string);
 
-    procedure Init(const config_fn: string = TGlobConfig._DEFAULT_FN);
+    procedure Init(config_fn: string = TGlobConfig._DEFAULT_FN);
     // configuration file path = 1st program argument
     procedure SetPanelSize(width, height: Integer);
     procedure UpdateuLIIcon();
@@ -298,9 +298,16 @@ begin
   Self.P_Connection.BringToFront();
 end;
 
-procedure TF_Main.Init(const config_fn: string);
+procedure TF_Main.Init(config_fn: string);
 begin
+  var paramOpnl: string := '';
   F_splash.ShowState('Načítám konfiguraci...');
+
+  if (config_fn.EndsWith('.opnl')) then
+  begin
+    paramOpnl := config_fn;
+    config_fn := ExtractFilePath(Application.ExeName) + '\' + TGlobConfig._DEFAULT_FN;
+  end;
 
   try
     GlobConfig.LoadFile(config_fn);
@@ -309,6 +316,9 @@ begin
       Application.MessageBox(PChar('Nepodařilo se načíst konfigurační soubor ' + config_fn + ':' + #13#10 + E.Message),
         'Chyba', MB_OK OR MB_ICONWARNING);
   end;
+
+  if (paramOpnl <> '') then
+    GlobConfig.data.panel_fn := paramOpnl;
 
   Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '') + ' – hJOPpanel – v' +
     NactiVerzi(Application.ExeName) + ' (build ' + GetLastBuildDate + ')';
