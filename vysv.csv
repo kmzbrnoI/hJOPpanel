@@ -75,7 +75,8 @@ PŘESUŇ vlak>;Přesunout vlak na jinou kolej
 PŘESUŇ vlak<;Ukončit přesouvání vlaku
 JEĎ vlak;Rozjet vlak (zrušit zastavení)
 RUČ vlak;Otevřít okno ručního řízení vlaku
-STOP vlak;Nouzové zastavení vlaku
+STOP vlak>;Nouzové zastavení vlaku
+STOP vlak<;Zrušení nouzového zastavení vlaku
 MAUS vlak;Převzít vlak na multiMaus (uLI-master)
 PODJ;Upravit předvídaný odjezd vlaku
 INFO vlak;Zobrazit informace o vlaku
