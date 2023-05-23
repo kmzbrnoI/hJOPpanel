@@ -74,13 +74,14 @@ begin
     fg := clBlack
   else
   begin
-    if ((Self.visible) or (Self.panelProp.fg = clAqua) or (Self.panelProp.fg = clFuchsia)) then
+    if ((Self.visible) or (Self.panelProp.fg = clAqua) or (Self.panelProp.fg = clFuchsia)
+        or (Self.obj < 0) or (Self.obj >= useky.Count)) then
       fg := Self.panelProp.fg
     else
       fg := useky[Self.obj].panelProp.notColorBranches;
   end;
 
-  if (Self.panelProp.bg = clBlack) then
+  if ((Self.panelProp.bg = clBlack) and (Self.obj > -1) and (Self.obj < useky.Count)) then
     bkcol := useky[Self.obj].panelProp.bg
   else
     bkcol := Self.panelProp.bg;

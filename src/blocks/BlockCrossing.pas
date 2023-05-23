@@ -96,7 +96,7 @@ begin
     // nestaticke pozice proste vykreslime:
     for var flashPoint in Self.flashPoss do
     begin
-      if (flashPoint.panelTrack > -1) then
+      if ((flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
         useky[flashPoint.panelTrack].RemoveSymbolFromCrossing(flashPoint.Pos);
 
       Symbols.Draw(SymbolSet.IL_Symbols, flashPoint.Pos, _S_CROSSING, Self.PanelProp.fg,
@@ -110,7 +110,7 @@ begin
       Exit();
 
     for var flashPoint in Self.flashPoss do
-      if (flashPoint.panelTrack > -1) then
+      if ((flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
         useky[flashPoint.panelTrack].AddSymbolFromCrossing(flashPoint.Pos);
   end;
 end;

@@ -95,7 +95,7 @@ procedure TPDerails.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
   for var derail in Self.data do
   begin
-    var visible := ((derail.PanelProp.position = TVyhPoloha.disabled) or (derail.branch < 0) or
+    var visible := ((derail.PanelProp.position = TVyhPoloha.disabled) or (derail.branch < 0) or (derail.track < 0) or (derail.track >= useky.Count) or
       (derail.branch >= useky[derail.track].branches.Count) or (useky[derail.track].branches[derail.branch].visible));
 
     var fg: TColor;
@@ -103,22 +103,23 @@ begin
       fg := clBlack
     else
     begin
-      if ((visible) or (derail.PanelProp.fg = clAqua)) then
+      if ((visible) or (derail.PanelProp.fg = clAqua) or (derail.track < 0) or (derail.track >= useky.Count)) then
         fg := derail.PanelProp.fg
       else
         fg := useky[derail.track].panelProp.notColorBranches;
     end;
 
     var bkcol: TColor;
-    if (derail.PanelProp.bg = clBlack) then
+    if ((derail.PanelProp.bg = clBlack) and (derail.track > -1) and (derail.track < useky.Count)) then
       bkcol := useky[derail.track].panelProp.bg
     else
       bkcol := derail.PanelProp.bg;
 
     case (derail.PanelProp.position) of
       TVyhPoloha.disabled:
-        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol,
-          useky[derail.track].panelProp.bg, clFuchsia, obj);
+        if ((derail.track > -1) and (derail.track < useky.Count)) then
+          Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol,
+            useky[derail.track].panelProp.bg, clFuchsia, obj);
       TVyhPoloha.none:
         Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, bkcol, fg, obj);
       TVyhPoloha.plus:
