@@ -95,9 +95,9 @@ type
 
     procedure PanelMessage(senderid: string; recepientid: string; msg: string);
 
-    function PanelButtonToString(Button: TPanelButton): string;
-    function VersionToInt(version: string): Integer;
-    function VersionToString(version: Integer): string;
+    class function PanelButtonToString(Button: TPanelButton): string;
+    class function VersionToInt(version: string): Integer;
+    class function VersionToString(version: Integer): string;
     function IsServerVersionAtLeast(version: string): boolean;
 
     property status: TPanelConnectionStatus read fstatus;
@@ -121,7 +121,7 @@ constructor TPanelTCPClient.Create();
 begin
   inherited;
 
-  Self.parsed := TStringList.Create;
+  Self.parsed := TStringList.Create();
   Self.mServerVersion := 0;
 
   Self.pingTimer := TTimer.Create(nil);
@@ -229,7 +229,7 @@ begin
 
   Self.control_disconnect := true;
   if Assigned(Self.rthread) then
-    Self.rthread.Terminate;
+    Self.rthread.Terminate();
   try
     Self.tcpClient.Disconnect();
   finally
@@ -273,7 +273,7 @@ end;
 procedure TPanelTCPClient.OnTcpClientDisconnected(Sender: TObject);
 begin
   if Assigned(Self.rthread) then
-    Self.rthread.Terminate;
+    Self.rthread.Terminate();
 
   Relief.OrDisconnect();
   TF_Messages.CloseForms();
@@ -404,7 +404,7 @@ end;
 
 procedure TPanelTCPClient.ParseGlobal();
 var i: Integer;
-  found: boolean;
+  found: Boolean;
 begin
   // parse handhake
   if (Self.parsed[1] = 'HELLO') then
@@ -418,10 +418,10 @@ begin
         found := true;
         break;
       end;
-    end; // for i
+    end;
 
     if (not found) then
-      Application.MessageBox(PChar('Verze protokolu, kterou požívá server (' + Self.parsed[2] + ') není podporována'),
+      Application.MessageBox(PChar('Verze protokolu, kterou používá server (' + Self.parsed[2] + ') není podporována'),
         'Upozornění', MB_OK OR MB_ICONWARNING);
 
     Self.mServerVersion := Self.VersionToInt(Self.parsed[2]);
@@ -868,7 +868,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPanelTCPClient.PanelButtonToString(Button: TPanelButton): string;
+class function TPanelTCPClient.PanelButtonToString(Button: TPanelButton): string;
 begin
   case (Button) of
     TPanelButton.F1:
@@ -886,7 +886,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TPanelTCPClient.VersionToInt(version: string): Integer;
+class function TPanelTCPClient.VersionToInt(version: string): Integer;
 var strs: TStrings;
 begin
   strs := TStringList.Create();
@@ -903,7 +903,7 @@ begin
   Result := (Self.serverVersionInt >= Self.VersionToInt(version));
 end;
 
-function TPanelTCPClient.VersionToString(version: Integer): string;
+class function TPanelTCPClient.VersionToString(version: Integer): string;
 begin
   Result := IntToStr(version div 1000) + '.' + IntToStr(version mod 1000);
 end;
