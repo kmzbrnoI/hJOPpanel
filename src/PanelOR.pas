@@ -85,6 +85,8 @@ type
   function IsReadable(right: TAreaControlRights): Boolean; overload;
   function IsReadable(area: TAreaPanel): Boolean; overload;
 
+  function RightsWithoutOther(right: TAreaControlRights): TAreaControlRights;
+
 implementation
 
 uses parseHelper;
@@ -195,6 +197,15 @@ function IsReadable(area: TAreaPanel): Boolean;
 begin
   Result := IsReadable(area.tech_rights);
 end;
+
+function RightsWithoutOther(right: TAreaControlRights): TAreaControlRights;
+begin
+  if (right = TAreaControlRights.other) then
+    Result := TAreaControlRights.read
+  else
+    Result := right;
+end;
+
 /// /////////////////////////////////////////////////////////////////////////////
 
 end.

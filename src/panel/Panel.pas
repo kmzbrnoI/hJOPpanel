@@ -1473,20 +1473,25 @@ procedure TRelief.ORConnectionOpenned_AuthCallback(Sender: TObject; username: st
   guest: boolean);
 var rights: TAreaControlRights;
 begin
-  for var i := 0 to Self.areas.Count - 1 do
+  for var area: TAreaPanel in Self.areas do
   begin
-    if (GlobConfig.data.Auth.ors.TryGetValue(Self.areas[i].id, rights)) then
+    // second part of condition for IPA auth when panel already connected
+    if ((GlobConfig.data.Auth.ors.TryGetValue(area.id, rights)) or (area.tech_rights > TAreaControlRights.null)) then
     begin
+      var current: TAreaControlRights := RightsWithoutOther(area.tech_rights);
+      if (current > rights) then
+        rights := current;
+
       if (IsReadable(rights)) then
       begin
         if ((IsWritable(rights)) and (guest)) then
           rights := TAreaControlRights.read;
-        Self.areas[i].login := username;
-        PanelTCPClient.PanelAuthorise(Self.areas[i].id, rights, username, password)
+        area.login := username;
+        PanelTCPClient.PanelAuthorise(area.id, rights, username, password)
       end;
     end else begin
-      Self.areas[i].login := username;
-      PanelTCPClient.PanelAuthorise(Self.areas[i].id, read, username, password);
+      area.login := username;
+      PanelTCPClient.PanelAuthorise(area.id, read, username, password);
     end;
   end;
 end;
