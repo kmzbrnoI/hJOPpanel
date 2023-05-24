@@ -66,6 +66,7 @@ type
     destructor Destroy(); override;
 
     function GetPanelLokString(mode: TLokStringMode = normal): string;
+    function NameStr(): string;
 
     class function CharToHVFuncType(c: char): THVFuncType;
     class function HVFuncTypeToChar(t: THVFuncType): char;
@@ -149,7 +150,7 @@ begin
   if (Assigned(special)) then
   begin
     SetLength(Indexes, Self.HVs.Count + 1);
-    CB.Items.Add(IntToStr(special.addr) + ' : ' + special.name + ' (' + special.designation + ')');
+    CB.Items.Add(special.NameStr());
     Indexes[0] := special.addr;
     if (Integer(special.addr) = addr) then
       CB.ItemIndex := 0;
@@ -163,7 +164,7 @@ begin
   begin
     if ((Self.HVs[i].train = '-') or (with_spr)) then
     begin
-      CB.Items.Add(IntToStr(Self.HVs[i].addr) + ' : ' + Self.HVs[i].name + ' (' + Self.HVs[i].designation + ')');
+      CB.Items.Add(Self.HVs[i].NameStr());
       Indexes[index] := Self.HVs[i].addr;
       if (Integer(Self.HVs[i].addr) = addr) then
         CB.ItemIndex := i;
@@ -474,6 +475,15 @@ begin
     begin
       Result := CompareValue(Left.addr, Right.addr);
     end);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function THV.NameStr(): string;
+begin
+  Result := IntToStr(Self.addr) + ' : ' + Self.name;
+  if (Self.designation <> '') then
+    Result := Result + ' (' + Self.designation + ')';
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
