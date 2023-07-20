@@ -12,7 +12,7 @@ uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
   PngImage, DirectX, PanelOR, BlockTypes, Types, BlockPst,
   BlockLinker, BlockLinkerTrain, BlockLock, BlockCrossing, BlocksTrack, BlocksTurnout,
   BlockSignal, BlockTurnout, BlockTrack, BlockDerail, BlockDisconnector, BlockText,
-  BlockOther;
+  BlockOther, DateUtils;
 
 const
   _INFOTIMER_WIDTH = 30;
@@ -502,35 +502,35 @@ const _LENGTH = 16;
 begin
   for var area in Self.areas do
   begin
+    // detekce konce mereni casu
+    for var k := area.countdown.Count - 1 downto 0 do
+      if (Now >= area.countdown[k].Length + area.countdown[k].Start) then
+        area.countdown.Delete(k);
+
     for var k := 0 to area.countdown.Count - 1 do
     begin
-      Symbols.TextOutput(Point(area.positions.time.X, area.positions.time.Y + k), 'MER.CASU', clRed,
+      Symbols.TextOutput(Point(area.positions.time.X, area.positions.time.Y + k), 'MĚŘ.ČASU', clRed,
         clWhite, Self.drawObject);
 
-      var time1, time2: string;
-      DateTimeToString(time1, 'ss', Now - area.countdown[k].Start);
-      DateTimeToString(time2, 'ss', area.countdown[k].Length);
+      if (area.countdown[k].length = 0) then
+        continue;
 
-      for var i := 0 to (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2) - 1 do
+      var pointsRemaining: Integer := Round(((Now-area.countdown[k].start)/area.countdown[k].length)*_LENGTH);
+
+      for var i := 0 to (pointsRemaining div 2) - 1 do
         Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
           _S_FULL, clRed, clBlack, Self.drawObject);
 
-      for var i := (Round((StrToIntDef(time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) div 2) to (_LENGTH div 2) - 1 do
+      for var i := (pointsRemaining div 2) to (_LENGTH div 2) - 1 do
         Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
           _S_FULL, clWhite, clBlack, Self.drawObject);
 
       // vykresleni poloviny symbolu
-      if ((Round((StrToIntDef(Time1, 0) / StrToIntDef(time2, 0)) * _LENGTH) mod 2) = 1) then
+      // vykreslovat jen pri dostatecne dlouhem casu, aby nerusilo pri kratkych casech
+      if (((pointsRemaining mod 2) = 1) and ((TimeToMilliseconds(area.countdown[k].length) div 1000) > (_LENGTH div 2))) then
         Symbols.Draw(SymbolSet.IL_Symbols,
-          Point(area.positions.Time.X + 8 + (Round((StrToIntDef(Time1, 0) / StrToIntDef(Time2, 0)) * _LENGTH) div 2),
+          Point(area.positions.Time.X + 8 + (pointsRemaining div 2),
           area.positions.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.drawObject);
-    end;
-
-    // detekce konce mereni casu
-    for var k := area.countdown.Count - 1 downto 0 do
-    begin
-      if (Now >= area.countdown[k].Length + area.countdown[k].Start) then
-        area.countdown.Delete(k);
     end;
   end;
 end;
