@@ -561,10 +561,10 @@ begin
     Self.linkersTrains.show(Self.drawObject, Self.Graphics.flash);
     Self.linkers.show(Self.drawObject, Self.Graphics.flash);
     Self.signals.show(Self.drawObject, Self.Graphics.flash);
-    Self.crossings.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
     Self.otherObj.show(Self.drawObject, Self.Graphics.flash);
     Self.disconnectors.ShowBg(Self.drawObject, Self.Graphics.flash);
     Self.tracks.show(Self.drawObject, Self.Graphics.flash, Self.areas, signals.startJC, Self.turnouts.data);
+    Self.crossings.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
     Self.turnouts.show(Self.drawObject, Self.Graphics.flash, Self.tracks.data);
     Self.locks.show(Self.drawObject, Self.Graphics.flash);
     Self.disconnectors.show(Self.drawObject, Self.Graphics.flash);

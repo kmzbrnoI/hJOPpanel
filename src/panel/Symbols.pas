@@ -167,6 +167,7 @@ procedure Draw(IL: TImageList; pos: TPoint; symbol: Integer; fg: TColor; bg: TCo
   transparent: boolean = false);
 procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; underline: boolean = false;
   transparent: boolean = false);
+procedure DrawRectangle(pos: TPoint; color: TColor; obj: TDXDraw);
 
 var
   SymbolSet: TSymbolSet;
@@ -426,15 +427,20 @@ begin
   if ((bg <> clBlack) and (not transparent)) then
   begin
     // black is default
-    obj.Surface.Canvas.Pen.Color := bg;
-    obj.Surface.Canvas.Brush.Color := bg;
-    obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
-      (pos.X + 1) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
+    DrawRectangle(pos, bg, obj);
   end;
 
   item := SymbolIndex(symbol, fg);
   IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight, item);
   IL.DrawingStyle := TDrawingStyle.dsNormal;
+end;
+
+procedure DrawRectangle(pos: TPoint; color: TColor; obj: TDXDraw);
+begin
+  obj.Surface.Canvas.Pen.Color := color;
+  obj.Surface.Canvas.Brush.Color := color;
+  obj.Surface.Canvas.Rectangle(pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight,
+    (pos.X + 1) * SymbolSet.symbWidth, (pos.Y + 1) * SymbolSet.symbHeight);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

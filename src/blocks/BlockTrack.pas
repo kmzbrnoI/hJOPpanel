@@ -102,6 +102,7 @@ type
     procedure DrawTrackSymbol(pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw);
     procedure ShowDKSCross(pos: TPoint; obj: TDXDraw; leftCross, rightCross: boolean; dksType: TDKSType; fg: TColor;
       usek: TPTrack);
+    function IsPos(pos: TPoint): Boolean;
 
   end;
 
@@ -527,6 +528,22 @@ begin
     else
       Self.DrawTrackSymbol(pos, _S_DKS_DET_BOT, usek.panelProp.notColorBranches, usek.panelProp.bg, obj)
   end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TPTrack.IsPos(pos: TPoint): Boolean;
+begin
+  for var branch: TTrackBranch in Self.branches do
+    for var sym: TReliefSym in branch.symbols do
+      if (sym.Position = pos) then
+        Exit(True);
+
+  for var sym: TReliefSym in Self.symbols do
+    if (sym.Position = pos) then
+      Exit(True);
+
+  Result := False;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

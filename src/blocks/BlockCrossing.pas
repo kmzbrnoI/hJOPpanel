@@ -31,6 +31,7 @@ type
 
     staticPoss: TList<TPoint>;
     flashPoss: TList<TCrosFlashPoint>;
+    flashPossAlreadyInTrack: TList<Boolean>;
 
     area: Integer;
     panelProp: TCrossingPanelProp;
@@ -40,6 +41,7 @@ type
 
     procedure Reset();
     procedure Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
+    procedure UpdateFlashPossAlreadyInTrack(const useky: TList<TPTrack>);
   end;
 
   TPCrossings = class
@@ -84,34 +86,44 @@ end;
 
 procedure TPCrossing.Show(obj: TDXDraw; blik: boolean; useky: TList<TPTrack>);
 begin
+  if ((Self.flashPossAlreadyInTrack.Count = 0) and (Self.flashPoss.Count > 0)) then
+    Self.UpdateFlashPossAlreadyInTrack(useky); // initial update
+
   // vykreslit staticke pozice:
   for var pos in Self.staticPoss do
     Symbols.Draw(SymbolSet.IL_Symbols, Pos, _S_CROSSING, Self.PanelProp.fg, Self.PanelProp.bg, obj);
 
+  if (Self.PanelProp.state <> TBlkCrossingPanelState.uzavreno) then
+    for var i: Integer := 0 to Self.flashPoss.Count-1 do
+      if (flashPossAlreadyInTrack[i]) then
+          Symbols.DrawRectangle(Self.flashPoss[i].pos, clBlack, obj);
+
   // vykreslit blikajici pozice podle stavu prejezdu:
-  if ((Self.PanelProp.state = TBlkCrossingPanelState.disabled) or (Self.PanelProp.state = TBlkCrossingPanelState.otevreno) or
-    (Self.PanelProp.state = TBlkCrossingPanelState.anulace) or (Self.PanelProp.state = TBlkCrossingPanelState.err) or
-    ((Self.PanelProp.state = TBlkCrossingPanelState.vystraha) and (blik))) then
+  if (Self.PanelProp.state = TBlkCrossingPanelState.uzavreno) then
   begin
-    // nestaticke pozice proste vykreslime:
-    for var flashPoint in Self.flashPoss do
+    // na nestatickych pozicich vykreslime usek
+    // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
+    // V modernich opnl souborech toto pridavani neni treba, protoze usek je pod prejezdem
+    // u z zeditoru. Stare verze opnl souboru symbol neobsahovaly.
+
+    for var i: Integer := 0 to Self.flashPoss.Count-1 do
     begin
-      if ((flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
+      var flashPoint: TCrosFlashPoint := Self.flashPoss[i];
+      if ((not flashPossAlreadyInTrack[i]) and (flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
+        useky[flashPoint.panelTrack].AddSymbolFromCrossing(flashPoint.Pos);
+    end;
+  end else if ((Self.PanelProp.state <> TBlkCrossingPanelState.vystraha) or (blik)) then
+  begin
+    // na nestatickych pozicich vykreslime prejezd
+    for var i: Integer := 0 to Self.flashPoss.Count-1 do
+    begin
+      var flashPoint: TCrosFlashPoint := Self.flashPoss[i];
+      if ((not flashPossAlreadyInTrack[i]) and (flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
         useky[flashPoint.panelTrack].RemoveSymbolFromCrossing(flashPoint.Pos);
 
       Symbols.Draw(SymbolSet.IL_Symbols, flashPoint.Pos, _S_CROSSING, Self.PanelProp.fg,
         Self.PanelProp.bg, obj);
     end;
-  end else begin
-    // na nestatickych pozicich vykreslime usek
-    // provedeme fintu: pridame pozici prostred prejezdu k useku, ktery tam patri
-
-    if (Self.PanelProp.state = TBlkCrossingPanelState.vystraha) then
-      Exit();
-
-    for var flashPoint in Self.flashPoss do
-      if ((flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count)) then
-        useky[flashPoint.panelTrack].AddSymbolFromCrossing(flashPoint.Pos);
   end;
 end;
 
@@ -249,13 +261,27 @@ begin
   inherited;
   Self.staticPoss := TList<TPoint>.Create();
   Self.flashPoss := TList<TCrosFlashPoint>.Create();
+  Self.flashPossAlreadyInTrack := TList<Boolean>.Create();
 end;
 
 destructor TPCrossing.Destroy();
 begin
   Self.staticPoss.Free();
   Self.flashPoss.Free();
+  Self.flashPossAlreadyInTrack.Free();
   inherited;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TPCrossing.UpdateFlashPossAlreadyInTrack(const useky: TList<TPTrack>);
+begin
+  Self.flashPossAlreadyInTrack.Clear();
+
+  for var flashPoint in Self.flashPoss do
+    Self.flashPossAlreadyInTrack.Add(
+      (flashPoint.panelTrack > -1) and (flashPoint.panelTrack < useky.Count) and (useky[flashPoint.panelTrack].IsPos(flashPoint.Pos))
+    );
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
