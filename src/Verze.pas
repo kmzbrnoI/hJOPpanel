@@ -1,22 +1,19 @@
 ﻿unit Verze;
 
-{
-  Ziskani verze programu.
-}
-
 interface
 
-uses Windows, SysUtils, Forms, jclPEImage;
+uses Windows, SysUtils;
 
-function NactiVerzi(const FileName: string): string; // cteni verze z nastaveni
-function GetLastBuildDate: string;
-function GetLastBuildTime: string;
+ function VersionStr(const FileName: string): string; //cteni verze z nastaveni
+ function BuildDateTime(): TDateTime;
 
-const _RELEASE: Boolean = false;
+ const _RELEASE: Boolean = false;
 
 implementation
 
-function NactiVerzi(const FileName: string): string; // cteni verze z nastaveni
+uses DateUtils;
+
+function VersionStr(const FileName: string): string;//cteni verze z nastaveni
 var
   size, len: longword;
   handle: Cardinal;
@@ -26,31 +23,26 @@ var
 begin
   Result := 'Není dostupná';
   size := GetFileVersionInfoSize(Pointer(FileName), handle);
-  if size > 0 then
-  begin
+  if (size > 0) then
+   begin
     GetMem(buffer, size);
-    if GetFileVersionInfo(Pointer(FileName), 0, size, buffer) then
-      if VerQueryValue(buffer, '\', Pointer(pinfo), len) then
-      begin
-        Major := HiWord(pinfo.dwFileVersionMS);
-        Minor := LoWord(pinfo.dwFileVersionMS);
-        Release := HiWord(pinfo.dwFileVersionLS);
-        Result := Format('%d.%d.%d', [Major, Minor, Release]);
-        if (not _RELEASE) then
-          Result := Result + '-dev';
-      end;
+    if ((GetFileVersionInfo(Pointer(FileName), 0, size, buffer)) and
+        (VerQueryValue(buffer, '\', pointer(pinfo), len))) then
+     begin
+      Major := HiWord(pinfo.dwFileVersionMS);
+      Minor := LoWord(pinfo.dwFileVersionMS);
+      Release := HiWord(pinfo.dwFileVersionLS);
+      Result := Format('%d.%d.%d',[Major, Minor, Release]);
+      if (not _RELEASE) then
+        Result := Result + '-dev';
+     end;
     FreeMem(buffer);
   end;
 end;
 
-function GetLastBuildDate(): String;
+function BuildDateTime(): TDateTime;
 begin
-  DateTimeToString(Result, 'd. m. yyyy', jclPEImage.PeReadLinkerTimeStamp(Application.ExeName));
+  Result := (TTimeZone.Local.ToLocalTime(PImageNtHeaders(HInstance + Cardinal(PImageDosHeader(HInstance)^._lfanew))^.FileHeader.TimeDateStamp / SecsPerDay) + UnixDateDelta);
 end;
 
-function GetLastBuildTime(): String;
-begin
-  DateTimeToString(Result, 'hh:mm:ss', jclPEImage.PeReadLinkerTimeStamp(Application.ExeName));
-end;
-
-end.// unit
+end.//unit

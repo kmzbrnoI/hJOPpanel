@@ -321,7 +321,7 @@ begin
     GlobConfig.data.panel_fn := paramOpnl;
 
   Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '') + ' – hJOPpanel – v' +
-    NactiVerzi(Application.ExeName) + ' (build ' + GetLastBuildDate + ')';
+    VersionStr(Application.ExeName) + ' (build ' + FormatDateTime('dd.mm.yyyy', BuildDateTime()) + ')';
 
   F_splash.ShowState('Vytvářím plátno...');
 
@@ -544,8 +544,8 @@ end;
 
 procedure TF_Main.ShowAboutDialog();
 begin
-  Application.MessageBox(PChar('hJOPpanel v' + NactiVerzi(Application.ExeName) + #13#10 + 'build ' + GetLastBuildDate()
-    + ' ' + GetLastBuildTime() + #13#10 + 'Vytvořil Jan Horáček (c) 2014–2023 pro KMŽ Brno I'), 'Info',
+  Application.MessageBox(PChar('hJOPpanel v' + VersionStr(Application.ExeName) + #13#10 + 'build ' + FormatDateTime('dd.mm.yyyy', BuildDateTime())
+     + #13#10 + 'Vytvořil Jan Horáček (c) 2014–2023 pro KMŽ Brno I'), 'Info',
     MB_OK OR MB_ICONINFORMATION);
 end;
 

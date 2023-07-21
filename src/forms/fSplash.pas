@@ -7,7 +7,7 @@ unit fSplash;
 interface
 
 uses
-  Windows, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Variants, Classes, Graphics, Controls, Forms, SysUtils,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls;
 
 type
@@ -45,8 +45,8 @@ end;
 
 procedure TF_splash.FormShow(Sender: TObject);
 begin
-  ST_Version.Caption := 'Verze ' + NactiVerzi(Application.ExeName);
-  L_BuildTime.Caption := GetLastBuildDate + '  ' + GetLastBuildTime;
+  Self.ST_Version.Caption := 'Verze ' + VersionStr(Application.ExeName);
+  Self.L_BuildTime.Caption := FormatDateTime('dd.mm.yyyy hh:nn:ss', BuildDateTime());
 end;
 
 procedure TF_splash.ShowState(Text: String);
