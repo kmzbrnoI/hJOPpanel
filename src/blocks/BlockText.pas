@@ -9,7 +9,7 @@ unit BlockText;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  UITypes;
+  UITypes, Symbols;
 
 type
   TTextPanelProp = record
@@ -54,12 +54,12 @@ type
   end;
 
 const
-  _Def_Text_Prop: TTextPanelProp = (Symbol: $A0A0A0; bg: clBlack; left: clFuchsia; right: clFuchsia;
+  _Def_Text_Prop: TTextPanelProp = (Symbol: TJopColor.grayDark; bg: clBlack; left: clFuchsia; right: clFuchsia;
     flash: false);
 
 implementation
 
-uses Symbols, parseHelper;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

@@ -6,7 +6,8 @@ unit BlockTurnout;
 
 interface
 
-uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlockTrack;
+uses Classes, Graphics, Types, SysUtils, DXDraws, Generics.Collections, BlockTrack,
+  Symbols;
 
 type
   TVyhPoloha = (disabled = -5, none = -1, plus = 0, minus = 1, both = 2);
@@ -35,12 +36,12 @@ type
   end;
 
 const
-  _DEF_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: clFuchsia; bg: clBlack; position: TVyhPoloha.disabled);
-  _UA_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: $A0A0A0; bg: clBlack; position: TVyhPoloha.both);
+  _DEF_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: TJopColor.purple; bg: clBlack; position: TVyhPoloha.disabled);
+  _UA_TURNOUT_PROP: TTurnoutPanelProp = (flash: false; fg: TJopColor.grayDark; bg: clBlack; position: TVyhPoloha.both);
 
 implementation
 
-uses parseHelper, Symbols;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -107,7 +108,7 @@ begin
         end;
       TVyhPoloha.both:
         begin
-          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, Self.symbolID, bkcol, clBlue, obj);
+          Symbols.Draw(SymbolSet.IL_Symbols, Self.position, Self.symbolID, bkcol, TJopColor.blue, obj);
         end;
     end;
   end;

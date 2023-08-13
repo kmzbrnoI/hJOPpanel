@@ -11,7 +11,7 @@ unit BlockOther;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlockTypes;
+  BlockTypes, Symbols;
 
 type
   TPObjOther = class
@@ -48,12 +48,12 @@ type
   end;
 
 const
-  _Def_Helper_Prop: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
-  _Assigned_Helper_Prop: TGeneralPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
+  _Def_Helper_Prop: TGeneralPanelProp = (fg: TJopColor.grayDark; bg: clBlack; flash: false;);
+  _Assigned_Helper_Prop: TGeneralPanelProp = (fg: TJopColor.purple; bg: clBlack; flash: false;);
 
 implementation
 
-uses Symbols, parseHelper, Panel;
+uses parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

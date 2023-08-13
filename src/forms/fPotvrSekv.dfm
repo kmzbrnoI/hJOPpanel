@@ -57,7 +57,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Height = 361
     Align = alTop
     BevelOuter = bvNone
-    Color = 10526880
+    Color = clSilver
     ParentBackground = False
     TabOrder = 2
     object L_ListDescription: TLabel
@@ -144,11 +144,13 @@ object F_PotvrSekv: TF_PotvrSekv
       Top = 16
       Width = 17
       Height = 105
+      Color = clSilver
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Fixedsys'
       Font.Style = []
+      ParentColor = False
       ParentFont = False
     end
     object PB_podm_Indexes: TPaintBox

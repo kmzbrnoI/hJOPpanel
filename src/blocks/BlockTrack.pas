@@ -12,7 +12,7 @@ uses Classes, Graphics, Types, Generics.Collections, Symbols, SysUtils,
   BlockTypes, PanelOR, DXDraws, Math;
 
 const
-  _JC_END: array [0 .. 3] of TColor = (clBlack, clGreen, clWhite, clTeal);
+  _JC_END: array [0 .. 3] of TColor = (TJopColor.black, TJopColor.greenDark, TJopColor.white, TJopColor.turqDark);
 
 type
   TTrackTrain = record
@@ -173,7 +173,7 @@ begin
       fg := clBlack;
       bg := Self.panelProp.bg;
     end else
-      bg := clYellow;
+      bg := TJopColor.yellow;
   end else if ((bgZaver) and (Self.panelProp.jcend > TJCType.no)) then
     bg := _JC_END[Integer(Self.panelProp.jcend)]
   else
@@ -315,16 +315,16 @@ begin
   Self.flash := false;
   Self.fg := clFuchsia;
   Self.bg := clBlack;
-  Self.notColorBranches := $A0A0A0;
+  Self.notColorBranches := TJopColor.grayDark;
   Self.jcend := no;
 end;
 
 procedure TTrackPanelProp.InitUA();
 begin
   Self.flash := false;
-  Self.fg := $A0A0A0;
+  Self.fg := TJopColor.grayDark;
   Self.bg := clBlack;
-  Self.notColorBranches := $A0A0A0;
+  Self.notColorBranches := TJopColor.grayDark;
   Self.jcend := no;
 end;
 

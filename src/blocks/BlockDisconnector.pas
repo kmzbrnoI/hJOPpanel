@@ -8,7 +8,7 @@ unit BlockDisconnector;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlockTypes;
+  BlockTypes, Symbols;
 
 type
   TPDisconnector = class
@@ -44,12 +44,12 @@ type
   end;
 
 const
-  _Def_Disc_Prop: TGeneralPanelProp = (fg: clFuchsia; bg: clBlack; flash: false;);
-  _UA_Disc_Prop: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
+  _Def_Disc_Prop: TGeneralPanelProp = (fg: TJopColor.purple; bg: clBlack; flash: false;);
+  _UA_Disc_Prop: TGeneralPanelProp = (fg: TJopColor.grayDark; bg: clBlack; flash: false;);
 
 implementation
 
-uses Symbols, parseHelper;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

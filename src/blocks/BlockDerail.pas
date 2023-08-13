@@ -127,7 +127,7 @@ begin
       TVyhPoloha.minus:
         Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol + 2, fg, bkcol, obj);
       TVyhPoloha.both:
-        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, bkcol, clBlue, obj);
+        Symbols.Draw(SymbolSet.IL_Symbols, derail.Pos, _S_DERAIL_B + derail.symbol, bkcol, TJopColor.blue, obj);
     end;
   end; // for i
 end;

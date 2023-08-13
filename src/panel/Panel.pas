@@ -12,7 +12,7 @@ uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
   PngImage, DirectX, PanelOR, BlockTypes, Types, BlockPst,
   BlockLinker, BlockLinkerTrain, BlockLock, BlockCrossing, BlocksTrack, BlocksTurnout,
   BlockSignal, BlockTurnout, BlockTrack, BlockDerail, BlockDisconnector, BlockText,
-  BlockOther, DateUtils;
+  BlockOther, DateUtils, Symbols;
 
 const
   _INFOTIMER_WIDTH = 30;
@@ -71,8 +71,8 @@ type
   TRelief = class
   private const
     _DEF_COLOR_BG = clBlack;
-    _DEF_COLOR_CURSOR_BORDER = clYellow;
-    _DEF_COLOR_CURSOR_FILL = clMaroon;
+    _DEF_COLOR_CURSOR_BORDER = TJopColor.yellow;
+    _DEF_COLOR_CURSOR_FILL = TJopColor.redDark;
     _MSG_WIDTH = 30;
     _DBLCLICK_TIMEOUT_MS = 250;
 
@@ -279,7 +279,7 @@ type
 
 implementation
 
-uses fStitVyl, TCPClientPanel, Symbols, fMain, BottomErrors, GlobalConfig, fZpravy,
+uses fStitVyl, TCPClientPanel, fMain, BottomErrors, GlobalConfig, fZpravy,
   fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
   fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
   parseHelper;
@@ -417,19 +417,19 @@ begin
     begin
       case (area.tech_rights) of
         read:
-          fg := clWhite;
+          fg := TJopColor.white;
         write:
-          fg := $A0A0A0;
+          fg := TJopColor.grayDark;
         superuser:
-          fg := clYellow;
+          fg := TJopColor.yellow;
         other:
-          fg := clRed;
+          fg := TJopColor.red;
       else
-        fg := clFuchsia;
+        fg := TJopColor.purple;
       end;
 
       if (area.RegPlease.status = TAreaRegPleaseStatus.selected) then
-        fg := clYellow;
+        fg := TJopColor.yellow;
     end;
 
     Symbols.Draw(SymbolSet.IL_DK, area.positions.dk, Integer(area.positions.dkOrentation), fg, clBlack, Self.drawObject);
@@ -437,7 +437,7 @@ begin
     // symbol zadosti o loko se vykresluje vpravo
     if (((area.RegPlease.status = TAreaRegPleaseStatus.request) or (area.RegPlease.status = TAreaRegPleaseStatus.selected))
       and (not Self.Graphics.flash)) then
-      Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.dk.X + 6, area.positions.dk.Y + 1), _S_CIRCLE, clYellow,
+      Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.dk.X + 6, area.positions.dk.Y + 1), _S_CIRCLE, TJopColor.yellow,
         clBlack, Self.drawObject);
   end;
 end;
@@ -452,13 +452,13 @@ begin
 
   if (PanelTCPClient.status = TPanelConnectionStatus.opened) then
   begin
-    c1 := IfThen(Self.systemOK.position, clRed, clLime);
-    c2 := IfThen(Self.systemOK.position, clLime, clRed);
-    c3 := clBlue;
+    c1 := IfThen(Self.systemOK.position, TJopColor.red, TJopColor.green);
+    c2 := IfThen(Self.systemOK.position, TJopColor.green, TJopColor.red);
+    c3 := TJopColor.blue;
   end else begin
-    c1 := clPurple;
-    c2 := clFuchsia;
-    c3 := clPurple;
+    c1 := TJopColor.purpleDark;
+    c2 := TJopColor.purple;
+    c3 := TJopColor.purpleDark;
   end;
 
   if (Self.systemOK.position) then
@@ -487,13 +487,13 @@ begin
 
   case (PanelTCPClient.status) of
     TPanelConnectionStatus.closed:
-      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Odpojeno od serveru', clFuchsia, clBlack, Self.drawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Odpojeno od serveru', TJopColor.purple, clBlack, Self.drawObject);
     TPanelConnectionStatus.opening:
-      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Otevírám spojení...', clFuchsia, clBlack, Self.drawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Otevírám spojení...', TJopColor.purple, clBlack, Self.drawObject);
     TPanelConnectionStatus.handshake:
-      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Probíhá handshake...', clFuchsia, clBlack, Self.drawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Probíhá handshake...', TJopColor.purple, clBlack, Self.drawObject);
     TPanelConnectionStatus.opened:
-      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Připojeno k serveru', $A0A0A0, clBlack, Self.drawObject);
+      Symbols.TextOutput(Point(pos.X + 5, pos.Y + 1), 'Připojeno k serveru', TJopColor.grayDark, clBlack, Self.drawObject);
   end;
 end;
 
@@ -509,8 +509,8 @@ begin
 
     for var k := 0 to area.countdown.Count - 1 do
     begin
-      Symbols.TextOutput(Point(area.positions.time.X, area.positions.time.Y + k), 'MĚŘ.ČASU', clRed,
-        clWhite, Self.drawObject);
+      Symbols.TextOutput(Point(area.positions.time.X, area.positions.time.Y + k), 'MĚŘ.ČASU', TJopColor.red,
+        TJopColor.white, Self.drawObject);
 
       if (area.countdown[k].length = 0) then
         continue;
@@ -519,18 +519,18 @@ begin
 
       for var i := 0 to (pointsRemaining div 2) - 1 do
         Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
-          _S_FULL, clRed, clBlack, Self.drawObject);
+          _S_FULL, TJopColor.red, clBlack, Self.drawObject);
 
       for var i := (pointsRemaining div 2) to (_LENGTH div 2) - 1 do
         Symbols.Draw(SymbolSet.IL_Symbols, Point(area.positions.Time.X + 8 + i, area.positions.Time.Y + k),
-          _S_FULL, clWhite, clBlack, Self.drawObject);
+          _S_FULL, TJopColor.white, clBlack, Self.drawObject);
 
       // vykresleni poloviny symbolu
       // vykreslovat jen pri dostatecne dlouhem casu, aby nerusilo pri kratkych casech
       if (((pointsRemaining mod 2) = 1) and ((TimeToMilliseconds(area.countdown[k].length) div 1000) > (_LENGTH div 2))) then
         Symbols.Draw(SymbolSet.IL_Symbols,
           Point(area.positions.Time.X + 8 + (pointsRemaining div 2),
-          area.positions.Time.Y + k), _S_HALF_TOP, clRed, clWhite, Self.drawObject);
+          area.positions.Time.Y + k), _S_HALF_TOP, TJopColor.red, TJopColor.white, Self.drawObject);
     end;
   end;
 end;
@@ -538,7 +538,7 @@ end;
 procedure TRelief.ShowMsg();
 begin
   if (Self.msg.show) then
-    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), Self.msg.msg, clRed, clWhite, Self.drawObject);
+    Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), Self.msg.msg, TJopColor.red, TJopColor.white, Self.drawObject);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1250,7 +1250,7 @@ begin
   if (F_StitVyl.showing) then
     F_StitVyl.Close();
   if (F_SoupravaEdit.showing) then
-    F_SoupravaEdit.Close;
+    F_SoupravaEdit.Close();
   if (F_Settings.showing) then
     F_Settings.Close();
   if (F_PotvrSekv.running) then
@@ -1325,7 +1325,7 @@ begin
           PG^ := 255;
           PB^ := 255;
         end else begin
-          if ((aColor = clWhite) or (aColor = clGray) or (aColor = clSilver) or (aColor = $A0A0A0)) then
+          if ((aColor = TJopColor.white) or (aColor = TJopColor.grayDark) or (aColor = TJopColor.gray)) then
           begin
             PR^ := 0;
             PG^ := 0;
@@ -2062,7 +2062,7 @@ begin
   for var i := 0 to Min(Self.infoTimers.Count, 2) - 1 do
   begin
     var str := Self.infoTimers[i].str + '  ' + FormatDateTime('nn:ss', Self.infoTimers[i].finish - Now) + ' ';
-    Symbols.TextOutput(Point(Self.width - _INFOTIMER_WIDTH, Self.height - i - 1), str, clRed, clWhite,
+    Symbols.TextOutput(Point(Self.width - _INFOTIMER_WIDTH, Self.height - i - 1), str, TJopColor.red, TJopColor.white,
       Self.DrawObject);
   end;
 end;

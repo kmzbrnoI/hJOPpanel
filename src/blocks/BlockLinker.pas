@@ -7,7 +7,8 @@ unit BlockLinker;
 
 interface
 
-uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws, Classes;
+uses Graphics, Types, Generics.Collections, IniFiles, SysUtils, DXDraws, Classes,
+  Symbols;
 
 type
   TLinkerDir = (disabled = -1, zadny = 0, zakladni = 1, opacny = 2);
@@ -50,11 +51,11 @@ type
 
 const
   _Def_Linker_Prop: TLinkerPanelProp = (fg: clBlack; bg: clFuchsia; flash: false; dir: disabled;);
-  _UA_Linker_Prop: TLinkerPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false; dir: zadny;);
+  _UA_Linker_Prop: TLinkerPanelProp = (fg: TJopColor.grayDark; bg: clBlack; flash: false; dir: zadny;);
 
 implementation
 
-uses Symbols, parseHelper;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

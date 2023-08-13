@@ -7,7 +7,79 @@
 
 interface
 
-uses SysUtils, Controls, Graphics, Classes, Windows, Forms, DXDraws, ImgList;
+uses SysUtils, Controls, Graphics, Classes, Windows, Forms, DXDraws, ImgList,
+  Generics.Collections;
+
+type
+  TSymbolSetType = (normal = 0, bigger = 1);
+
+  TJopColor = record
+  const
+    red = TColor($0000FF);
+    redDark = TColor($000080);
+    purple = TColor($FF00FF);
+    purpleDark = TColor($800080);
+    turq = TColor($FFFF00);
+    turqDark = TColor($808000);
+    white = TColor($FFFFFF);
+    green = TColor($00FF00);
+    greenDark = TColor($008000);
+    brown = TColor($004080);
+    blue = TColor($FF0000);
+    blueDark = TColor($800000);
+    yellow = TColor($00FFFF);
+    gray = TColor($C0C0C0);
+    grayDark = TColor($808080);
+    black = TColor($000000);
+    orange = TColor($0099FF);
+  end;
+
+  TOneSymbolSet = record
+    names: record
+      symbols, text, area, railway: string;
+    end;
+
+    symbolWidth, symbolHeight: Integer;
+  end;
+
+  // 1 bitmapovy symbol na reliefu
+  TReliefSym = record
+    Position: TPoint;
+    SymbolID: Integer;
+  end;
+
+  TSymbolSet = class
+  public const
+    // tady jsou nadefinovane Resource nazvy ImageListu jendotlivych setu a rozmery jejich symbolu
+    sets: array [0 .. 1] of TOneSymbolSet = (
+      // normal
+      (names: (symbols: 'symbols8'; text: 'text8'; area: 'dk8'; railway: 'trat8';); symbolWidth: 8; symbolHeight: 12;),
+
+      // bigger
+      (names: (symbols: 'symbols16'; text: 'text16'; area: 'dk16'; railway: 'trat16';); symbolWidth: 16;
+      symbolHeight: 24;));
+
+  private
+
+    procedure LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Cardinal;
+      MaskColor: TColor = clPurple);
+    procedure ReplaceColor(ABitmap: Graphics.TBitmap; ASource, ATarget: TColor; Rect: TRect);
+
+  public
+
+    IL_Symbols: TImageList;
+    IL_Text: TImageList;
+    IL_DK: TImageList;
+    IL_Trat: TImageList;
+
+    symbWidth: Integer;
+    symbHeight: Integer;
+
+    constructor Create(typ: TSymbolSetType = normal);
+    destructor Destroy(); override;
+
+    procedure LoadSet(typ: TSymbolSetType);
+  end;
 
 const
   _Symbols_DefColor = clBlack; // barva pro nacitani souboru
@@ -15,21 +87,21 @@ const
   // barvy symbolu
   // zde jsou definovany jednotlive barvy
   _SYMBOL_COLORS: array [0 .. 14] of TColor = (
-    clFuchsia, // fuchsia
-    $A0A0A0, // gray
-    clRed,
-    clLime,
-    clWhite,
-    clAqua,
-    clBlue,
-    clYellow, // yellow
-    clBlack,
-    clTeal,
-    clOlive,
-    clPurple,
-    clMaroon,
-    $707070,
-    clGreen
+    TJopColor.purple,
+    TJopColor.grayDark,
+    TJopColor.red,
+    TJopColor.green,
+    TJopColor.white,
+    TJopColor.turq,
+    TJopColor.blue,
+    TJopColor.yellow,
+    TJopColor.gray,
+    TJopColor.purpleDark,
+    TJopColor.redDark,
+    TJopColor.greenDark,
+    TJopColor.turqDark,
+    TJopColor.black,
+    TJopColor.brown
   );
 
   _S_TURNOUT_B = 0;
@@ -88,81 +160,6 @@ const
   _DK_WIDTH_MULT = 5;
   _DK_HEIGHT_MULT = 3;
 
-type
-  TSymbolSetType = (normal = 0, bigger = 1);
-
-  SymbolColor = (
-    scFuchsia = 0,
-    scGray = 1,
-    scRed = 2,
-    scLime = 3,
-    scWhite = 4,
-    scAqua = 5,
-    scBlue = 6,
-    scYellow = 7,
-    scBlack = 8,
-    scTeal = 9,
-    scOlive = 10,
-    scPurple = 11,
-    scMaroon = 12,
-    scLightGray = 13,
-    scGreen = 14
-  );
-
-  TOneSymbolSet = record
-    names: record
-      symbols, text, area, railway: string;
-    end;
-
-    symbolWidth, symbolHeight: Integer;
-  end;
-
-  // 1 bitmapovy symbol na reliefu (ze symbolu se skladaji useky)
-  TReliefSym = record
-    Position: TPoint;
-    SymbolID: Integer;
-  end;
-
-  TSymbolSet = class
-  public const
-    // tady jsou nadefinovane Resource nazvy ImageListu jendotlivych setu a rozmery jejich symbolu
-    sets: array [0 .. 1] of TOneSymbolSet = (
-      // normal
-      (names: (symbols: 'symbols8'; text: 'text8'; area: 'dk8'; railway: 'trat8';); symbolWidth: 8; symbolHeight: 12;),
-
-      // bigger
-      (names: (symbols: 'symbols16'; text: 'text16'; area: 'dk16'; railway: 'trat16';); symbolWidth: 16;
-      symbolHeight: 24;));
-
-  private
-
-    procedure LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Cardinal;
-      MaskColor: TColor = clPurple);
-    procedure ReplaceColor(ABitmap: Graphics.TBitmap; ASource, ATarget: TColor; Rect: TRect);
-
-  public
-
-    IL_Symbols: TImageList;
-    IL_Text: TImageList;
-    IL_DK: TImageList;
-    IL_Trat: TImageList;
-
-    symbWidth: Integer;
-    symbHeight: Integer;
-
-    constructor Create(typ: TSymbolSetType = normal);
-    destructor Destroy(); override;
-
-    procedure LoadSet(typ: TSymbolSetType);
-  end;
-
-function ColorToSymbolColor(color: TColor): SymbolColor;
-function SymbolIndex(symbol: Integer; color: SymbolColor): Integer; overload;
-function SymbolIndex(symbol: Integer; color: TColor): Integer; overload;
-function SymbolDrawColor(symbol: Integer): SymbolColor;
-function SymbolDefaultColor(symbol: Integer): TColor;
-function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
-
 procedure Draw(IL: TImageList; pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw;
   transparent: boolean = false);
 procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; underline: boolean = false;
@@ -170,7 +167,13 @@ procedure TextOutput(pos: TPoint; Text: string; fg, bg: TColor; obj: TDXDraw; un
 procedure DrawRectangle(pos: TPoint; color: TColor; obj: TDXDraw);
 
 var
-  SymbolSet: TSymbolSet;
+  symbolSet: TSymbolSet;
+  _colorToIndex: TDictionary<TColor, Integer>;
+
+function ColorToIndex(color: TColor): Integer;
+function SymbolIndex(symbol: Integer; color: TColor): Integer;
+function SymbolDefaultColor(symbol: Integer): TColor;
+function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 
 implementation
 
@@ -341,25 +344,26 @@ end;
 // GLOBALNI FUNKCE                                  //
 /// /////////////////////////////////////////////////////////////////////////////
 
-function ColorToSymbolColor(color: TColor): SymbolColor;
+function ColorToIndex(color: TColor): Integer;
 begin
-  for var i: Integer := 0 to Length(_SYMBOL_COLORS)-1 do
-    if (_SYMBOL_COLORS[i] = color) then
-      Exit(SymbolColor(i));
-  Result := scFuchsia;
+  if (color = $A0A0A0) then
+    Exit(1); // gray; backward compatibility
+
+  if (not _colorToIndex.ContainsKey(color)) then
+    for var i: Integer := 0 to Length(_SYMBOL_COLORS)-1 do
+      if (_SYMBOL_COLORS[i] = color) then
+        _colorToIndex.Add(color, i);
+
+  if (not _colorToIndex.TryGetValue(color, Result)) then
+    Result := 0;
 end;
 
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function SymbolIndex(symbol: Integer; color: SymbolColor): Integer;
-begin
-  Result := symbol*Length(_SYMBOL_COLORS) + Integer(color);
-end;
-
 function SymbolIndex(symbol: Integer; color: TColor): Integer;
 begin
-  Result := SymbolIndex(symbol, ColorToSymbolColor(color));
+  Result := symbol*Length(_SYMBOL_COLORS) + ColorToIndex(color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -396,26 +400,20 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function SymbolDrawColor(symbol: Integer): SymbolColor;
-begin
-  if ((symbol >= _S_PLATFORM_B) and (symbol <= _S_PLATFORM_E)) then
-    Result := scBlue
-  else if (symbol = _S_LINKER_TRAIN) then
-    Result := scYellow
-  else
-    Result := scGray;
-end;
-
 function SymbolDefaultColor(symbol: Integer): TColor;
 begin
-  Result := _SYMBOL_COLORS[Integer(SymbolDrawColor(symbol))];
+  if ((symbol >= _S_PLATFORM_B) and (symbol <= _S_PLATFORM_E)) then
+    Result := TJopColor.blue
+  else if (symbol = _S_LINKER_TRAIN) then
+    Result := TJopColor.yellow
+  else
+    Result := TJopColor.grayDark;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure Draw(IL: TImageList; pos: TPoint; symbol: Integer; fg: TColor; bg: TColor; obj: TDXDraw;
   transparent: boolean = false);
-var item: Integer;
 begin
   // transparent is faster
 
@@ -430,7 +428,7 @@ begin
     DrawRectangle(pos, bg, obj);
   end;
 
-  item := SymbolIndex(symbol, fg);
+  var item := SymbolIndex(symbol, fg);
   IL.Draw(obj.Surface.Canvas, pos.X * SymbolSet.symbWidth, pos.Y * SymbolSet.symbHeight, item);
   IL.DrawingStyle := TDrawingStyle.dsNormal;
 end;
@@ -546,10 +544,11 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 initialization
+  _colorToIndex := TDictionary<TColor, Integer>.Create();;
 
 finalization
-
-if (Assigned(SymbolSet)) then
-  FreeAndNil(SymbolSet);
+  _colorToIndex.Free();
+  if (Assigned(SymbolSet)) then
+    FreeAndNil(SymbolSet);
 
 end.

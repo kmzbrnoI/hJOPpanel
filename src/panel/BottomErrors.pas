@@ -139,7 +139,7 @@ begin
   else
     msg := StringOfChar(' ', _TECH_WIDTH);
 
-  Symbols.TextOutput(Point(_TECH_LEFT, Relief.height - 1), msg, clRed, clWhite, obj);
+  Symbols.TextOutput(Point(_TECH_LEFT, Relief.height - 1), msg, TJopColor.red, TJopColor.white, obj);
 
   // vypsani poctu chyb
   msg := Format('%2d', [Self.errors.Count]);
@@ -155,7 +155,7 @@ begin
     msg := ' ' + Self.errors[i].stanice + ' : ' + Self.errors[i].err;
     msg := Format('%-' + IntToStr(_ERR_WIDTH) + 's', [msg]);
 
-    Symbols.TextOutput(Point(left, top), msg, clRed, clWhite, obj);
+    Symbols.TextOutput(Point(left, top), msg, TJopColor.red, TJopColor.white, obj);
 
     top := top - 1;
   end;

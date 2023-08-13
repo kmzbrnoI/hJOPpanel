@@ -8,12 +8,12 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, Generics.Collections;
+  Dialogs, ExtCtrls, StdCtrls, Generics.Collections, Symbols;
 
 const
   _POTVR_TIMEOUT_MIN = 2;
   _POTVR_ITEMS_PER_PAGE = 13;
-  _FG_COLOR = $A0A0A0;
+  _FG_COLOR = TJopColor.gray;
   _SYMBOL_HEIGHT = 15;
   _SYMBOL_WIDTH = 8;
 
@@ -269,7 +269,7 @@ begin
 
   with (Self.PB_SFP.canvas) do
   begin
-    Font.color := clWhite;
+    Font.color := TJopColor.white;
     TextOut(2 * _SYMBOL_WIDTH, 0, Self.m_station);
     TextOut(2 * _SYMBOL_WIDTH, _SYMBOL_HEIGHT, ' ' + Self.m_event);
     Font.color := _FG_COLOR;
@@ -295,7 +295,7 @@ begin
       if (Self.m_conditions[podm_start + i].condition <> '') then
         TextOut(30 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), '# ' + Self.m_conditions[podm_start + i].condition);
     end;
-    Font.color := clWhite;
+    Font.color := TJopColor.white;
 
     if (podm_start + podm_count >= Self.m_conditions.Count) then
       TextOut(2 * _SYMBOL_WIDTH, (podm_count * _SYMBOL_HEIGHT), 'KONEC SEZNAMU')
@@ -316,8 +316,8 @@ begin
   begin
     for var i := 0 to Self.m_senders.Count + 1 do
     begin
-      first := IfThen(Self.m_flash, clBlack, $A0A0A0);
-      second := IfThen(Self.m_flash, $A0A0A0, clBlack);
+      first := IfThen(Self.m_flash, clBlack, _FG_COLOR);
+      second := IfThen(Self.m_flash, _FG_COLOR, clBlack);
       FillRectangle(Self.PB_SFP.canvas, rect(0, i * _SYMBOL_HEIGHT, _SYMBOL_WIDTH,
         i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
       FillRectangle(Self.PB_SFP.canvas, rect(0, i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH,
@@ -333,8 +333,8 @@ begin
   begin
     for var i := 0 to podm_count do
     begin
-      first := IfThen(Self.m_flash, clBlack, $A0A0A0);
-      second := IfThen(Self.m_flash, $A0A0A0, clBlack);
+      first := IfThen(Self.m_flash, clBlack, _FG_COLOR);
+      second := IfThen(Self.m_flash, _FG_COLOR, clBlack);
       FillRectangle(Self.PB_Podm.canvas, rect(0, i * _SYMBOL_HEIGHT, _SYMBOL_WIDTH,
         i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
       FillRectangle(Self.PB_Podm.canvas, rect(0, i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH,

@@ -123,10 +123,10 @@ begin
   // vykresleni informaceo pokracovani
   if ((Self.critical) and (Self.current = Self.items.Count - 1)) then
     Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), '          Ukončení: ESCAPE          ', clBlack,
-      clTeal, obj)
+      TJopColor.turqDark, obj)
   else
     Symbols.TextOutput(Point(0, Self.Graphics.pHeight - 1), '  Pokračovat: ENTER, konec: ESCAPE  ', clBlack,
-      clTeal, obj);
+      TJopColor.turqDark, obj);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -138,8 +138,7 @@ end;
 // radek_x: fg|bg|text         barvy na dalsich radcich nemusi byt vyplnene, pak prebiraji tu barvu, jako radek predchozi
 procedure TPanelUPO.ParseCommand(data: string; critical: boolean);
 var items, lines, line: TStrings;
-  i, j: Integer;
-  item: TPanelUPOItem;
+
 begin
   items := TStringList.Create();
   lines := TStringList.Create();
@@ -151,15 +150,17 @@ begin
     Self.items.Clear();
     ExtractStringsEx([']'], ['['], data, items);
 
-    for i := 0 to items.Count - 1 do
+    for var i := 0 to items.Count - 1 do
     begin
+      var item: TPanelUPOItem;
+
       lines.Clear();
       ExtractStringsEx([']'], ['['], items[i], lines);
 
       if (lines.Count = 0) then
         continue;
 
-      for j := 0 to lines.Count - 1 do
+      for var j := 0 to lines.Count - 1 do
       begin
         if (j > _UPO_HEIGHT - 2) then
           break;
@@ -190,7 +191,7 @@ begin
           if (j > 0) then
             item.lines[j].fg := item.lines[j - 1].fg
           else
-            item.lines[j].fg := clRed;
+            item.lines[j].fg := TJopColor.red;
         end;
 
         // parsovani barvy pozadi
@@ -201,7 +202,7 @@ begin
           if (j > 0) then
             item.lines[j].bg := item.lines[j - 1].bg
           else
-            item.lines[j].bg := clWhite;
+            item.lines[j].bg := TJopColor.white;
         end;
 
         item.lines[j].str := line[line.Count - 1];
@@ -209,7 +210,7 @@ begin
 
       if (lines.Count < _UPO_HEIGHT - 1) then
       begin
-        for j := lines.Count to _UPO_HEIGHT - 2 do
+        for var j := lines.Count to _UPO_HEIGHT - 2 do
         begin
           item.lines[j].str := '';
           item.lines[j].fg := item.lines[j - 1].fg;

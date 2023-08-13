@@ -6,7 +6,8 @@ unit BlockSignal;
 
 interface
 
-uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils;
+uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
+  Symbols;
 
 type
   TSignalPanelProp = record
@@ -58,12 +59,12 @@ type
   end;
 
 const
-  _DEF_SIGNAL_PROP: TSignalPanelProp = (symbol: clBlack; bg: clFuchsia; surr: clBlack; AB: false; flash: false);
-  _UA_SIGNAL_PROP: TSignalPanelProp = (symbol: $A0A0A0; bg: clBlack; surr: clBlack; AB: false; flash: false);
+  _DEF_SIGNAL_PROP: TSignalPanelProp = (symbol: TJopColor.black; bg: clFuchsia; surr: clBlack; AB: false; flash: false);
+  _UA_SIGNAL_PROP: TSignalPanelProp = (symbol: TJopColor.grayDark; bg: clBlack; surr: clBlack; AB: false; flash: false);
 
 implementation
 
-uses Symbols, parseHelper, Panel;
+uses parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

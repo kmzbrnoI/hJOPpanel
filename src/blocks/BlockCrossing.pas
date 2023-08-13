@@ -8,7 +8,7 @@ unit BlockCrossing;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlockTrack, BlocksTrack;
+  BlockTrack, BlocksTrack, Symbols;
 
 type
   TBlkCrossingPanelState = (disabled = -5, err = -1, otevreno = 0, vystraha = 1, uzavreno = 2, anulace = 3);
@@ -67,12 +67,12 @@ type
   end;
 
 const
-  _Def_Cros_Prop: TCrossingPanelProp = (fg: clBlack; bg: clFuchsia; state: otevreno);
-  _UA_Cros_Prop: TCrossingPanelProp = (fg: $A0A0A0; bg: clBlack; state: otevreno);
+  _Def_Cros_Prop: TCrossingPanelProp = (fg: TJopColor.black; bg: clFuchsia; state: otevreno);
+  _UA_Cros_Prop: TCrossingPanelProp = (fg: TJopColor.grayDark; bg: clBlack; state: otevreno);
 
 implementation
 
-uses Symbols, parseHelper, Panel;
+uses parseHelper, Panel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 

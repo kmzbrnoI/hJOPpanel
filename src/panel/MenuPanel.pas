@@ -155,12 +155,12 @@ begin
 
   for i := 0 to Self.Items.cnt - 1 do
   begin
-    background := clSIlver;
+    background := TJopColor.gray;
 
     if (Self.Items.data[i].header) then
     begin
       // hlavicka
-      foreground := $FF0000;
+      foreground := TJopColor.blue;
       Pos.X := Round(((_MENU_WIDTH - 2) / 2) - (Length(Self.Items.data[i].show_text) / 2)) + 2;
       str := Self.Items.data[i].show_text;
     end else begin
@@ -171,18 +171,18 @@ begin
       if (Self.Items.data[i].disabled) then
       begin
         // disabled
-        foreground := $A0A0A0;
+        foreground := TJopColor.grayDark;
       end else begin
         // normalni text
         Pos.X := _PNL_MENU_ITEM_LEFT_OFFSET;
         foreground := clBlack;
         if (Self.Items.data[i].admin) then
-          background := clTeal;
+          background := TJopColor.turqDark;
       end;
     end;
 
     if (Self.Items.data[i].important) then
-      foreground := clRed;
+      foreground := TJopColor.red;
 
     if (mouse_pos.Y = Pos.Y) then
     begin
@@ -190,12 +190,12 @@ begin
         Self.fselected := -1
       else
       begin
-        if (background = clTeal) then
-          foreground := clYellow;
+        if (background = TJopColor.turqDark) then
+          foreground := TJopColor.yellow;
         background := $5555CC;
         Self.fselected := i;
-        if (foreground = clRed) then
-          foreground := clYellow;
+        if (foreground = TJopColor.red) then
+          foreground := TJopColor.yellow;
       end;
     end;
 
@@ -217,7 +217,7 @@ begin
   if (Self.fselected > -1) and (Self.Hints.TryGetValue(Self.Items.data[Self.fselected].show_text, str)) then
   begin
     str := Format(' %-' + IntToStr(_HINT_WIDTH) + 's', [str]);
-    Symbols.TextOutput(Point(1, 0), str, clYellow, clTeal, obj);
+    Symbols.TextOutput(Point(1, 0), str, TJopColor.yellow, TJopColor.turqDark, obj);
   end;
 end;
 

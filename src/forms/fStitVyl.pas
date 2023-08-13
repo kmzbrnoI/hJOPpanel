@@ -43,7 +43,7 @@ var
 
 implementation
 
-uses RPConst, fMain;
+uses RPConst, fMain, Symbols;
 
 {$R *.dfm}
 
@@ -54,8 +54,9 @@ begin
   Self.OpenBlk := blk;
 
   Self.Caption := 'Štítek na bloku ' + blk;
+  Self.L_What.Font.Color := clBlack;
   Self.L_What.Caption := 'Štítek :';
-  Self.Color := clTeal;
+  Self.Color := TJopColor.turqDark;
   Self.E_Popisek.Text := stit;
 
   Self.Show();
@@ -68,8 +69,9 @@ begin
   Self.OpenBlk := blk;
 
   Self.Caption := 'Výluka na bloku ' + blk;
+  Self.L_What.Font.Color := clWhite;
   Self.L_What.Caption := 'Výluka :';
-  Self.Color := clOlive;
+  Self.Color := TJopColor.brown;
   Self.E_Popisek.Text := vyl;
 
   Self.Show();

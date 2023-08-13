@@ -272,21 +272,21 @@ begin
     Exit();
   end;
 
-  Symbols.TextOutput(Self.pos, Format('%.2d', [Self.index]), $A0A0A0, clBlack, obj);
+  Symbols.TextOutput(Self.pos, Format('%.2d', [Self.index]), TJopColor.grayDark, clBlack, obj);
 
   case (Self.EZ) of
     TOREZVolba.closed:
-      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', $A0A0A0, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', TJopColor.grayDark, clBlack, obj);
     TOREZVolba.please:
-      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clYellow, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', TJopColor.yellow, clBlack, obj);
     TOREZVolba.openned:
-      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', clWhite, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 9, Self.pos.y), 'EZ', TJopColor.white, clBlack, obj);
   end; // case
 
   if (Self.EZ = TOREZVolba.openned) then
   begin
-    Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
-    Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', TJopColor.grayDark, clBlack, obj);
+    Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', TJopColor.grayDark, clBlack, obj);
 
     jcpos := mousePos.y - Self.pos.y - 1;
     if ((Self.dragged > -1) and ((jcpos < 0) or (jcpos >= Self.stack.Count))) then
@@ -315,29 +315,29 @@ begin
     // pokud neni EZ
     if (Self.volba = VZ) then
     begin
-      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', clWhite, clBlack, obj);
-      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', $A0A0A0, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', TJopColor.white, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', TJopColor.grayDark, clBlack, obj);
     end else begin
-      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', $A0A0A0, clBlack, obj);
-      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', clWhite, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 3, Self.pos.y), 'VZ', TJopColor.grayDark, clBlack, obj);
+      Symbols.TextOutput(Point(Self.pos.X + 6, Self.pos.y), 'PV', TJopColor.white, clBlack, obj);
     end;
 
     // pokud je alespon jedna cesta v zasobniku, vypiseme ji
     if (Self.stack.Count > 0) then
       Self.ShowStackCMD(0, Self.stack[0].JC, true, false, Self.first_enabled, false, obj);
 
-    Symbols.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), $A0A0A0,
+    Symbols.TextOutput(Point(Self.pos.X + 12, Self.pos.y), Format('%.2d', [Self.stack.Count]), TJopColor.grayDark,
       clBlack, obj);
 
     if ((Self.hint <> '') or (Self.UPOenabled)) then
     begin
       if (Self.UPOenabled) then
       begin
-        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', clYellow, clBlack, obj);
-        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, clYellow, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', TJopColor.yellow, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, TJopColor.yellow, clBlack, obj);
       end else begin
-        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', $A0A0A0, clBlack, obj);
-        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, $A0A0A0, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 15, Self.pos.y), 'UPO', TJopColor.grayDark, clBlack, obj);
+        Symbols.TextOutput(Point(Self.pos.X + 19, Self.pos.y), Self.hint, TJopColor.grayDark, clBlack, obj);
       end;
     end;
   end;
@@ -348,37 +348,36 @@ end;
 procedure TORStack.ShowStackCMD(ypos: Integer; text: string; first: boolean; selected: boolean; available: boolean;
   dirty: boolean; obj: TDXDraw);
 var bk, fg: TColor;
-  j: Integer;
 begin
-  bk := $A0A0A0;
-  fg := clBlack;
+  bk := TJopColor.grayDark;
+  fg := TJopColor.black;
 
   if (first) then
   begin
     bk := clTeal;
     if (available) then
-      fg := clWhite
+      fg := TJopColor.white
     else
-      fg := clBlack;
+      fg := TJopColor.black;
   end;
 
   if (selected) then
   begin
-    bk := clOlive;
-    fg := clWhite;
+    bk := TJopColor.brown;
+    fg := TJopColor.white;
   end;
 
   if (dirty) then
   begin
-    fg := clBlack;
-    bk := clYellow;
+    fg := TJopColor.black;
+    bk := TJopColor.yellow;
   end;
 
   if (Length(text) > _JC_TEXT_WIDTH) then
     text := LeftStr(text, _JC_TEXT_WIDTH)
   else
   begin
-    for j := 0 to _JC_TEXT_WIDTH - Length(text) do
+    for var j := 0 to _JC_TEXT_WIDTH - Length(text) do
       text := text + ' ';
   end;
 

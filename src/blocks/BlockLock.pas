@@ -8,7 +8,7 @@ unit BlockLock;
 interface
 
 uses Classes, Graphics, Types, Generics.Collections, IniFiles, DXDraws, SysUtils,
-  BlockTypes;
+  BlockTypes, Symbols;
 
 type
   TPLock = class
@@ -41,12 +41,12 @@ type
   end;
 
 const
-  _DEF_LOCK_PROP: TGeneralPanelProp = (fg: clBlack; bg: clFuchsia; flash: false;);
-  _UA_LOCK_PROP: TGeneralPanelProp = (fg: $A0A0A0; bg: clBlack; flash: false;);
+  _DEF_LOCK_PROP: TGeneralPanelProp = (fg: TJopColor.black; bg: clFuchsia; flash: false;);
+  _UA_LOCK_PROP: TGeneralPanelProp = (fg: TJopColor.grayDark; bg: clBlack; flash: false;);
 
 implementation
 
-uses Symbols, parseHelper;
+uses parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
