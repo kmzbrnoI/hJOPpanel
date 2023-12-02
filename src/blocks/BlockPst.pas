@@ -42,7 +42,7 @@ type
 
 const
   _DEF_PST_PROP: TGeneralPanelProp = (fg: TJopColor.black; bg: clFuchsia; flash: false;);
-  _UA_PST_PROP: TGeneralPanelProp = (fg: TJopColor.purple; bg: clBlack; flash: false;);
+  _UA_PST_PROP: TGeneralPanelProp = (fg: TJopColor.grayDark; bg: clBlack; flash: false;);
 
 implementation
 
