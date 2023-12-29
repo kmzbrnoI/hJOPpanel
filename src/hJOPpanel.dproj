@@ -3,7 +3,7 @@
         <ProjectGuid>{44A7AE91-162E-45C9-84D4-51A50AB72A6F}</ProjectGuid>
         <ProjectVersion>19.5</ProjectVersion>
         <MainSource>hJOPpanel.dpr</MainSource>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
@@ -118,10 +118,9 @@
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <VerInfo_Keys>CompanyName=;FileDescription=hJOPpanel;FileVersion=1.16.3.0;InternalName=hJOPpanel.exe;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPpanel.exe;ProductName=hJOPpanel;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Release>3</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=hJOPpanel;FileVersion=1.16.4.0;InternalName=hJOPpanel.exe;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPpanel.exe;ProductName=hJOPpanel;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Release>4</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
@@ -290,15 +289,12 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k270.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp270.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclBaseExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclBaseExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclDebugExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclDebugExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclProjectAnalysisExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclProjectAnalysisExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclFavoriteFoldersExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclFavoriteFoldersExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclRepositoryExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclRepositoryExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclSIMDViewExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclSIMDViewExpert270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="c:\vlak\delphi\components\jcl-build\x86\bpl\JclStackTraceViewerExpert270.bpl">File c:\vlak\delphi\components\jcl-build\x86\bpl\JclStackTraceViewerExpert270.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp280.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\22.0\Bpl\JclFavoriteFoldersExpert280.bpl">JCL Open and Save IDE dialogs with favorite folders</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\22.0\Bpl\JclRepositoryExpert280.bpl">JCL Package containing repository wizards</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\22.0\Bpl\JclSIMDViewExpert280.bpl">JCL Debug Window of XMM registers</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\22.0\Bpl\JclStackTraceViewerExpert280.bpl">JCL Stack Trace Viewer</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
