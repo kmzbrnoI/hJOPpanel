@@ -155,24 +155,40 @@ var
 implementation
 
 uses GlobalConfig, Symbols, fMain, Resuscitation, fAuth, TCPClientPanel,
-  uLIclient, PanelOR;
+  uLIclient, PanelOR, StrUtils;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 {$R *.dfm}
 
 procedure TF_Settings.B_ApplyClick(Sender: TObject);
-var ss, ss2: TSymbolSet;
-  oldss: TSymbolSetType;
 begin
   if ((GlobConfig.data.symbolSet = TSymbolSetType.normal) and (Self.LB_Symbols.ItemIndex = 1) and
     (not F_Main.LargeSSFitsScreen())) then
   begin
-    Application.MessageBox('Panel s větším rozměrem symbolů se nevejde na monitor!', 'Nelze pokračovat',
-      MB_OK OR MB_ICONERROR);
+    Application.MessageBox('Panel s větším rozměrem symbolů se nevejde na monitor!', 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
     Screen.Cursor := crDefault;
     Exit();
   end;
+
+  begin
+    var superuserareas: string := '';
+    for var areaid: string in GlobConfig.data.auth.ORs.Keys do
+      if (GlobConfig.data.auth.ORs[areaid] = TAreaControlRights.superuser) then
+        superuserareas := superuserareas + areaid + ', ';
+
+    superuserareas := LeftStr(superuserareas, Length(superuserareas)-2);
+    if (superuserareas <> '') then
+      if (Application.MessageBox(PChar('Výchozí autorizace oblasti/í řízení '+superuserareas+' je nastavená na "superuser". Toto je vysoce nestandardní nastavení vhodné pouze pro experty.'+
+          'Pokud si nejste opravdu jisti, že víte, co děláte, je důrazně doporučeno autorizovat nižší oprávnění.'+#13#10+'Opravdu pokračovat?'),
+          'Varování', MB_YESNO OR MB_ICONWARNING OR MB_DEFBUTTON2) <> mrYes) then
+        Exit();
+  end;
+
+  for var i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
+    if (Self.LB_AutoAuthOR.Selected[i]) then
+      GlobConfig.data.auth.ORs.AddOrSetValue(Self.LB_AutoAuthOR.Items[i], TAreaControlRights(Self.CB_ORRights.ItemIndex));
+
 
   Screen.Cursor := crHourGlass;
 
@@ -239,7 +255,7 @@ begin
   if (Self.LB_Timer.ItemIndex > -1) then
     F_Main.T_Main.Interval := StrToInt(Self.LB_Timer.Items.Strings[Self.LB_Timer.ItemIndex]);
 
-  oldss := GlobConfig.data.symbolSet;
+  var oldss: TSymbolSetType := GlobConfig.data.symbolSet;
   case (Self.LB_Symbols.ItemIndex) of
     1:
       GlobConfig.data.symbolSet := TSymbolSetType.bigger;
@@ -263,8 +279,8 @@ begin
   if (oldss <> GlobConfig.data.symbolSet) then
   begin
     try
-      ss := TSymbolSet.Create(GlobConfig.data.symbolSet);
-      ss2 := symbolSet;
+      var ss := TSymbolSet.Create(GlobConfig.data.symbolSet);
+      var ss2 := symbolSet;
       symbolSet := ss;
       Relief.UpdateSymbolSet();
       ss2.Free();
