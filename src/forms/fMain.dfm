@@ -3128,13 +3128,11 @@ object F_Main: TF_Main
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-  OldCreateOrder = False
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  PixelsPerInch = 96
   TextHeight = 13
   object P_Header: TPanel
     Left = 0
@@ -3146,6 +3144,7 @@ object F_Main: TF_Main
     Color = clGray
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 918
     object P_Connection: TPanel
       Left = 8
       Top = 4
@@ -3841,6 +3840,8 @@ object F_Main: TF_Main
       item
         Width = 50
       end>
+    ExplicitTop = 366
+    ExplicitWidth = 918
   end
   object IL_Ostatni: TImageList
     BkColor = clBlack

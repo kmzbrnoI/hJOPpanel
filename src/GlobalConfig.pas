@@ -78,20 +78,22 @@ type
   private
     filename: string;
 
-  public
+     function GetPanelName(): string;
 
+  public
     data: TGlobConfigData;
 
-    constructor Create();
-    destructor Destroy(); override;
+     constructor Create();
+     destructor Destroy(); override;
 
-    procedure LoadFile(const filename: string = _DEFAULT_FN);
-    procedure SaveFile(const filename: string); overload;
-    procedure SaveFile(); overload;
+     procedure LoadFile(const filename: string = _DEFAULT_FN);
+     procedure SaveFile(const filename: string); overload;
+     procedure SaveFile(); overload;
 
-    function GetAuthNonNullORSCnt(): Cardinal;
+     function GetAuthNonNullORSCnt(): Cardinal;
 
-    property fn: string read filename;
+     property fn: string read filename;
+     property panelName: string read GetPanelName;
   end;
 
 var
@@ -267,6 +269,13 @@ begin
   for var item in Self.data.auth.ORs do
     if (item.Value > TAreaControlRights.null) then
       Inc(Result);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TGlobConfig.GetPanelName(): string;
+begin
+  Result := ChangeFileExt(ExtractFileName(ExpandFileName(Self.data.panel_fn)), '');
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

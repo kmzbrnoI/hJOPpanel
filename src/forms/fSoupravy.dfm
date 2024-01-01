@@ -11,10 +11,8 @@ object F_SprList: TF_SprList
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object P_Top: TPanel
     Left = 0
@@ -24,6 +22,7 @@ object F_SprList: TF_SprList
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 979
     object B_Refresh: TButton
       Left = 8
       Top = 8
@@ -49,7 +48,6 @@ object F_SprList: TF_SprList
     Top = 41
     Width = 983
     Height = 436
-    Hint = 'Tabulka definovan'#253'ch souprav'
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -101,9 +99,11 @@ object F_SprList: TF_SprList
     RowSelect = True
     ParentFont = False
     ParentShowHint = False
-    ShowHint = True
+    ShowHint = False
     TabOrder = 1
     ViewStyle = vsReport
     OnChange = LV_SoupravyChange
+    ExplicitWidth = 979
+    ExplicitHeight = 435
   end
 end

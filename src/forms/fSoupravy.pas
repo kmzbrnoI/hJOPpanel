@@ -39,7 +39,7 @@ var
 
 implementation
 
-uses TCPClientPanel, ORList, parseHelper;
+uses TCPClientPanel, ORList, parseHelper, GlobalConfig;
 
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
@@ -205,6 +205,7 @@ begin
   Self.B_RemoveSpr.Enabled := false;
 
   PanelTCPClient.SendLn('-;SPR-LIST;');
+  Self.Caption := 'Soupravy – ' + GlobConfig.panelName;
 end;
 
 procedure TF_SprList.LV_SoupravyChange(Sender: TObject; Item: TListItem; Change: TItemChange);

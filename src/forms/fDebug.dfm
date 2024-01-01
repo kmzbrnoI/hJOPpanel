@@ -12,8 +12,7 @@ object F_Debug: TF_Debug
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
+  OnShow = FormShow
   TextHeight = 13
   object Label1: TLabel
     Left = 424

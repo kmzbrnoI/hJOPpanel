@@ -1030,11 +1030,9 @@ end;
 
 procedure TRelief.FLoad(aFile: string);
 var inifile: TMemIniFile;
-  sect_str: TStrings;
   ver: string;
   verWord: Word;
   versionOk: boolean;
-  strs: TStrings;
 begin
   if (not FileExists(aFile)) then
     raise Exception.Create('Soubor panelu ' + aFile + ' neexistuje!');
@@ -1065,23 +1063,27 @@ begin
         Exit();
     end;
 
-    strs := TStringList.Create();
-    try
-      ExtractStringsEx(['.'], [], ver, strs);
-      verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
-    finally
-      strs.Free();
+    begin
+      var strs: TStrings := TStringList.Create();
+      try
+        ExtractStringsEx(['.'], [], ver, strs);
+        verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
+      finally
+        strs.Free();
+      end;
     end;
 
     // Oblasti rizeni
-    sect_str := TStringList.Create();
-    try
-      inifile.ReadSection('OR', sect_str);
-      Self.areas.Clear();
-      for var i := 0 to sect_str.Count - 1 do
-        Self.areas.Add(TAreaPanel.Create(inifile.ReadString('OR', sect_str[i], ''), Self.Graphics));
-    finally
-      sect_str.Free();
+    begin
+      var strs: TStrings := TStringList.Create();
+      try
+        inifile.ReadSection('OR', strs);
+        Self.areas.Clear();
+        for var i := 0 to strs.Count - 1 do
+          Self.areas.Add(TAreaPanel.Create(inifile.ReadString('OR', strs[i], ''), Self.Graphics));
+      finally
+        strs.Free();
+      end;
     end;
 
     // vytvorime okynka zprav

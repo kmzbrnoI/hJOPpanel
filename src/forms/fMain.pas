@@ -320,7 +320,7 @@ begin
   if (paramOpnl <> '') then
     GlobConfig.data.panel_fn := paramOpnl;
 
-  Self.Caption := ChangeFileExt(ExtractFileName(ExpandFileName(GlobConfig.data.panel_fn)), '') + ' – hJOPpanel – v' +
+  Self.Caption := GlobConfig.panelName + ' – hJOPpanel – v' +
     VersionStr(Application.ExeName) + ' (build ' + FormatDateTime('dd.mm.yyyy', BuildDateTime()) + ')';
 
   F_splash.ShowState('Vytvářím plátno...');

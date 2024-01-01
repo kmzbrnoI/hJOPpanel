@@ -211,6 +211,7 @@ end;
 procedure TF_Auth.FormShow(Sender: TObject);
 begin
   F_Main.A_ReAuth.Enabled := false;
+  Self.Caption := 'Server vyžaduje autentizaci – ' + GlobConfig.panelName;
 end;
 
 procedure TF_Auth.OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TList<Integer>; allow_guest: boolean;

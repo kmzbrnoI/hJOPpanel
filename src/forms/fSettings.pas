@@ -638,6 +638,8 @@ begin
 
   Self.passwdChanged := false;
   Self.guestPasswdChanged := false;
+
+  Self.Caption := 'Nastavení – ' + GlobConfig.panelName;
   Self.Show();
 end;
 

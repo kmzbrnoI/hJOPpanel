@@ -78,7 +78,7 @@ var
 
 implementation
 
-uses Sounds, ORList;
+uses Sounds, ORList, GlobalConfig;
 
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ begin
   while ((i > 0) and (s[i] = ' ')) do
     i := i - 1;
 
-  Self.Caption := Copy(s, 0, i) + ' - ' + Self.name + ' - zprávy';
+  Self.Caption := Copy(s, 0, i) + ' – ' + Self.name + ' – zprávy';
 end;
 
 procedure TF_Messages.PC_ClientsDragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -281,7 +281,7 @@ begin
     LI.SubItems.Add(areaDb.db_reverse[name]);
   end;
 
-  Self.Caption := Self.name + ' - zprávy';
+  Self.Caption := Self.name + ' – zprávy';
 end;
 
 procedure TF_Messages.LV_ORsDblClick(Sender: TObject);

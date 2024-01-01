@@ -1,7 +1,8 @@
 object F_Settings: TF_Settings
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
+  ActiveControl = PC_Main
+  BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Nastaven'#237
   ClientHeight = 322
@@ -12,7 +13,7 @@ object F_Settings: TF_Settings
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  Position = poScreenCenter
+  Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
   TextHeight = 13

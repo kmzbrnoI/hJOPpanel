@@ -91,7 +91,7 @@ var
 
 implementation
 
-uses fMain, BottomErrors, Sounds, parseHelper, Math;
+uses fMain, BottomErrors, Sounds, parseHelper, Math, GlobalConfig;
 
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
@@ -129,8 +129,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_PotvrSekv.StartOrUpdate(parsed: TStrings; callback: TEndEvent);
-var str: string;
-  strs: TStrings;
+var strs: TStrings;
 begin
   strs := TStringList.Create();
 
@@ -150,18 +149,18 @@ begin
       Self.L_Description.Caption := 'INFORMAČNÍ STRÁNKA';
       Self.L_ListDescription.Caption := 'INFORMACE';
       Self.B_OK.Caption := 'OK';
-      Self.Caption := 'Informační stránka';
+      Self.Caption := 'Informační stránka – ' + GlobConfig.panelName;
     end else begin
       Self.L_Description.Caption := '!!! PROBÍHÁ RIZIKOVÁ FUNKCE !!!';
       Self.L_ListDescription.Caption := 'KONTROLOVANÉ PODMÍNKY';
       Self.B_OK.Caption := 'Souhlasím';
-      Self.Caption := 'Riziková funkce';
+      Self.Caption := 'Riziková funkce – ' + GlobConfig.panelName;
     end;
 
     if (parsed.Count >= 5) then
     begin
       ExtractStringsEx(['|'], [], parsed[4], strs);
-      for str in strs do
+      for var str: string in strs do
         Self.m_senders.Add(str);
     end;
 
@@ -171,7 +170,7 @@ begin
     if (parsed.Count >= 6) then
     begin
       ExtractStringsEx([']'], ['['], parsed[5], strs);
-      for str in strs do
+      for var str: string in strs do
       begin
         try
           Self.m_conditions.Add(TPSCondition.Create(str));

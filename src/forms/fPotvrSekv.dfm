@@ -13,14 +13,12 @@ object F_PotvrSekv: TF_PotvrSekv
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnPaint = FormPaint
-  PixelsPerInch = 96
   TextHeight = 13
   object B_Storno: TButton
     Left = 597
@@ -60,6 +58,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Color = clSilver
     ParentBackground = False
     TabOrder = 2
+    ExplicitWidth = 677
     object L_ListDescription: TLabel
       Left = 40
       Top = 127
