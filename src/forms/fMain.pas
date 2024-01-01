@@ -39,7 +39,7 @@ type
     P_DCC: TPanel;
     SB_DCC_Go: TSpeedButton;
     SB_DCC_Stop: TSpeedButton;
-    Panel2: TPanel;
+    P_Other: TPanel;
     SB_Soupravy: TSpeedButton;
     A_Settings: TAction;
     A_Mute: TAction;
@@ -52,7 +52,9 @@ type
     P_Time_modelovy: TPanel;
     P_Zrychleni: TPanel;
     SB_Details: TSpeedButton;
+    P_Form: TPanel;
     SB_HideStatusBar: TSpeedButton;
+    SB_FullScreen: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -74,6 +76,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure SB_DetailsClick(Sender: TObject);
     procedure SB_HideStatusBarClick(Sender: TObject);
+    procedure SB_FullScreenClick(Sender: TObject);
   private
 
     mute_time: TDateTime;
@@ -135,6 +138,10 @@ begin
         F_Debug.Show();
       VK_F3:
         Self.ShowAboutDialog();
+      VK_F11: begin
+        Self.SB_FullScreen.Down := not Self.SB_FullScreen.Down;
+        Self.SB_FullScreenClick(Self.SB_FullScreen);
+      end;
     end; // case
   end else if (Msg.Message = WM_MOUSELEAVE) then
   begin
@@ -259,10 +266,12 @@ begin
 
   if (Assigned(GlobConfig)) then
   begin
+    GlobConfig.data.forms.fMainFullScreen := (Self.BorderStyle = TFormBorderStyle.bsNone);
     GlobConfig.data.forms.fMainShowSB := Self.SB_Main.Visible;
     GlobConfig.data.forms.fMainMaximized := (Self.WindowState = TWindowState.wsMaximized);
     if (Self.WindowState <> TWindowState.wsMaximized) then
       GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
+
     try
       GlobConfig.SaveFile();
     except
@@ -338,7 +347,6 @@ begin
 
   Self.SB_Main.Visible := GlobConfig.data.forms.fMainShowSB;
   Self.SB_HideStatusBar.Down := not GlobConfig.data.forms.fMainShowSB;
-  Self.SB_HideStatusBar.AllowAllUp := GlobConfig.data.forms.fMainShowSB;
 
   F_splash.ShowState('Vytvářím plátno...');
 
@@ -434,7 +442,10 @@ begin
 
   F_splash.ShowState('Hotovo');
 
-  if (GlobConfig.data.forms.fMainMaximized) then
+  Self.SB_FullScreen.Down := GlobConfig.data.forms.fMainFullScreen;
+  if (GlobConfig.data.forms.fMainFullScreen) then
+    Self.BorderStyle := TFormBorderStyle.bsNone;
+  if ((GlobConfig.data.forms.fMainMaximized) or (GlobConfig.data.forms.fMainFullScreen)) then
     Self.WindowState := TWindowState.wsMaximized;
 
   Self.UpdateuLIIcon();
@@ -471,15 +482,24 @@ end;
 
 procedure TF_Main.SB_DetailsClick(Sender: TObject);
 begin
-  Self.SB_Details.AllowAllUp := not Self.SB_Details.AllowAllUp;
-  Self.SB_Details.Down := not Self.SB_Details.Down;
   Relief.ShowDetails := Self.SB_Details.Down;
+end;
+
+procedure TF_Main.SB_FullScreenClick(Sender: TObject);
+begin
+  if (Self.SB_FullScreen.Down) then
+  begin
+    Self.WindowState := TWindowState.wsMaximized;
+    Self.BorderStyle := TFormBorderStyle.bsNone;
+    Self.Align := alClient;
+  end else begin
+    Self.BorderStyle := TFormBorderStyle.bsSizeable;
+    Self.Align := alNone;
+  end;
 end;
 
 procedure TF_Main.SB_HideStatusBarClick(Sender: TObject);
 begin
-  Self.SB_HideStatusBar.AllowAllUp := not Self.SB_HideStatusBar.AllowAllUp;
-  Self.SB_HideStatusBar.Down := not Self.SB_HideStatusBar.Down;
   Self.SB_Main.Visible := not Self.SB_HideStatusBar.Down;
   Self.UpdateFormConstraints();
   Self.Resize();
@@ -487,9 +507,6 @@ end;
 
 procedure TF_Main.SB_MuteClick(Sender: TObject);
 begin
-  Self.SB_Mute.AllowAllUp := not Self.SB_Mute.AllowAllUp;
-  Self.SB_Mute.Down := not Self.SB_Mute.Down;
-
   if (Self.SB_Mute.Down) then
   begin
     Self.mute_time := Now;
@@ -559,9 +576,8 @@ begin
 
   if ((SoundsPlay.muted) and (Self.mute_time + EncodeTime(0, _MUTE_MIN, 0, 0) <= Now)) then
   begin
-    Self.SB_Mute.AllowAllUp := not Self.SB_Mute.AllowAllUp;
-    Self.SB_Mute.Down := not Self.SB_Mute.Down;
-    SoundsPlay.muted := false;
+    Self.SB_Mute.Down := False;
+    SoundsPlay.muted := False;
   end;
 end;
 
