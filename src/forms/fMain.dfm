@@ -1,12 +1,10 @@
 object F_Main: TF_Main
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsSingle
   Caption = 'hJOPpanel'
   ClientHeight = 386
   ClientWidth = 922
-  Color = clBtnFace
+  Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

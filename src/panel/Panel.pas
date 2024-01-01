@@ -322,10 +322,10 @@ begin
   Self.menu.OnClick := Self.MenuOnClick;
   Self.menu.LoadHints(hints_file);
 
-  Errors := TErrors.Create(Self.Graphics);
+  errors := TErrors.Create(Self.Graphics);
   Self.UPO := TPanelUPO.Create(Self.Graphics);
   RucList := TRucList.Create(Self.Graphics);
-  Self.techBlok := TDictionary < Integer, TList < TTechBlokToSymbol >>.Create();
+  Self.techBlok := TDictionary<Integer, TList<TTechBlokToSymbol>>.Create();
 
   Self.infoTimers := TList<TInfoTimer>.Create();
 
@@ -336,9 +336,6 @@ begin
   Self.drawObject.OnMouseMove := Self.DXDMouseMove;
 
   Self.cursorDraw.pos.X := -2;
-  Self.cursorDraw.bg := TBitmap.Create();
-  Self.cursorDraw.bg.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
-  Self.cursorDraw.bg.Height := SymbolSet.symbHeight + 2;
 
   Self.AE := TApplicationEvents.Create(Self.parentForm);
   Self.AE.OnMessage := Self.AEMessage;
@@ -355,11 +352,7 @@ begin
   Self.areaIndex := areaIndex;
 
   Self.FLoad(aFile);
-
-  (Self.parentForm as TF_Main).SetPanelSize(Self.Graphics.pWidth * SymbolSet.symbWidth,
-    Self.Graphics.pHeight * SymbolSet.symbHeight);
-
-  Self.show();
+  Self.UpdateSymbolSet();
 end;
 
 destructor TRelief.Destroy();
@@ -2211,8 +2204,13 @@ begin
   Self.CursorDraw.bg := TBitmap.Create();
   Self.CursorDraw.bg.Width := SymbolSet.symbWidth + 2; // +2 kvuli okrajum kurzoru
   Self.CursorDraw.bg.Height := SymbolSet.symbHeight + 2;
-  (Self.ParentForm as TF_Main).SetPanelSize(Self.Graphics.pWidth * SymbolSet.symbWidth,
-    Self.Graphics.pHeight * SymbolSet.symbHeight);
+
+  var widthPx: Integer := Self.Graphics.pWidth * SymbolSet.symbWidth;
+  var heightPx: Integer := Self.Graphics.pHeight * SymbolSet.symbHeight;
+  Self.drawObject.Width := widthPx;
+  Self.drawObject.Height := heightPx;
+  (Self.parentForm as TF_Main).SetPanelSize(widthPx, heightPx);
+
   Self.show();
 end;
 

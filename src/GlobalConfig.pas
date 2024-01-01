@@ -58,6 +58,7 @@ type
 
   TFormConfig = record
     fMainPos: TPoint;
+    fMainMaximized: Boolean;
     fPotvrSekv: TPoint;
   end;
 
@@ -189,6 +190,7 @@ begin
 
     Self.data.forms.fMainPos.X := ini.ReadInteger('F_Main', 'X', 0);
     Self.data.forms.fMainPos.Y := ini.ReadInteger('F_Main', 'Y', 0);
+    Self.data.forms.fMainMaximized := ini.ReadBool('F_Main', 'maximized', False);
 
     Self.data.forms.fPotvrSekv.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
     Self.data.forms.fPotvrSekv.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
@@ -255,6 +257,7 @@ begin
 
     ini.WriteInteger('F_Main', 'X', Self.data.forms.fMainPos.X);
     ini.WriteInteger('F_Main', 'Y', Self.data.forms.fMainPos.Y);
+    ini.WriteBool('F_Main', 'maximized', Self.data.forms.fMainMaximized);
 
     ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekv.X);
     ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekv.Y);

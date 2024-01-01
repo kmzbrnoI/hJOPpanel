@@ -237,6 +237,7 @@ end;
 
 procedure TF_Main.FormCreate(Sender: TObject);
 begin
+  Self.DXD_Main := nil;
   Self.close_app := false;
   Self.uliauth_enabled := false;
 
@@ -251,12 +252,13 @@ end;
 procedure TF_Main.FormDestroy(Sender: TObject);
 begin
   BridgeClient.OnAuthStatushanged := nil;
-
   Screen.Cursor := crHourGlass;
 
   if (Assigned(GlobConfig)) then
   begin
-    GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
+    GlobConfig.data.forms.fMainMaximized := (Self.WindowState = TWindowState.wsMaximized);
+    if (Self.WindowState <> TWindowState.wsMaximized) then
+      GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
     try
       GlobConfig.SaveFile();
     except
@@ -292,6 +294,15 @@ begin
   Self.P_Date.Visible := (Self.P_Date.Left > (Self.P_Login.Left + Self.P_Login.width));
   Self.P_Time.Visible := (Self.P_Time.Left > (Self.P_Login.Left + Self.P_Login.width));
 
+  if (Assigned(Self.DXD_Main)) then
+  begin
+    var heightForPanel: Integer := Self.ClientHeight-Self.P_Header.Height;
+    if (Self.SB_Main.Visible) then
+      heightForPanel := heightForPanel - Self.SB_Main.Height;
+    Self.DXD_Main.Left := (Self.ClientWidth div 2) - (Self.DXD_Main.Width div 2);
+    Self.DXD_Main.Top := (heightForPanel div 2) - (Self.DXD_Main.Height div 2) + Self.P_Header.Height;
+  end;
+
   Self.P_Settings.BringToFront();
   Self.P_Connection.BringToFront();
 end;
@@ -326,9 +337,8 @@ begin
   try
     Self.DXD_Main := TDXDraw.Create(Self);
     Self.DXD_Main.Parent := Self;
-    Self.DXD_Main.Align := alClient;
     Self.DXD_Main.Options := [doAllowReboot, doSelectDriver, doHardware];
-    Self.DXD_Main.Initialize;
+    Self.DXD_Main.Initialize();
   except
     on E: Exception do
     begin
@@ -416,12 +426,15 @@ begin
 
   F_splash.ShowState('Hotovo');
 
+  if (GlobConfig.data.forms.fMainMaximized) then
+    Self.WindowState := TWindowState.wsMaximized;
+
   Self.UpdateuLIIcon();
   F_splash.Close();
   Self.Show();
 
   // Must be after Show() because of multiple monitors
-  if ((Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
+  if ((not GlobConfig.data.forms.fMainMaximized) and (Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
   begin
     // Allow negative coordinates for multiple monitors
     Self.Left := GlobConfig.data.forms.fMainPos.X;
@@ -507,8 +520,15 @@ end;
 
 procedure TF_Main.SetPanelSize(width, height: Integer);
 begin
-  Self.ClientWidth := width;
-  Self.ClientHeight := height + Self.P_Header.height + Self.SB_Main.height;
+  Self.WindowState := TWindowState.wsNormal;
+
+  Self.Constraints.MinWidth := width;
+  Self.Constraints.MinHeight := height + Self.P_Header.height;
+  if (Self.SB_Main.Visible) then
+    Self.Constraints.MinHeight := Self.Constraints.MinHeight + Self.SB_Main.Height;
+
+  Self.ClientWidth := Self.Constraints.MinWidth;
+  Self.ClientHeight := Self.Constraints.MinHeight;
 end;
 
 procedure TF_Main.T_MainTimer(Sender: TObject);
