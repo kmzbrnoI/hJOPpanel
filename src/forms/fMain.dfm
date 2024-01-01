@@ -1,9 +1,10 @@
 object F_Main: TF_Main
   Left = 0
   Top = 0
+  Margins.Left = 8
   Caption = 'hJOPpanel'
-  ClientHeight = 386
-  ClientWidth = 922
+  ClientHeight = 412
+  ClientWidth = 980
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -3135,7 +3136,7 @@ object F_Main: TF_Main
   object P_Header: TPanel
     Left = 0
     Top = 0
-    Width = 922
+    Width = 980
     Height = 33
     Align = alTop
     BevelOuter = bvNone
@@ -3392,7 +3393,7 @@ object F_Main: TF_Main
       end
     end
     object P_Time: TPanel
-      Left = 660
+      Left = 716
       Top = 4
       Width = 106
       Height = 25
@@ -3415,7 +3416,7 @@ object F_Main: TF_Main
       TabOrder = 2
     end
     object P_Date: TPanel
-      Left = 518
+      Left = 575
       Top = 4
       Width = 137
       Height = 25
@@ -3554,7 +3555,7 @@ object F_Main: TF_Main
     object Panel2: TPanel
       Left = 202
       Top = 4
-      Width = 100
+      Width = 126
       Height = 25
       Margins.Left = 2
       Margins.Top = 2
@@ -3565,7 +3566,7 @@ object F_Main: TF_Main
       ParentBackground = False
       TabOrder = 5
       object SB_Soupravy: TSpeedButton
-        Left = 26
+        Left = 50
         Top = 1
         Width = 24
         Height = 22
@@ -3649,7 +3650,7 @@ object F_Main: TF_Main
         ShowHint = True
       end
       object SB_uLIdaemon: TSpeedButton
-        Left = 73
+        Left = 98
         Top = 1
         Width = 24
         Height = 22
@@ -3691,9 +3692,9 @@ object F_Main: TF_Main
         OnClick = SB_uLIdaemonClick
       end
       object SB_Details: TSpeedButton
-        Left = 50
+        Left = 74
         Top = 1
-        Width = 23
+        Width = 24
         Height = 22
         Hint = 'Zobrazit/skr'#253't popisky blok'#367
         AllowAllUp = True
@@ -3729,9 +3730,47 @@ object F_Main: TF_Main
         ShowHint = True
         OnClick = SB_DetailsClick
       end
+      object SB_HideStatusBar: TSpeedButton
+        Left = 26
+        Top = 1
+        Width = 24
+        Height = 22
+        Hint = 'Skr'#253't stavov'#253' '#345#225'dek'
+        GroupIndex = 1
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFF7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F
+          7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7FFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF00000000000000
+          0000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+          FFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF000000FFFF
+          FFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFF
+          FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+          FFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFF
+          FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+          FFFFFF000000FFFFFF000000000000000000FFFFFFFFFFFFFFFFFF000000FFFF
+          FFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFF
+          FFFF000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF000000
+          FFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFFFF
+          FF000000FFFFFF000000FFFFFFFFFFFF000000000000FFFFFFFFFFFFFFFFFFFF
+          FFFF000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000FFFFFFFFFFFF
+          FFFFFF000000FFFFFF000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7F7F7F7F7F7F
+          7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F
+          7F7F7F7F7F7F7F7F7F7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = SB_HideStatusBarClick
+      end
     end
     object P_Login: TPanel
-      Left = 306
+      Left = 332
       Top = 4
       Width = 200
       Height = 25
@@ -3754,10 +3793,11 @@ object F_Main: TF_Main
       TabOrder = 6
       Visible = False
       object L_Login: TLabel
-        Left = 5
-        Top = 2
-        Width = 200
+        Left = 4
+        Top = 0
+        Width = 196
         Height = 25
+        Align = alRight
         AutoSize = False
         Caption = '-'
         Font.Charset = EASTEUROPE_CHARSET
@@ -3766,11 +3806,12 @@ object F_Main: TF_Main
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+        ExplicitLeft = 5
       end
     end
     object P_Time_modelovy: TPanel
-      Left = 770
-      Top = 4
+      Left = 826
+      Top = 3
       Width = 106
       Height = 25
       Hint = 'Modelov'#253' cas'
@@ -3795,8 +3836,8 @@ object F_Main: TF_Main
       TabOrder = 7
     end
     object P_Zrychleni: TPanel
-      Left = 880
-      Top = 4
+      Left = 936
+      Top = 3
       Width = 33
       Height = 25
       Hint = 'Prevod modelov'#233'ho casu'
@@ -3823,8 +3864,8 @@ object F_Main: TF_Main
   end
   object SB_Main: TStatusBar
     Left = 0
-    Top = 367
-    Width = 922
+    Top = 393
+    Width = 980
     Height = 19
     Panels = <
       item

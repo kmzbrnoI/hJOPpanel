@@ -52,6 +52,7 @@ type
     P_Time_modelovy: TPanel;
     P_Zrychleni: TPanel;
     SB_Details: TSpeedButton;
+    SB_HideStatusBar: TSpeedButton;
     procedure FormDestroy(Sender: TObject);
     procedure T_MainTimer(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -72,6 +73,7 @@ type
     procedure SB_uLIdaemonClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure SB_DetailsClick(Sender: TObject);
+    procedure SB_HideStatusBarClick(Sender: TObject);
   private
 
     mute_time: TDateTime;
@@ -83,6 +85,7 @@ type
     procedure RunuLIDaemon();
     procedure OnuLIAuthStatusChanged(Sender: TObject);
     procedure uLILoginFilled(Sender: TObject; username: string; password: string; ors: TList<Integer>; guest: Boolean);
+    procedure UpdateFormConstraints();
 
   protected
     procedure WndProc(var Message: TMessage); override;
@@ -256,6 +259,7 @@ begin
 
   if (Assigned(GlobConfig)) then
   begin
+    GlobConfig.data.forms.fMainShowSB := Self.SB_Main.Visible;
     GlobConfig.data.forms.fMainMaximized := (Self.WindowState = TWindowState.wsMaximized);
     if (Self.WindowState <> TWindowState.wsMaximized) then
       GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
@@ -331,6 +335,10 @@ begin
 
   Self.Caption := GlobConfig.panelName + ' – hJOPpanel – v' +
     VersionStr(Application.ExeName) + ' (build ' + FormatDateTime('dd.mm.yyyy', BuildDateTime()) + ')';
+
+  Self.SB_Main.Visible := GlobConfig.data.forms.fMainShowSB;
+  Self.SB_HideStatusBar.Down := not GlobConfig.data.forms.fMainShowSB;
+  Self.SB_HideStatusBar.AllowAllUp := GlobConfig.data.forms.fMainShowSB;
 
   F_splash.ShowState('Vytvářím plátno...');
 
@@ -468,6 +476,15 @@ begin
   Relief.ShowDetails := Self.SB_Details.Down;
 end;
 
+procedure TF_Main.SB_HideStatusBarClick(Sender: TObject);
+begin
+  Self.SB_HideStatusBar.AllowAllUp := not Self.SB_HideStatusBar.AllowAllUp;
+  Self.SB_HideStatusBar.Down := not Self.SB_HideStatusBar.Down;
+  Self.SB_Main.Visible := not Self.SB_HideStatusBar.Down;
+  Self.UpdateFormConstraints();
+  Self.Resize();
+end;
+
 procedure TF_Main.SB_MuteClick(Sender: TObject);
 begin
   Self.SB_Mute.AllowAllUp := not Self.SB_Mute.AllowAllUp;
@@ -521,14 +538,10 @@ end;
 procedure TF_Main.SetPanelSize(width, height: Integer);
 begin
   Self.WindowState := TWindowState.wsNormal;
+  Self.UpdateFormConstraints();
 
-  Self.Constraints.MinWidth := width;
-  Self.Constraints.MinHeight := height + Self.P_Header.height;
-  if (Self.SB_Main.Visible) then
-    Self.Constraints.MinHeight := Self.Constraints.MinHeight + Self.SB_Main.Height;
-
-  Self.ClientWidth := Self.Constraints.MinWidth;
-  Self.ClientHeight := Self.Constraints.MinHeight;
+  Self.Width := Self.Constraints.MinWidth;
+  Self.Height := Self.Constraints.MinHeight;
 end;
 
 procedure TF_Main.T_MainTimer(Sender: TObject);
@@ -713,6 +726,16 @@ begin
     Exit(True);
   Result := ((Relief.width * SymbolSet.sets[1].symbolWidth <= Screen.DesktopWidth) and
     (Relief.height * SymbolSet.sets[1].symbolHeight <= Screen.DesktopHeight));
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TF_Main.UpdateFormConstraints();
+begin
+  Self.Constraints.MinWidth := Self.DXD_Main.Width + (Self.Width-Self.ClientWidth);
+  Self.Constraints.MinHeight := Self.DXD_Main.Height + Self.P_Header.Height + (Self.Height-Self.ClientHeight);
+  if (Self.SB_Main.Visible) then
+    Self.Constraints.MinHeight := Self.Constraints.MinHeight + Self.SB_Main.Height;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
