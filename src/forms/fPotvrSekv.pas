@@ -7,7 +7,7 @@
 interface
 
 uses
-  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Types,
   Dialogs, ExtCtrls, StdCtrls, Generics.Collections, Symbols;
 
 const
@@ -75,6 +75,7 @@ type
     procedure StartOrUpdate(parsed: TStrings; callback: TEndEvent);
     procedure Stop(reason: string = '');
     procedure OnKeyUp(Key: Integer; var handled: Boolean);
+    procedure SetPosFromConfig();
 
     class procedure FillRectangle(canvas: TCanvas; rect: TRect; color: TColor);
 
@@ -354,6 +355,7 @@ end;
 
 procedure TF_PotvrSekv.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  GlobConfig.data.forms.fPotvrSekv := Point(Self.Left, Self.Top);
   if (Self.running) then
     Self.Stop('Zavřeno okno potvrzovací sekvence');
 end;
@@ -399,6 +401,22 @@ begin
   canvas.Brush.color := color;
   canvas.Pen.color := color;
   canvas.FillRect(rect);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TF_PotvrSekv.SetPosFromConfig();
+begin
+  // Must be after main window Show() because of multiple monitors
+  if ((Abs(GlobConfig.data.forms.fPotvrSekv.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fPotvrSekv.Y) < Screen.DesktopHeight)) then
+  begin
+    // Allow negative coordinates for multiple monitors
+    Self.Left := GlobConfig.data.forms.fPotvrSekv.X;
+    Self.Top := GlobConfig.data.forms.fPotvrSekv.Y;
+  end else begin
+    Self.Left := 0;
+    Self.Top := 0;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -56,6 +56,11 @@ type
     use: boolean;
   end;
 
+  TFormConfig = record
+    fMainPos: TPoint;
+    fPotvrSekv: TPoint;
+  end;
+
   TGlobConfigData = record
     panel_fn: string;
     panel_mouse: Integer;
@@ -66,9 +71,9 @@ type
     guest: TGuestConfig;
     reg: TRegConfig;
     vysv_fn: string;
-    frmPos: TPoint;
     resuscitation: boolean;
     uLI: TuLIConfig;
+    forms: TFormConfig;
   end;
 
   TGlobConfig = class
@@ -182,8 +187,11 @@ begin
     Self.data.uLI.path := ini.ReadString('uLI-daemon', 'path', '');
     Self.data.uLI.use := ini.ReadBool('uli-daemon', 'connect', false);
 
-    Self.data.frmPos.X := ini.ReadInteger('F_Main', 'X', 0);
-    Self.data.frmPos.Y := ini.ReadInteger('F_Main', 'Y', 0);
+    Self.data.forms.fMainPos.X := ini.ReadInteger('F_Main', 'X', 0);
+    Self.data.forms.fMainPos.Y := ini.ReadInteger('F_Main', 'Y', 0);
+
+    Self.data.forms.fPotvrSekv.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
+    Self.data.forms.fPotvrSekv.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
 
     F_Main.T_Main.Interval := ini.ReadInteger('global', 'timer', 200);
 
@@ -245,8 +253,11 @@ begin
     ini.WriteString('uLI-daemon', 'path', Self.data.uLI.path);
     ini.WriteBool('uli-daemon', 'connect', Self.data.uLI.use);
 
-    ini.WriteInteger('F_Main', 'X', Self.data.frmPos.X);
-    ini.WriteInteger('F_Main', 'Y', Self.data.frmPos.Y);
+    ini.WriteInteger('F_Main', 'X', Self.data.forms.fMainPos.X);
+    ini.WriteInteger('F_Main', 'Y', Self.data.forms.fMainPos.Y);
+
+    ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekv.X);
+    ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekv.Y);
 
     ini.WriteInteger('global', 'timer', F_Main.T_Main.Interval);
 

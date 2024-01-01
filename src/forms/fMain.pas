@@ -256,9 +256,7 @@ begin
 
   if (Assigned(GlobConfig)) then
   begin
-    var data := GlobConfig.data;
-    data.frmPos := Point(Self.Left, Self.Top);
-    GlobConfig.data := data;
+    GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
     try
       GlobConfig.SaveFile();
     except
@@ -423,13 +421,14 @@ begin
   Self.Show();
 
   // Must be after Show() because of multiple monitors
-  if ((Abs(GlobConfig.data.frmPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.frmPos.Y) < Screen.DesktopHeight))
-  then
+  if ((Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
   begin
     // Allow negative coordinates for multiple monitors
-    Self.Left := GlobConfig.data.frmPos.X;
-    Self.Top := GlobConfig.data.frmPos.Y;
+    Self.Left := GlobConfig.data.forms.fMainPos.X;
+    Self.Top := GlobConfig.data.forms.fMainPos.Y;
   end;
+
+  F_PotvrSekv.SetPosFromConfig();
 
   if (GlobConfig.data.server.autoconnect) then
     Self.A_ConnectExecute(Self);
