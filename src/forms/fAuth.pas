@@ -38,6 +38,8 @@ const
       save_hint: '';
     )
   );
+  BODY_DEFAULT_TOP: Integer = 8;
+  MSG_BODY_SPACE: Integer = 20;
 
 type
   TAuthFilledCallback = procedure(Sender: TObject; username: string; password: string; ors: TList<Integer>; guest: boolean)
@@ -89,6 +91,7 @@ type
     procedure ShowRelogin();
 
     procedure UpdateCheckboxLayout();
+    procedure UpdateFormHeight();
 
   public
     procedure OpenForm(caption: string; callback: TAuthFilledCallback; or_ids: TList<Integer>; allow_guest: boolean;
@@ -381,8 +384,8 @@ end;
 procedure TF_Auth.ShowErrorMessage();
 begin
   Self.P_Message.Visible := true;
-  Self.P_Body.Top := Self.P_Message.Height + 20;
-  Self.Height := P_Body.Top + P_Body.Height + P_Message.Top + 20;
+  Self.P_Body.Top := Self.P_Message.Height + MSG_BODY_SPACE;
+  Self.UpdateFormHeight();
 
   Self.ST_Error.Visible := true;
   Self.P_Message.Color := $DEDEF2;
@@ -391,9 +394,9 @@ end;
 
 procedure TF_Auth.HideErrorMessage();
 begin
-  Self.P_Body.Top := 8;
-  Self.Height := P_Body.Top + P_Body.Height + P_Message.Top + 20;
+  Self.P_Body.Top := BODY_DEFAULT_TOP;
   Self.P_Message.Visible := false;
+  Self.UpdateFormHeight();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -480,7 +483,12 @@ begin
 
   Self.P_Buttons.Top := Top;
   Self.P_Body.Height := Top + Self.P_Buttons.Height;
-  Self.Height := Self.P_Body.Top + Self.P_Body.Height + Self.P_Message.Top + 20;
+  Self.UpdateFormHeight();
+end;
+
+procedure TF_Auth.UpdateFormHeight();
+begin
+  Self.ClientHeight := Self.P_Body.Top + Self.P_Body.Height + BODY_DEFAULT_TOP;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
