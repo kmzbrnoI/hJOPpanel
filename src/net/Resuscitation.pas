@@ -19,7 +19,7 @@ type
 
   protected
 
-    procedure Execute; override;
+    procedure Execute(); override;
     procedure Activate();
 
   public
@@ -63,7 +63,7 @@ begin
     Self.fOnActivate(Self);
 end;
 
-procedure TResuscitation.Execute;
+procedure TResuscitation.Execute();
 var IdTCPClient: TIdTCPClient;
 begin
   IdTCPClient := TIdTCPClient.Create(nil);

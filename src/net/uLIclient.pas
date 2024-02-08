@@ -131,6 +131,9 @@ constructor TBridgeClient.Create();
 begin
   inherited;
 
+  Self.rthread := nil;
+  Self.resusc := nil;
+
   Self.fAuthStatus := TuLIAuthStatus.cannot;
   Self.fAuthStatusChanged := nil;
   Self.parsed := TStringList.Create;
@@ -153,7 +156,8 @@ begin
 
   end;
 
-  Self.DestroyResusc();
+  if (Assigned(Self.resusc)) then
+    Self.DestroyResusc();
 
   if (Assigned(Self.tcpClient)) then
     FreeAndNil(Self.tcpClient);
@@ -181,6 +185,13 @@ begin
     end;
     if (Self.tcpClient.IOHandler <> nil) then
       Self.tcpClient.IOHandler.InputBuffer.Clear;
+  end;
+
+  // Destroy thread from previous connection
+  if (Assigned(Self.rthread)) then
+  begin
+    Self.rthread.WaitFor();
+    FreeAndNil(Self.rthread);
   end;
 
   Self.tcpClient.host := host;
@@ -403,7 +414,8 @@ begin
   if (Self.resusc_destroy) then
   begin
     Self.resusc_destroy := False;
-    Self.DestroyResusc();
+    if (Assigned(Self.resusc)) then
+      Self.DestroyResusc();
   end;
 end;
 
@@ -450,15 +462,9 @@ begin
   // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
   if (Assigned(Self.resusc)) then
   begin
-    try
-      Self.resusc.Terminate();
-    finally
-      if (Assigned(Self.resusc)) then
-      begin
-        resusc.WaitFor();
-        FreeAndNil(Self.resusc);
-      end;
-    end;
+    Self.resusc.Terminate();
+    resusc.WaitFor();
+    FreeAndNil(Self.resusc);
   end;
 end;
 

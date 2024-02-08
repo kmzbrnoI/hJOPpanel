@@ -123,6 +123,8 @@ begin
 
   Self.parsed := TStringList.Create();
   Self.mServerVersion := 0;
+  Self.rthread := nil;
+  Self.resusct := nil;
 
   Self.pingTimer := TTimer.Create(nil);
   Self.pingTimer.Enabled := false;
@@ -135,7 +137,6 @@ begin
   Self.tcpClient.ConnectTimeout := 1500;
 
   Self.fstatus := TPanelConnectionStatus.closed;
-  Self.resusct := nil;
   Self.recusc_destroy := false;
 end; // ctor
 
@@ -151,15 +152,9 @@ begin
   // Znicime resuscitacni vlakno (vlakno obnovujici spojeni).
   if (Assigned(Self.resusct)) then
   begin
-    try
-      TerminateThread(Self.resusct.Handle, 0);
-    finally
-      if Assigned(Self.resusct) then
-      begin
-        resusct.WaitFor;
-        FreeAndNil(Self.resusct);
-      end;
-    end;
+    Self.resusct.Terminate();
+    resusct.WaitFor();
+    FreeAndNil(Self.resusct);
   end;
 
   try
@@ -192,6 +187,13 @@ begin
     end;
     if (Self.tcpClient.IOHandler <> nil) then
       Self.tcpClient.IOHandler.InputBuffer.Clear();
+  end;
+
+  // Destroy thread from previous connection
+  if (Assigned(Self.rthread)) then
+  begin
+    Self.rthread.WaitFor();
+    FreeAndNil(Self.rthread);
   end;
 
   Self.tcpClient.host := host;
@@ -228,14 +230,14 @@ begin
   end;
 
   Self.control_disconnect := true;
-  if Assigned(Self.rthread) then
+  if (Assigned(Self.rthread)) then
     Self.rthread.Terminate();
   try
     Self.tcpClient.Disconnect();
   finally
-    if Assigned(Self.rthread) then
+    if (Assigned(Self.rthread)) then
     begin
-      Self.rthread.WaitFor;
+      Self.rthread.WaitFor();
       FreeAndNil(Self.rthread);
     end;
   end;
@@ -272,7 +274,8 @@ end;
 
 procedure TPanelTCPClient.OnTcpClientDisconnected(Sender: TObject);
 begin
-  if Assigned(Self.rthread) then
+  // Do not FreeAndNil the thread - this method could be called from the thread
+  if (Assigned(Self.rthread)) then
     Self.rthread.Terminate();
 
   Relief.OrDisconnect();
@@ -842,15 +845,20 @@ begin
   if (Self.recusc_destroy) then
   begin
     Self.recusc_destroy := false;
-    try
+    if (Assigned(Self.resusct)) then
+    begin
       Self.resusct.Terminate();
-    finally
-      if Assigned(Self.resusct) then
-      begin
-        Self.resusct.WaitFor;
-        FreeAndNil(Self.resusct);
-      end;
+      Self.resusct.WaitFor();
+      FreeAndNil(Self.resusct);
     end;
+  end;
+
+  // Destroy thread from previous connection
+  if ((not Self.tcpClient.Connected) and (Assigned(Self.rthread))) then
+  begin
+    Self.rthread.Terminate();
+    Self.rthread.WaitFor();
+    FreeAndNil(Self.rthread);
   end;
 end;
 

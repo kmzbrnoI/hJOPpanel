@@ -9,6 +9,9 @@ interface
 uses
   Classes, IdTCPClient, SysUtils, IdException;
 
+const
+  READ_TIMEOUT_MS: Integer = 500;
+
 type
   TDataEvent = procedure(const Data: string) of object;
   TErrorEvent = procedure() of object;
@@ -20,14 +23,18 @@ type
     FOnData: TDataEvent;
     FOnError: TErrorEvent;
     FOnTimeout: TErrorEvent;
-    procedure DataReceived;
+
+     procedure DataReceived();
+
   protected
-    procedure Execute; override;
+     procedure Execute(); override;
+
   public
-    constructor Create(AClient: TIdTCPClient); reintroduce;
-    property OnData: TDataEvent read FOnData write FOnData;
-    property OnError: TErrorEvent read FOnError write FOnError;
-    property OnTimeout: TErrorEvent read FOnTimeout write FOnTimeout;
+     constructor Create(AClient: TIdTCPClient); reintroduce;
+     property OnData: TDataEvent read FOnData write FOnData;
+     property OnError: TErrorEvent read FOnError write FOnError;
+     property OnTimeout: TErrorEvent read FOnTimeout write FOnTimeout;
+
   end;
 
 implementation
@@ -35,15 +42,19 @@ implementation
 constructor TReadingThread.Create(AClient: TIdTCPClient);
 begin
   inherited Create(True);
-  FClient := AClient;
+  Self.FOnData := nil;
+  Self.FOnError := nil;
+  Self.FOnTimeout := nil;
+  Self.FClient := AClient;
 end;
 
-procedure TReadingThread.Execute;
+procedure TReadingThread.Execute();
 begin
   while (not Terminated) do
   begin
     try
-      FData := FClient.IOHandler.ReadLn();
+      // Use timeout so the thread terminates always (not stuck in ReadLn blocking call 4ever)
+      FData := FClient.IOHandler.ReadLn(#10, READ_TIMEOUT_MS);
     except
       on E: EIdConnClosedGracefully do
       begin
@@ -58,14 +69,15 @@ begin
         Exit();
       end;
     end;
-    if (FData <> '') and Assigned(FOnData) then
+
+    if ((FData <> '') and (Assigned(FOnData))) then
       Synchronize(DataReceived);
   end;
 end;
 
-procedure TReadingThread.DataReceived;
+procedure TReadingThread.DataReceived();
 begin
-  if Assigned(FOnData) then
+  if (Assigned(FOnData)) then
     FOnData(FData);
 end;
 
