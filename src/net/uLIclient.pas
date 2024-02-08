@@ -210,14 +210,14 @@ begin
   end;
 
   Self.control_disconnect := true;
-  if Assigned(Self.rthread) then
-    Self.rthread.Terminate;
+  if (Assigned(Self.rthread)) then
+    Self.rthread.Terminate();
   try
     Self.tcpClient.Disconnect();
   finally
-    if Assigned(Self.rthread) then
+    if (Assigned(Self.rthread)) then
     begin
-      Self.rthread.WaitFor;
+      Self.rthread.WaitFor();
       FreeAndNil(Self.rthread);
     end;
   end;
@@ -247,8 +247,8 @@ end;
 
 procedure TBridgeClient.OnTcpClientDisconnected(Sender: TObject);
 begin
-  if Assigned(Self.rthread) then
-    Self.rthread.Terminate;
+  if (Assigned(Self.rthread)) then
+    Self.rthread.Terminate();
 
   Self.fAuthStatus := TuLIAuthStatus.cannot;
 
@@ -451,11 +451,11 @@ begin
   if (Assigned(Self.resusc)) then
   begin
     try
-      TerminateThread(Self.resusc.Handle, 0);
+      Self.resusc.Terminate();
     finally
-      if Assigned(Self.resusc) then
+      if (Assigned(Self.resusc)) then
       begin
-        resusc.WaitFor;
+        resusc.WaitFor();
         FreeAndNil(Self.resusc);
       end;
     end;
