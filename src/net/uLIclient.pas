@@ -128,7 +128,6 @@ uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, parseHelper;
 /// /////////////////////////////////////////////////////////////////////////////
 
 constructor TBridgeClient.Create();
-var i: Integer;
 begin
   inherited;
 
@@ -136,7 +135,7 @@ begin
   Self.fAuthStatusChanged := nil;
   Self.parsed := TStringList.Create;
 
-  for i := 1 to _SLOTS_CNT do
+  for var i: Integer := 1 to _SLOTS_CNT do
     Self.sloty[i] := ssNotAvailable;
 
   Self.tcpClient := TIdTCPClient.Create(nil);
@@ -309,11 +308,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TBridgeClient.Parse();
-var i: Integer;
 begin
   if (parsed[0] = 'SLOTS') then
   begin
-    for i := 1 to _SLOTS_CNT do
+    for var i: Integer := 1 to _SLOTS_CNT do
     begin
       if (i < parsed.Count) then
       begin
@@ -477,10 +475,9 @@ end;
 
 procedure TBridgeClient.LoksToSlot(HVs: THVDb; slot: Integer; ruc: boolean);
 var str: string;
-  HV: THV;
 begin
   str := '';
-  for HV in HVs.HVs do
+  for var HV: THV in HVs.HVs do
     str := str + '{' + IntToStr(HV.addr) + ';' + HV.token + '};';
 
   if (ruc) then
@@ -499,10 +496,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TBridgeClient.GetActiveSlotsCount(): Integer;
-var i: Integer;
 begin
   Result := 0;
-  for i := 1 to _SLOTS_CNT do
+  for var i: Integer := 1 to _SLOTS_CNT do
     if ((Self.sloty[i] = ssAvailable) or (Self.sloty[i] = ssFull)) then
       Inc(Result);
 end;
