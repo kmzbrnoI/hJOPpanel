@@ -124,8 +124,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelMenu.PaintMenu(obj: TDXDraw; mouse_pos: TPoint);
-var i: Integer;
-  Pos: TPoint;
+var Pos: TPoint;
   foreground, background: TColor;
   str: string;
   Canvas: TCanvas;
@@ -153,7 +152,7 @@ begin
 
   Self.fselected := -1;
 
-  for i := 0 to Self.Items.cnt - 1 do
+  for var i: Integer := 0 to Self.Items.cnt - 1 do
   begin
     background := TJopColor.gray;
 
@@ -290,8 +289,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelMenu.LoadHints(fn: string);
-var parsed: TStrings;
-  f: TextFile;
+var f: TextFile;
 begin
   Self.Hints.Clear();
 
@@ -302,7 +300,7 @@ begin
     Exit();
   end;
 
-  parsed := TStringList.Create();
+  var parsed: TStrings := TStringList.Create();
   try
     while (not eof(f)) do
     begin
