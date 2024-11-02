@@ -1636,9 +1636,10 @@ end;
 // technologie posle nejake menu a my ho zobrazime:
 procedure TRelief.ORShowMenu(items: string);
 begin
-  Self.menuLastpos := Self.CursorDraw.Pos;
+  if (not Self.menu.showing) then
+    Self.menuLastpos := Self.CursorDraw.Pos;
   Self.dkRootMenuItem := '';
-  Self.Menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0, 0)));
+  Self.menu.ShowMenu(items, -1, Self.DrawObject.ClientToScreen(Point(0, 0)));
 end;
 
 procedure TRelief.ORDkShowMenu(Sender: string; rootItem, menuItems: string);
