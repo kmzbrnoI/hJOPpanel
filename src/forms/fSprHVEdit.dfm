@@ -1,6 +1,7 @@
 object F_SprHVEdit: TF_SprHVEdit
   Left = 0
   Top = 0
+  Align = alClient
   BorderStyle = bsNone
   ClientHeight = 287
   ClientWidth = 386
@@ -10,10 +11,8 @@ object F_SprHVEdit: TF_SprHVEdit
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object L_S09: TLabel
     Left = 7

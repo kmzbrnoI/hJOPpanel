@@ -12,12 +12,10 @@ object F_SoupravaEdit: TF_SoupravaEdit
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object L_S01: TLabel
     Left = 7
