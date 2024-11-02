@@ -269,8 +269,7 @@ begin
     GlobConfig.data.forms.fMainFullScreen := (Self.BorderStyle = TFormBorderStyle.bsNone);
     GlobConfig.data.forms.fMainShowSB := Self.SB_Main.Visible;
     GlobConfig.data.forms.fMainMaximized := (Self.WindowState = TWindowState.wsMaximized);
-    if (Self.WindowState <> TWindowState.wsMaximized) then
-      GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
+    GlobConfig.data.forms.fMainPos := Point(Self.Left, Self.Top);
 
     try
       GlobConfig.SaveFile();
@@ -445,20 +444,22 @@ begin
   Self.SB_FullScreen.Down := GlobConfig.data.forms.fMainFullScreen;
   if (GlobConfig.data.forms.fMainFullScreen) then
     Self.BorderStyle := TFormBorderStyle.bsNone;
-  if ((GlobConfig.data.forms.fMainMaximized) or (GlobConfig.data.forms.fMainFullScreen)) then
-    Self.WindowState := TWindowState.wsMaximized;
 
   Self.UpdateuLIIcon();
   F_splash.Close();
   Self.Show();
 
   // Must be after Show() because of multiple monitors
-  if ((not GlobConfig.data.forms.fMainMaximized) and (Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
+  if ((Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
   begin
     // Allow negative coordinates for multiple monitors
+    // This if must be entered also if in maximized state - restore the monitor it was maximized on
     Self.Left := GlobConfig.data.forms.fMainPos.X;
     Self.Top := GlobConfig.data.forms.fMainPos.Y;
   end;
+
+  if ((GlobConfig.data.forms.fMainMaximized) or (GlobConfig.data.forms.fMainFullScreen)) then
+    Self.WindowState := TWindowState.wsMaximized;
 
   F_PotvrSekv.SetPosFromConfig();
 
