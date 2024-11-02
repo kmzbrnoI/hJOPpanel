@@ -450,7 +450,8 @@ begin
   Self.Show();
 
   // Must be after Show() because of multiple monitors
-  if ((Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
+  if (((GlobConfig.data.forms.fMainPos.X > (Screen.DesktopLeft-10)) and (GlobConfig.data.forms.fMainPos.Y > (Screen.DesktopTop-10))) and
+      (Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
   begin
     // Allow negative coordinates for multiple monitors
     // This if must be entered also if in maximized state - restore the monitor it was maximized on
