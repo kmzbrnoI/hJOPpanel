@@ -477,4 +477,13 @@ object F_HVEdit: TF_HVEdit
     TabOrder = 3
     OnClick = B_CancelClick
   end
+  object B_Refresh: TButton
+    Left = 8
+    Top = 528
+    Width = 137
+    Height = 25
+    Caption = 'Aktualizovat seznam HV'
+    TabOrder = 4
+    OnClick = B_RefreshClick
+  end
 end

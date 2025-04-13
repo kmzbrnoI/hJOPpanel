@@ -47,6 +47,7 @@ type
     Label12: TLabel;
     CB_Prechodnost: TComboBox;
     Label13: TLabel;
+    B_Refresh: TButton;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
@@ -63,9 +64,10 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure B_SearchClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure B_RefreshClick(Sender: TObject);
   private
     HVs: THVDb;
-    new: boolean;
+    new: Boolean;
     m_area: string;
     CB_funkce: array [0 .. _MAX_FUNC] of TComboBox;
     RB_P: array [0 .. _MAX_FUNC] of TRadioButton;
@@ -94,7 +96,6 @@ type
 
     procedure LoadPrechodnost(ini: TMemIniFile);
     procedure HVListRefreshed();
-    property hvLisRefreshWaiting: Boolean read m_hvlistRefreshWarning;
     property area: string read m_area;
 
   end;
@@ -154,7 +155,7 @@ begin
 
   for var i: Integer := 0 to Self.HVs.HVs.Count-1 do
     if (Integer(Self.HVs.HVs[i].addr) = selectAddr) then
-      Self.CB_HV.ItemIndex := i + Integer(Self.new);
+      Self.CB_HV.ItemIndex := i + BoolToInt(Self.new);
 
   Self.CB_HVChange(Self.CB_HV);
 end;
@@ -310,6 +311,18 @@ begin
   Self.Close();
 end;
 
+procedure TF_HVEdit.B_RefreshClick(Sender: TObject);
+begin
+  var response: Integer := Application.MessageBox('Tato operace zahodí neuložené změny, pokračovat?', 'Pokračovat?', MB_YESNO OR MB_ICONQUESTION);
+  if (response = mrYes) then
+  begin
+    Self.CB_HV.Enabled := False;
+    Self.SetEngineGUIEnabled(False);
+    Self.m_hvlistRefreshWarning := True;
+    PanelTCPClient.PanelLokList(Self.area); // refresh engine list
+  end;
+end;
+
 procedure TF_HVEdit.B_SearchClick(Sender: TObject);
 begin
   if (Self.E_Adresa.Text = '') then
@@ -366,11 +379,7 @@ begin
       end;
 
     end else begin
-      var HV: THV;
-      if (Self.new) then
-        HV := Self.HVs.HVs[Self.CB_HV.ItemIndex - 1]
-      else
-        HV := Self.HVs.HVs[Self.CB_HV.ItemIndex];
+      var HV: THV := Self.HVs.HVs[Self.CB_HV.ItemIndex - BoolToInt(Self.new)];
 
       Self.E_Name.Text := HV.name;
       Self.E_Oznaceni.Text := HV.designation;
@@ -848,9 +857,12 @@ end;
 
 procedure TF_HVEdit.HVListRefreshed();
 begin
-  Self.m_hvlistRefreshWarning := False;
-  Self.FillEngines(StrToIntDef(Self.E_Adresa.Text, -1));
-  Self.CB_HV.Enabled := True;
+  if (Self.m_hvlistRefreshWarning) then
+  begin
+    Self.m_hvlistRefreshWarning := False;
+    Self.FillEngines(StrToIntDef(Self.E_Adresa.Text, -1));
+    Self.CB_HV.Enabled := True;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

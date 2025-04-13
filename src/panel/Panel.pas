@@ -1595,7 +1595,7 @@ begin
   begin
     area.HVs.ParseHVs(data);
     area.HVs.HVs.Sort();
-    if ((F_HVEdit.Showing) and (F_HVEdit.hvLisRefreshWaiting) and (F_HVEdit.area = Sender)) then
+    if ((F_HVEdit.Showing) and (F_HVEdit.area = Sender)) then
       F_HVEdit.HVListRefreshed();
   end;
 end;

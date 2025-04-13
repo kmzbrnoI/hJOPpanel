@@ -21,6 +21,7 @@ type
   TIntAr = array of Integer;
 
 function StrToBool(str: string): boolean;
+function BoolToInt(a: Boolean): Integer;
 function GetForbidderChars(): string;
 
 implementation
@@ -28,6 +29,14 @@ implementation
 function StrToBool(str: string): boolean;
 begin
   Result := (str = '1');
+end;
+
+function BoolToInt(a: Boolean): Integer;
+begin
+  if (a) then
+    Result := 1
+  else
+    Result := 0;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
