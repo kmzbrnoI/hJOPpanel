@@ -64,11 +64,9 @@ type
     procedure B_SearchClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    { Private declarations }
-
     HVs: THVDb;
     new: boolean;
-    senderArea: string;
+    m_area: string;
     CB_funkce: array [0 .. _MAX_FUNC] of TComboBox;
     RB_P: array [0 .. _MAX_FUNC] of TRadioButton;
     RB_M: array [0 .. _MAX_FUNC] of TRadioButton;
@@ -76,22 +74,28 @@ type
     FOldListviewWindowProc: TWndMethod;
     vyznType: TDictionary<string, THVFuncType>;
     transience: TDictionary<Cardinal, string>;
+    m_hvlistRefreshWarning: Boolean;
 
     procedure InitFunkce();
     procedure FreeFunkce();
     procedure RepaintFunkce();
     procedure LV_FunkceWindowproc(var Message: TMessage);
     procedure CB_VyznamChange(Sender: TObject);
+    procedure SetEngineGUIEnabled(enabled: Boolean);
+    procedure FillEngines(selectAddr: Integer = -1);
 
   public
-    procedure HVAdd(sender_or: string; HVs: THVDb);
-    procedure HVEdit(sender_or: string; HVs: THVDb);
+    procedure HVAdd(area: string; HVs: THVDb);
+    procedure HVEdit(area: string; HVs: THVDb);
     procedure ParseVyznamy(vyznamy: string);
 
     procedure ServerEditResp(parsed: TStrings);
     procedure ServerAddResp(parsed: TStrings);
 
     procedure LoadPrechodnost(ini: TMemIniFile);
+    procedure HVListRefreshed();
+    property hvLisRefreshWaiting: Boolean read m_hvlistRefreshWarning;
+    property area: string read m_area;
 
   end;
 
@@ -103,6 +107,57 @@ implementation
 uses fHVPomEdit, commctrl, parseHelper;
 
 {$R *.dfm}
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.HVAdd(area: string; HVs: THVDb);
+begin
+  Self.m_area := area;
+  Self.HVs := HVs;
+  Self.new := true;
+
+  Self.FillEngines();
+  Self.B_Search.Visible := true;
+
+  Self.CB_HV.Enabled := True;
+  Self.Caption := 'Vytvořit nové hnací vozidlo';
+  Self.L_HV.Caption := 'Vytvořit hnací vozidlo na základě šablony:';
+  Self.Show();
+  Self.ActiveControl := Self.CB_HV;
+end;
+
+procedure TF_HVEdit.HVEdit(area: string; HVs: THVDb);
+begin
+  Self.m_area := area;
+  Self.new := false;
+  Self.HVs := HVs;
+
+  Self.FillEngines();
+  Self.B_Search.Visible := false;
+
+  Self.CB_HV.Enabled := True;
+  Self.Caption := 'Upravit hnací vozidlo';
+  Self.L_HV.Caption := 'Hnací vozidlo:';
+  Self.Show();
+  Self.ActiveControl := Self.CB_HV;
+end;
+
+procedure TF_HVEdit.FillEngines(selectAddr: Integer = -1);
+var arr: TWordAr; // not used
+begin
+  HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
+  if (Self.new) then
+  begin
+    Self.CB_HV.Items.Insert(0, 'Nepoužít šablonu');
+    Self.CB_HV.ItemIndex := 0;
+  end;
+
+  for var i: Integer := 0 to Self.HVs.HVs.Count-1 do
+    if (Integer(Self.HVs.HVs[i].addr) = selectAddr) then
+      Self.CB_HV.ItemIndex := i + Integer(Self.new);
+
+  Self.CB_HVChange(Self.CB_HV);
+end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -218,11 +273,13 @@ begin
         HV.funcType[i] := THVFuncType.permanent;
     end;
 
+    Self.SetEngineGUIEnabled(false);
+    Self.CB_HV.Enabled := False;
     if (Self.new) then
     begin
-      PanelTCPClient.PanelHVAdd(Self.senderArea, '{' + HV.GetPanelLokString(full) + '}');
+      PanelTCPClient.PanelHVAdd(Self.area, '{' + HV.GetPanelLokString(full) + '}');
     end else begin
-      PanelTCPClient.PanelHVEdit(Self.senderArea, '{' + HV.GetPanelLokString(full) + '}');
+      PanelTCPClient.PanelHVEdit(Self.area, '{' + HV.GetPanelLokString(full) + '}');
     end;
 
     // generate new function descriptions
@@ -271,33 +328,11 @@ begin
   Self.LV_Pom_Load.Clear();
   Self.LV_Pom_Release.Clear();
 
+  Self.SetEngineGUIEnabled(Self.CB_HV.ItemIndex > -1);
+
   if (Self.CB_HV.ItemIndex > -1) then
   begin
-    Self.B_Apply.Enabled := true;
-
-    Self.E_Name.Enabled := true;
-    Self.E_Oznaceni.Enabled := true;
-    Self.E_Majitel.Enabled := true;
-    Self.E_Adresa.Enabled := true;
     Self.E_Adresa.ReadOnly := not Self.new;
-    Self.M_Poznamka.Enabled := true;
-    Self.RG_Trida.Enabled := true;
-    Self.RG_StA.Enabled := true;
-    Self.SE_MaxSpeed.Enabled := true;
-    Self.CB_Prechodnost.Enabled := true;
-
-    Self.SB_Take_Add.Enabled := true;
-    Self.SB_Rel_Add.Enabled := true;
-    Self.LV_Pom_Load.Enabled := true;
-    Self.LV_Pom_Release.Enabled := true;
-
-    Self.LV_Funkce.Enabled := true;
-    for var i := 0 to _MAX_FUNC do
-    begin
-      Self.CB_funkce[i].Enabled := true;
-      Self.RB_P[i].Enabled := true;
-      Self.RB_M[i].Enabled := true;
-    end;
 
     if ((Self.new) and (Self.CB_HV.ItemIndex = 0)) then
     begin
@@ -323,9 +358,6 @@ begin
       Self.LV_Funkce.Items[0].Checked := true;
       for var i := 1 to _MAX_FUNC do
         Self.LV_Funkce.Items[i].Checked := false;
-
-      Self.SB_Take_Remove.Enabled := false;
-      Self.SB_Rel_Remove.Enabled := false;
 
       for var i := 0 to _MAX_FUNC do
       begin
@@ -400,18 +432,6 @@ begin
     end; // if not New
 
   end else begin
-    Self.B_Apply.Enabled := false;
-
-    Self.E_Name.Enabled := false;
-    Self.E_Oznaceni.Enabled := false;
-    Self.E_Majitel.Enabled := false;
-    Self.E_Adresa.Enabled := false;
-    Self.M_Poznamka.Enabled := false;
-    Self.RG_Trida.Enabled := false;
-    Self.RG_StA.Enabled := false;
-    Self.SE_MaxSpeed.Enabled := false;
-    Self.CB_Prechodnost.Enabled := false;
-
     Self.E_Name.Text := '';
     Self.E_Oznaceni.Text := '';
     Self.E_Majitel.Text := '';
@@ -425,26 +445,46 @@ begin
     for var i := 1 to _MAX_FUNC do
       Self.LV_Funkce.Items[i].Checked := false;
 
-    Self.SB_Take_Add.Enabled := false;
-    Self.SB_Rel_Add.Enabled := false;
-    Self.LV_Pom_Load.Enabled := false;
-    Self.LV_Pom_Release.Enabled := false;
-
-    Self.LV_Funkce.Enabled := false;
     for var i := 0 to _MAX_FUNC do
     begin
-      Self.CB_funkce[i].Enabled := false;
       Self.CB_funkce[i].Text := '';
-      Self.RB_P[i].Enabled := false;
-      Self.RB_P[i].Checked := false;
-      Self.RB_M[i].Enabled := false;
-      Self.RB_M[i].Enabled := false;
+      Self.RB_P[i].Checked := False;
+      Self.RB_M[i].Checked := False;
     end;
+  end;
+end;
+
+procedure TF_HVEdit.SetEngineGUIEnabled(enabled: Boolean);
+begin
+  Self.B_Apply.Enabled := enabled;
+
+  Self.E_Name.Enabled := enabled;
+  Self.E_Oznaceni.Enabled := enabled;
+  Self.E_Majitel.Enabled := enabled;
+  Self.E_Adresa.Enabled := enabled;
+  Self.M_Poznamka.Enabled := enabled;
+  Self.RG_Trida.Enabled := enabled;
+  Self.RG_StA.Enabled := enabled;
+  Self.SE_MaxSpeed.Enabled := enabled;
+  Self.CB_Prechodnost.Enabled := enabled;
+
+  Self.SB_Take_Add.Enabled := enabled;
+  Self.SB_Rel_Add.Enabled := enabled;
+  Self.LV_Pom_Load.Enabled := enabled;
+  Self.LV_Pom_Release.Enabled := enabled;
+
+  Self.LV_Funkce.Enabled := enabled;
+  for var i := 0 to _MAX_FUNC do
+  begin
+    Self.CB_funkce[i].Enabled := enabled;
+    Self.RB_P[i].Enabled := enabled;
+    Self.RB_M[i].Enabled := enabled;
   end;
 end;
 
 procedure TF_HVEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  Self.m_hvlistRefreshWarning := False;
   Screen.Cursor := crDefault;
 end;
 
@@ -452,6 +492,8 @@ procedure TF_HVEdit.FormCreate(Sender: TObject);
 begin
   Self.vyznType := TDictionary<string, THVFuncType>.Create();
   Self.transience := TDictionary<Cardinal, string>.Create();
+  Self.m_hvlistRefreshWarning := False;
+  Self.m_area := '';
   Self.InitFunkce();
 end;
 
@@ -463,44 +505,6 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
-
-procedure TF_HVEdit.HVAdd(sender_or: string; HVs: THVDb);
-var arr: TWordAr; // not used
-begin
-  Self.senderArea := sender_or;
-  Self.HVs := HVs;
-  Self.new := true;
-
-  HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
-  Self.CB_HV.Items.Insert(0, 'Nepoužít šablonu');
-  Self.CB_HV.ItemIndex := 0;
-  Self.CB_HVChange(Self.CB_HV);
-
-  Self.B_Search.Visible := true;
-
-  Self.Caption := 'Vytvořit nové hnací vozidlo';
-  Self.L_HV.Caption := 'Vytvořit hnací vozidlo na základě šablony:';
-  Self.Show();
-  Self.ActiveControl := Self.CB_HV;
-end;
-
-procedure TF_HVEdit.HVEdit(sender_or: string; HVs: THVDb);
-var arr: TWordAr; // not used
-begin
-  Self.senderArea := sender_or;
-  Self.new := false;
-  Self.HVs := HVs;
-
-  HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
-  Self.CB_HVChange(Self.CB_HV);
-
-  Self.B_Search.Visible := false;
-
-  Self.Caption := 'Upravit hnací vozidlo';
-  Self.L_HV.Caption := 'Hnací vozidlo:';
-  Self.Show();
-  Self.ActiveControl := Self.CB_HV;
-end;
 
 procedure TF_HVEdit.LV_Pom_LoadChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
@@ -765,10 +769,9 @@ end;
 
 procedure TF_HVEdit.LoadPrechodnost(ini: TMemIniFile);
 const _SECTION: string = 'prechodnost';
-var strs: TStrings;
 begin
   Self.transience.Clear();
-  strs := TStringList.Create();
+  var strs: TStrings := TStringList.Create();
   try
     ini.ReadSection(_SECTION, strs);
     for var str in strs do
@@ -784,41 +787,70 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_HVEdit.ServerEditResp(parsed: TStrings);
-var err: string;
 begin
-  if (not Self.Showing or Self.new) then
+  if ((not Self.Showing) or (Self.new)) then
     Exit();
   Screen.Cursor := crDefault;
 
   if (parsed[4] = 'ERR') then
   begin
-    if (parsed.Count >= 6) then
-      err := parsed[5]
-    else
-      err := 'neznámá chyba';
+    Self.CB_HV.Enabled := True;
+    Self.SetEngineGUIEnabled(True);
+
+    var err: string := 'neznámá chyba';
+    if (parsed.Count > 5) then
+      err := parsed[5];
 
     Application.MessageBox(PChar('Při úpravě HV nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
-    Self.Close();
+  begin
+    var response: Integer := Application.MessageBox('HV úspěšně upraveno, pokračovat s úpravou dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
+    if (response = mrYes) then
+    begin
+      Self.m_hvlistRefreshWarning := True;
+      PanelTCPClient.PanelLokList(Self.area); // refresh engine list
+    end else begin
+      Self.Close();
+    end;
+  end;
 end;
 
 procedure TF_HVEdit.ServerAddResp(parsed: TStrings);
-var err: string;
 begin
-  if (not Self.Showing or not Self.new) then
+  if ((not Self.Showing) or (not Self.new)) then
     Exit();
   Screen.Cursor := crDefault;
 
   if (parsed[4] = 'ERR') then
   begin
-    if (parsed.Count >= 6) then
-      err := parsed[5]
-    else
-      err := 'neznámá chyba';
+    Self.CB_HV.Enabled := True;
+    Self.SetEngineGUIEnabled(True);
+
+    var err: string := 'neznámá chyba';
+    if (parsed.Count > 5) then
+      err := parsed[5];
 
     Application.MessageBox(PChar('Při přidávání HV nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
-    Self.Close();
+  begin
+    var response: Integer := Application.MessageBox('HV úspěšně přidáno, pokračovat s přidáním dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
+    if (response = mrYes) then
+    begin
+      Self.m_hvlistRefreshWarning := True;
+      PanelTCPClient.PanelLokList(Self.area); // refresh engine list
+    end else begin
+      Self.Close();
+    end;
+  end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TF_HVEdit.HVListRefreshed();
+begin
+  Self.m_hvlistRefreshWarning := False;
+  Self.FillEngines(StrToIntDef(Self.E_Adresa.Text, -1));
+  Self.CB_HV.Enabled := True;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

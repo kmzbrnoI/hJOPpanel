@@ -1590,45 +1590,41 @@ end;
 
 procedure TRelief.ORHVList(Sender: string; data: string);
 begin
-  for var i := 0 to Self.areas.Count - 1 do
-    if (Sender = Self.areas[i].id) then
-    begin
-      Self.areas[i].HVs.ParseHVs(data);
-      Self.areas[i].HVs.HVs.Sort();
-      Exit();
-    end;
+  var area: TAreaPanel := Self.GetArea(Sender);
+  if (area <> nil) then
+  begin
+    area.HVs.ParseHVs(data);
+    area.HVs.HVs.Sort();
+    if ((F_HVEdit.Showing) and (F_HVEdit.hvLisRefreshWaiting) and (F_HVEdit.area = Sender)) then
+      F_HVEdit.HVListRefreshed();
+  end;
 end;
 
 procedure TRelief.ORSprNew(Sender: string);
 begin
-  for var i := 0 to Self.areas.Count - 1 do
-    if (Sender = Self.areas[i].id) then
-    begin
-      var available := false;
-      for var HV in Self.areas[i].HVs.HVs do
-        if (HV.train = '-') then
-        begin
-          available := true;
-          Break;
-        end;
+  var area: TAreaPanel := Self.GetArea(Sender);
+  if (area <> nil) then
+  begin
+    var available := false;
+    for var HV in area.HVs.HVs do
+      if (HV.train = '-') then
+      begin
+        available := true;
+        Break;
+      end;
 
-      if (available) then
-        F_SoupravaEdit.NewSpr(Self.areas[i].HVs, Self.areas[i].id)
-      else
-        Self.ORInfoMsg('Nejsou volné loko');
-
-      Exit();
-    end;
+    if (available) then
+      F_SoupravaEdit.NewSpr(area.HVs, area.id)
+    else
+      Self.ORInfoMsg('Nejsou volné loko');
+  end;
 end;
 
 procedure TRelief.ORSprEdit(Sender: string; parsed: TStrings);
 begin
-  for var i := 0 to Self.areas.Count - 1 do
-    if (Sender = Self.areas[i].id) then
-    begin
-      F_SoupravaEdit.EditSpr(parsed, Self.areas[i].HVs, Self.areas[i].id, Self.areas[i].Name);
-      Exit();
-    end;
+  var area: TAreaPanel := Self.GetArea(Sender);
+  if (area <> nil) then
+    F_SoupravaEdit.EditSpr(parsed, area.HVs, area.id, area.name);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
