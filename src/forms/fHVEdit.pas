@@ -343,11 +343,13 @@ begin
 
   Self.SetEngineGUIEnabled(Self.CB_HV.ItemIndex > -1);
 
+  var outdated: Boolean := ((Self.HVs.HVs.Count+BoolToInt(Self.new)) <> Self.CB_HV.Items.Count);
+
   if (Self.CB_HV.ItemIndex > -1) then
   begin
     Self.E_Adresa.ReadOnly := not Self.new;
 
-    if ((Self.new) and (Self.CB_HV.ItemIndex = 0)) then
+    if (((Self.new) and (Self.CB_HV.ItemIndex = 0)) or (outdated)) then
     begin
       Self.E_Name.Text := '';
       Self.E_Oznaceni.Text := '';
@@ -439,6 +441,9 @@ begin
       end;
 
     end; // if not New
+
+    if (outdated) then
+      Application.MessageBox('Pozor: došlo ke změně seznamu HV na serveru, aktualizujte seznam!', 'Varování', MB_OK OR MB_ICONWARNING);
 
   end else begin
     Self.E_Name.Text := '';
