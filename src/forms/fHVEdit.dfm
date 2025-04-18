@@ -378,6 +378,7 @@ object F_HVEdit: TF_HVEdit
       ViewStyle = vsReport
       OnChange = LV_Pom_LoadChange
       OnDblClick = LV_Pom_LoadDblClick
+      OnKeyDown = LV_Pom_LoadKeyDown
     end
     object LV_Pom_Release: TListView
       Left = 211
@@ -398,6 +399,7 @@ object F_HVEdit: TF_HVEdit
       ViewStyle = vsReport
       OnChange = LV_Pom_ReleaseChange
       OnDblClick = LV_Pom_ReleaseDblClick
+      OnKeyDown = LV_Pom_ReleaseKeyDown
     end
     object LV_Funkce: TListView
       Left = 398

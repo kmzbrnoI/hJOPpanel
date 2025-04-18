@@ -20,6 +20,8 @@ type
     procedure LV_SoupravyChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure B_RemoveSprClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure LV_SoupravyKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     { Private declarations }
 
@@ -219,6 +221,13 @@ begin
     Self.B_RemoveSpr.Caption := 'Smazat soupravy'
   else
     Self.B_RemoveSpr.Caption := 'Smazat soupravu';
+end;
+
+procedure TF_SprList.LV_SoupravyKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if ((Key = VK_DELETE) and (Self.B_RemoveSpr.Enabled)) then
+    Self.B_RemoveSprClick(Self);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

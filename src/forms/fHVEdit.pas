@@ -65,6 +65,10 @@ type
     procedure B_SearchClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure B_RefreshClick(Sender: TObject);
+    procedure LV_Pom_LoadKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure LV_Pom_ReleaseKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     HVs: THVDb;
     new: Boolean;
@@ -538,6 +542,13 @@ begin
   end;
 end;
 
+procedure TF_HVEdit.LV_Pom_LoadKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if ((Key = VK_DELETE) and (Self.SB_Take_Remove.Enabled)) then
+    Self.SB_Take_RemoveClick(Self);
+end;
+
 procedure TF_HVEdit.LV_Pom_ReleaseChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
   Self.SB_Rel_Remove.Enabled := (Self.LV_Pom_Release.Selected <> nil);
@@ -554,6 +565,13 @@ begin
   end else begin
     Self.SB_Rel_AddClick(Self);
   end;
+end;
+
+procedure TF_HVEdit.LV_Pom_ReleaseKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if ((Key = VK_DELETE) and (Self.SB_Rel_Remove.Enabled)) then
+    Self.SB_Rel_RemoveClick(Self);
 end;
 
 procedure TF_HVEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
@@ -591,8 +609,7 @@ end;
 
 procedure TF_HVEdit.SB_Rel_RemoveClick(Sender: TObject);
 begin
-  if (Self.LV_Pom_Release.Selected <> nil) then
-    Self.LV_Pom_Release.Items.Delete(Self.LV_Pom_Release.ItemIndex);
+  Self.LV_Pom_Release.DeleteSelected();
 end;
 
 procedure TF_HVEdit.SB_Take_AddClick(Sender: TObject);
@@ -619,8 +636,7 @@ end;
 
 procedure TF_HVEdit.SB_Take_RemoveClick(Sender: TObject);
 begin
-  if (Self.LV_Pom_Load.Selected <> nil) then
-    Self.LV_Pom_Load.Items.Delete(Self.LV_Pom_Load.ItemIndex);
+  Self.LV_Pom_Load.DeleteSelected();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
