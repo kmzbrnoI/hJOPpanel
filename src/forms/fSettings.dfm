@@ -48,7 +48,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_ORAuth
+    ActivePage = TS_PODJ
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -880,6 +880,154 @@ object F_Settings: TF_Settings
         Height = 17
         Caption = 'Akceptovat meziprocesov'#253' login od dal'#353#237'ch panel'#367
         TabOrder = 1
+      end
+    end
+    object TS_PODJ: TTabSheet
+      Caption = 'P'#345'edv'#237'dan'#253' odjezd'
+      ImageIndex = 13
+      object GroupBox3: TGroupBox
+        Left = 71
+        Top = 124
+        Width = 471
+        Height = 93
+        Caption = ' P'#345'i pou'#382'it'#237' modelov'#233'ho '#269'asu '
+        TabOrder = 0
+        object Label26: TLabel
+          Left = 17
+          Top = 52
+          Width = 319
+          Height = 13
+          Caption = 
+            'V'#253'choz'#237' hodnota odlo'#382'en'#237' relativn'#237'ho '#269'asu odjezdu [minut:sekund]' +
+            ':'
+        end
+        object Label24: TLabel
+          Left = 17
+          Top = 27
+          Width = 324
+          Height = 13
+          Caption = 
+            'V'#253'choz'#237' hodnota odlo'#382'en'#237' absolutn'#237'ho '#269'asu odjezdu [minut:sekund]' +
+            ':'
+        end
+        object ME_podj_model_relative: TMaskEdit
+          Left = 396
+          Top = 52
+          Width = 53
+          Height = 21
+          Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          EditMask = '00:00;1;_'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          MaxLength = 5
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          Text = '  :  '
+        end
+        object ME_podj_model_absolute: TMaskEdit
+          Left = 396
+          Top = 27
+          Width = 53
+          Height = 21
+          Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          EditMask = '00:00;1;_'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          MaxLength = 5
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Text = '  :  '
+        end
+      end
+      object GroupBox4: TGroupBox
+        Left = 71
+        Top = 14
+        Width = 471
+        Height = 94
+        Caption = ' P'#345'i pou'#382'it'#237' re'#225'ln'#233'ho '#269'asu '
+        TabOrder = 1
+        object Label25: TLabel
+          Left = 17
+          Top = 27
+          Width = 324
+          Height = 13
+          Caption = 
+            'V'#253'choz'#237' hodnota odlo'#382'en'#237' absolutn'#237'ho '#269'asu odjezdu [minut:sekund]' +
+            ':'
+        end
+        object Label27: TLabel
+          Left = 17
+          Top = 52
+          Width = 319
+          Height = 13
+          Caption = 
+            'V'#253'choz'#237' hodnota odlo'#382'en'#237' relativn'#237'ho '#269'asu odjezdu [minut:sekund]' +
+            ':'
+        end
+        object ME_podj_real_absolute: TMaskEdit
+          Left = 396
+          Top = 27
+          Width = 53
+          Height = 21
+          Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          EditMask = '00:00;1;_'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          MaxLength = 5
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Text = '  :  '
+        end
+        object ME_podj_real_relative: TMaskEdit
+          Left = 396
+          Top = 52
+          Width = 53
+          Height = 21
+          Hint = 'Zadejte aktu'#225'ln'#237' modelov'#253' cas'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          EditMask = '00:00;1;_'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          MaxLength = 5
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          Text = '  :  '
+        end
       end
     end
   end

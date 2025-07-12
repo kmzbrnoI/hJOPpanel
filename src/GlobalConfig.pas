@@ -64,6 +64,13 @@ type
     fPotvrSekv: TPoint;
   end;
 
+  TPODJConfig = record
+    realAbsolute: TTime;
+    realRelative: TTime;
+    modelAbsolute: TTime;
+    modelRelative: TTime;
+  end;
+
   TGlobConfigData = record
     panel_fn: string;
     panel_mouse: Integer;
@@ -77,6 +84,7 @@ type
     resuscitation: boolean;
     uLI: TuLIConfig;
     forms: TFormConfig;
+    podj: TPODJConfig;
   end;
 
   TGlobConfig = class
@@ -199,6 +207,21 @@ begin
     Self.data.forms.fPotvrSekv.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
     Self.data.forms.fPotvrSekv.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
 
+    try
+      Self.data.podj.realAbsolute := StrToTime('00:' + ini.ReadString('PODJ', 'realAbsolute', '01:00'));
+      Self.data.podj.realRelative := StrToTime('00:' + ini.ReadString('PODJ', 'realRelative', '00:20'));
+      Self.data.podj.modelAbsolute := StrToTime('00:' + ini.ReadString('PODJ', 'modelAbsolute', '03:00'));
+      Self.data.podj.modelRelative := StrToTime('00:' + ini.ReadString('PODJ', 'modelRelative', '01:20'));
+    except
+      on E:EConvertError do
+      begin
+        Self.data.podj.realAbsolute := EncodeTime(0, 1, 0, 0);
+        Self.data.podj.realRelative := EncodeTime(0, 0, 20, 0);
+        Self.data.podj.modelAbsolute := EncodeTime(0, 3, 0, 0);
+        Self.data.podj.modelRelative := EncodeTime(0, 1, 20, 0);
+      end;
+    end;
+
     F_Main.T_Main.Interval := ini.ReadInteger('global', 'timer', 200);
 
     F_SprHelp.LoadData(ini);
@@ -267,6 +290,11 @@ begin
 
     ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekv.X);
     ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekv.Y);
+
+    ini.WriteString('PODJ', 'realAbsolute', FormatDateTime('nn:ss', Self.data.podj.realAbsolute));
+    ini.WriteString('PODJ', 'realRelative', FormatDateTime('nn:ss', Self.data.podj.realRelative));
+    ini.WriteString('PODJ', 'modelAbsolute', FormatDateTime('nn:ss', Self.data.podj.modelAbsolute));
+    ini.WriteString('PODJ', 'modelRelative', FormatDateTime('nn:ss', Self.data.podj.modelRelative));
 
     ini.WriteInteger('global', 'timer', F_Main.T_Main.Interval);
 

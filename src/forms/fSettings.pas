@@ -8,7 +8,7 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, ComCtrls, Spin, Hash;
+  Dialogs, ExtCtrls, StdCtrls, ComCtrls, Spin, Hash, Vcl.Mask;
 
 type
   TF_Settings = class(TForm)
@@ -121,6 +121,17 @@ type
     B_Proch8: TButton;
     B_Proch9: TButton;
     CHB_Relative2: TCheckBox;
+    TS_PODJ: TTabSheet;
+    GroupBox3: TGroupBox;
+    GroupBox4: TGroupBox;
+    Label25: TLabel;
+    ME_podj_real_absolute: TMaskEdit;
+    ME_podj_real_relative: TMaskEdit;
+    Label27: TLabel;
+    ME_podj_model_relative: TMaskEdit;
+    Label26: TLabel;
+    Label24: TLabel;
+    ME_podj_model_absolute: TMaskEdit;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure B_Proch1Click(Sender: TObject);
@@ -183,6 +194,20 @@ begin
           'Pokud si nejste opravdu jisti, že víte, co děláte, je důrazně doporučeno autorizovat nižší oprávnění.'+#13#10+'Opravdu pokračovat?'),
           'Varování', MB_YESNO OR MB_ICONWARNING OR MB_DEFBUTTON2) <> mrYes) then
         Exit();
+  end;
+
+  var podj: TPODJConfig;
+  try
+    podj.realAbsolute := StrToTime('00:' + Self.ME_podj_real_absolute.Text);
+    podj.realRelative := StrToTime('00:' + Self.ME_podj_real_relative.Text);
+    podj.modelAbsolute := StrToTime('00:' + Self.ME_podj_model_absolute.Text);
+    podj.modelRelative := StrToTime('00:' + Self.ME_podj_model_relative.Text);
+  except
+    on E:EConvertError do
+    begin
+      Application.MessageBox('Nepodařilo se načíst výchozí čas předvídaného odjezdu - opravte formát!', 'Chyba', MB_OK OR MB_ICONERROR);
+      Exit();
+    end;
   end;
 
   for var i := 0 to Self.LB_AutoAuthOR.Items.Count - 1 do
@@ -263,6 +288,8 @@ begin
     GlobConfig.data.symbolSet := TSymbolSetType.normal;
   end;
 
+  GlobConfig.data.podj := podj;
+
   if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
   begin
     F_Main.DXD_Main.Cursor := crNone;
@@ -314,7 +341,6 @@ begin
 end;
 
 procedure TF_Settings.B_Proch1Click(Sender: TObject);
-var fn: string;
 begin
   case (Sender as TButton).Tag of
     1:
@@ -339,6 +365,7 @@ begin
 
   if (Self.OD_Snd.Execute(Self.Handle)) then
   begin
+    var fn: string;
     if ((Sender as TButton).Tag < 8) then
     begin
       if (Self.CHB_Relative.Checked) then
@@ -638,6 +665,11 @@ begin
 
   Self.passwdChanged := false;
   Self.guestPasswdChanged := false;
+
+  Self.ME_podj_real_absolute.Text := FormatDateTime('nn:ss', data.podj.realAbsolute);
+  Self.ME_podj_real_relative.Text := FormatDateTime('nn:ss', data.podj.realRelative);
+  Self.ME_podj_model_absolute.Text := FormatDateTime('nn:ss', data.podj.modelAbsolute);
+  Self.ME_podj_model_relative.Text := FormatDateTime('nn:ss', data.podj.modelRelative);
 
   Self.Caption := 'Nastavení – ' + GlobConfig.panelName;
   Self.Show();

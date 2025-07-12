@@ -33,13 +33,13 @@ var
 
 implementation
 
-uses ModelovyCas, TCPClientPanel;
+uses ModelovyCas, TCPClientPanel, GlobalConfig;
 
 {$R *.dfm}
+
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_OOdj.B_OKClick(Sender: TObject);
-var rel, abs: string;
 begin
   try
     if (Self.CHB_Absolute.Checked) then
@@ -86,15 +86,13 @@ begin
     end;
   end;
 
+  var abs: string := '';
   if (CHB_Absolute.Checked) then
-    abs := Self.ME_Absolute.Text
-  else
-    abs := '';
+    abs := Self.ME_Absolute.Text;
 
+  var rel: string := '';
   if (CHB_Relative.Checked) then
-    rel := Self.ME_Relative.Text
-  else
-    rel := '';
+    rel := Self.ME_Relative.Text;
 
   PanelTCPClient.SendLn('-;PODJ;' + abs + ';' + rel + ';');
 
@@ -112,9 +110,9 @@ begin
   if (Self.CHB_Absolute.Checked) then
   begin
     if (ModelTime.used) then
-      Self.ME_Absolute.Text := FormatDateTime('hh:nn', ModelTime.time + EncodeTime(0, 3, 0, 0)) + ':00'
+      Self.ME_Absolute.Text := FormatDateTime('hh:nn', ModelTime.time + GlobConfig.data.podj.modelAbsolute) + ':00'
     else
-      Self.ME_Absolute.Text := FormatDateTime('hh:nn', Now + EncodeTime(0, 1, 0, 0)) + ':00';
+      Self.ME_Absolute.Text := FormatDateTime('hh:nn', Now + GlobConfig.data.podj.realAbsolute) + ':00';
   end
   else
     Self.ME_Absolute.Text := '';
@@ -126,9 +124,9 @@ begin
   if (Self.CHB_Relative.Checked) then
   begin
     if (ModelTime.used) then
-      Self.ME_Relative.Text := '01:20'
+      Self.ME_Relative.Text := FormatDateTime('nn:ss', GlobConfig.data.podj.modelRelative)
     else
-      Self.ME_Relative.Text := '00:20';
+      Self.ME_Relative.Text := FormatDateTime('nn:ss', GlobConfig.data.podj.realRelative);
   end
   else
     Self.ME_Relative.Text := '';
