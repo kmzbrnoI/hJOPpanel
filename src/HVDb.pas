@@ -26,7 +26,7 @@ type
 
   THVPomCV = record // jeden zaznam POM se sklada z:
     cv: Word; // cislo CV
-    data: Byte; // data, ktera se maji do CV zapsat
+    value: Byte; // data, ktera se maji do CV zapsat
   end;
 
   THVFuncType = (permanent = 0, momentary = 1);
@@ -257,7 +257,7 @@ begin
         ExtractStringsEx(['|'], [], tmp, str3);
         var pomCv: THVPomCV;
         pomCv.cv := StrToInt(str3[0]);
-        pomCv.data := StrToInt(str3[1]);
+        pomCv.value := StrToInt(str3[1]);
         Self.POMautomat.Add(pomCv);
       end;
 
@@ -270,7 +270,7 @@ begin
         ExtractStringsEx(['|'], [], tmp, str3);
         var pomCv: THVPomCV;
         pomCv.cv := StrToInt(str3[0]);
-        pomCv.data := StrToInt(str3[1]);
+        pomCv.value := StrToInt(str3[1]);
         Self.POMmanual.Add(pomCv);
       end;
     end;
@@ -390,12 +390,12 @@ begin
     // cv-take
     Result := Result + '{';
     for var pomCv in Self.POMautomat do
-      Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.data) + '}]';
+      Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.value) + '}]';
     Result := Result + '}|{';
 
     // cv-release
     for var pomCv in Self.POMmanual do
-      Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.data) + '}]';
+      Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.value) + '}]';
     Result := Result + '}|';
   end; // if pom
 

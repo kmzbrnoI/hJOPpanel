@@ -247,7 +247,7 @@ begin
       try
         var pomCV: THVPomCV;
         pomCV.cv := StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption);
-        pomCV.data := StrToInt(Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0]);
+        pomCV.value := StrToInt(Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0]);
         HV.POMautomat.Add(pomCV);
       except
 
@@ -260,7 +260,7 @@ begin
       try
         var pomCV: THVPomCV;
         pomCV.cv := StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption);
-        pomCV.data := StrToInt(Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0]);
+        pomCV.value := StrToInt(Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0]);
         HV.POMmanual.Add(pomCV);
       except
 
@@ -442,14 +442,14 @@ begin
       begin
         var LI := Self.LV_POM_Automat.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
-        LI.SubItems.Add(IntToStr(pomCV.data));
+        LI.SubItems.Add(IntToStr(pomCV.value));
       end;
 
       for var pomCV in HV.POMmanual do
       begin
         var LI := Self.LV_POM_Manual.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
-        LI.SubItems.Add(IntToStr(pomCV.data));
+        LI.SubItems.Add(IntToStr(pomCV.value));
       end;
 
       Self.CB_POM_Release.Enabled := ((not HV.POMautomat.IsEmpty) or (not HV.POMmanual.IsEmpty));
