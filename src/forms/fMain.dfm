@@ -3772,7 +3772,7 @@ object F_Main: TF_Main
     end
     object P_Time_modelovy: TPanel
       Left = 826
-      Top = 3
+      Top = 4
       Width = 106
       Height = 25
       Hint = 'Modelov'#253' cas'
@@ -3798,7 +3798,7 @@ object F_Main: TF_Main
     end
     object P_Zrychleni: TPanel
       Left = 936
-      Top = 3
+      Top = 4
       Width = 33
       Height = 25
       Hint = 'Prevod modelov'#233'ho casu'
