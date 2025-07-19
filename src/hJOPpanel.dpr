@@ -68,7 +68,8 @@ uses
   BlockOther in 'blocks\BlockOther.pas',
   BlockTypes in 'blocks\BlockTypes.pas',
   fOdlozeniOdjezdu in 'forms\fOdlozeniOdjezdu.pas' {F_OOdj},
-  BlockPst in 'blocks\BlockPst.pas';
+  BlockPst in 'blocks\BlockPst.pas',
+  IfThenElse in 'IfThenElse.pas';
 
 {$R *.res}
 
