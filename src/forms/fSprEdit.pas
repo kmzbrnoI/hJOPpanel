@@ -314,6 +314,8 @@ begin
   sprstr := sprstr + '{';
 
   var err := '';
+  var cannotMultitrack: THV := nil;
+  var noNonCarEngines: Cardinal := 0;
   for var i := 0 to Self.PC_HVs.PageCount - 1 do
   begin
     if (Self.HVs[i].HV = nil) then
@@ -343,7 +345,20 @@ begin
         err := err + Self.PC_HVs.Pages[i].Caption + ' má aktivovanou funkci ' + IntToStr(j) + ' (' +
           Self.HVs[i].HV.funcDesc[j] + '), která je momentary.' + #13#10;
 
+    if ((cannotMultitrack = nil) and (not Self.HVs[i].HV.multitrackCapable)) then
+    begin
+      cannotMultitrack := Self.HVs[i].HV;
+      Inc(noNonCarEngines);
+    end else if (Self.HVs[i].HV.typ <> THVType.car) then
+      Inc(noNonCarEngines);
+
     sprstr := sprstr + Self.HVs[i].GetHVString();
+  end;
+
+  if ((cannotMultitrack <> nil) and (noNonCarEngines >= 2)) then
+  begin
+    Application.MessageBox(PChar('Vozidlo '+IntToStr(cannotMultitrack.addr)+' je označené jako nezpůsobilé multritrakce!'), 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Exit();
   end;
 
   if (err <> '') then
