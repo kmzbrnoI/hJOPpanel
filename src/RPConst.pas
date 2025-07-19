@@ -23,6 +23,7 @@ type
 function StrToBool(str: string): boolean;
 function BoolToInt(a: Boolean): Integer;
 function GetForbidderChars(): string;
+function BoolToStr10(bool: Boolean): string;
 
 implementation
 
@@ -37,6 +38,14 @@ begin
     Result := 1
   else
     Result := 0;
+end;
+
+function BoolToStr10(bool: Boolean): string;
+begin
+  if (Bool) then
+    Result := '1'
+  else
+    Result := '0';
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

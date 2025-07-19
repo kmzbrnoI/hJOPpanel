@@ -3,7 +3,7 @@
         <ProjectGuid>{44A7AE91-162E-45C9-84D4-51A50AB72A6F}</ProjectGuid>
         <ProjectVersion>20.1</ProjectVersion>
         <MainSource>hJOPpanel.dpr</MainSource>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>

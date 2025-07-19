@@ -4,7 +4,7 @@ object F_HVEdit: TF_HVEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Upravit hnac'#237' vozidlo'
-  ClientHeight = 561
+  ClientHeight = 613
   ClientWidth = 689
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -37,32 +37,32 @@ object F_HVEdit: TF_HVEdit
     Left = 8
     Top = 51
     Width = 673
-    Height = 471
+    Height = 518
     Caption = ' Hnac'#237' vozidlo '
     TabOrder = 1
     object Label2: TLabel
-      Left = 16
+      Left = 14
       Top = 24
       Width = 34
       Height = 13
       Caption = 'N'#225'zev:'
     end
     object Label3: TLabel
-      Left = 15
+      Left = 14
       Top = 51
       Width = 48
       Height = 13
       Caption = 'Ozna'#269'en'#237':'
     end
     object Label4: TLabel
-      Left = 15
+      Left = 14
       Top = 78
       Width = 35
       Height = 13
       Caption = 'Majitel:'
     end
     object Label6: TLabel
-      Left = 15
+      Left = 14
       Top = 105
       Width = 61
       Height = 13
@@ -70,32 +70,32 @@ object F_HVEdit: TF_HVEdit
     end
     object Label7: TLabel
       Left = 263
-      Top = 237
+      Top = 256
       Width = 126
       Height = 13
       Alignment = taRightJustify
       Caption = 'Zak'#225'zan'#233' znaky: enter { }'
     end
     object Label8: TLabel
-      Left = 12
-      Top = 328
-      Width = 146
+      Left = 14
+      Top = 347
+      Width = 123
       Height = 13
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
-      Caption = 'POM p'#345'i p'#345'evzet'#237' do automatu:'
+      Caption = 'POM automatick'#253' provoz:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -11
-      Font.Name = 'MS Sans Serif'
+      Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
-    object SB_Take_Add: TSpeedButton
+    object SB_POM_Automat_Add: TSpeedButton
       Left = 169
-      Top = 346
+      Top = 365
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -125,11 +125,11 @@ object F_HVEdit: TF_HVEdit
         FFFFFFFFFFFFFFFFFFFFFFFF000000000000000000AAAAAAFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
         0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      OnClick = SB_Take_AddClick
+      OnClick = SB_POM_Automat_AddClick
     end
-    object SB_Take_Remove: TSpeedButton
+    object SB_POM_Automat_Remove: TSpeedButton
       Left = 169
-      Top = 374
+      Top = 393
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -159,11 +159,11 @@ object F_HVEdit: TF_HVEdit
         241CEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FF241CED241CEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      OnClick = SB_Take_RemoveClick
+      OnClick = SB_POM_Automat_RemoveClick
     end
-    object SB_Rel_Add: TSpeedButton
+    object SB_POM_Manual_Add: TSpeedButton
       Left = 369
-      Top = 346
+      Top = 365
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -193,11 +193,11 @@ object F_HVEdit: TF_HVEdit
         FFFFFFFFFFFFFFFFFFFFFFFF000000000000000000AAAAAAFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
         0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      OnClick = SB_Rel_AddClick
+      OnClick = SB_POM_Manual_AddClick
     end
-    object SB_Rel_Remove: TSpeedButton
+    object SB_POM_Manual_Remove: TSpeedButton
       Left = 369
-      Top = 374
+      Top = 393
       Width = 23
       Height = 22
       Glyph.Data = {
@@ -227,22 +227,22 @@ object F_HVEdit: TF_HVEdit
         241CEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FF241CED241CEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      OnClick = SB_Rel_RemoveClick
+      OnClick = SB_POM_Manual_RemoveClick
     end
     object Label9: TLabel
-      Left = 211
-      Top = 328
-      Width = 141
+      Left = 212
+      Top = 347
+      Width = 80
       Height = 13
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
-      Caption = 'POM p'#345'i uvoln'#283'n'#237' z automatu:'
+      Caption = 'POM ru'#269'n'#237' '#345#237'zen'#237':'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -11
-      Font.Name = 'MS Sans Serif'
+      Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
@@ -254,21 +254,21 @@ object F_HVEdit: TF_HVEdit
       Caption = 'P'#345#237#345'azen'#237' v'#253'znam'#367' a typ'#367' funkc'#237', ovl'#225'd'#225'n'#237' funkc'#237':'
     end
     object Label5: TLabel
-      Left = 15
-      Top = 237
+      Left = 14
+      Top = 256
       Width = 52
       Height = 13
       Caption = 'Pozn'#225'mka:'
     end
     object Label11: TLabel
-      Left = 15
+      Left = 14
       Top = 170
       Width = 91
       Height = 13
       Caption = 'Maxim'#225'ln'#237' rychlost:'
     end
     object Label12: TLabel
-      Left = 15
+      Left = 14
       Top = 207
       Width = 93
       Height = 13
@@ -281,16 +281,23 @@ object F_HVEdit: TF_HVEdit
       Height = 13
       Caption = 'km/h'
     end
+    object Label1: TLabel
+      Left = 14
+      Top = 484
+      Width = 120
+      Height = 13
+      Caption = 'POM p'#345'i uvoln'#283'n'#237' z hJOP:'
+    end
     object M_Poznamka: TMemo
       Left = 12
-      Top = 256
+      Top = 275
       Width = 377
       Height = 60
       Lines.Strings = (
         'M_Poznamka')
       MaxLength = 1000
       ScrollBars = ssVertical
-      TabOrder = 9
+      TabOrder = 10
       OnKeyPress = M_PoznamkaKeyPress
     end
     object E_Name: TEdit
@@ -346,7 +353,7 @@ object F_HVEdit: TF_HVEdit
         'elektrick'#225
         'v'#367'z'
         'jin'#253)
-      TabOrder = 7
+      TabOrder = 6
     end
     object RG_StA: TRadioGroup
       Left = 239
@@ -357,11 +364,11 @@ object F_HVEdit: TF_HVEdit
       Items.Strings = (
         'lich'#233'm'
         'sud'#233'm')
-      TabOrder = 8
+      TabOrder = 7
     end
-    object LV_Pom_Load: TListView
+    object LV_Pom_Automat: TListView
       Left = 12
-      Top = 346
+      Top = 365
       Width = 152
       Height = 113
       Columns = <
@@ -374,15 +381,15 @@ object F_HVEdit: TF_HVEdit
       MultiSelect = True
       ReadOnly = True
       RowSelect = True
-      TabOrder = 10
+      TabOrder = 11
       ViewStyle = vsReport
-      OnChange = LV_Pom_LoadChange
-      OnDblClick = LV_Pom_LoadDblClick
-      OnKeyDown = LV_Pom_LoadKeyDown
+      OnChange = LV_Pom_AutomatChange
+      OnDblClick = LV_Pom_AutomatDblClick
+      OnKeyDown = LV_Pom_AutomatKeyDown
     end
-    object LV_Pom_Release: TListView
+    object LV_Pom_Manual: TListView
       Left = 211
-      Top = 346
+      Top = 365
       Width = 152
       Height = 113
       Columns = <
@@ -395,17 +402,17 @@ object F_HVEdit: TF_HVEdit
       ReadOnly = True
       RowSelect = True
       SortType = stData
-      TabOrder = 11
+      TabOrder = 12
       ViewStyle = vsReport
-      OnChange = LV_Pom_ReleaseChange
-      OnDblClick = LV_Pom_ReleaseDblClick
-      OnKeyDown = LV_Pom_ReleaseKeyDown
+      OnChange = LV_Pom_ManualChange
+      OnDblClick = LV_Pom_ManualDblClick
+      OnKeyDown = LV_Pom_ManualKeyDown
     end
     object LV_Funkce: TListView
       Left = 398
       Top = 39
       Width = 268
-      Height = 420
+      Height = 466
       Checkboxes = True
       Columns = <
         item
@@ -429,7 +436,7 @@ object F_HVEdit: TF_HVEdit
       Font.Style = []
       ReadOnly = True
       ParentFont = False
-      TabOrder = 12
+      TabOrder = 14
       ViewStyle = vsReport
     end
     object B_Search: TButton
@@ -457,12 +464,31 @@ object F_HVEdit: TF_HVEdit
       Width = 276
       Height = 21
       Style = csDropDownList
-      TabOrder = 6
+      TabOrder = 8
+    end
+    object CB_POM_Release: TComboBox
+      Left = 152
+      Top = 484
+      Width = 212
+      Height = 21
+      Style = csDropDownList
+      TabOrder = 13
+      Items.Strings = (
+        'POM ru'#269'n'#237' '#345#237'zen'#237
+        'POM automatick'#233' '#345#237'zen'#237)
+    end
+    object CHB_Multitrack: TCheckBox
+      Left = 112
+      Top = 235
+      Width = 161
+      Height = 17
+      Caption = 'Vozidlo zp'#367'sobil'#233' multitrakce'
+      TabOrder = 9
     end
   end
   object B_Apply: TButton
     Left = 606
-    Top = 528
+    Top = 580
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -472,7 +498,7 @@ object F_HVEdit: TF_HVEdit
   end
   object B_Cancel: TButton
     Left = 525
-    Top = 528
+    Top = 580
     Width = 75
     Height = 25
     Caption = 'Storno'
@@ -481,7 +507,7 @@ object F_HVEdit: TF_HVEdit
   end
   object B_Refresh: TButton
     Left = 8
-    Top = 528
+    Top = 580
     Width = 137
     Height = 25
     Caption = 'Aktualizovat seznam HV'

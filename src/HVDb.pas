@@ -12,20 +12,21 @@ uses Classes, SysUtils, StdCtrls, RPConst, ShellApi, Dialogs, Windows,
 
 const
   _MAX_FUNC = 28;
-  _DEFAULT_MAX_SPEED = 120;
+  _DEFAULT_MAX_SPEED = 120; // [km/h]
 
 type
   THVType = (other = -1, steam = 0, diesel = 1, motor = 2, electro = 3, car = 4);
   TFunkce = array [0 .. _MAX_FUNC] of boolean;
   THVSite = (odd = 0, even = 1);
+  TPomStatus = (manual = 0, automat = 1);
 
   // mod posilani dat hnaciho vozidla klientovi
   // full: s POM
   TLokStringMode = (normal = 0, full = 1);
 
-  THVPomCV = record // jeden zaznam POM se sklada z
-    cv: Word; // oznaceni CV a
-    data: Byte; // dat, ktera se maji do CV zapsat.
+  THVPomCV = record // jeden zaznam POM se sklada z:
+    cv: Word; // cislo CV
+    data: Byte; // data, ktera se maji do CV zapsat
   end;
 
   THVFuncType = (permanent = 0, momentary = 1);
@@ -51,9 +52,11 @@ type
     orid: string; // id oblasti rizeni, ve ktere se nachazi loko
     maxSpeed: Cardinal;
     transience: Cardinal;
+    multitrackCapable: Boolean;
 
-    POMtake: TList<THVPomCV>; // seznam POM pri prevzeti do automatu
-    POMrelease: TList<THVPomCV>; // seznam POM pri uvolneni to rucniho rizeni
+    POMautomat: TList<THVPomCV>; // seznam POM pri prevzeti do automatickeho rizeni
+    POMmanual: TList<THVPomCV>; // seznam POM pri prevzeti do rucniho rizeni
+    POMrelease: TPomStatus;
 
     funcDesc: array [0 .. _MAX_FUNC] of string; // seznam popisu funkci hnaciho vozidla
     funcType: array [0 .. _MAX_FUNC] of THVFuncType; // typy funkci hnaciho vozidla
@@ -93,7 +96,7 @@ type
 
 implementation
 
-uses GlobalConfig, fMain, TCPClientPanel, parseHelper;
+uses GlobalConfig, fMain, TCPClientPanel, parseHelper, IfThenElse;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -178,16 +181,16 @@ end;
 constructor THV.Create(data: string);
 begin
   inherited Create();
-  Self.POMtake := TList<THVPomCV>.Create();
-  Self.POMrelease := TList<THVPomCV>.Create();
+  Self.POMautomat := TList<THVPomCV>.Create();
+  Self.POMmanual := TList<THVPomCV>.Create();
   Self.ParseData(data);
 end;
 
 constructor THV.Create();
 begin
   inherited;
-  Self.POMtake := TList<THVPomCV>.Create();
-  Self.POMrelease := TList<THVPomCV>.Create();
+  Self.POMautomat := TList<THVPomCV>.Create();
+  Self.POMmanual := TList<THVPomCV>.Create();
 end;
 
 constructor THV.CreateFromToken(data: string);
@@ -198,8 +201,8 @@ end;
 
 destructor THV.Destroy();
 begin
-  Self.POMtake.Free();
-  Self.POMrelease.Free();
+  Self.POMautomat.Free();
+  Self.POMmanual.Free();
   inherited;
 end;
 
@@ -255,7 +258,7 @@ begin
         var pomCv: THVPomCV;
         pomCv.cv := StrToInt(str3[0]);
         pomCv.data := StrToInt(str3[1]);
-        Self.POMtake.Add(pomCv);
+        Self.POMautomat.Add(pomCv);
       end;
 
       // pom-release
@@ -268,7 +271,7 @@ begin
         var pomCv: THVPomCV;
         pomCv.cv := StrToInt(str3[0]);
         pomCv.data := StrToInt(str3[1]);
-        Self.POMrelease.Add(pomCv);
+        Self.POMmanual.Add(pomCv);
       end;
     end;
 
@@ -305,6 +308,17 @@ begin
 
     if (str.Count > 18) then
       Self.transience := StrToInt(str[18]);
+
+    if (str.Count > 19) then
+    begin
+      if (str[19] = 'automat') then
+        Self.POMrelease := TPomStatus.automat
+      else
+        Self.POMrelease := TPomStatus.manual;
+    end;
+
+    if (str.Count > 20) then
+      Self.multitrackCapable := StrToBool(str[20]);
 
   except
 
@@ -347,6 +361,8 @@ begin
   Self.train := '-';
   Self.maxSpeed := _DEFAULT_MAX_SPEED;
   Self.transience := 0;
+  Self.multitrackCapable := True;
+  Self.POMrelease := TPomStatus.manual;
 
   for var i := 0 to _MAX_FUNC do
     Self.functions[i] := false;
@@ -373,12 +389,12 @@ begin
   begin
     // cv-take
     Result := Result + '{';
-    for var pomCv in Self.POMtake do
+    for var pomCv in Self.POMautomat do
       Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.data) + '}]';
     Result := Result + '}|{';
 
     // cv-release
-    for var pomCv in Self.POMrelease do
+    for var pomCv in Self.POMmanual do
       Result := Result + '[{' + IntToStr(pomCv.cv) + '|' + IntToStr(pomCv.data) + '}]';
     Result := Result + '}|';
   end; // if pom
@@ -401,6 +417,8 @@ begin
 
   Result := Result + IntToStr(Self.maxSpeed) + '|';
   Result := Result + IntToStr(Self.transience) + '|';
+  Result := Result + ite(Self.POMrelease = TPomStatus.manual, 'manual', 'automat') + '|';
+  Result := Result + BoolToStr10(Self.multitrackCapable) + '|';
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

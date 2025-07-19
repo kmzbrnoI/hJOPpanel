@@ -32,13 +32,13 @@ type
     B_Cancel: TButton;
     Label7: TLabel;
     Label8: TLabel;
-    SB_Take_Add: TSpeedButton;
-    SB_Take_Remove: TSpeedButton;
-    LV_Pom_Load: TListView;
-    SB_Rel_Add: TSpeedButton;
-    SB_Rel_Remove: TSpeedButton;
+    SB_POM_Automat_Add: TSpeedButton;
+    SB_POM_Automat_Remove: TSpeedButton;
+    LV_Pom_Automat: TListView;
+    SB_POM_Manual_Add: TSpeedButton;
+    SB_POM_Manual_Remove: TSpeedButton;
     Label9: TLabel;
-    LV_Pom_Release: TListView;
+    LV_Pom_Manual: TListView;
     LV_Funkce: TListView;
     Label10: TLabel;
     B_Search: TButton;
@@ -48,26 +48,29 @@ type
     CB_Prechodnost: TComboBox;
     Label13: TLabel;
     B_Refresh: TButton;
+    Label1: TLabel;
+    CB_POM_Release: TComboBox;
+    CHB_Multitrack: TCheckBox;
     procedure CB_HVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
-    procedure SB_Take_RemoveClick(Sender: TObject);
-    procedure SB_Rel_RemoveClick(Sender: TObject);
-    procedure LV_Pom_LoadChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-    procedure LV_Pom_ReleaseChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-    procedure LV_Pom_LoadDblClick(Sender: TObject);
-    procedure SB_Take_AddClick(Sender: TObject);
-    procedure SB_Rel_AddClick(Sender: TObject);
-    procedure LV_Pom_ReleaseDblClick(Sender: TObject);
+    procedure SB_POM_Automat_RemoveClick(Sender: TObject);
+    procedure SB_POM_Manual_RemoveClick(Sender: TObject);
+    procedure LV_Pom_AutomatChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+    procedure LV_Pom_ManualChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+    procedure LV_Pom_AutomatDblClick(Sender: TObject);
+    procedure SB_POM_Automat_AddClick(Sender: TObject);
+    procedure SB_POM_Manual_AddClick(Sender: TObject);
+    procedure LV_Pom_ManualDblClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure B_SearchClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure B_RefreshClick(Sender: TObject);
-    procedure LV_Pom_LoadKeyDown(Sender: TObject; var Key: Word;
+    procedure LV_Pom_AutomatKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure LV_Pom_ReleaseKeyDown(Sender: TObject; var Key: Word;
+    procedure LV_Pom_ManualKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
     HVs: THVDb;
@@ -193,6 +196,11 @@ begin
     Application.MessageBox('Vyberte třídu přechodnosti hnacího vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
+  if ((Self.CB_POM_Release.ItemIndex < 0) and (Self.CB_POM_Release.Enabled)) then
+  begin
+    Application.MessageBox('Vyberte POM při uvolnění!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Exit();
+  end;
 
   var HV := THV.Create();
   try
@@ -221,34 +229,39 @@ begin
     HV.maxSpeed := Self.SE_MaxSpeed.Value;
     var str := Self.CB_Prechodnost.Items[Self.CB_Prechodnost.ItemIndex];
     HV.transience := StrToInt(Copy(str, 1, Pos(':', str) - 1));
+    HV.multitrackCapable := Self.CHB_Multitrack.Checked;
+    if (Self.CB_POM_Release.Enabled) then
+      HV.POMrelease := TPomStatus(Self.CB_POM_Release.ItemIndex)
+    else
+      HV.POMrelease := TPomStatus.manual;
 
     for var i := 0 to _MAX_FUNC do
       HV.functions[i] := Self.LV_Funkce.Items[i].Checked;
 
-    HV.POMtake.Clear();
-    HV.POMrelease.Clear();
+    HV.POMautomat.Clear();
+    HV.POMmanual.Clear();
 
     // parse POM take
-    for var i := 0 to Self.LV_Pom_Load.Items.Count - 1 do
+    for var i := 0 to Self.LV_Pom_Automat.Items.Count - 1 do
     begin
       try
         var pomCV: THVPomCV;
-        pomCV.cv := StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption);
-        pomCV.data := StrToInt(Self.LV_Pom_Load.Items.Item[i].SubItems.Strings[0]);
-        HV.POMtake.Add(pomCV);
+        pomCV.cv := StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption);
+        pomCV.data := StrToInt(Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0]);
+        HV.POMautomat.Add(pomCV);
       except
 
       end;
     end;
 
     // parse POM release
-    for var i := 0 to Self.LV_Pom_Release.Items.Count - 1 do
+    for var i := 0 to Self.LV_POM_Manual.Items.Count - 1 do
     begin
       try
         var pomCV: THVPomCV;
-        pomCV.cv := StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption);
-        pomCV.data := StrToInt(Self.LV_Pom_Release.Items.Item[i].SubItems.Strings[0]);
-        HV.POMrelease.Add(pomCV);
+        pomCV.cv := StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption);
+        pomCV.data := StrToInt(Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0]);
+        HV.POMmanual.Add(pomCV);
       except
 
       end;
@@ -340,10 +353,10 @@ end;
 
 procedure TF_HVEdit.CB_HVChange(Sender: TObject);
 begin
-  Self.SB_Take_Remove.Enabled := false;
-  Self.SB_Rel_Remove.Enabled := false;
-  Self.LV_Pom_Load.Clear();
-  Self.LV_Pom_Release.Clear();
+  Self.SB_POM_Automat_Remove.Enabled := false;
+  Self.SB_POM_Manual_Remove.Enabled := false;
+  Self.LV_POM_Automat.Clear();
+  Self.LV_POM_Manual.Clear();
 
   Self.SetEngineGUIEnabled(Self.CB_HV.ItemIndex > -1);
 
@@ -363,6 +376,9 @@ begin
       Self.RG_Trida.ItemIndex := -1;
       Self.RG_StA.ItemIndex := -1;
       Self.SE_MaxSpeed.Value := _DEFAULT_MAX_SPEED;
+      Self.CHB_Multitrack.Checked := True;
+      Self.CB_POM_Release.Enabled := False;
+      Self.CB_POM_Release.ItemIndex := -1;
 
       var prechSorted := TList<Cardinal>.Create(Self.transience.Keys);
       try
@@ -398,6 +414,7 @@ begin
         Self.RG_Trida.ItemIndex := Integer(HV.typ);
       Self.RG_StA.ItemIndex := Integer(HV.siteA);
       Self.SE_MaxSpeed.Value := HV.maxSpeed;
+      Self.CHB_Multitrack.Checked := HV.multitrackCapable;
 
       var transSorted := TList<Cardinal>.Create(Self.transience.Keys);
       try
@@ -421,19 +438,25 @@ begin
       for var i := 0 to _MAX_FUNC do
         Self.LV_Funkce.Items[i].Checked := HV.functions[i];
 
-      for var pomCV in HV.POMtake do
+      for var pomCV in HV.POMautomat do
       begin
-        var LI := Self.LV_Pom_Load.Items.Add;
+        var LI := Self.LV_POM_Automat.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
         LI.SubItems.Add(IntToStr(pomCV.data));
       end;
 
-      for var pomCV in HV.POMrelease do
+      for var pomCV in HV.POMmanual do
       begin
-        var LI := Self.LV_Pom_Release.Items.Add;
+        var LI := Self.LV_POM_Manual.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
         LI.SubItems.Add(IntToStr(pomCV.data));
       end;
+
+      Self.CB_POM_Release.Enabled := ((not HV.POMautomat.IsEmpty) or (not HV.POMmanual.IsEmpty));
+      if (Self.CB_POM_Release.Enabled) then
+        Self.CB_POM_Release.ItemIndex := Integer(HV.POMrelease)
+      else
+        Self.CB_POM_Release.ItemIndex := -1;
 
       for var i := 0 to _MAX_FUNC do
       begin
@@ -458,6 +481,9 @@ begin
     Self.RG_Trida.ItemIndex := -1;
     Self.RG_StA.ItemIndex := -1;
     Self.CB_Prechodnost.ItemIndex := -1;
+    Self.CHB_Multitrack.Checked := True;
+    Self.CB_POM_Release.Enabled := False;
+    Self.CB_POM_Release.ItemIndex := -1;
 
     Self.LV_Funkce.Items[0].Checked := true;
     for var i := 1 to _MAX_FUNC do
@@ -485,11 +511,13 @@ begin
   Self.RG_StA.Enabled := enabled;
   Self.SE_MaxSpeed.Enabled := enabled;
   Self.CB_Prechodnost.Enabled := enabled;
+  Self.CHB_Multitrack.Enabled := enabled;
 
-  Self.SB_Take_Add.Enabled := enabled;
-  Self.SB_Rel_Add.Enabled := enabled;
-  Self.LV_Pom_Load.Enabled := enabled;
-  Self.LV_Pom_Release.Enabled := enabled;
+  Self.SB_POM_Automat_Add.Enabled := enabled;
+  Self.SB_POM_Manual_Add.Enabled := enabled;
+  Self.LV_POM_Automat.Enabled := enabled;
+  Self.LV_POM_Manual.Enabled := enabled;
+  Self.CB_POM_Release.Enabled := enabled;
 
   Self.LV_Funkce.Enabled := enabled;
   for var i := 0 to _MAX_FUNC do
@@ -524,119 +552,145 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.LV_Pom_LoadChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+procedure TF_HVEdit.LV_Pom_AutomatChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
-  Self.SB_Take_Remove.Enabled := (Self.LV_Pom_Load.Selected <> nil);
+  Self.SB_POM_Automat_Remove.Enabled := (Self.LV_POM_Automat.Selected <> nil);
 end;
 
-procedure TF_HVEdit.LV_Pom_LoadDblClick(Sender: TObject);
+procedure TF_HVEdit.LV_Pom_AutomatDblClick(Sender: TObject);
 begin
-  if (Self.LV_Pom_Load.Selected <> nil) then
+  if (Self.LV_POM_Automat.Selected <> nil) then
   begin
-    F_HV_Pom.OpenForm(StrToInt(Self.LV_Pom_Load.Selected.Caption),
-      StrToInt(Self.LV_Pom_Load.Selected.SubItems.Strings[0]));
+    F_HV_Pom.OpenForm(StrToInt(Self.LV_POM_Automat.Selected.Caption),
+      StrToInt(Self.LV_POM_Automat.Selected.SubItems.Strings[0]));
     if (F_HV_Pom.saved) then
-      Self.LV_Pom_Load.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Automat.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
   end else begin
-    Self.SB_Take_AddClick(Self);
+    Self.SB_POM_Automat_AddClick(Self);
   end;
 end;
 
-procedure TF_HVEdit.LV_Pom_LoadKeyDown(Sender: TObject; var Key: Word;
+procedure TF_HVEdit.LV_Pom_AutomatKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if ((Key = VK_DELETE) and (Self.SB_Take_Remove.Enabled)) then
-    Self.SB_Take_RemoveClick(Self);
+  if ((Key = VK_DELETE) and (Self.SB_POM_Automat_Remove.Enabled)) then
+    Self.SB_POM_Automat_RemoveClick(Self);
 end;
 
-procedure TF_HVEdit.LV_Pom_ReleaseChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+procedure TF_HVEdit.LV_Pom_ManualChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
-  Self.SB_Rel_Remove.Enabled := (Self.LV_Pom_Release.Selected <> nil);
+  Self.SB_POM_Manual_Remove.Enabled := (Self.LV_POM_Manual.Selected <> nil);
 end;
 
-procedure TF_HVEdit.LV_Pom_ReleaseDblClick(Sender: TObject);
+procedure TF_HVEdit.LV_Pom_ManualDblClick(Sender: TObject);
 begin
-  if (Self.LV_Pom_Release.Selected <> nil) then
+  if (Self.LV_POM_Manual.Selected <> nil) then
   begin
-    F_HV_Pom.OpenForm(StrToInt(Self.LV_Pom_Release.Selected.Caption),
-      StrToInt(Self.LV_Pom_Release.Selected.SubItems.Strings[0]));
+    F_HV_Pom.OpenForm(StrToInt(Self.LV_POM_Manual.Selected.Caption),
+      StrToInt(Self.LV_POM_Manual.Selected.SubItems.Strings[0]));
     if (F_HV_Pom.saved) then
-      Self.LV_Pom_Release.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Manual.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
   end else begin
-    Self.SB_Rel_AddClick(Self);
+    Self.SB_POM_Manual_AddClick(Self);
   end;
 end;
 
-procedure TF_HVEdit.LV_Pom_ReleaseKeyDown(Sender: TObject; var Key: Word;
+procedure TF_HVEdit.LV_Pom_ManualKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if ((Key = VK_DELETE) and (Self.SB_Rel_Remove.Enabled)) then
-    Self.SB_Rel_RemoveClick(Self);
+  if ((Key = VK_DELETE) and (Self.SB_POM_Manual_Remove.Enabled)) then
+    Self.SB_POM_Manual_RemoveClick(Self);
 end;
 
 procedure TF_HVEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
 begin
   // input checking
   for var i := 0 to Length(_forbidden_chars) - 1 do
+  begin
     if (_forbidden_chars[i] = Key) then
     begin
       Key := #0;
       Exit();
     end;
+  end;
 end;
 
-procedure TF_HVEdit.SB_Rel_AddClick(Sender: TObject);
+procedure TF_HVEdit.SB_POM_Manual_AddClick(Sender: TObject);
 begin
   F_HV_Pom.OpenForm(-1, 0);
   if (F_HV_Pom.saved) then
   begin
     var i: Integer := 0;
-    while ((i < Self.LV_Pom_Release.Items.Count) and (StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption) <
+    while ((i < Self.LV_POM_Manual.Items.Count) and (StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption) <
       F_HV_Pom.SE_CV.Value)) do
       Inc(i);
 
-    if ((Assigned(Self.LV_Pom_Release.Items.Item[i])) and (StrToInt(Self.LV_Pom_Release.Items.Item[i].Caption)
+    if ((Assigned(Self.LV_POM_Manual.Items.Item[i])) and (StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption)
       = F_HV_Pom.SE_CV.Value)) then
     begin
-      Self.LV_Pom_Release.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
     end else begin
-      var LI: TListItem := Self.LV_Pom_Release.Items.Insert(i);
+      var LI: TListItem := Self.LV_POM_Manual.Items.Insert(i);
       LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
       LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+    end;
+
+    if (not Self.CB_POM_Release.Enabled) then
+    begin
+      Self.CB_POM_Release.Enabled := True;
+      Self.CB_POM_Release.ItemIndex := 0;
     end;
   end;
 end;
 
-procedure TF_HVEdit.SB_Rel_RemoveClick(Sender: TObject);
+procedure TF_HVEdit.SB_POM_Manual_RemoveClick(Sender: TObject);
 begin
-  Self.LV_Pom_Release.DeleteSelected();
+  Self.LV_POM_Manual.DeleteSelected();
+
+  if ((Self.LV_Pom_Automat.Items.Count = 0) and (Self.LV_Pom_Manual.Items.Count = 0)) then
+  begin
+    Self.CB_POM_Release.Enabled := False;
+    Self.CB_POM_Release.ItemIndex := -1;
+  end;
 end;
 
-procedure TF_HVEdit.SB_Take_AddClick(Sender: TObject);
+procedure TF_HVEdit.SB_POM_Automat_AddClick(Sender: TObject);
 begin
   F_HV_Pom.OpenForm(-1, 0);
   if (F_HV_Pom.saved) then
   begin
     var i: Integer := 0;
-    while ((i < Self.LV_Pom_Load.Items.Count) and (StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption) <
+    while ((i < Self.LV_POM_Automat.Items.Count) and (StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption) <
       F_HV_Pom.SE_CV.Value)) do
       Inc(i);
 
-    if ((Assigned(Self.LV_Pom_Load.Items.Item[i])) and (StrToInt(Self.LV_Pom_Load.Items.Item[i].Caption)
+    if ((Assigned(Self.LV_POM_Automat.Items.Item[i])) and (StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption)
       = F_HV_Pom.SE_CV.Value)) then
     begin
-      Self.LV_Pom_Load.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
     end else begin
-      var LI: TListItem := Self.LV_Pom_Load.Items.Insert(i);
+      var LI: TListItem := Self.LV_POM_Automat.Items.Insert(i);
       LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
       LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+    end;
+
+    if (not Self.CB_POM_Release.Enabled) then
+    begin
+      Self.CB_POM_Release.Enabled := True;
+      Self.CB_POM_Release.ItemIndex := 0;
     end;
   end;
 end;
 
-procedure TF_HVEdit.SB_Take_RemoveClick(Sender: TObject);
+procedure TF_HVEdit.SB_POM_Automat_RemoveClick(Sender: TObject);
 begin
-  Self.LV_Pom_Load.DeleteSelected();
+  Self.LV_POM_Automat.DeleteSelected();
+
+  if ((Self.LV_Pom_Automat.Items.Count = 0) and (Self.LV_Pom_Manual.Items.Count = 0)) then
+  begin
+    Self.CB_POM_Release.Enabled := False;
+    Self.CB_POM_Release.ItemIndex := -1;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
