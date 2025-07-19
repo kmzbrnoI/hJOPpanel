@@ -376,12 +376,7 @@ begin
     + '|' + IntToStr(Integer(Self.typ)) + '|' + Self.train + '|' + IntToStr(Integer(Self.siteA)) + '|';
 
   for var i := 0 to _MAX_FUNC do
-  begin
-    if (Self.functions[i]) then
-      Result := Result + '1'
-    else
-      Result := Result + '0';
-  end;
+    Result := Result + BoolToStr10(Self.functions[i]);
 
   Result := Result + '||||' + Self.orid + '|';
 

@@ -91,7 +91,7 @@ var
 
 implementation
 
-uses fSprHelp, fMain, TCPClientPanel, ORList;
+uses fSprHelp, fMain, TCPClientPanel, ORList, IfThenElse;
 
 // format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 
@@ -203,15 +203,8 @@ begin
     Self.SE_PocetVozu.Value := StrToInt(parsed[3]);
     Self.M_Poznamka.Text := parsed[4];
 
-    if (parsed[5][1] = '1') then
-      Self.CHB_Sipka_L.Checked := true
-    else
-      Self.CHB_Sipka_L.Checked := false;
-
-    if (parsed[5][2] = '1') then
-      Self.CHB_Sipka_S.Checked := true
-    else
-      Self.CHB_Sipka_S.Checked := false;
+    Self.CHB_Sipka_L.Checked := (parsed[5][1] = '1');
+    Self.CHB_Sipka_S.Checked := (parsed[5][2] = '1');
 
     Self.SE_Delka.Value := StrToInt(parsed[6]);
     Self.CB_Typ.Text := parsed[7];
@@ -279,17 +272,19 @@ begin
   if (Self.E_Nazev.Text = '') then
   begin
     Application.MessageBox('Vyplňte název soupravy!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
-    Exit;
+    Exit();
   end;
 
   // kontrola M_Poznamka
   for var j := 0 to Length(_forbidden_chars) - 1 do
+  begin
     if (StrScan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
     begin
       Application.MessageBox(PChar('Poznámka k soupravě obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
         GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
+  end;
 
   if ((Self.CHB_report.Checked) and ((Self.CB_Vychozi.ItemIndex < 1) or (Self.CB_Cilova.ItemIndex < 1))) then
   begin
@@ -313,18 +308,9 @@ begin
 
   var sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' + Self.M_Poznamka.Text + '};';
 
-  if (Self.CHB_Sipka_L.Checked) then
-    sprstr := sprstr + '1'
-  else
-    sprstr := sprstr + '0';
-
-  if (Self.CHB_Sipka_S.Checked) then
-    sprstr := sprstr + '1;'
-  else
-    sprstr := sprstr + '0;';
-
+  sprstr := sprstr + BoolToStr10(Self.CHB_Sipka_L.Checked);
+  sprstr := sprstr + BoolToStr10(Self.CHB_Sipka_S.Checked) + ';';
   sprstr := sprstr + IntToStr(Self.SE_Delka.Value) + ';' + Self.CB_Typ.Text + ';';
-
   sprstr := sprstr + '{';
 
   var err := '';
@@ -343,12 +329,14 @@ begin
       Exit();
     end;
     for var j := 0 to Length(_forbidden_chars) - 1 do
+    begin
       if (StrScan(PChar(Self.HVs[i].M_HV1_Notes.Text), _forbidden_chars[j]) <> nil) then
       begin
         Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
           + GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
       end;
+    end;
 
     for var j := 0 to _MAX_FUNC do
       if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
@@ -373,10 +361,7 @@ begin
     sprstr := sprstr + areaDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
   sprstr := sprstr + ';';
 
-  if (Self.CHB_report.Checked) then
-    sprstr := sprstr + '1;'
-  else
-    sprstr := sprstr + '0;';
+  sprstr := sprstr + BoolToStr10(Self.CHB_report.Checked) + ';';
 
   if (Self.CHB_MaxSpeed.Checked) then
     sprstr := sprstr + IntToStr(Self.SE_MaxSpeed.Value) + ';'
