@@ -595,7 +595,7 @@ end;
 procedure TF_Main.ShowAboutDialog();
 begin
   Application.MessageBox(PChar('hJOPpanel v' + VersionStr(Application.ExeName) + #13#10 + 'build ' + FormatDateTime('dd.mm.yyyy', BuildDateTime())
-     + #13#10 + 'Vytvořil Jan Horáček (c) 2014–2023 pro KMŽ Brno I'), 'Info',
+     + #13#10 + 'Vytvořil Jan Malina (Horáček) (c) 2014–2025 v KMŽ Brno I'), 'Info',
     MB_OK OR MB_ICONINFORMATION);
 end;
 
