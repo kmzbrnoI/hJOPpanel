@@ -1156,7 +1156,7 @@ end;
 
 procedure TRelief.AEMessage(var msg: tagMSG; var Handled: boolean);
 begin
-  if ((msg.message = WM_KeyDown) and (Self.ParentForm.Active)) then // pokud je stisknuta klavesa
+  if ((msg.message = WM_KEYDOWN) and (Self.ParentForm.Active)) then
   begin
     if (Errors.Count > 0) then
     begin
@@ -1189,7 +1189,7 @@ begin
         Exit();
     end; // for i
 
-    case (msg.wParam) of // case moznosti stisknutych klaves
+    case (msg.wParam) of
       VK_F1:
         Self.ObjectMouseClick(Self.CursorDraw.Pos, F1);
       VK_F2:
@@ -1200,6 +1200,8 @@ begin
         Self.ObjectMouseClick(Self.CursorDraw.Pos, ENTER);
       VK_BACK:
         Errors.RemoveVisibleErrors();
+      VK_SPACE:
+        PanelTCPClient.SendLn('-;PKEY;space;1');
 
       VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:
         begin
@@ -1230,6 +1232,14 @@ begin
         end;
     end; // case
   end; // if
+
+  if ((msg.message = WM_KEYUP) and (Self.ParentForm.Active)) then
+  begin
+    case (msg.wParam) of
+      VK_SPACE:
+        PanelTCPClient.SendLn('-;PKEY;space;0');
+    end; // case
+  end;
 end;
 
 procedure TRelief.T_SystemOKOnTimer(Sender: TObject);
