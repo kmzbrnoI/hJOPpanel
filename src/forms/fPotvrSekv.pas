@@ -194,6 +194,7 @@ begin
 
   Relief.UpdateEnabled();
   Self.Show();
+  Self.SetPosFromConfig(); // must be here to work on multiple screens
   Self.ShowTexts();
   Self.B_OK.SetFocus();
   Self.TimerUpdate(Self);

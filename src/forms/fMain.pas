@@ -464,8 +464,6 @@ begin
   if ((GlobConfig.data.forms.fMainMaximized) or (GlobConfig.data.forms.fMainFullScreen)) then
     Self.WindowState := TWindowState.wsMaximized;
 
-  F_PotvrSekv.SetPosFromConfig();
-
   if (GlobConfig.data.server.autoconnect) then
     Self.A_ConnectExecute(Self);
 end;
