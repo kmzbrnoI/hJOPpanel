@@ -61,7 +61,7 @@ type
     fMainMaximized: Boolean;
     fMainFullScreen: Boolean;
     fMainShowSB: Boolean;
-    fPotvrSekv: TPoint;
+    fPotvrSekvPos: TPoint;
   end;
 
   TPODJConfig = record
@@ -204,8 +204,8 @@ begin
     Self.data.forms.fMainShowSB := ini.ReadBool('F_Main', 'showStatusBar', True);
     Self.data.forms.fMainFullScreen := ini.ReadBool('F_Main', 'fullScreen', False);
 
-    Self.data.forms.fPotvrSekv.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
-    Self.data.forms.fPotvrSekv.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
+    Self.data.forms.fPotvrSekvPos.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
+    Self.data.forms.fPotvrSekvPos.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
 
     try
       Self.data.podj.realAbsolute := StrToTime('00:' + ini.ReadString('PODJ', 'realAbsolute', '01:00'));
@@ -288,8 +288,8 @@ begin
     ini.WriteBool('F_Main', 'showStatusBar', Self.data.forms.fMainShowSB);
     ini.WriteBool('F_Main', 'fullScreen', Self.data.forms.fMainFullScreen);
 
-    ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekv.X);
-    ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekv.Y);
+    ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekvPos.X);
+    ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekvPos.Y);
 
     ini.WriteString('PODJ', 'realAbsolute', FormatDateTime('nn:ss', Self.data.podj.realAbsolute));
     ini.WriteString('PODJ', 'realRelative', FormatDateTime('nn:ss', Self.data.podj.realRelative));

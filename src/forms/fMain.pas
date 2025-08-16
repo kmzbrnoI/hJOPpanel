@@ -108,6 +108,9 @@ type
     procedure OnModTimeChanged();
     procedure CheckTimeSpeedWidth();
     function LargeSSFitsScreen(): Boolean;
+
+    class function IsFormVisible(lefttop: TPoint): Boolean; overload;
+    class function IsFormVisible(left: Integer; top: Integer): Boolean; overload;
   end;
 
 var
@@ -450,8 +453,7 @@ begin
   Self.Show();
 
   // Must be after Show() because of multiple monitors
-  if (((GlobConfig.data.forms.fMainPos.X > (Screen.DesktopLeft-10)) and (GlobConfig.data.forms.fMainPos.Y > (Screen.DesktopTop-10))) and
-      (Abs(GlobConfig.data.forms.fMainPos.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fMainPos.Y) < Screen.DesktopHeight)) then
+  if (Self.IsFormVisible(GlobConfig.data.forms.fMainPos)) then
   begin
     // Allow negative coordinates for multiple monitors
     // This if must be entered also if in maximized state - restore the monitor it was maximized on
@@ -754,6 +756,19 @@ begin
   Self.Constraints.MinHeight := Self.DXD_Main.Height + Self.P_Header.Height + (Self.Height-Self.ClientHeight);
   if (Self.SB_Main.Visible) then
     Self.Constraints.MinHeight := Self.Constraints.MinHeight + Self.SB_Main.Height;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+class function TF_Main.IsFormVisible(left: Integer; top: Integer): Boolean;
+begin
+  Result := (((left > (Screen.DesktopLeft-10)) and (top > (Screen.DesktopTop-10))) and
+             (Abs(left) < Screen.DesktopWidth) and (Abs(top) < Screen.DesktopHeight));
+end;
+
+class function TF_Main.IsFormVisible(lefttop: TPoint): Boolean;
+begin
+  Result := Self.IsFormVisible(lefttop.X, lefttop.Y);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

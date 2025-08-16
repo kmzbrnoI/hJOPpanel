@@ -57,7 +57,6 @@ object F_PotvrSekv: TF_PotvrSekv
     Color = clSilver
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 677
     object L_ListDescription: TLabel
       Left = 40
       Top = 127

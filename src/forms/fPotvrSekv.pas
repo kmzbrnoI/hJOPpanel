@@ -355,7 +355,7 @@ end;
 
 procedure TF_PotvrSekv.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  GlobConfig.data.forms.fPotvrSekv := Point(Self.Left, Self.Top);
+  GlobConfig.data.forms.fPotvrSekvPos := Point(Self.Left, Self.Top);
   if (Self.running) then
     Self.Stop('Zavřeno okno potvrzovací sekvence');
 end;
@@ -408,11 +408,11 @@ end;
 procedure TF_PotvrSekv.SetPosFromConfig();
 begin
   // Must be after main window Show() because of multiple monitors
-  if ((Abs(GlobConfig.data.forms.fPotvrSekv.X) < Screen.DesktopWidth) and (Abs(GlobConfig.data.forms.fPotvrSekv.Y) < Screen.DesktopHeight)) then
+  if (F_Main.IsFormVisible(GlobConfig.data.forms.fPotvrSekvPos)) then
   begin
     // Allow negative coordinates for multiple monitors
-    Self.Left := GlobConfig.data.forms.fPotvrSekv.X;
-    Self.Top := GlobConfig.data.forms.fPotvrSekv.Y;
+    Self.Left := GlobConfig.data.forms.fPotvrSekvPos.X;
+    Self.Top := GlobConfig.data.forms.fPotvrSekvPos.Y;
   end else begin
     Self.Left := 0;
     Self.Top := 0;
