@@ -3,7 +3,7 @@ object F_SprHelp: TF_SprHelp
   Top = 247
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'N'#225'poveda k souprav'#225'm'
+  Caption = 'N'#225'pov'#283'da k souprav'#225'm'
   ClientHeight = 286
   ClientWidth = 281
   Color = clBtnFace
@@ -12,9 +12,7 @@ object F_SprHelp: TF_SprHelp
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
-  PixelsPerInch = 96
   TextHeight = 13
   object B_OK: TButton
     Left = 104

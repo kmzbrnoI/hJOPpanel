@@ -104,8 +104,8 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <DCC_MapFile>3</DCC_MapFile>
-        <VerInfo_Keys>CompanyName=;FileDescription=hJOPpanel;FileVersion=1.17.3.0;InternalName=hJOPpanel.exe;LegalCopyright=Jan Malina (Horáček);LegalTrademarks=Jan Malina (Horáček);OriginalFilename=hJOPpanel.exe;ProductName=hJOPpanel;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Release>3</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=hJOPpanel;FileVersion=1.17.4.0;InternalName=hJOPpanel.exe;LegalCopyright=Jan Malina (Horáček);LegalTrademarks=Jan Malina (Horáček);OriginalFilename=hJOPpanel.exe;ProductName=hJOPpanel;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Release>4</VerInfo_Release>
         <VerInfo_MinorVer>17</VerInfo_MinorVer>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
