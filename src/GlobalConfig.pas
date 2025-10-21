@@ -8,10 +8,6 @@ interface
 
 uses IniFiles, SysUtils, Types, Generics.Collections, Classes, PanelOR, Symbols;
 
-const
-  _MOUSE_PANEL = 0;
-  _MOUSE_OS = 1;
-
 type
   TSoundsConfig = record
     sndRizikovaFce: string;
@@ -73,7 +69,6 @@ type
 
   TGlobConfigData = record
     panel_fn: string;
-    panel_mouse: Integer;
     sounds: TSoundsConfig;
     symbolSet: TSymbolSetType;
     server: TServerConfig;
@@ -143,7 +138,6 @@ begin
 
     Self.data.panel_fn := ini.ReadString('global', 'panel', 'panel.opnl');
     Self.data.vysv_fn := ini.ReadString('global', 'vysv', 'vysv.csv');
-    Self.data.panel_mouse := ini.ReadInteger('global', 'panel_mouse', 0);
     Self.data.resuscitation := ini.ReadBool('global', 'resuscitation', false);
 
     Self.data.sounds.sndRizikovaFce := ini.ReadString('sounds', 'rizikova-funkce', '');
@@ -238,7 +232,6 @@ begin
   try
     ini.WriteString('global', 'panel', Self.data.panel_fn);
     ini.WriteString('global', 'vysv', Self.data.vysv_fn);
-    ini.WriteInteger('global', 'panel_mouse', Self.data.panel_mouse);
     ini.WriteBool('global', 'resuscitation', Self.data.resuscitation);
 
     ini.WriteBool('reg', 'auth', Self.data.reg.reg_user);

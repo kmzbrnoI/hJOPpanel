@@ -580,8 +580,7 @@ begin
     begin
       Self.menu.PaintMenu(Self.drawObject, Self.cursorDraw.pos)
     end else begin
-      if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
-        Self.PaintKurzor();
+      Self.PaintKurzor();
     end;
 
     Self.drawObject.Surface.Canvas.Release();
@@ -605,8 +604,6 @@ procedure TRelief.PaintKurzor();
 begin
   if ((Self.cursorDraw.pos.X < 0) or (Self.cursorDraw.pos.Y < 0)) then
     Exit;
-  if (GlobConfig.data.panel_mouse <> _MOUSE_PANEL) then
-    Exit();
 
   // zkopirujeme si obrazek pod kurzorem jeste pred tim, nez se pres nej prekresli mys
   Self.cursorDraw.bg.Canvas.CopyRect(Rect(0, 0, SymbolSet.symbWidth + 2, SymbolSet.symbHeight + 2),
@@ -750,45 +747,40 @@ begin
     if (Self.areas[i].stack.IsDragged()) then
       stackDragged := true;
 
-  // panel prekreslujeme jen kdyz je nutne vykreslovat mys na panelu
-  // pokud se vykresluje mys operacniho systemu, panel neni prekreslovan
-  if ((GlobConfig.data.panel_mouse = _MOUSE_PANEL) or (Self.menu.showing) or (stackDragged)) then
-  begin
-    // neprekreslujeme cely panel, ale pouze policko, na kterem byla mys v minule pozici
-    // obsah tohoto policka je ulozen v Self.CursorDraw.History
-    try
-      Self.drawObject.Surface.Canvas.Lock();
-      if (not Assigned(Self.drawObject)) then
-        Exit;
-      if (not Self.drawObject.CanDraw) then
-        Exit;
+  // neprekreslujeme cely panel, ale pouze policko, na kterem byla mys v minule pozici
+  // obsah tohoto policka je ulozen v Self.CursorDraw.History
+  try
+    Self.drawObject.Surface.Canvas.Lock();
+    if (not Assigned(Self.drawObject)) then
+      Exit;
+    if (not Self.drawObject.CanDraw) then
+      Exit;
 
-      if (Self.menu.showing) then
-        Self.menu.PaintMenu(Self.drawObject, Self.cursorDraw.pos)
-      else
-      begin
-        Self.PaintKurzorBg(old);
+    if (Self.menu.showing) then
+      Self.menu.PaintMenu(Self.drawObject, Self.cursorDraw.pos)
+    else
+    begin
+      Self.PaintKurzorBg(old);
 
-        for var i := 0 to Self.areas.Count - 1 do
-          if (Self.areas[i].stack.IsDragged()) then
-            Self.areas[i].stack.show(Self.drawObject, Self.cursorDraw.pos);
+      for var i := 0 to Self.areas.Count - 1 do
+        if (Self.areas[i].stack.IsDragged()) then
+          Self.areas[i].stack.show(Self.drawObject, Self.cursorDraw.pos);
 
-        Self.PaintKurzor();
-      end;
-
-      // prekreslime si platno
-      Self.drawObject.Surface.Canvas.Release();
-      Self.drawObject.Flip();
-    except
-
+      Self.PaintKurzor();
     end;
 
-    try
-      if (Self.drawObject.Surface.Canvas.LockCount > 0) then
-        Self.drawObject.Surface.Canvas.UnLock();
-    except
+    // prekreslime si platno
+    Self.drawObject.Surface.Canvas.Release();
+    Self.drawObject.Flip();
+  except
 
-    end;
+  end;
+
+  try
+    if (Self.drawObject.Surface.Canvas.LockCount > 0) then
+      Self.drawObject.Surface.Canvas.UnLock();
+  except
+
   end;
 end;
 

@@ -367,12 +367,7 @@ begin
     end;
   end;
 
-  if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
-  begin
-    F_Main.DXD_Main.Cursor := crNone;
-  end else begin
-    F_Main.DXD_Main.Cursor := crDefault;
-  end;
+  Self.DXD_Main.Cursor := crNone;
 
   F_splash.ShowState('Načítám symboly...');
 

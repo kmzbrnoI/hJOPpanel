@@ -48,7 +48,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_PODJ
+    ActivePage = TS_Panel
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -401,28 +401,6 @@ object F_Settings: TF_Settings
         Checked = True
         State = cbChecked
         TabOrder = 2
-      end
-      object RG_Mouse: TRadioGroup
-        Left = 192
-        Top = 80
-        Width = 185
-        Height = 57
-        Caption = ' P'#345'ekreslen'#237' my'#353'i '
-        Items.Strings = (
-          'Panel'
-          'Opera'#269'n'#237' syst'#233'm')
-        TabOrder = 3
-      end
-      object StaticText1: TStaticText
-        Left = 192
-        Top = 143
-        Width = 185
-        Height = 25
-        AutoSize = False
-        Caption = 
-          'P'#345'ekreslov'#225'n'#237' my'#353'i opera'#269'n'#237'm syst'#233'mem m'#367#382'e zrychlit b'#283'h aplikace' +
-          '.'
-        TabOrder = 4
       end
     end
     object TS_Timer: TTabSheet

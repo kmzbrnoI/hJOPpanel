@@ -66,8 +66,6 @@ type
     Label15: TLabel;
     E_Password: TEdit;
     CHB_ShowPassword: TCheckBox;
-    RG_Mouse: TRadioGroup;
-    StaticText1: TStaticText;
     CHB_Resuscitation: TCheckBox;
     CHB_Forgot: TCheckBox;
     TS_Regulator: TTabSheet;
@@ -219,7 +217,6 @@ begin
 
   GlobConfig.data.panel_fn := Self.E_Panel.Text;
   GlobConfig.data.vysv_fn := Self.E_Vysv.Text;
-  GlobConfig.data.panel_mouse := Self.RG_Mouse.ItemIndex;
   GlobConfig.data.Resuscitation := Self.CHB_Resuscitation.Checked;
 
   GlobConfig.data.reg.reg_user := Self.CHB_Jerry_username.Checked;
@@ -290,12 +287,7 @@ begin
 
   GlobConfig.data.podj := podj;
 
-  if (GlobConfig.data.panel_mouse = _MOUSE_PANEL) then
-  begin
-    F_Main.DXD_Main.Cursor := crNone;
-  end else begin
-    F_Main.DXD_Main.Cursor := crDefault;
-  end;
+  F_Main.DXD_Main.Cursor := crNone;
 
   if (Assigned(PanelTCPClient.resusct)) then
   begin
@@ -599,7 +591,6 @@ begin
 
   Self.E_Panel.Text := data.panel_fn;
   Self.E_Vysv.Text := data.vysv_fn;
-  Self.RG_Mouse.ItemIndex := data.panel_mouse;
 
   Self.CHB_Resuscitation.Checked := data.Resuscitation;
 
