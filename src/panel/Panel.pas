@@ -212,7 +212,7 @@ type
     destructor Destroy; override;
 
     procedure Initialize(var DrawObject: TDXDraw; aFile: string; hints_file: string);
-    procedure show();
+    procedure Show();
 
     procedure AddCountdown(Sender: string; length: TDateTime; id: Integer);
     procedure RemoveCountdown(Sender: string; id: Integer);
@@ -537,7 +537,7 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // hlavni zobrazeni celeho reliefu
-procedure TRelief.show();
+procedure TRelief.Show();
 begin
   try
     if (not Assigned(Self.drawObject)) then
@@ -679,7 +679,7 @@ begin
   Self.mouseClick := Now;
   Self.mouseLastBtn := Button;
 
-  Self.show();
+  Self.Show();
 end;
 
 // Tato funkce neni skoro vubec vyuzivana, je pouze na specialni veci.
@@ -710,7 +710,7 @@ begin
   begin
     Self.ObjectMouseClick(Self.mouseClickPos, TPanelButton.F1);
     Self.mouseTimer.Enabled := false;
-    Self.show();
+    Self.Show();
   end;
 end;
 
@@ -1169,7 +1169,7 @@ begin
       Self.UPO.KeyPress(msg.wParam, ahandled);
     if (ahandled) then
     begin
-      Self.show();
+      Self.Show();
       Exit();
     end;
 
@@ -1295,7 +1295,7 @@ var PR, PG, PB: ^byte;
 begin
   Self.CursorDraw.Pos.X := -2;
 
-  Self.show();
+  Self.Show();
 
   var Bmp := TBitmap.Create;
   try
@@ -1354,7 +1354,7 @@ begin
   if (Self.CursorDraw.Pos.X >= 0) then
   begin
     Self.CursorDraw.Pos.X := -2;
-    Self.show();
+    Self.Show();
   end;
 end;
 
@@ -1664,7 +1664,7 @@ begin
   var bPos := Self.DrawObject.ClientToScreen(Point(0, 0));
   SetCursorPos(Self.menuLastpos.X * SymbolSet.symbWidth + bPos.X, Self.menuLastpos.Y * SymbolSet.symbHeight
     + bPos.Y);
-  Self.show();
+  Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1843,7 +1843,7 @@ end;
 
 procedure TRelief.DKMenuClickMSG(Sender: Integer; item: string);
 begin
-  TF_Messages.frm_db[Sender].show();
+  TF_Messages.frm_db[Sender].Show();
   TF_Messages.frm_db[Sender].SetFocus();
 end;
 
@@ -1929,7 +1929,7 @@ begin
   else if (item = 'PŘEDAT loko') then
     F_HV_Move.Open(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
   else if (item = 'HLEDAT loko') then
-    F_HVSearch.show()
+    F_HVSearch.Show()
   else if ((item = 'RUČ loko') or (item = 'MAUS loko')) then
     F_RegReq.Open(Self.areas[obl_r].HVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
       Self.areas[obl_r].RegPlease.firstname, Self.areas[obl_r].RegPlease.lastname, Self.areas[obl_r].RegPlease.comment,
@@ -1996,7 +1996,7 @@ begin
     end;
   end;
 
-  Self.show();
+  Self.Show();
   Self.UpdateLoginString();
 end;
 
@@ -2210,7 +2210,7 @@ begin
   Self.drawObject.Height := heightPx;
   (Self.parentForm as TF_Main).SetPanelSize(widthPx, heightPx);
 
-  Self.show();
+  Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -2463,7 +2463,7 @@ begin
   if (Self.fShowDetails = show) then
     Exit();
   Self.fShowDetails := show;
-  Self.show();
+  Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
