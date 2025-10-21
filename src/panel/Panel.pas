@@ -2481,6 +2481,19 @@ end;
 procedure TRelief.UpdateEnabled();
 begin
   Self.Enabled := ((Errors.Count = 0) and (not Self.UPO.showing) and (F_PotvrSekv.EndReason <> TPSEnd.prubeh));
+
+  if (Self.Enabled) then
+  begin
+    Self.Graphics.dxd.Cursor := crNone;
+
+    // Repaint cursor on current position
+    var p: TPoint;
+    Windows.GetCursorPos(p);
+    Windows.ScreenToClient(Self.Graphics.dxd.Handle, p);
+    Self.DXDMouseMove(Self.Graphics.dxd, [], p.X, p.Y);
+  end else begin
+    Self.Graphics.dxd.Cursor := crDefault;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
