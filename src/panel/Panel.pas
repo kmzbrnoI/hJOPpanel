@@ -2480,9 +2480,10 @@ end;
 
 procedure TRelief.UpdateEnabled();
 begin
+  var wasEnabled: Boolean := Self.Enabled;
   Self.Enabled := ((Errors.Count = 0) and (not Self.UPO.showing) and (F_PotvrSekv.EndReason <> TPSEnd.prubeh));
 
-  if (Self.Enabled) then
+  if ((Self.Enabled) and (not wasEnabled)) then
   begin
     Self.Graphics.dxd.Cursor := crNone;
 
@@ -2491,7 +2492,9 @@ begin
     Windows.GetCursorPos(p);
     Windows.ScreenToClient(Self.Graphics.dxd.Handle, p);
     Self.DXDMouseMove(Self.Graphics.dxd, [], p.X, p.Y);
-  end else begin
+  end;
+  if ((wasEnabled) and (not Self.Enabled)) then
+  begin
     Self.Graphics.dxd.Cursor := crDefault;
   end;
 end;
