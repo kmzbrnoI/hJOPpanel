@@ -59,6 +59,7 @@ NOT<;Zrušení nouzového otevření přejezdu
 ZTS>;Žádost o traťový souhlas
 ZTS<;Zrušení žádosti o traťový souhlas
 UTS;Udělení traťového souhlasu
+RTS;Revokace traťového souhlasu
 ZAK>;Zavedení zákazu odjezdu na trať
 ZAK<;Zrušení zákazu odjezdu na trať
 OTS;Odmítnutí žádosti o traťový souhlas
