@@ -131,7 +131,7 @@ procedure TF_Main.AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
 begin
   if (Msg.Message = WM_KeyDown) then
   begin
-    if (F_PotvrSekv.running) then
+    if ((Assigned(F_PotvrSekv)) and (F_PotvrSekv.running)) then
       F_PotvrSekv.OnKeyUp(Msg.wParam, Handled);
     if (Handled) then
       Exit();
