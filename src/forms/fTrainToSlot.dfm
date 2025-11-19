@@ -1,8 +1,8 @@
-object F_SprToSlot: TF_SprToSlot
+object F_TrainToSlot: TF_TrainToSlot
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
-  Caption = 'Souprava do slotu'
+  Caption = 'Vlak do slotu'
   ClientHeight = 155
   ClientWidth = 447
   Color = clBtnFace
@@ -11,11 +11,9 @@ object F_SprToSlot: TF_SprToSlot
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 8

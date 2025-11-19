@@ -37,7 +37,7 @@ var
 
 implementation
 
-uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fSprToSlot,
+uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fTrainToSlot,
   parseHelper, GlobalConfig;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -64,8 +64,8 @@ begin
   begin
     if (F_RegReq.token_req_sent) then
       F_RegReq.ServerResponseOK();
-    if (F_SprToSlot.token_req_sent) then
-      F_SprToSlot.ServerResponseOK();
+    if (F_TrainToSlot.token_req_sent) then
+      F_TrainToSlot.ServerResponseOK();
 
     var HVs := THVDb.Create();
     HVs.ParseHVsFromToken(parsed[3]);
@@ -117,8 +117,8 @@ begin
   begin
     if (F_RegReq.token_req_sent) then
       F_RegReq.ServerResponseErr(parsed[4]);
-    if (F_SprToSlot.token_req_sent) then
-      F_SprToSlot.ServerResponseErr(parsed[4]);
+    if (F_TrainToSlot.token_req_sent) then
+      F_TrainToSlot.ServerResponseErr(parsed[4]);
 
     try
       splitted := TStringList.Create();

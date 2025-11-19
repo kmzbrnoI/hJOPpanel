@@ -82,7 +82,7 @@ var
 
 implementation
 
-uses fAuth, fRegReq, TCPClientPanel, fSprToSlot, parseHelper;
+uses fAuth, fRegReq, TCPClientPanel, fTrainToSlot, parseHelper;
 
 {
   Jak funguje komunikace ze strany serveru:
@@ -341,8 +341,8 @@ begin
 
     if (F_RegReq.Showing) then
       F_RegReq.RepaintSlots();
-    if (F_SprToSlot.Showing) then
-      F_SprToSlot.RepaintSlots();
+    if (F_TrainToSlot.Showing) then
+      F_TrainToSlot.RepaintSlots();
 
   end else if (parsed[0] = 'AUTH') then
   begin

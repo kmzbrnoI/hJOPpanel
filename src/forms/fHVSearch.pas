@@ -56,7 +56,7 @@ procedure TF_HVSearch.LokoFound(HV: THV);
 var str: string;
 begin
   str := 'Lokomotiva nalezena!' + #13#10 + 'Název : ' + HV.name + #13#10 + 'Majitel : ' + HV.owner + #13#10 +
-    'Označení : ' + HV.designation + #13#10 + 'Adresa : ' + IntToStr(HV.addr) + #13#10 + 'Souprava : ' + HV.train +
+    'Označení : ' + HV.designation + #13#10 + 'Adresa : ' + IntToStr(HV.addr) + #13#10 + 'Vlak : ' + HV.train +
     #13#10 + 'Stanice : ' + HV.orid + ' (' + areaDb.db[HV.orid] + ')' + #13#10;
   Application.MessageBox(PChar(str), 'Loko nalezeno', MB_OK OR MB_ICONINFORMATION);
 end;

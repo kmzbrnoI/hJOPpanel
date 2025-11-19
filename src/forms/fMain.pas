@@ -40,7 +40,7 @@ type
     SB_DCC_Go: TSpeedButton;
     SB_DCC_Stop: TSpeedButton;
     P_Other: TPanel;
-    SB_Soupravy: TSpeedButton;
+    SB_Trains: TSpeedButton;
     A_Settings: TAction;
     A_Mute: TAction;
     P_Login: TPanel;
@@ -65,7 +65,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure SB_DCC_GoClick(Sender: TObject);
     procedure SB_DCC_StopClick(Sender: TObject);
-    procedure SB_SoupravyClick(Sender: TObject);
+    procedure SB_TrainsClick(Sender: TObject);
     procedure SB_MuteClick(Sender: TObject);
     procedure SB_SettingsClick(Sender: TObject);
     procedure A_SettingsExecute(Sender: TObject);
@@ -120,7 +120,7 @@ var
 implementation
 
 uses Symbols, fDebug, TCPCLientPanel, BottomErrors, Verze, Sounds, fAuth,
-  fSettings, fSplash, ModelovyCas, DCC_Icons, fSoupravy, uLIclient,
+  fSettings, fSplash, ModelovyCas, DCC_Icons, fTrains, uLIclient,
   InterProcessCom, JclAppInst, fPotvrSekv;
 
 {$R *.dfm}
@@ -518,9 +518,9 @@ begin
   F_Settings.OpenForm();
 end;
 
-procedure TF_Main.SB_SoupravyClick(Sender: TObject);
+procedure TF_Main.SB_TrainsClick(Sender: TObject);
 begin
-  F_SprList.Show();
+  F_Trains.Show();
 end;
 
 procedure TF_Main.SB_uLIdaemonClick(Sender: TObject);

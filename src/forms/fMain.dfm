@@ -3564,12 +3564,12 @@ object F_Main: TF_Main
       Color = clWhite
       ParentBackground = False
       TabOrder = 5
-      object SB_Soupravy: TSpeedButton
+      object SB_Trains: TSpeedButton
         Left = 26
         Top = 1
         Width = 24
         Height = 22
-        Hint = 'Seznam souprav'
+        Hint = 'Seznam vlak'#367
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -3598,7 +3598,7 @@ object F_Main: TF_Main
           9C9CBBBBBBB0B0B0EBEBEBF2F2F2E4E4E4FFFFFFFFFFFFFFFFFF}
         ParentShowHint = False
         ShowHint = True
-        OnClick = SB_SoupravyClick
+        OnClick = SB_TrainsClick
       end
       object SB_PrintScreen: TSpeedButton
         Left = 2

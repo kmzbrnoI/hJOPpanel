@@ -1,4 +1,4 @@
-unit fSprHVEdit;
+unit fTrainHVEdit;
 
 {
   Edit engine in train edit window.
@@ -11,7 +11,7 @@ uses
   StdCtrls, ExtCtrls, HVDb, RPConst, ComCtrls;
 
 type
-  TF_SprHVEdit = class(TForm)
+  TF_TrainHVEdit = class(TForm)
     CB_HV1_HV: TComboBox;
     RG_HV1_dir: TRadioGroup;
     M_HV1_Notes: TMemo;
@@ -44,13 +44,13 @@ type
   end;
 
 var
-  F_SprHVEdit: TF_SprHVEdit;
+  F_TrainHVEdit: TF_TrainHVEdit;
 
 implementation
 
 {$R *.dfm}
 
-procedure TF_SprHVEdit.M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
+procedure TF_TrainHVEdit.M_HV1_NotesKeyPress(Sender: TObject; var Key: Char);
 begin
   for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
@@ -62,7 +62,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprHVEdit.CB_HV1_HVChange(Sender: TObject);
+procedure TF_TrainHVEdit.CB_HV1_HVChange(Sender: TObject);
 begin
   if (Self.CB_HV1_HV.ItemIndex < 0) then
   begin
@@ -107,7 +107,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprHVEdit.FillHV(HVs: THVDb; sprHV: THV);
+procedure TF_TrainHVEdit.FillHV(HVs: THVDb; sprHV: THV);
 begin
   Self.HVs := HVs;
   Self.sprHV := sprHV;
@@ -123,19 +123,19 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprHVEdit.FormCreate(Sender: TObject);
+procedure TF_TrainHVEdit.FormCreate(Sender: TObject);
 begin
   Self.CreateCHBFunkce();
 end;
 
-procedure TF_SprHVEdit.FormDestroy(Sender: TObject);
+procedure TF_TrainHVEdit.FormDestroy(Sender: TObject);
 begin
   Self.DestroyCHBFunkce();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TF_SprHVEdit.GetHVString(): string;
+function TF_TrainHVEdit.GetHVString(): string;
 var HV: THV;
   i: Integer;
 begin
@@ -153,9 +153,9 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TF_SprHVEdit.GetHV(addr: Word): THV;
+function TF_TrainHVEdit.GetHV(addr: Word): THV;
 begin
-  // nejdrive hledame lokomotivu ve hnacim vozidle k souprave
+  // nejdrive hledame lokomotivu ve hnacim vozidle k vlaku
   if (Assigned(Self.sprHV)) then
     if (Self.sprHV.addr = addr) then
       Exit(Self.sprHV);
@@ -169,7 +169,7 @@ begin
   Exit(nil);
 end;
 
-function TF_SprHVEdit.GetCurrentHV(): THV;
+function TF_TrainHVEdit.GetCurrentHV(): THV;
 begin
   if (Self.CB_HV1_HV.ItemIndex < 0) then
     Result := nil
@@ -179,7 +179,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprHVEdit.CreateCHBFunkce();
+procedure TF_TrainHVEdit.CreateCHBFunkce();
 var i: Integer;
   atop: Integer;
 begin
@@ -209,7 +209,7 @@ begin
   end; // for i
 end;
 
-procedure TF_SprHVEdit.DestroyCHBFunkce();
+procedure TF_TrainHVEdit.DestroyCHBFunkce();
 begin
   for var i := 0 to _MAX_FUNC do
     Self.CHB_funkce[i].Free();

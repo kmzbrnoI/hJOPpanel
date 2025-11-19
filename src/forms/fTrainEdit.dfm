@@ -1,9 +1,9 @@
-object F_SoupravaEdit: TF_SoupravaEdit
+object F_TrainEdit: TF_TrainEdit
   Left = 770
   Top = 195
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'Souprava [...]'
+  Caption = 'Vlak [...]'
   ClientHeight = 593
   ClientWidth = 409
   Color = clBtnFace
@@ -20,13 +20,13 @@ object F_SoupravaEdit: TF_SoupravaEdit
   object L_S01: TLabel
     Left = 7
     Top = 5
-    Width = 129
+    Width = 112
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = #268#237'slo soupravy (0..999999):'
+    Caption = #268#237'slo vlaku (0..999999):'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -54,13 +54,13 @@ object F_SoupravaEdit: TF_SoupravaEdit
   object Label1: TLabel
     Left = 7
     Top = 501
-    Width = 109
+    Width = 91
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Pozn'#225'mka k souprav'#283':'
+    Caption = 'Pozn'#225'mka k vlaku:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -88,13 +88,13 @@ object F_SoupravaEdit: TF_SoupravaEdit
   object Label3: TLabel
     Left = 224
     Top = 5
-    Width = 67
+    Width = 50
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Typ soupravy:'
+    Caption = 'Typ vlaku:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -370,7 +370,7 @@ object F_SoupravaEdit: TF_SoupravaEdit
     Top = 470
     Width = 241
     Height = 17
-    Caption = 'Omezit maxim'#225'ln'#237' rychlost soupravy na [km/h]:'
+    Caption = 'Omezit maxim'#225'ln'#237' rychlost vlaku na [km/h]:'
     TabOrder = 9
     OnClick = CHB_MaxSpeedClick
   end

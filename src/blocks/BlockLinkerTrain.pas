@@ -3,7 +3,7 @@ unit BlockLinkerTrain;
 {
   Definice bloku uvazka-spr, jeho vlastnosti a stavu v panelu.
   Definice databaze bloku typu uvazka-spr.
-  Uvazka-spr je seznam souprav u uvazky.
+  Uvazka-spr je seznam vlaku u uvazky.
 }
 
 interface

@@ -1,4 +1,4 @@
-﻿unit fSprToSlot;
+﻿unit fTrainToSlot;
 
 {
   Move engine to uLI-master.
@@ -11,7 +11,7 @@ uses
   Dialogs, StdCtrls, ExtCtrls, uLIClient, RPConst;
 
 type
-  TF_SprToSlot = class(TForm)
+  TF_TrainToSlot = class(TForm)
     Label1: TLabel;
     L_Addrs: TLabel;
     P_Buttons: TPanel;
@@ -43,7 +43,7 @@ type
   end;
 
 var
-  F_SprToSlot: TF_SprToSlot;
+  F_TrainToSlot: TF_TrainToSlot;
 
 implementation
 
@@ -52,7 +52,7 @@ uses LokTokens;
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.CreateSlotsButtons();
+procedure TF_TrainToSlot.CreateSlotsButtons();
 begin
   for var i := 1 to TBridgeClient._SLOTS_CNT do
   begin
@@ -84,19 +84,19 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_TrainToSlot.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Self.token_req_sent := false;
 end;
 
-procedure TF_SprToSlot.FormCreate(Sender: TObject);
+procedure TF_TrainToSlot.FormCreate(Sender: TObject);
 begin
   Self.CreateSlotsButtons();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.RepaintSlots();
+procedure TF_TrainToSlot.RepaintSlots();
 var cnt, j: Integer;
   partWidth: Integer;
 begin
@@ -140,7 +140,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.ButtonSlotClick(Sender: TObject);
+procedure TF_TrainToSlot.ButtonSlotClick(Sender: TObject);
 begin
   tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, false);
 
@@ -148,7 +148,7 @@ begin
   Self.token_req_sent := true;
 end;
 
-procedure TF_SprToSlot.ButtonSlotRucClick(Sender: TObject);
+procedure TF_TrainToSlot.ButtonSlotRucClick(Sender: TObject);
 begin
   tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, true);
 
@@ -158,7 +158,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.Open(orId: string; HVs: TWordAr);
+procedure TF_TrainToSlot.Open(orId: string; HVs: TWordAr);
 begin
   Self.area := orId;
   Self.HVs := HVs;
@@ -188,13 +188,13 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprToSlot.ServerResponseOK();
+procedure TF_TrainToSlot.ServerResponseOK();
 begin
   Self.token_req_sent := false;
   Self.Close();
 end;
 
-procedure TF_SprToSlot.ServerResponseErr(err: string);
+procedure TF_TrainToSlot.ServerResponseErr(err: string);
 begin
   Self.token_req_sent := false;
   Self.L_Stav.Font.Color := clRed;

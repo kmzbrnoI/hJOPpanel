@@ -280,7 +280,7 @@ type
 implementation
 
 uses fStitVyl, TCPClientPanel, fMain, BottomErrors, GlobalConfig, fZpravy,
-  fSprEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
+  fTrainEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
   fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
   parseHelper;
 
@@ -878,7 +878,7 @@ begin
     if (Self.tracks[uid.index].block < 0) then
       goto EscCheck;
 
-    // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na souprave v tomto useku
+    // kliknutim na usek pri zadani o lokomotivu vybereme hnaci vozidla na vlaku v tomto useku
     if ((Self.areas[Self.tracks[uid.index].area].RegPlease.status = TAreaRegPleaseStatus.selected) and
       (Button = ENTER)) then
       // zadost o vydani seznamu hnacich vozidel na danem useku
@@ -1246,8 +1246,8 @@ begin
     Self.HideMenu();
   if (F_StitVyl.showing) then
     F_StitVyl.Close();
-  if (F_SoupravaEdit.showing) then
-    F_SoupravaEdit.Close();
+  if (F_TrainEdit.showing) then
+    F_TrainEdit.Close();
   if (F_Settings.showing) then
     F_Settings.Close();
   if (F_PotvrSekv.running) then
@@ -1616,7 +1616,7 @@ begin
       end;
 
     if (available) then
-      F_SoupravaEdit.NewSpr(area.HVs, area.id)
+      F_TrainEdit.NewSpr(area.HVs, area.id)
     else
       Self.ORInfoMsg('Nejsou volné loko');
   end;
@@ -1626,7 +1626,7 @@ procedure TRelief.ORSprEdit(Sender: string; parsed: TStrings);
 begin
   var area: TAreaPanel := Self.GetArea(Sender);
   if (area <> nil) then
-    F_SoupravaEdit.EditSpr(parsed, area.HVs, area.id, area.name);
+    F_TrainEdit.EditSpr(parsed, area.HVs, area.id, area.name);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

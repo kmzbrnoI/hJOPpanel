@@ -1,4 +1,4 @@
-﻿unit fSoupravy;
+﻿unit fTrains;
 
 {
   Window with list of all trains in all controlled areas.
@@ -10,17 +10,17 @@ uses Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, StdCtrls, ExtCtrls, Generics.Collections, StrUtils;
 
 type
-  TF_SprList = class(TForm)
+  TF_Trains = class(TForm)
     P_Top: TPanel;
     B_Refresh: TButton;
-    B_RemoveSpr: TButton;
-    LV_Soupravy: TListView;
+    B_RemoveTrain: TButton;
+    LV_Trains: TListView;
     procedure FormShow(Sender: TObject);
     procedure B_RefreshClick(Sender: TObject);
-    procedure LV_SoupravyChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-    procedure B_RemoveSprClick(Sender: TObject);
+    procedure LV_TrainsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+    procedure B_RemoveTrainClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure LV_SoupravyKeyDown(Sender: TObject; var Key: Word;
+    procedure LV_TrainsKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
     { Private declarations }
@@ -37,7 +37,7 @@ type
   end;
 
 var
-  F_SprList: TF_SprList;
+  F_Trains: TF_Trains;
 
 implementation
 
@@ -46,11 +46,11 @@ uses TCPClientPanel, ORList, parseHelper, GlobalConfig;
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprList.ParseLoko(str: string);
+procedure TF_Trains.ParseLoko(str: string);
 begin
-  Self.LV_Soupravy.Clear();
-  Self.LV_Soupravy.Color := clWhite;
-  Self.B_RemoveSpr.Enabled := false;
+  Self.LV_Trains.Clear();
+  Self.LV_Trains.Color := clWhite;
+  Self.B_RemoveTrain.Enabled := false;
 
   var sl: TStrings := TStringList.Create();
   try
@@ -66,7 +66,7 @@ begin
     end;
 
     if (Self.listRequest) then
-      Application.MessageBox('Tabulka souprav aktualizována.', 'OK', MB_OK OR MB_ICONINFORMATION);
+      Application.MessageBox('Tabulka vlaků aktualizována.', 'OK', MB_OK OR MB_ICONINFORMATION);
     Self.listRequest := false;
   finally
     sl.Free();
@@ -75,7 +75,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprList.AddSpr(str: string);
+procedure TF_Trains.AddSpr(str: string);
 var sl, slhv: TStrings;
   LI: TListItem;
 begin
@@ -85,9 +85,9 @@ begin
 
   try
     try
-      LI := Self.LV_Soupravy.Items.Insert(Self.FindIndexForNewSpr(StrToInt(sl[0])));
+      LI := Self.LV_Trains.Items.Insert(Self.FindIndexForNewSpr(StrToInt(sl[0])));
     except
-      LI := Self.LV_Soupravy.Items.Add;
+      LI := Self.LV_Trains.Items.Add();
     end;
 
     LI.Caption := sl[0];
@@ -131,8 +131,8 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|souprava|stanovisteA|funkce
-function TF_SprList.ParseHV(str: string): string;
+// format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|vlak|stanovisteA|funkce
+function TF_Trains.ParseHV(str: string): string;
 var sl: TStrings;
 begin
   sl := TStringList.Create();
@@ -149,28 +149,28 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SprList.B_RefreshClick(Sender: TObject);
+procedure TF_Trains.B_RefreshClick(Sender: TObject);
 begin
-  Self.LV_Soupravy.Color := clSilver;
-  Self.LV_Soupravy.Clear();
+  Self.LV_Trains.Color := clSilver;
+  Self.LV_Trains.Clear();
   Self.listRequest := true;
 
   PanelTCPClient.SendLn('-;SPR-LIST;');
 end;
 
-procedure TF_SprList.B_RemoveSprClick(Sender: TObject);
+procedure TF_Trains.B_RemoveTrainClick(Sender: TObject);
 var toRemove: TList<string>;
   sprs, spr: string;
   Count: Integer;
 begin
-  if (Self.LV_Soupravy.Selected = nil) then
+  if (Self.LV_Trains.Selected = nil) then
     Exit();
 
   toRemove := TList<string>.Create();
   try
     sprs := '';
     Count := 0;
-    for var LI in Self.LV_Soupravy.Items do
+    for var LI in Self.LV_Trains.Items do
     begin
       if (LI.Selected) then
       begin
@@ -182,9 +182,9 @@ begin
     sprs := LeftStr(sprs, Length(sprs) - 2);
 
     if (Count = 1) then
-      sprs := 'soupravu ' + sprs
+      sprs := 'vlak ' + sprs
     else
-      sprs := 'soupravy ' + sprs;
+      sprs := 'vlaky ' + sprs;
 
     if (Application.MessageBox(PChar('Opravdu smazat ' + sprs + ' z kolejiště?'), 'Otázka', MB_YESNO OR MB_ICONQUESTION)
       = mrYes) then
@@ -195,53 +195,50 @@ begin
   end;
 end;
 
-procedure TF_SprList.FormCreate(Sender: TObject);
+procedure TF_Trains.FormCreate(Sender: TObject);
 begin
   Self.listRequest := false;
 end;
 
-procedure TF_SprList.FormShow(Sender: TObject);
+procedure TF_Trains.FormShow(Sender: TObject);
 begin
-  Self.LV_Soupravy.Color := clSilver;
-  Self.LV_Soupravy.Clear();
-  Self.B_RemoveSpr.Enabled := false;
+  Self.LV_Trains.Color := clSilver;
+  Self.LV_Trains.Clear();
+  Self.B_RemoveTrain.Enabled := false;
 
   PanelTCPClient.SendLn('-;SPR-LIST;');
-  Self.Caption := 'Soupravy – ' + GlobConfig.panelName;
+  Self.Caption := 'Vlaky – ' + GlobConfig.panelName;
 end;
 
-procedure TF_SprList.LV_SoupravyChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+procedure TF_Trains.LV_TrainsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
-  if (Self.LV_Soupravy.Selected = nil) then
-    Self.B_RemoveSpr.Enabled := false
-  else
-    Self.B_RemoveSpr.Enabled := true;
+  Self.B_RemoveTrain.Enabled := (Self.LV_Trains.Selected <> nil);
 
-  if (Self.LV_Soupravy.SelCount > 1) then
-    Self.B_RemoveSpr.Caption := 'Smazat soupravy'
+  if (Self.LV_Trains.SelCount > 1) then
+    Self.B_RemoveTrain.Caption := 'Smazat vlaky'
   else
-    Self.B_RemoveSpr.Caption := 'Smazat soupravu';
+    Self.B_RemoveTrain.Caption := 'Smazat vlak';
 end;
 
-procedure TF_SprList.LV_SoupravyKeyDown(Sender: TObject; var Key: Word;
+procedure TF_Trains.LV_TrainsKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if ((Key = VK_DELETE) and (Self.B_RemoveSpr.Enabled)) then
-    Self.B_RemoveSprClick(Self);
+  if ((Key = VK_DELETE) and (Self.B_RemoveTrain.Enabled)) then
+    Self.B_RemoveTrainClick(Self);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TF_SprList.FindIndexForNewSpr(cislo: Integer): Integer;
+function TF_Trains.FindIndexForNewSpr(cislo: Integer): Integer;
 var i: Integer;
 begin
   try
-    i := Self.LV_Soupravy.Items.Count - 1;
-    while ((i >= 0) and (StrToInt(Self.LV_Soupravy.Items[i].Caption) > cislo)) do
+    i := Self.LV_Trains.Items.Count - 1;
+    while ((i >= 0) and (StrToInt(Self.LV_Trains.Items[i].Caption) > cislo)) do
       i := i - 1;
     Result := i + 1;
   except
-    Result := Self.LV_Soupravy.Items.Count;
+    Result := Self.LV_Trains.Items.Count;
   end;
 end;
 

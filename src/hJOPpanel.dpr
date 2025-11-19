@@ -39,7 +39,7 @@ uses
   ModelovyCas in 'ModelovyCas.pas',
   fNastaveni_Casu in 'forms\fNastaveni_Casu.pas' {F_ModelTIme},
   DCC_Icons in 'DCC_Icons.pas',
-  fSoupravy in 'forms\fSoupravy.pas' {F_SprList},
+  fTrains in 'forms\fTrains.pas' {F_SprList},
   LokoRuc in 'LokoRuc.pas',
   Resuscitation in 'net\Resuscitation.pas',
   Verze in 'Verze.pas',

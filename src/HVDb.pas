@@ -2,7 +2,7 @@ unit HVDb;
 
 {
   Sprava seznamu hnacich vozidel, ktere nam posle server.
-  (napr. pri prilezitosti editace soupravy)
+  (napr. pri prilezitosti editace vlaku)
 }
 
 interface
@@ -211,11 +211,11 @@ end;
 procedure THV.ParseData(data: string);
 var str, str2, str3: TStrings;
 begin
-  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|Typ|souprava|stanovisteA|funkce|rychlost_stupne|
+  // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|Typ|vlak|stanovisteA|funkce|rychlost_stupne|
   // rychlost_kmph|smer|or_id{[{cv1take|cv1take-value}][{...}]...}|{[{cv1release|cv1release-value}][{...}]...}|
   // {vyznam-F0;vyznam-F1;...}|typy_funkci|max rychlost
 
-  // souprava je bud cislo soupravy, nebo znak '-'
+  // vlak je bud cislo vlaku, nebo znak '-'
   str := TStringList.Create();
   str2 := TStringList.Create();
   str3 := TStringList.Create();

@@ -1,4 +1,4 @@
-object F_SprHVEdit: TF_SprHVEdit
+object F_TrainHVEdit: TF_TrainHVEdit
   Left = 0
   Top = 0
   Align = alClient

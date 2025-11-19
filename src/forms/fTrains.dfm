@@ -1,8 +1,8 @@
-object F_SprList: TF_SprList
+object F_Trains: TF_Trains
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  Caption = 'Soupravy'
+  Caption = 'Vlaky'
   ClientHeight = 477
   ClientWidth = 983
   Color = clBtnFace
@@ -31,18 +31,18 @@ object F_SprList: TF_SprList
       TabOrder = 0
       OnClick = B_RefreshClick
     end
-    object B_RemoveSpr: TButton
+    object B_RemoveTrain: TButton
       Left = 135
       Top = 8
       Width = 122
       Height = 25
-      Caption = 'Smazat soupravu'
+      Caption = 'Smazat vlak'
       Enabled = False
       TabOrder = 1
-      OnClick = B_RemoveSprClick
+      OnClick = B_RemoveTrainClick
     end
   end
-  object LV_Soupravy: TListView
+  object LV_Trains: TListView
     Left = 0
     Top = 41
     Width = 983
@@ -101,7 +101,7 @@ object F_SprList: TF_SprList
     ShowHint = False
     TabOrder = 1
     ViewStyle = vsReport
-    OnChange = LV_SoupravyChange
-    OnKeyDown = LV_SoupravyKeyDown
+    OnChange = LV_TrainsChange
+    OnKeyDown = LV_TrainsKeyDown
   end
 end

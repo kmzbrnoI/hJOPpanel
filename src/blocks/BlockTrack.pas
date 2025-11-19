@@ -19,7 +19,7 @@ type
     name: string;
     arrowL, arrowS: boolean;
     fg, bg, border: TColor;
-    posindex: Integer; // index pozice, na ktere je umistena tato konkretni souprava
+    posindex: Integer; // index pozice, na ktere je umistena tento konkretni vlak
     flash: Boolean;
   end;
 
@@ -153,7 +153,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// vykresleni soupravy na dane pozici
+// vykresleni vlaku na dane pozici
 procedure TPTrack.PaintTrain(pos: TPoint; spri: Integer; myORs: TList<TAreaPanel>; obj: TDXDraw; blik: boolean;
   bgZaver: boolean = false);
 var fg, bg: TColor;
@@ -241,8 +241,8 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
-// zobrazi soupravy na celem useku
 
+// zobrazi vlaku na celem useku
 procedure TPTrack.ShowTrains(obj: TDXDraw; blik: boolean; myORs: TList<TAreaPanel>);
 begin
   // Posindex neni potreba mazat, protoze se vzdy se zmenou stavu bloku
@@ -263,7 +263,7 @@ begin
     end;
 
   end else begin
-    // vsechny soupravy, ktere se vejdou, krome posledni
+    // vsechny vlaky, ktere se vejdou, krome posledni
     var index: Integer := 0;
     var step: Integer := Max(Self.trains.Count div Self.panelProp.trains.Count, 1);
     for var i := 0 to Min(Self.trains.Count, Self.panelProp.trains.Count) - 2 do
@@ -280,7 +280,7 @@ begin
       index := index + step;
     end;
 
-    // posledni souprava na posledni pozici
+    // posledni vlak na posledni pozici
     if (Self.trains.Count > 0) then
     begin
       Self.PaintTrain(Self.trains[Self.trains.Count - 1], Self.panelProp.trains.Count - 1, myORs, obj, blik);

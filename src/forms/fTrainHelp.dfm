@@ -1,9 +1,9 @@
-object F_SprHelp: TF_SprHelp
+object F_TrainHelp: TF_TrainHelp
   Left = 918
   Top = 247
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'N'#225'pov'#283'da k souprav'#225'm'
+  Caption = 'N'#225'pov'#283'da k vlak'#367'm'
   ClientHeight = 286
   ClientWidth = 281
   Color = clBtnFace

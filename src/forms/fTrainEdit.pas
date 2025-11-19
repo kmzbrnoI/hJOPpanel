@@ -1,4 +1,4 @@
-﻿unit fSprEdit;
+﻿unit fTrainEdit;
 
 {
   Train edit window.
@@ -8,7 +8,7 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fSprHVEdit, Buttons,
+  StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fTrainHVEdit, Buttons,
   CloseTabSheet, Themes, Generics.Collections, Types;
 
 const
@@ -17,7 +17,7 @@ const
 
 type
 
-  TF_SoupravaEdit = class(TForm)
+  TF_TrainEdit = class(TForm)
     L_S01: TLabel;
     E_Nazev: TEdit;
     B_Save: TButton;
@@ -66,7 +66,7 @@ type
     procedure CHB_MaxSpeedClick(Sender: TObject);
   private
     OblR: string;
-    HVs: TObjectList<TF_SprHVEdit>;
+    HVs: TObjectList<TF_TrainHVEdit>;
     HVDb: THVDb;
     sprHVs: THVDb;
 
@@ -87,18 +87,18 @@ type
   end;
 
 var
-  F_SoupravaEdit: TF_SoupravaEdit;
+  F_TrainEdit: TF_TrainEdit;
 
 implementation
 
-uses fSprHelp, fMain, TCPClientPanel, ORList, IfThenElse;
+uses fTrainHelp, fMain, TCPClientPanel, ORList, IfThenElse;
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
 
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.E_PoznamkaKeyPress(Sender: TObject; var Key: Char);
+procedure TF_TrainEdit.E_PoznamkaKeyPress(Sender: TObject; var Key: Char);
 begin
   for var i := 0 to Length(_forbidden_chars) - 1 do
     if (_forbidden_chars[i] = Key) then
@@ -108,9 +108,9 @@ begin
     end;
 end;
 
-procedure TF_SoupravaEdit.BB_HV_AddClick(Sender: TObject);
+procedure TF_TrainEdit.BB_HV_AddClick(Sender: TObject);
 var ts: TCloseTabSheet;
-  form: TF_SprHVEdit;
+  form: TF_TrainHVEdit;
 begin
   if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
   begin
@@ -125,7 +125,7 @@ begin
   ts.OnClose := Self.OnTabClose;
   Self.PC_HVs.ActivePage := ts;
 
-  form := TF_SprHVEdit.Create(ts);
+  form := TF_TrainHVEdit.Create(ts);
   form.Parent := ts;
   form.Show();
   Self.HVs.Add(form);
@@ -136,14 +136,14 @@ begin
     Self.BB_HV_Add.Enabled := false;
 end;
 
-procedure TF_SoupravaEdit.B_HelpClick(Sender: TObject);
+procedure TF_TrainEdit.B_HelpClick(Sender: TObject);
 begin
-  F_SprHelp.Show();
+  F_TrainHelp.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.NewSpr(HVs: THVDb; Sender: string);
+procedure TF_TrainEdit.NewSpr(HVs: THVDb; Sender: string);
 begin
   Self.HVDb := HVs;
   Self.OblR := Sender;
@@ -178,7 +178,7 @@ begin
   ts.Caption := 'HV 1';
   ts.OnClose := OnTabClose;
 
-  var form := TF_SprHVEdit.Create(ts);
+  var form := TF_TrainHVEdit.Create(ts);
   form.Parent := ts;
   form.Show();
   Self.HVs.Add(form);
@@ -186,14 +186,14 @@ begin
   form.FillHV(HVs, nil);
 
   Self.ActiveControl := Self.E_Nazev;
-  Self.Caption := 'Nová souprava';
+  Self.Caption := 'Nový vlak';
   Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
-procedure TF_SoupravaEdit.EditSpr(parsed: TStrings; HVs: THVDb; sender_id: string; owner: string);
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
+procedure TF_TrainEdit.EditSpr(parsed: TStrings; HVs: THVDb; sender_id: string; owner: string);
 begin
   Self.HVDb := HVs;
   Self.OblR := sender_id;
@@ -231,7 +231,7 @@ begin
 
     Self.sprHVs.ParseHVs(parsed[8]);
   except
-    Application.MessageBox('Neplatný formát dat soupravy !', 'Nelze editovat soupravu', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Neplatný formát dat vlaku !', 'Nelze editovat vlak', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
@@ -249,7 +249,7 @@ begin
     ts.Caption := 'HV ' + IntToStr(i + 1);
     ts.OnClose := OnTabClose;
 
-    var form := TF_SprHVEdit.Create(ts);
+    var form := TF_TrainHVEdit.Create(ts);
     form.Parent := ts;
     form.Show();
     Self.HVs.Add(form);
@@ -260,18 +260,18 @@ begin
   Self.BB_HV_Add.Enabled := (Self.sprHVs.HVs.Count < _MAX_HV_CNT);
 
   Self.ActiveControl := Self.E_Nazev;
-  Self.Caption := 'Souprava ' + Self.E_Nazev.Text + ' – ' + owner;
+  Self.Caption := 'Vlak ' + Self.E_Nazev.Text + ' – ' + owner;
   Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// format dat soupravy: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
-procedure TF_SoupravaEdit.B_SaveClick(Sender: TObject);
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
+procedure TF_TrainEdit.B_SaveClick(Sender: TObject);
 begin
   if (Self.E_Nazev.Text = '') then
   begin
-    Application.MessageBox('Vyplňte název soupravy!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyplňte název vlaku!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
@@ -280,7 +280,7 @@ begin
   begin
     if (StrScan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
     begin
-      Application.MessageBox(PChar('Poznámka k soupravě obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
+      Application.MessageBox(PChar('Poznámka k vlaku obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
         GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
@@ -295,13 +295,13 @@ begin
 
   if ((Self.CHB_report.Checked) and (Self.CB_Typ.Text = '')) then
   begin
-    Application.MessageBox('Pro staniční hlášení musí být vyplněn typ soupravy!', 'Nelze pokračovat',
+    Application.MessageBox('Pro staniční hlášení musí být vyplněn typ vlaku!', 'Nelze pokračovat',
       MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if ((Self.CHB_MaxSpeed.Checked) and (Self.SE_MaxSpeed.Value < 10)) then
   begin
-    Application.MessageBox('Omezení na maximální rychlost soupravy musí být alespoň 10 km/h!', 'Nelze pokračovat',
+    Application.MessageBox('Omezení na maximální rychlost vlaku musí být alespoň 10 km/h!', 'Nelze pokračovat',
       MB_OK OR MB_ICONWARNING);
     Exit();
   end;
@@ -320,7 +320,7 @@ begin
   begin
     if (Self.HVs[i].HV = nil) then
     begin
-      Application.MessageBox(PChar('Vyberte hnací vozidlo soupravy na záložce ' + Self.PC_HVs.Pages[i].Caption),
+      Application.MessageBox(PChar('Vyberte hnací vozidlo vlaku na záložce ' + Self.PC_HVs.Pages[i].Caption),
         'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
@@ -391,13 +391,13 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.B_StornoClick(Sender: TObject);
+procedure TF_TrainEdit.B_StornoClick(Sender: TObject);
 begin
   Relief.Escape();
   Self.Close();
 end;
 
-procedure TF_SoupravaEdit.CB_TypChange(Sender: TObject);
+procedure TF_TrainEdit.CB_TypChange(Sender: TObject);
 begin
   if (not Self.CHB_report.Enabled) then
     Exit();
@@ -414,7 +414,7 @@ begin
   CHB_report.Checked := true;
 end;
 
-procedure TF_SoupravaEdit.CHB_MaxSpeedClick(Sender: TObject);
+procedure TF_TrainEdit.CHB_MaxSpeedClick(Sender: TObject);
 begin
   Self.SE_MaxSpeed.Enabled := Self.CHB_MaxSpeed.Checked;
   if (not Self.CHB_MaxSpeed.Checked) then
@@ -423,7 +423,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_TrainEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Self.HVDb := nil;
 
@@ -432,9 +432,9 @@ begin
     Self.PC_HVs.Pages[i].Free();
 end;
 
-procedure TF_SoupravaEdit.FormCreate(Sender: TObject);
+procedure TF_TrainEdit.FormCreate(Sender: TObject);
 begin
-  Self.HVs := TObjectList<TF_SprHVEdit>.Create();
+  Self.HVs := TObjectList<TF_TrainHVEdit>.Create();
 
   Self.PC_HVs.TabWidth := 60;
   Self.PC_HVs.OwnerDraw := true;
@@ -442,7 +442,7 @@ begin
   Self.sprHVs := THVDb.Create();
 end;
 
-procedure TF_SoupravaEdit.FormDestroy(Sender: TObject);
+procedure TF_TrainEdit.FormDestroy(Sender: TObject);
 begin
   // smazeme zalozky pro hnaci vozidla
   Self.HVs.Free();
@@ -455,7 +455,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.TechError(err: string);
+procedure TF_TrainEdit.TechError(err: string);
 begin
   Screen.Cursor := crDefault;
   Self.T_Timeout.Enabled := false;
@@ -463,25 +463,25 @@ begin
     MB_OK OR MB_ICONWARNING);
 end;
 
-procedure TF_SoupravaEdit.T_TimeoutTimer(Sender: TObject);
+procedure TF_TrainEdit.T_TimeoutTimer(Sender: TObject);
 begin
   Self.T_Timeout.Enabled := false;
   Screen.Cursor := crDefault;
-  Application.MessageBox('Technologický server neodpověděl na požadavek o editaci soupravy', 'Varování',
+  Application.MessageBox('Technologický server neodpověděl na požadavek o editaci vlaku', 'Varování',
     MB_OK OR MB_ICONWARNING);
 end;
 
-procedure TF_SoupravaEdit.TechACK();
+procedure TF_TrainEdit.TechACK();
 begin
   Screen.Cursor := crDefault;
-  Relief.ORInfoMsg('Souprava uložena');
+  Relief.ORInfoMsg('Vlak uložen');
   Self.T_Timeout.Enabled := false;
   Self.Close();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.PageControlCloseButtonDrawTab(Control: TCustomTabControl; TabIndex: Integer;
+procedure TF_TrainEdit.PageControlCloseButtonDrawTab(Control: TCustomTabControl; TabIndex: Integer;
   const Rect: TRect; Active: Boolean);
 var
   CloseBtnSize: Integer;
@@ -542,7 +542,7 @@ begin
   end;
 end;
 
-procedure TF_SoupravaEdit.PageControlCloseButtonMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
+procedure TF_TrainEdit.PageControlCloseButtonMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
 var
   PageControl: TPageControl;
@@ -567,7 +567,7 @@ begin
   end;
 end;
 
-procedure TF_SoupravaEdit.PageControlCloseButtonMouseLeave(Sender: TObject);
+procedure TF_TrainEdit.PageControlCloseButtonMouseLeave(Sender: TObject);
 var
   PageControl: TPageControl;
 begin
@@ -576,7 +576,7 @@ begin
   PageControl.Repaint;
 end;
 
-procedure TF_SoupravaEdit.PageControlCloseButtonMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TF_TrainEdit.PageControlCloseButtonMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   PageControl: TPageControl;
   Inside: Boolean;
@@ -595,7 +595,7 @@ begin
   end;
 end;
 
-procedure TF_SoupravaEdit.PageControlCloseButtonMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
+procedure TF_TrainEdit.PageControlCloseButtonMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
 var
   PageControl: TPageControl;
@@ -613,7 +613,7 @@ begin
   end;
 end;
 
-procedure TF_SoupravaEdit.SB_st_changeClick(Sender: TObject);
+procedure TF_TrainEdit.SB_st_changeClick(Sender: TObject);
 var tmp: Integer;
 begin
   tmp := Self.CB_Cilova.ItemIndex;
@@ -623,7 +623,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.OnTabClose(Sender: TObject);
+procedure TF_TrainEdit.OnTabClose(Sender: TObject);
 begin
   for var i := 0 to Self.PC_HVs.PageCount - 1 do
   begin
@@ -631,7 +631,7 @@ begin
     begin
       Self.HVs.Delete(i);
 
-      // preradime HV ze soupravy do obecneho seznamu HV
+      // preradime HV z vlaku do obecneho seznamu HV
       if (i < Self.sprHVs.HVs.Count) then
       begin
         for var HV in HVDb.HVs do
@@ -659,7 +659,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_SoupravaEdit.FillORs(vychoziId: string; cilovaId: string);
+procedure TF_TrainEdit.FillORs(vychoziId: string; cilovaId: string);
 var name: string;
 begin
   Self.CB_Vychozi.Clear();

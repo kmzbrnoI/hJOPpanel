@@ -192,7 +192,7 @@
             <Form>F_ModelTIme</Form>
         </DCCReference>
         <DCCReference Include="DCC_Icons.pas"/>
-        <DCCReference Include="forms\fSoupravy.pas">
+        <DCCReference Include="forms\fTrains.pas">
             <Form>F_SprList</Form>
         </DCCReference>
         <DCCReference Include="LokoRuc.pas"/>

@@ -136,11 +136,11 @@ begin
       end;
     end;
 
-    // usporadame seznam souprav podle licheho smeru
+    // usporadame seznam vlaku podle licheho smeru
     if (myORs[track.area].orientation = aoOddRightToLeft) then
       track.trains.Reverse();
 
-    // pokud nejsou pozice na soupravu, kreslime soupravu na cislo koleje
+    // pokud nejsou pozice na vlaky, kreslime vlak na cislo koleje
     if ((track.trains.Count = 0) and (track.name <> '') and (track.labels.Count <> 0)) then
       track.trains.Add(track.labels[0]);
 
@@ -207,7 +207,7 @@ begin
     Exit();
   Result.traini := -1;
 
-  // zjisteni indexu soupravy
+  // zjisteni indexu vlaku
   for var i := 0 to Self.data[Result.index].panelProp.trains.Count - 1 do
   begin
     var us := Self.data[Result.index].panelProp.trains[i];
@@ -283,13 +283,13 @@ begin
     end;
 
     // vykresleni cisla koleje
-    // kdyz by mela cislo koleje prekryt souprava, nevykreslovat cislo koleje
-    // (cislo soupravy muze byt kratsi nez cislo koleje)
+    // kdyz by melo cislo koleje byt prekryto vlakem, nevykreslovat cislo koleje
+    // (cislo vlaku muze byt kratsi nez cislo koleje)
     if ((track.trains.Count > 0) and (track.labels.Count > 0)) then
     begin
       if (track.TrainPaintsOnRailNum() and (track.panelProp.trains.Count > 0) and ((not flash) or (not track.panelProp.trains[0].flash))) then
       begin
-        for var j := 1 to track.labels.Count - 1 do // na nulte pozici je cislo soupravy
+        for var j := 1 to track.labels.Count - 1 do // na nulte pozici je cislo vlaku
           track.PaintTrackName(track.labels[j], obj, fg = clBlack);
       end else begin
         for var p in track.labels do

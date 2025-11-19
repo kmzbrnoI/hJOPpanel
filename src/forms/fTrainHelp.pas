@@ -1,4 +1,4 @@
-﻿unit fSprHelp;
+﻿unit fTrainHelp;
 
 {
   Train help window.
@@ -11,7 +11,7 @@ uses
   ComCtrls, IniFiles;
 
 type
-  TF_SprHelp = class(TForm)
+  TF_TrainHelp = class(TForm)
     B_OK: TButton;
     LV_SprHelp: TListView;
     procedure B_OKClick(Sender: TObject);
@@ -22,18 +22,18 @@ type
   end;
 
 var
-  F_SprHelp: TF_SprHelp;
+  F_TrainHelp: TF_TrainHelp;
 
 implementation
 
 {$R *.dfm}
 
-procedure TF_SprHelp.B_OKClick(Sender: TObject);
+procedure TF_TrainHelp.B_OKClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_SprHelp.LoadData(ini: TMemIniFile);
+procedure TF_TrainHelp.LoadData(ini: TMemIniFile);
 const _SECTION: string = 'train-types';
 var strs: TStrings;
 begin

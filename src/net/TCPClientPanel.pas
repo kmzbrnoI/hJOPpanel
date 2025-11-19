@@ -111,9 +111,9 @@ var
 
 implementation
 
-uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fSprEdit,
-  ModelovyCas, fNastaveni_casu, DCC_Icons, fSoupravy, LokoRuc, fAuth,
-  GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fSprToSlot,
+uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fTrainEdit,
+  ModelovyCas, fNastaveni_casu, DCC_Icons, fTrains, LokoRuc, fAuth,
+  GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fTrainToSlot,
   fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt, BlockTypes;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -283,12 +283,12 @@ begin
   TF_Messages.CloseForms();
   if (F_StitVyl.Showing) then
     F_StitVyl.Close();
-  if (F_SoupravaEdit.Showing) then
-    F_SoupravaEdit.Close();
+  if (F_TrainEdit.Showing) then
+    F_TrainEdit.Close();
   if (F_PotvrSekv.Showing) then
     F_PotvrSekv.Close();
-  if (F_SprList.Showing) then
-    F_SprList.Close();
+  if (F_Trains.Showing) then
+    F_Trains.Close();
   if (F_HVSearch.Showing) then
     F_HVSearch.Close();
   if (F_Auth.Showing) then
@@ -308,10 +308,10 @@ begin
   ModelTime.Reset();
   F_ModelTime.Close();
   DCC.status := TDCCStatus.disabled;
-  F_Main.SB_Soupravy.Enabled := false;
+  F_Main.SB_Trains.Enabled := false;
   RucList.Clear();
   F_RegReq.Close();
-  F_SprToSlot.Close();
+  F_TrainToSlot.Close();
 
   Self.fstatus := TPanelConnectionStatus.closed;
   Self.pingTimer.Enabled := false;
@@ -436,7 +436,7 @@ begin
     BridgeClient.toLogin.server := Self.tcpClient.host;
     BridgeClient.toLogin.port := Self.tcpClient.port;
     Relief.ORConnectionOpenned();
-    F_Main.SB_Soupravy.Enabled := true;
+    F_Main.SB_Trains.Enabled := true;
   end
 
   else if ((parsed[1] = 'PING') and (parsed.Count > 2) and (UpperCase(parsed[2]) = 'REQ-RESP')) then
@@ -519,9 +519,9 @@ begin
 
   else if (parsed[1] = 'SPR-LIST') then
     if (parsed.Count > 2) then
-      F_SprList.ParseLoko(parsed[2])
+      F_Trains.ParseLoko(parsed[2])
     else
-      F_SprList.ParseLoko('')
+      F_Trains.ParseLoko('')
 
   else if ((parsed[1] = 'F-VYZN-LIST') and (parsed.Count > 2)) then
     F_HVEdit.ParseVyznamy(parsed[2])
@@ -579,10 +579,10 @@ begin
     Relief.ORSprEdit(parsed[0], parsed)
 
   else if (parsed[1] = 'SPR-EDIT-ERR') then
-    F_SoupravaEdit.TechError(parsed[2])
+    F_TrainEdit.TechError(parsed[2])
 
   else if (parsed[1] = 'SPR-EDIT-ACK') then
-    F_SoupravaEdit.TechACK()
+    F_TrainEdit.TechACK()
 
   else if ((parsed[1] = 'OSV') and (parsed.Count > 2)) then
     Self.OsvListParse(parsed[0], parsed[2])
@@ -616,7 +616,7 @@ begin
     SetLength(ar, data.Count);
     for i := 0 to data.Count - 1 do
       ar[i] := StrToInt(data[i]);
-    F_SprToSlot.Open(parsed[0], ar);
+    F_TrainToSlot.Open(parsed[0], ar);
     data.Free();
 
   end else if (parsed[1] = 'SHP') then
