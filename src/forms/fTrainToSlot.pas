@@ -23,7 +23,7 @@ type
     B_Slots: array [1 .. TBridgeClient._SLOTS_CNT] of TButton;
     B_Slots_Ruc: array [1 .. TBridgeClient._SLOTS_CNT] of TButton;
 
-    HVs: TWordAr;
+    RVs: TWordAr;
     area: string;
 
     procedure CreateSlotsButtons();
@@ -35,7 +35,7 @@ type
     token_req_sent: boolean;
 
     procedure RepaintSlots();
-    procedure Open(orId: string; HVs: TWordAr);
+    procedure Open(orId: string; RVs: TWordAr);
 
     procedure ServerResponseOK();
     procedure ServerResponseErr(err: string);
@@ -142,7 +142,7 @@ end;
 
 procedure TF_TrainToSlot.ButtonSlotClick(Sender: TObject);
 begin
-  tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, false);
+  tokens.LokosToMaus(Self.area, Self.RVs, TButton(Sender).Tag, false);
 
   Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenů...';
   Self.token_req_sent := true;
@@ -150,7 +150,7 @@ end;
 
 procedure TF_TrainToSlot.ButtonSlotRucClick(Sender: TObject);
 begin
-  tokens.LokosToMaus(Self.area, Self.HVs, TButton(Sender).Tag, true);
+  tokens.LokosToMaus(Self.area, Self.RVs, TButton(Sender).Tag, true);
 
   Self.L_Stav.Caption := 'Odeslána žádost o vydání tokenů...';
   Self.token_req_sent := true;
@@ -158,15 +158,15 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_TrainToSlot.Open(orId: string; HVs: TWordAr);
+procedure TF_TrainToSlot.Open(orId: string; RVs: TWordAr);
 begin
   Self.area := orId;
-  Self.HVs := HVs;
+  Self.RVs := RVs;
 
   Self.L_Addrs.Caption := '';
-  for var i := 0 to Length(HVs) - 2 do
-    Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[i]) + ', ';
-  Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(HVs[Length(HVs) - 1]);
+  for var i := 0 to Length(RVs) - 2 do
+    Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(RVs[i]) + ', ';
+  Self.L_Addrs.Caption := Self.L_Addrs.Caption + IntToStr(RVs[Length(RVs) - 1]);
 
   Self.L_Stav.Caption := 'Vyberte slot';
   Self.L_Stav.Font.Color := clBlack;

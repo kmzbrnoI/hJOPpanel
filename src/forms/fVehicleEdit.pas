@@ -1,4 +1,4 @@
-﻿unit fHVEdit;
+﻿unit fVehicleEdit;
 
 {
   Engine edit window.
@@ -8,14 +8,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, HVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
+  Dialogs, StdCtrls, ExtCtrls, RVDb, RPConst, TCPClientPanel, ComCtrls, Buttons,
   Generics.Collections, AppEvnts, Spin, IniFiles;
 
 type
-  TF_HVEdit = class(TForm)
-    L_HV: TLabel;
-    CB_HV: TComboBox;
-    GB_HV: TGroupBox;
+  TF_VehicleEdit = class(TForm)
+    L_RV: TLabel;
+    CB_RV: TComboBox;
+    GB_RV: TGroupBox;
     Label2: TLabel;
     E_Name: TEdit;
     E_Oznaceni: TEdit;
@@ -51,7 +51,7 @@ type
     Label1: TLabel;
     CB_POM_Release: TComboBox;
     CHB_Multitrack: TCheckBox;
-    procedure CB_HVChange(Sender: TObject);
+    procedure CB_RVChange(Sender: TObject);
     procedure B_CancelClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
@@ -73,7 +73,7 @@ type
     procedure LV_Pom_ManualKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
-    HVs: THVDb;
+    RVs: TRVDb;
     new: Boolean;
     m_area: string;
     CB_funkce: array [0 .. _MAX_FUNC] of TComboBox;
@@ -81,9 +81,9 @@ type
     RB_M: array [0 .. _MAX_FUNC] of TRadioButton;
     P_types: array [0 .. _MAX_FUNC] of TPanel;
     FOldListviewWindowProc: TWndMethod;
-    vyznType: TDictionary<string, THVFuncType>;
+    vyznType: TDictionary<string, TRVFuncType>;
     transience: TDictionary<Cardinal, string>;
-    m_hvlistRefreshWarning: Boolean;
+    m_rvlistRefreshWarning: Boolean;
 
     procedure InitFunkce();
     procedure FreeFunkce();
@@ -94,106 +94,106 @@ type
     procedure FillEngines(selectAddr: Integer = -1);
 
   public
-    procedure HVAdd(area: string; HVs: THVDb);
-    procedure HVEdit(area: string; HVs: THVDb);
+    procedure RVAdd(area: string; RVs: TRVDb);
+    procedure RVEdit(area: string; RVs: TRVDb);
     procedure ParseVyznamy(vyznamy: string);
 
     procedure ServerEditResp(parsed: TStrings);
     procedure ServerAddResp(parsed: TStrings);
 
     procedure LoadPrechodnost(ini: TMemIniFile);
-    procedure HVListRefreshed();
+    procedure RVListRefreshed();
     property area: string read m_area;
 
   end;
 
 var
-  F_HVEdit: TF_HVEdit;
+  F_VehicleEdit: TF_VehicleEdit;
 
 implementation
 
-uses fHVPomEdit, commctrl, parseHelper;
+uses fRVPomEdit, commctrl, parseHelper;
 
 {$R *.dfm}
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.HVAdd(area: string; HVs: THVDb);
+procedure TF_VehicleEdit.RVAdd(area: string; RVs: TRVDb);
 begin
   Self.m_area := area;
-  Self.HVs := HVs;
+  Self.RVs := RVs;
   Self.new := true;
 
   Self.FillEngines();
   Self.B_Search.Visible := true;
 
-  Self.CB_HV.Enabled := True;
-  Self.Caption := 'Vytvořit nové hnací vozidlo';
-  Self.L_HV.Caption := 'Vytvořit hnací vozidlo na základě šablony:';
+  Self.CB_RV.Enabled := True;
+  Self.Caption := 'Vytvořit nové vozidlo';
+  Self.L_RV.Caption := 'Vytvořit vozidlo na základě šablony:';
   Self.Show();
-  Self.ActiveControl := Self.CB_HV;
+  Self.ActiveControl := Self.CB_RV;
 end;
 
-procedure TF_HVEdit.HVEdit(area: string; HVs: THVDb);
+procedure TF_VehicleEdit.RVEdit(area: string; RVs: TRVDb);
 begin
   Self.m_area := area;
   Self.new := false;
-  Self.HVs := HVs;
+  Self.RVs := RVs;
 
   Self.FillEngines();
   Self.B_Search.Visible := false;
 
-  Self.CB_HV.Enabled := True;
-  Self.Caption := 'Upravit hnací vozidlo';
-  Self.L_HV.Caption := 'Hnací vozidlo:';
+  Self.CB_RV.Enabled := True;
+  Self.Caption := 'Upravit vozidlo';
+  Self.L_RV.Caption := 'Vozidlo:';
   Self.Show();
-  Self.ActiveControl := Self.CB_HV;
+  Self.ActiveControl := Self.CB_RV;
 end;
 
-procedure TF_HVEdit.FillEngines(selectAddr: Integer = -1);
+procedure TF_VehicleEdit.FillEngines(selectAddr: Integer = -1);
 var arr: TWordAr; // not used
 begin
-  HVs.FillHVs(Self.CB_HV, arr, -1, nil, true);
+  RVs.Fill(Self.CB_RV, arr, -1, nil, true);
   if (Self.new) then
   begin
-    Self.CB_HV.Items.Insert(0, 'Nepoužít šablonu');
-    Self.CB_HV.ItemIndex := 0;
+    Self.CB_RV.Items.Insert(0, 'Nepoužít šablonu');
+    Self.CB_RV.ItemIndex := 0;
   end;
 
-  for var i: Integer := 0 to Self.HVs.HVs.Count-1 do
-    if (Integer(Self.HVs.HVs[i].addr) = selectAddr) then
-      Self.CB_HV.ItemIndex := i + BoolToInt(Self.new);
+  for var i: Integer := 0 to Self.RVs.Count-1 do
+    if (Integer(Self.RVs[i].addr) = selectAddr) then
+      Self.CB_RV.ItemIndex := i + BoolToInt(Self.new);
 
-  Self.CB_HVChange(Self.CB_HV);
+  Self.CB_RVChange(Self.CB_RV);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.B_ApplyClick(Sender: TObject);
+procedure TF_VehicleEdit.B_ApplyClick(Sender: TObject);
 begin
   if (Self.E_Name.Text = '') then
   begin
-    Application.MessageBox('Vyplňte název lokomotivy!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyplňte název vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if (Self.E_Adresa.Text = '') then
   begin
-    Application.MessageBox('Vyplňte adresu lokomotivy!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyplňte adresu vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if (Self.RG_Trida.ItemIndex < 0) then
   begin
-    Application.MessageBox('Vyberte třídu lokomotivy!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte třídu vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if (Self.RG_StA.ItemIndex < 0) then
   begin
-    Application.MessageBox('Vyberte stanoviště A lokomotivy!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte stanoviště A vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if (Self.CB_Prechodnost.ItemIndex < 0) then
   begin
-    Application.MessageBox('Vyberte třídu přechodnosti hnacího vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte třídu přechodnosti vozidla!', 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if ((Self.CB_POM_Release.ItemIndex < 0) and (Self.CB_POM_Release.Enabled)) then
@@ -202,53 +202,53 @@ begin
     Exit();
   end;
 
-  var HV := THV.Create();
+  var vehicle := TRV.Create();
   try
     // kontrola M_Poznamka
     for var j := 0 to Length(_forbidden_chars) - 1 do
     begin
       if (strscan(PChar(Self.M_Poznamka.Text), _forbidden_chars[j]) <> nil) then
       begin
-        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
+        Application.MessageBox(PChar('Poznámka k vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: ' +
           GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
       end;
     end;
 
-    HV.name := Self.E_Name.Text;
-    HV.owner := Self.E_Majitel.Text;
-    HV.designation := Self.E_Oznaceni.Text;
-    HV.note := Self.M_Poznamka.Text;
-    HV.addr := StrToInt(Self.E_Adresa.Text);
+    vehicle.name := Self.E_Name.Text;
+    vehicle.owner := Self.E_Majitel.Text;
+    vehicle.designation := Self.E_Oznaceni.Text;
+    vehicle.note := Self.M_Poznamka.Text;
+    vehicle.addr := StrToInt(Self.E_Adresa.Text);
     if (Self.RG_Trida.ItemIndex = Self.RG_Trida.Items.Count - 1) then
-      HV.typ := THVType.other
+      vehicle.typ := TRVType.other
     else
-      HV.typ := THVType(Self.RG_Trida.ItemIndex);
-    HV.train := '-';
-    HV.siteA := THVSite(Self.RG_StA.ItemIndex);
-    HV.maxSpeed := Self.SE_MaxSpeed.Value;
+      vehicle.typ := TRVType(Self.RG_Trida.ItemIndex);
+    vehicle.train := '-';
+    vehicle.siteA := TRVSite(Self.RG_StA.ItemIndex);
+    vehicle.maxSpeed := Self.SE_MaxSpeed.Value;
     var str := Self.CB_Prechodnost.Items[Self.CB_Prechodnost.ItemIndex];
-    HV.transience := StrToInt(Copy(str, 1, Pos(':', str) - 1));
-    HV.multitrackCapable := Self.CHB_Multitrack.Checked;
+    vehicle.transience := StrToInt(Copy(str, 1, Pos(':', str) - 1));
+    vehicle.multitrackCapable := Self.CHB_Multitrack.Checked;
     if (Self.CB_POM_Release.Enabled) then
-      HV.POMrelease := TPomStatus(Self.CB_POM_Release.ItemIndex)
+      vehicle.POMrelease := TPomStatus(Self.CB_POM_Release.ItemIndex)
     else
-      HV.POMrelease := TPomStatus.manual;
+      vehicle.POMrelease := TPomStatus.manual;
 
     for var i := 0 to _MAX_FUNC do
-      HV.functions[i] := Self.LV_Funkce.Items[i].Checked;
+      vehicle.functions[i] := Self.LV_Funkce.Items[i].Checked;
 
-    HV.POMautomat.Clear();
-    HV.POMmanual.Clear();
+    vehicle.POMautomat.Clear();
+    vehicle.POMmanual.Clear();
 
     // parse POM take
     for var i := 0 to Self.LV_Pom_Automat.Items.Count - 1 do
     begin
       try
-        var pomCV: THVPomCV;
+        var pomCV: TRVPomCV;
         pomCV.cv := StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption);
         pomCV.value := StrToInt(Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0]);
-        HV.POMautomat.Add(pomCV);
+        vehicle.POMautomat.Add(pomCV);
       except
 
       end;
@@ -258,10 +258,10 @@ begin
     for var i := 0 to Self.LV_POM_Manual.Items.Count - 1 do
     begin
       try
-        var pomCV: THVPomCV;
+        var pomCV: TRVPomCV;
         pomCV.cv := StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption);
         pomCV.value := StrToInt(Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0]);
-        HV.POMmanual.Add(pomCV);
+        vehicle.POMmanual.Add(pomCV);
       except
 
       end;
@@ -284,20 +284,20 @@ begin
           Exit();
         end;
 
-      HV.funcDesc[i] := Self.CB_funkce[i].Text;
+      vehicle.funcDesc[i] := Self.CB_funkce[i].Text;
       if (Self.RB_M[i].Checked) then
-        HV.funcType[i] := THVFuncType.momentary
+        vehicle.funcType[i] := TRVFuncType.momentary
       else
-        HV.funcType[i] := THVFuncType.permanent;
+        vehicle.funcType[i] := TRVFuncType.permanent;
     end;
 
     Self.SetEngineGUIEnabled(false);
-    Self.CB_HV.Enabled := False;
+    Self.CB_RV.Enabled := False;
     if (Self.new) then
     begin
-      PanelTCPClient.PanelHVAdd(Self.area, '{' + HV.GetPanelLokString(full) + '}');
+      PanelTCPClient.PanelRVAdd(Self.area, '{' + vehicle.GetPanelLokString(full) + '}');
     end else begin
-      PanelTCPClient.PanelHVEdit(Self.area, '{' + HV.GetPanelLokString(full) + '}');
+      PanelTCPClient.PanelRVEdit(Self.area, '{' + vehicle.GetPanelLokString(full) + '}');
     end;
 
     // generate new function descriptions
@@ -317,56 +317,56 @@ begin
     if (newDescs <> '') then
       PanelTCPClient.SendLn('-;F-VYZN-ADD;{' + newDescs + '}');
   finally
-    HV.Free();
+    vehicle.Free();
   end;
 
   Screen.Cursor := crHourGlass;
 end;
 
-procedure TF_HVEdit.B_CancelClick(Sender: TObject);
+procedure TF_VehicleEdit.B_CancelClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_HVEdit.B_RefreshClick(Sender: TObject);
+procedure TF_VehicleEdit.B_RefreshClick(Sender: TObject);
 begin
   var response: Integer := Application.MessageBox('Tato operace zahodí neuložené změny, pokračovat?', 'Pokračovat?', MB_YESNO OR MB_ICONQUESTION);
   if (response = mrYes) then
   begin
-    Self.CB_HV.Enabled := False;
+    Self.CB_RV.Enabled := False;
     Self.SetEngineGUIEnabled(False);
-    Self.m_hvlistRefreshWarning := True;
+    Self.m_rvlistRefreshWarning := True;
     PanelTCPClient.PanelLokList(Self.area); // refresh engine list
   end;
 end;
 
-procedure TF_HVEdit.B_SearchClick(Sender: TObject);
+procedure TF_VehicleEdit.B_SearchClick(Sender: TObject);
 begin
   if (Self.E_Adresa.Text = '') then
   begin
-    Application.MessageBox('Vyplňte adresu hnacího vozidla!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyplňte adresu vozidla!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
   PanelTCPClient.SendLn('-;HV;ASK;' + Self.E_Adresa.Text);
 end;
 
-procedure TF_HVEdit.CB_HVChange(Sender: TObject);
+procedure TF_VehicleEdit.CB_RVChange(Sender: TObject);
 begin
   Self.SB_POM_Automat_Remove.Enabled := false;
   Self.SB_POM_Manual_Remove.Enabled := false;
   Self.LV_POM_Automat.Clear();
   Self.LV_POM_Manual.Clear();
 
-  Self.SetEngineGUIEnabled(Self.CB_HV.ItemIndex > -1);
+  Self.SetEngineGUIEnabled(Self.CB_RV.ItemIndex > -1);
 
-  var outdated: Boolean := ((Self.HVs.HVs.Count+BoolToInt(Self.new)) <> Self.CB_HV.Items.Count);
+  var outdated: Boolean := ((Self.RVs.Count+BoolToInt(Self.new)) <> Self.CB_RV.Items.Count);
 
-  if (Self.CB_HV.ItemIndex > -1) then
+  if (Self.CB_RV.ItemIndex > -1) then
   begin
     Self.E_Adresa.ReadOnly := not Self.new;
 
-    if (((Self.new) and (Self.CB_HV.ItemIndex = 0)) or (outdated)) then
+    if (((Self.new) and (Self.CB_RV.ItemIndex = 0)) or (outdated)) then
     begin
       Self.E_Name.Text := '';
       Self.E_Oznaceni.Text := '';
@@ -401,20 +401,20 @@ begin
       end;
 
     end else begin
-      var HV: THV := Self.HVs.HVs[Self.CB_HV.ItemIndex - BoolToInt(Self.new)];
+      var vehicle: TRV := Self.RVs[Self.CB_RV.ItemIndex - BoolToInt(Self.new)];
 
-      Self.E_Name.Text := HV.name;
-      Self.E_Oznaceni.Text := HV.designation;
-      Self.E_Majitel.Text := HV.owner;
-      Self.E_Adresa.Text := IntToStr(HV.addr);
-      Self.M_Poznamka.Text := HV.note;
-      if (HV.typ = THVType.other) then
+      Self.E_Name.Text := vehicle.name;
+      Self.E_Oznaceni.Text := vehicle.designation;
+      Self.E_Majitel.Text := vehicle.owner;
+      Self.E_Adresa.Text := IntToStr(vehicle.addr);
+      Self.M_Poznamka.Text := vehicle.note;
+      if (vehicle.typ = TRVType.other) then
         Self.RG_Trida.ItemIndex := Self.RG_Trida.Items.Count - 1
       else
-        Self.RG_Trida.ItemIndex := Integer(HV.typ);
-      Self.RG_StA.ItemIndex := Integer(HV.siteA);
-      Self.SE_MaxSpeed.Value := HV.maxSpeed;
-      Self.CHB_Multitrack.Checked := HV.multitrackCapable;
+        Self.RG_Trida.ItemIndex := Integer(vehicle.typ);
+      Self.RG_StA.ItemIndex := Integer(vehicle.siteA);
+      Self.SE_MaxSpeed.Value := vehicle.maxSpeed;
+      Self.CHB_Multitrack.Checked := vehicle.multitrackCapable;
 
       var transSorted := TList<Cardinal>.Create(Self.transience.Keys);
       try
@@ -423,12 +423,12 @@ begin
         for var j in transSorted do
         begin
           Self.CB_Prechodnost.Items.Add(IntToStr(j) + ': ' + Self.transience[j]);
-          if (j = HV.transience) then
+          if (j = vehicle.transience) then
             Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count - 1;
         end;
-        if (not Self.transience.ContainsKey(HV.transience)) then
+        if (not Self.transience.ContainsKey(vehicle.transience)) then
         begin
-          Self.CB_Prechodnost.Items.Add(IntToStr(HV.transience) + ': ?');
+          Self.CB_Prechodnost.Items.Add(IntToStr(vehicle.transience) + ': ?');
           Self.CB_Prechodnost.ItemIndex := Self.CB_Prechodnost.Items.Count - 1;
         end;
       finally
@@ -436,32 +436,32 @@ begin
       end;
 
       for var i := 0 to _MAX_FUNC do
-        Self.LV_Funkce.Items[i].Checked := HV.functions[i];
+        Self.LV_Funkce.Items[i].Checked := vehicle.functions[i];
 
-      for var pomCV in HV.POMautomat do
+      for var pomCV in vehicle.POMautomat do
       begin
         var LI := Self.LV_POM_Automat.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
         LI.SubItems.Add(IntToStr(pomCV.value));
       end;
 
-      for var pomCV in HV.POMmanual do
+      for var pomCV in vehicle.POMmanual do
       begin
         var LI := Self.LV_POM_Manual.Items.Add;
         LI.Caption := IntToStr(pomCV.cv);
         LI.SubItems.Add(IntToStr(pomCV.value));
       end;
 
-      Self.CB_POM_Release.Enabled := ((not HV.POMautomat.IsEmpty) or (not HV.POMmanual.IsEmpty));
+      Self.CB_POM_Release.Enabled := ((not vehicle.POMautomat.IsEmpty) or (not vehicle.POMmanual.IsEmpty));
       if (Self.CB_POM_Release.Enabled) then
-        Self.CB_POM_Release.ItemIndex := Integer(HV.POMrelease)
+        Self.CB_POM_Release.ItemIndex := Integer(vehicle.POMrelease)
       else
         Self.CB_POM_Release.ItemIndex := -1;
 
       for var i := 0 to _MAX_FUNC do
       begin
-        Self.CB_funkce[i].Text := HV.funcDesc[i];
-        if (HV.funcType[i] = THVFuncType.permanent) then
+        Self.CB_funkce[i].Text := vehicle.funcDesc[i];
+        if (vehicle.funcType[i] = TRVFuncType.permanent) then
           Self.RB_P[i].Checked := true
         else
           Self.RB_M[i].Checked := true;
@@ -470,7 +470,7 @@ begin
     end; // if not New
 
     if (outdated) then
-      Application.MessageBox('Pozor: došlo ke změně seznamu HV na serveru, aktualizujte seznam!', 'Varování', MB_OK OR MB_ICONWARNING);
+      Application.MessageBox('Pozor: došlo ke změně seznamu vozidel na serveru, aktualizujte seznam!', 'Varování', MB_OK OR MB_ICONWARNING);
 
   end else begin
     Self.E_Name.Text := '';
@@ -498,7 +498,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.SetEngineGUIEnabled(enabled: Boolean);
+procedure TF_VehicleEdit.SetEngineGUIEnabled(enabled: Boolean);
 begin
   Self.B_Apply.Enabled := enabled;
 
@@ -528,22 +528,22 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_VehicleEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Self.m_hvlistRefreshWarning := False;
+  Self.m_rvlistRefreshWarning := False;
   Screen.Cursor := crDefault;
 end;
 
-procedure TF_HVEdit.FormCreate(Sender: TObject);
+procedure TF_VehicleEdit.FormCreate(Sender: TObject);
 begin
-  Self.vyznType := TDictionary<string, THVFuncType>.Create();
+  Self.vyznType := TDictionary<string, TRVFuncType>.Create();
   Self.transience := TDictionary<Cardinal, string>.Create();
-  Self.m_hvlistRefreshWarning := False;
+  Self.m_rvlistRefreshWarning := False;
   Self.m_area := '';
   Self.InitFunkce();
 end;
 
-procedure TF_HVEdit.FormDestroy(Sender: TObject);
+procedure TF_VehicleEdit.FormDestroy(Sender: TObject);
 begin
   Self.FreeFunkce();
   Self.vyznType.Free();
@@ -552,57 +552,57 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.LV_Pom_AutomatChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+procedure TF_VehicleEdit.LV_Pom_AutomatChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
   Self.SB_POM_Automat_Remove.Enabled := (Self.LV_POM_Automat.Selected <> nil);
 end;
 
-procedure TF_HVEdit.LV_Pom_AutomatDblClick(Sender: TObject);
+procedure TF_VehicleEdit.LV_Pom_AutomatDblClick(Sender: TObject);
 begin
   if (Self.LV_POM_Automat.Selected <> nil) then
   begin
-    F_HV_Pom.OpenForm(StrToInt(Self.LV_POM_Automat.Selected.Caption),
+    F_RV_Pom.OpenForm(StrToInt(Self.LV_POM_Automat.Selected.Caption),
       StrToInt(Self.LV_POM_Automat.Selected.SubItems.Strings[0]));
-    if (F_HV_Pom.saved) then
-      Self.LV_POM_Automat.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+    if (F_RV_Pom.saved) then
+      Self.LV_POM_Automat.Selected.SubItems.Strings[0] := IntToStr(F_RV_Pom.SE_Value.Value);
   end else begin
     Self.SB_POM_Automat_AddClick(Self);
   end;
 end;
 
-procedure TF_HVEdit.LV_Pom_AutomatKeyDown(Sender: TObject; var Key: Word;
+procedure TF_VehicleEdit.LV_Pom_AutomatKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if ((Key = VK_DELETE) and (Self.SB_POM_Automat_Remove.Enabled)) then
     Self.SB_POM_Automat_RemoveClick(Self);
 end;
 
-procedure TF_HVEdit.LV_Pom_ManualChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+procedure TF_VehicleEdit.LV_Pom_ManualChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
   Self.SB_POM_Manual_Remove.Enabled := (Self.LV_POM_Manual.Selected <> nil);
 end;
 
-procedure TF_HVEdit.LV_Pom_ManualDblClick(Sender: TObject);
+procedure TF_VehicleEdit.LV_Pom_ManualDblClick(Sender: TObject);
 begin
   if (Self.LV_POM_Manual.Selected <> nil) then
   begin
-    F_HV_Pom.OpenForm(StrToInt(Self.LV_POM_Manual.Selected.Caption),
+    F_RV_Pom.OpenForm(StrToInt(Self.LV_POM_Manual.Selected.Caption),
       StrToInt(Self.LV_POM_Manual.Selected.SubItems.Strings[0]));
-    if (F_HV_Pom.saved) then
-      Self.LV_POM_Manual.Selected.SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+    if (F_RV_Pom.saved) then
+      Self.LV_POM_Manual.Selected.SubItems.Strings[0] := IntToStr(F_RV_Pom.SE_Value.Value);
   end else begin
     Self.SB_POM_Manual_AddClick(Self);
   end;
 end;
 
-procedure TF_HVEdit.LV_Pom_ManualKeyDown(Sender: TObject; var Key: Word;
+procedure TF_VehicleEdit.LV_Pom_ManualKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if ((Key = VK_DELETE) and (Self.SB_POM_Manual_Remove.Enabled)) then
     Self.SB_POM_Manual_RemoveClick(Self);
 end;
 
-procedure TF_HVEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
+procedure TF_VehicleEdit.M_PoznamkaKeyPress(Sender: TObject; var Key: Char);
 begin
   // input checking
   for var i := 0 to Length(_forbidden_chars) - 1 do
@@ -615,24 +615,24 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.SB_POM_Manual_AddClick(Sender: TObject);
+procedure TF_VehicleEdit.SB_POM_Manual_AddClick(Sender: TObject);
 begin
-  F_HV_Pom.OpenForm(-1, 0);
-  if (F_HV_Pom.saved) then
+  F_RV_Pom.OpenForm(-1, 0);
+  if (F_RV_Pom.saved) then
   begin
     var i: Integer := 0;
     while ((i < Self.LV_POM_Manual.Items.Count) and (StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption) <
-      F_HV_Pom.SE_CV.Value)) do
+      F_RV_Pom.SE_CV.Value)) do
       Inc(i);
 
     if ((Assigned(Self.LV_POM_Manual.Items.Item[i])) and (StrToInt(Self.LV_POM_Manual.Items.Item[i].Caption)
-      = F_HV_Pom.SE_CV.Value)) then
+      = F_RV_Pom.SE_CV.Value)) then
     begin
-      Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Manual.Items.Item[i].SubItems.Strings[0] := IntToStr(F_RV_Pom.SE_Value.Value);
     end else begin
       var LI: TListItem := Self.LV_POM_Manual.Items.Insert(i);
-      LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
-      LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+      LI.Caption := IntToStr(F_RV_Pom.SE_CV.Value);
+      LI.SubItems.Add(IntToStr(F_RV_Pom.SE_Value.Value));
     end;
 
     if (not Self.CB_POM_Release.Enabled) then
@@ -643,7 +643,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.SB_POM_Manual_RemoveClick(Sender: TObject);
+procedure TF_VehicleEdit.SB_POM_Manual_RemoveClick(Sender: TObject);
 begin
   Self.LV_POM_Manual.DeleteSelected();
 
@@ -654,24 +654,24 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.SB_POM_Automat_AddClick(Sender: TObject);
+procedure TF_VehicleEdit.SB_POM_Automat_AddClick(Sender: TObject);
 begin
-  F_HV_Pom.OpenForm(-1, 0);
-  if (F_HV_Pom.saved) then
+  F_RV_Pom.OpenForm(-1, 0);
+  if (F_RV_Pom.saved) then
   begin
     var i: Integer := 0;
     while ((i < Self.LV_POM_Automat.Items.Count) and (StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption) <
-      F_HV_Pom.SE_CV.Value)) do
+      F_RV_Pom.SE_CV.Value)) do
       Inc(i);
 
     if ((Assigned(Self.LV_POM_Automat.Items.Item[i])) and (StrToInt(Self.LV_POM_Automat.Items.Item[i].Caption)
-      = F_HV_Pom.SE_CV.Value)) then
+      = F_RV_Pom.SE_CV.Value)) then
     begin
-      Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0] := IntToStr(F_HV_Pom.SE_Value.Value);
+      Self.LV_POM_Automat.Items.Item[i].SubItems.Strings[0] := IntToStr(F_RV_Pom.SE_Value.Value);
     end else begin
       var LI: TListItem := Self.LV_POM_Automat.Items.Insert(i);
-      LI.Caption := IntToStr(F_HV_Pom.SE_CV.Value);
-      LI.SubItems.Add(IntToStr(F_HV_Pom.SE_Value.Value));
+      LI.Caption := IntToStr(F_RV_Pom.SE_CV.Value);
+      LI.SubItems.Add(IntToStr(F_RV_Pom.SE_Value.Value));
     end;
 
     if (not Self.CB_POM_Release.Enabled) then
@@ -682,7 +682,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.SB_POM_Automat_RemoveClick(Sender: TObject);
+procedure TF_VehicleEdit.SB_POM_Automat_RemoveClick(Sender: TObject);
 begin
   Self.LV_POM_Automat.DeleteSelected();
 
@@ -695,7 +695,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.InitFunkce();
+procedure TF_VehicleEdit.InitFunkce();
 begin
   Self.LV_Funkce.Clear();
 
@@ -754,7 +754,7 @@ begin
   Self.RepaintFunkce();
 end;
 
-procedure TF_HVEdit.FreeFunkce();
+procedure TF_VehicleEdit.FreeFunkce();
 begin
   for var i := 0 to _MAX_FUNC do
   begin
@@ -763,7 +763,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.RepaintFunkce();
+procedure TF_VehicleEdit.RepaintFunkce();
 var
   r: TRect;
   SInfo: TScrollInfo;
@@ -792,7 +792,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.LV_FunkceWindowproc(var Message: TMessage);
+procedure TF_VehicleEdit.LV_FunkceWindowproc(var Message: TMessage);
 begin
   Self.FOldListviewWindowProc(Message);
   Case Message.Msg Of
@@ -804,7 +804,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.ParseVyznamy(vyznamy: string);
+procedure TF_VehicleEdit.ParseVyznamy(vyznamy: string);
 var sl, sl2, slDesc: TStrings;
 begin
   Self.vyznType.Clear();
@@ -819,7 +819,7 @@ begin
       ExtractStringsEx([':'], [], str, sl2);
       slDesc.Add(sl2[0]);
       if (sl2.Count > 1) then
-        Self.vyznType.AddOrSetValue(sl2[0], THV.CharToHVFuncType(sl2[1][1]));
+        Self.vyznType.AddOrSetValue(sl2[0], TRV.CharToRVFuncType(sl2[1][1]));
     end;
 
     for var i := 0 to _MAX_FUNC do
@@ -836,13 +836,13 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.CB_VyznamChange(Sender: TObject);
+procedure TF_VehicleEdit.CB_VyznamChange(Sender: TObject);
 var func: Integer;
 begin
   func := TComboBox(Sender).Tag;
   if (Self.vyznType.ContainsKey(TComboBox(Sender).Text)) then
   begin
-    if (Self.vyznType[TComboBox(Sender).Text] = THVFuncType.momentary) then
+    if (Self.vyznType[TComboBox(Sender).Text] = TRVFuncType.momentary) then
       Self.RB_M[func].Checked := true
     else
       Self.RB_P[func].Checked := true;
@@ -851,7 +851,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.LoadPrechodnost(ini: TMemIniFile);
+procedure TF_VehicleEdit.LoadPrechodnost(ini: TMemIniFile);
 const _SECTION: string = 'prechodnost';
 begin
   Self.transience.Clear();
@@ -870,7 +870,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.ServerEditResp(parsed: TStrings);
+procedure TF_VehicleEdit.ServerEditResp(parsed: TStrings);
 begin
   if ((not Self.Showing) or (Self.new)) then
     Exit();
@@ -878,20 +878,20 @@ begin
 
   if (parsed[4] = 'ERR') then
   begin
-    Self.CB_HV.Enabled := True;
+    Self.CB_RV.Enabled := True;
     Self.SetEngineGUIEnabled(True);
 
     var err: string := 'neznámá chyba';
     if (parsed.Count > 5) then
       err := parsed[5];
 
-    Application.MessageBox(PChar('Při úpravě HV nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox(PChar('Při úpravě vozidla nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
   begin
-    var response: Integer := Application.MessageBox('HV úspěšně upraveno, pokračovat s úpravou dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
+    var response: Integer := Application.MessageBox('Vozidlo úspěšně upraveno, pokračovat s úpravou dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
     if (response = mrYes) then
     begin
-      Self.m_hvlistRefreshWarning := True;
+      Self.m_rvlistRefreshWarning := True;
       PanelTCPClient.PanelLokList(Self.area); // refresh engine list
     end else begin
       Self.Close();
@@ -899,7 +899,7 @@ begin
   end;
 end;
 
-procedure TF_HVEdit.ServerAddResp(parsed: TStrings);
+procedure TF_VehicleEdit.ServerAddResp(parsed: TStrings);
 begin
   if ((not Self.Showing) or (not Self.new)) then
     Exit();
@@ -907,20 +907,20 @@ begin
 
   if (parsed[4] = 'ERR') then
   begin
-    Self.CB_HV.Enabled := True;
+    Self.CB_RV.Enabled := True;
     Self.SetEngineGUIEnabled(True);
 
     var err: string := 'neznámá chyba';
     if (parsed.Count > 5) then
       err := parsed[5];
 
-    Application.MessageBox(PChar('Při přidávání HV nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox(PChar('Při přidávání vozidla nastala chyba:' + #13#10 + err), 'Chyba', MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
   begin
-    var response: Integer := Application.MessageBox('HV úspěšně přidáno, pokračovat s přidáním dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
+    var response: Integer := Application.MessageBox('Vozidlo úspěšně přidáno, pokračovat s přidáním dalšího?', 'Hotovo', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2);
     if (response = mrYes) then
     begin
-      Self.m_hvlistRefreshWarning := True;
+      Self.m_rvlistRefreshWarning := True;
       PanelTCPClient.PanelLokList(Self.area); // refresh engine list
     end else begin
       Self.Close();
@@ -930,13 +930,13 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HVEdit.HVListRefreshed();
+procedure TF_VehicleEdit.RVListRefreshed();
 begin
-  if (Self.m_hvlistRefreshWarning) then
+  if (Self.m_rvlistRefreshWarning) then
   begin
-    Self.m_hvlistRefreshWarning := False;
+    Self.m_rvlistRefreshWarning := False;
     Self.FillEngines(StrToIntDef(Self.E_Adresa.Text, -1));
-    Self.CB_HV.Enabled := True;
+    Self.CB_RV.Enabled := True;
   end;
 end;
 

@@ -8,11 +8,11 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Spin, HVDb, RPConst, ComCtrls, fTrainHVEdit, Buttons,
+  StdCtrls, ExtCtrls, Spin, RVDb, RPConst, ComCtrls, fTrainRVEdit, Buttons,
   CloseTabSheet, Themes, Generics.Collections, Types;
 
 const
-  _MAX_HV_CNT = 4;
+  _MAX_RV_CNT = 4;
   _ANNONUNCE_TRAIN_FORBIDDEN: array [0 .. 5] of string = ('Pn', 'Mn', 'Vn', 'Lv', 'Vle', 'Slu');
 
 type
@@ -30,8 +30,8 @@ type
     CHB_Sipka_L: TCheckBox;
     CHB_Sipka_S: TCheckBox;
     T_Timeout: TTimer;
-    PC_HVs: TPageControl;
-    BB_HV_Add: TBitBtn;
+    PC_Vehicles: TPageControl;
+    BB_RV_Add: TBitBtn;
     Label2: TLabel;
     SE_Delka: TSpinEdit;
     CB_Typ: TComboBox;
@@ -53,7 +53,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure T_TimeoutTimer(Sender: TObject);
     procedure E_PoznamkaKeyPress(Sender: TObject; var Key: Char);
-    procedure BB_HV_AddClick(Sender: TObject);
+    procedure BB_RV_AddClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PageControlCloseButtonDrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect;
       Active: Boolean);
@@ -66,9 +66,9 @@ type
     procedure CHB_MaxSpeedClick(Sender: TObject);
   private
     OblR: string;
-    HVs: TObjectList<TF_TrainHVEdit>;
-    HVDb: THVDb;
-    sprHVs: THVDb;
+    RVs: TObjectList<TF_TrainRVEdit>;
+    RVDb: TRVDb;
+    trainRVs: TRVDb;
 
     FCloseButtonMouseDownTab: TCloseTabSheet;
     FCloseButtonShowPushed: Boolean;
@@ -78,8 +78,8 @@ type
 
   public
 
-    procedure NewSpr(HVs: THVDb; Sender: string);
-    procedure EditSpr(parsed: TStrings; HVs: THVDb; sender_id: string; owner: string);
+    procedure NewTrain(RVs: TRVDb; Sender: string);
+    procedure EditTrain(parsed: TStrings; RVs: TRVDb; sender_id: string; owner: string);
 
     procedure TechError(err: string);
     procedure TechACK();
@@ -108,32 +108,30 @@ begin
     end;
 end;
 
-procedure TF_TrainEdit.BB_HV_AddClick(Sender: TObject);
-var ts: TCloseTabSheet;
-  form: TF_TrainHVEdit;
+procedure TF_TrainEdit.BB_RV_AddClick(Sender: TObject);
 begin
-  if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
+  if (Self.PC_Vehicles.PageCount >= _MAX_RV_CNT) then
   begin
-    Application.MessageBox('Více HV nelze přidat', 'Nelze přidat další HV', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Více vozidel nelze přidat', 'Nelze přidat další vozidlo', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
-  ts := TCloseTabSheet.Create(Self.PC_HVs);
-  ts.Caption := 'HV ' + IntToStr(Self.PC_HVs.PageCount + 1);
+  var ts := TCloseTabSheet.Create(Self.PC_Vehicles);
+  ts.Caption := 'Vozidlo ' + IntToStr(Self.PC_Vehicles.PageCount + 1);
 
-  ts.PageControl := Self.PC_HVs;
+  ts.PageControl := Self.PC_Vehicles;
   ts.OnClose := Self.OnTabClose;
-  Self.PC_HVs.ActivePage := ts;
+  Self.PC_Vehicles.ActivePage := ts;
 
-  form := TF_TrainHVEdit.Create(ts);
+  var form := TF_TrainRVEdit.Create(ts);
   form.Parent := ts;
   form.Show();
-  Self.HVs.Add(form);
+  Self.RVs.Add(form);
 
-  form.FillHV(Self.HVDb, nil);
+  form.FillRV(Self.RVDb, nil);
 
-  if (Self.PC_HVs.PageCount >= _MAX_HV_CNT) then
-    Self.BB_HV_Add.Enabled := false;
+  if (Self.PC_Vehicles.PageCount >= _MAX_RV_CNT) then
+    Self.BB_RV_Add.Enabled := false;
 end;
 
 procedure TF_TrainEdit.B_HelpClick(Sender: TObject);
@@ -143,9 +141,9 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_TrainEdit.NewSpr(HVs: THVDb; Sender: string);
+procedure TF_TrainEdit.NewTrain(RVs: TRVDb; Sender: string);
 begin
-  Self.HVDb := HVs;
+  Self.RVDb := RVs;
   Self.OblR := Sender;
 
   Self.E_Nazev.Text := '';
@@ -153,7 +151,7 @@ begin
   Self.CHB_Sipka_L.Checked := false;
   Self.CHB_Sipka_S.Checked := false;
 
-  Self.BB_HV_Add.Enabled := true;
+  Self.BB_RV_Add.Enabled := true;
 
   Self.SE_Delka.Value := 0;
   Self.CB_Typ.Text := '';
@@ -167,23 +165,23 @@ begin
   Self.CB_Cilova.ItemIndex := 0;
 
   // smazat vsechny zalozky
-  Self.HVs.Clear();
+  Self.RVs.Clear();
 
-  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
-    Self.PC_HVs.Pages[i].Free();
+  for var i := Self.PC_Vehicles.PageCount - 1 downto 0 do
+    Self.PC_Vehicles.Pages[i].Free();
 
   // vytvorit 1 zalozku
-  var ts := TCloseTabSheet.Create(Self.PC_HVs);
-  ts.PageControl := Self.PC_HVs;
-  ts.Caption := 'HV 1';
+  var ts := TCloseTabSheet.Create(Self.PC_Vehicles);
+  ts.PageControl := Self.PC_Vehicles;
+  ts.Caption := 'Vozidlo 1';
   ts.OnClose := OnTabClose;
 
-  var form := TF_TrainHVEdit.Create(ts);
+  var form := TF_TrainRVEdit.Create(ts);
   form.Parent := ts;
   form.Show();
-  Self.HVs.Add(form);
+  Self.RVs.Add(form);
 
-  form.FillHV(HVs, nil);
+  form.FillRV(RVs, nil);
 
   Self.ActiveControl := Self.E_Nazev;
   Self.Caption := 'Nový vlak';
@@ -193,9 +191,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 // format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
-procedure TF_TrainEdit.EditSpr(parsed: TStrings; HVs: THVDb; sender_id: string; owner: string);
+procedure TF_TrainEdit.EditTrain(parsed: TStrings; RVs: TRVDb; sender_id: string; owner: string);
 begin
-  Self.HVDb := HVs;
+  Self.RVDb := RVs;
   Self.OblR := sender_id;
 
   try
@@ -229,35 +227,35 @@ begin
     if ((parsed.Count > 12) and (parsed[12] <> '')) then
       Self.SE_MaxSpeed.Value := StrToInt(parsed[12]);
 
-    Self.sprHVs.ParseHVs(parsed[8]);
+    Self.trainRVs.ParseRVs(parsed[8]);
   except
     Application.MessageBox('Neplatný formát dat vlaku !', 'Nelze editovat vlak', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
   // smazat vsechny zalozky
-  Self.HVs.Clear();
+  Self.RVs.Clear();
 
-  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
-    Self.PC_HVs.Pages[i].Free();
+  for var i := Self.PC_Vehicles.PageCount - 1 downto 0 do
+    Self.PC_Vehicles.Pages[i].Free();
 
-  // vytvorit zalozky podle poctu HV
-  for var i := 0 to sprHVs.HVs.Count - 1 do
+  // vytvorit zalozky podle poctu vozidel
+  for var i := 0 to Self.trainRVs.Count - 1 do
   begin
-    var ts := TCloseTabSheet.Create(Self.PC_HVs);
-    ts.PageControl := Self.PC_HVs;
-    ts.Caption := 'HV ' + IntToStr(i + 1);
+    var ts := TCloseTabSheet.Create(Self.PC_Vehicles);
+    ts.PageControl := Self.PC_Vehicles;
+    ts.Caption := 'Vozidlo ' + IntToStr(i + 1);
     ts.OnClose := OnTabClose;
 
-    var form := TF_TrainHVEdit.Create(ts);
+    var form := TF_TrainRVEdit.Create(ts);
     form.Parent := ts;
     form.Show();
-    Self.HVs.Add(form);
+    Self.RVs.Add(form);
 
-    form.FillHV(HVs, sprHVs.HVs[i]);
+    form.FillRV(RVs, Self.trainRVs[i]);
   end; // for i
 
-  Self.BB_HV_Add.Enabled := (Self.sprHVs.HVs.Count < _MAX_HV_CNT);
+  Self.BB_RV_Add.Enabled := (Self.trainRVs.Count < _MAX_RV_CNT);
 
   Self.ActiveControl := Self.E_Nazev;
   Self.Caption := 'Vlak ' + Self.E_Nazev.Text + ' – ' + owner;
@@ -314,45 +312,45 @@ begin
   sprstr := sprstr + '{';
 
   var err := '';
-  var cannotMultitrack: THV := nil;
+  var cannotMultitrack: TRV := nil;
   var noNonCarEngines: Cardinal := 0;
-  for var i := 0 to Self.PC_HVs.PageCount - 1 do
+  for var i := 0 to Self.PC_Vehicles.PageCount - 1 do
   begin
-    if (Self.HVs[i].HV = nil) then
+    if (Self.RVs[i].vehicle = nil) then
     begin
-      Application.MessageBox(PChar('Vyberte hnací vozidlo vlaku na záložce ' + Self.PC_HVs.Pages[i].Caption),
+      Application.MessageBox(PChar('Vyberte vozidlo vlaku na záložce ' + Self.PC_Vehicles.Pages[i].Caption),
         'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
-    if (Self.HVs[i].RG_HV1_dir.ItemIndex < 0) then
+    if (Self.RVs[i].RG_direction.ItemIndex < 0) then
     begin
-      Application.MessageBox(PChar('Vyberte orientaci stanoviště A hnacího vozidla na záložce ' + Self.PC_HVs.Pages[i]
+      Application.MessageBox(PChar('Vyberte orientaci stanoviště A vozidla na záložce ' + Self.PC_Vehicles.Pages[i]
         .Caption), 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
       Exit();
     end;
     for var j := 0 to Length(_forbidden_chars) - 1 do
     begin
-      if (StrScan(PChar(Self.HVs[i].M_HV1_Notes.Text), _forbidden_chars[j]) <> nil) then
+      if (StrScan(PChar(Self.RVs[i].M_note.Text), _forbidden_chars[j]) <> nil) then
       begin
-        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
+        Application.MessageBox(PChar('Poznámka k vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
           + GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
       end;
     end;
 
     for var j := 0 to _MAX_FUNC do
-      if ((Self.HVs[i].HV.funcType[j] = THVFuncType.momentary) and (Self.HVs[i].CHB_funkce[j].Checked)) then
-        err := err + Self.PC_HVs.Pages[i].Caption + ' má aktivovanou funkci ' + IntToStr(j) + ' (' +
-          Self.HVs[i].HV.funcDesc[j] + '), která je momentary.' + #13#10;
+      if ((Self.RVs[i].vehicle.funcType[j] = TRVFuncType.momentary) and (Self.RVs[i].CHB_funkce[j].Checked)) then
+        err := err + Self.PC_Vehicles.Pages[i].Caption + ' má aktivovanou funkci ' + IntToStr(j) + ' (' +
+          Self.RVs[i].vehicle.funcDesc[j] + '), která je momentary.' + #13#10;
 
-    if ((cannotMultitrack = nil) and (not Self.HVs[i].HV.multitrackCapable)) then
+    if ((cannotMultitrack = nil) and (not Self.RVs[i].vehicle.multitrackCapable)) then
     begin
-      cannotMultitrack := Self.HVs[i].HV;
+      cannotMultitrack := Self.RVs[i].vehicle;
       Inc(noNonCarEngines);
-    end else if (Self.HVs[i].HV.typ <> THVType.car) then
+    end else if (Self.RVs[i].vehicle.typ <> TRVType.car) then
       Inc(noNonCarEngines);
 
-    sprstr := sprstr + Self.HVs[i].GetHVString();
+    sprstr := sprstr + Self.RVs[i].GetRVString();
   end;
 
   if ((cannotMultitrack <> nil) and (noNonCarEngines >= 2)) then
@@ -425,32 +423,32 @@ end;
 
 procedure TF_TrainEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Self.HVDb := nil;
+  Self.RVDb := nil;
 
-  Self.HVs.Clear();
-  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
-    Self.PC_HVs.Pages[i].Free();
+  Self.RVs.Clear();
+  for var i := Self.PC_Vehicles.PageCount - 1 downto 0 do
+    Self.PC_Vehicles.Pages[i].Free();
 end;
 
 procedure TF_TrainEdit.FormCreate(Sender: TObject);
 begin
-  Self.HVs := TObjectList<TF_TrainHVEdit>.Create();
+  Self.RVs := TObjectList<TF_TrainRVEdit>.Create();
 
-  Self.PC_HVs.TabWidth := 60;
-  Self.PC_HVs.OwnerDraw := true;
+  Self.PC_Vehicles.TabWidth := 75;
+  Self.PC_Vehicles.OwnerDraw := true;
 
-  Self.sprHVs := THVDb.Create();
+  Self.trainRVs := TRVDb.Create();
 end;
 
 procedure TF_TrainEdit.FormDestroy(Sender: TObject);
 begin
   // smazeme zalozky pro hnaci vozidla
-  Self.HVs.Free();
+  Self.RVs.Free();
 
-  for var i := Self.PC_HVs.PageCount - 1 downto 0 do
-    Self.PC_HVs.Pages[i].Free();
+  for var i := Self.PC_Vehicles.PageCount - 1 downto 0 do
+    Self.PC_Vehicles.Pages[i].Free();
 
-  FreeAndNil(Self.sprHVs);
+  FreeAndNil(Self.trainRVs);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -625,19 +623,19 @@ end;
 
 procedure TF_TrainEdit.OnTabClose(Sender: TObject);
 begin
-  for var i := 0 to Self.PC_HVs.PageCount - 1 do
+  for var i := 0 to Self.PC_Vehicles.PageCount - 1 do
   begin
-    if (Self.PC_HVs.Pages[i] = Sender) then
+    if (Self.PC_Vehicles.Pages[i] = Sender) then
     begin
-      Self.HVs.Delete(i);
+      Self.RVs.Delete(i);
 
-      // preradime HV z vlaku do obecneho seznamu HV
-      if (i < Self.sprHVs.HVs.Count) then
+      // preradime vozidlo z vlaku do obecneho seznamu vozidel
+      if (i < Self.trainRVs.Count) then
       begin
-        for var HV in HVDb.HVs do
-          if (HV.addr = Self.sprHVs.HVs[i].addr) then
-            HV.train := '-';
-        Self.sprHVs.Delete(i);
+        for var vehicle in Self.RVDb do
+          if (vehicle.addr = Self.trainRVs[i].addr) then
+            vehicle.train := '-';
+        Self.trainRVs.Delete(i);
       end;
 
       break;
@@ -645,15 +643,15 @@ begin
   end;
 
   (Sender as TTabSheet).Free();
-  Self.BB_HV_Add.Enabled := true;
+  Self.BB_RV_Add.Enabled := true;
 
-  for var i := 0 to Self.PC_HVs.PageCount - 1 do
+  for var i := 0 to Self.PC_Vehicles.PageCount - 1 do
   begin
-    Self.PC_HVs.Pages[i].Caption := 'HV ' + IntToStr(i + 1);
-    if (i < Self.sprHVs.HVs.Count) then
-      Self.HVs[i].FillHV(Self.HVDb, Self.sprHVs.HVs[i])
+    Self.PC_Vehicles.Pages[i].Caption := 'Vozidlo ' + IntToStr(i + 1);
+    if (i < Self.trainRVs.Count) then
+      Self.RVs[i].FillRV(Self.RVDb, Self.trainRVs[i])
     else
-      Self.HVs[i].FillHV(Self.HVDb, nil);
+      Self.RVs[i].FillRV(Self.RVDb, nil);
   end;
 end;
 

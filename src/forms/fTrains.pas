@@ -28,7 +28,7 @@ type
     listRequest: boolean;
 
     procedure AddSpr(str: string);
-    function ParseHV(str: string): string;
+    function ParseRV(str: string): string;
     function FindIndexForNewSpr(cislo: Integer): Integer;
 
   public
@@ -76,11 +76,11 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TF_Trains.AddSpr(str: string);
-var sl, slhv: TStrings;
+var sl, slrv: TStrings;
   LI: TListItem;
 begin
   sl := TStringList.Create();
-  slhv := TStringList.Create();
+  slrv := TStringList.Create();
   ExtractStringsEx([';'], [], str, sl);
 
   try
@@ -94,12 +94,12 @@ begin
 
     if (sl.Count > 6) then
     begin
-      ExtractStringsEx([']'], ['['], sl[6], slhv);
-      if (slhv.Count > 0) then
+      ExtractStringsEx([']'], ['['], sl[6], slrv);
+      if (slrv.Count > 0) then
       begin
-        LI.SubItems.Add(Self.ParseHV(slhv[0]));
-        if (slhv.Count > 1) then
-          LI.SubItems.Add(Self.ParseHV(slhv[1]))
+        LI.SubItems.Add(Self.ParseRV(slrv[0]));
+        if (slrv.Count > 1) then
+          LI.SubItems.Add(Self.ParseRV(slrv[1]))
         else
           LI.SubItems.Add('');
       end;
@@ -126,13 +126,13 @@ begin
   end;
 
   sl.Free();
-  slhv.Free();
+  slrv.Free();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 // format zapisu: nazev|majitel|oznaceni|poznamka|adresa|trida|vlak|stanovisteA|funkce
-function TF_Trains.ParseHV(str: string): string;
+function TF_Trains.ParseRV(str: string): string;
 var sl: TStrings;
 begin
   sl := TStringList.Create();

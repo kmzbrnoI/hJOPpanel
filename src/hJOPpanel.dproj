@@ -155,11 +155,11 @@
         <DCCReference Include="forms\fSplash.pas">
             <Form>F_splash</Form>
         </DCCReference>
-        <DCCReference Include="forms\fSprEdit.pas">
-            <Form>F_SoupravaEdit</Form>
+        <DCCReference Include="forms\fTrainEdit.pas">
+            <Form>F_TrainEdit</Form>
         </DCCReference>
-        <DCCReference Include="forms\fSprHelp.pas">
-            <Form>F_SprHelp</Form>
+        <DCCReference Include="forms\fTrainHelp.pas">
+            <Form>F_TrainHelp</Form>
         </DCCReference>
         <DCCReference Include="forms\fZpravy.pas">
             <Form>F_Messages</Form>
@@ -168,22 +168,22 @@
         <DCCReference Include="forms\fZprava.pas">
             <Form>F_Message</Form>
         </DCCReference>
-        <DCCReference Include="HVDb.pas"/>
-        <DCCReference Include="forms\fHVMoveSt.pas">
-            <Form>F_HV_Move</Form>
+        <DCCReference Include="RVDb.pas"/>
+        <DCCReference Include="forms\fRVMoveArea.pas">
+            <Form>F_RV_Move</Form>
         </DCCReference>
-        <DCCReference Include="forms\fSprHVEdit.pas">
-            <Form>F_SprHVEdit</Form>
+        <DCCReference Include="forms\fTrainRVEdit.pas">
+            <Form>F_TrainRVEdit</Form>
         </DCCReference>
         <DCCReference Include="CloseTabSheet.pas"/>
         <DCCReference Include="forms\fAuth.pas">
             <Form>F_Auth</Form>
         </DCCReference>
-        <DCCReference Include="forms\fHVEdit.pas">
-            <Form>F_HVEdit</Form>
+        <DCCReference Include="forms\fVehicleEdit.pas">
+            <Form>F_VehicleEdit</Form>
         </DCCReference>
-        <DCCReference Include="forms\fHVDelete.pas">
-            <Form>F_HVDelete</Form>
+        <DCCReference Include="forms\fRVDelete.pas">
+            <Form>F_RVDelete</Form>
         </DCCReference>
         <DCCReference Include="panel\Zasobnik.pas"/>
         <DCCReference Include="panel\UPO.pas"/>
@@ -193,7 +193,7 @@
         </DCCReference>
         <DCCReference Include="DCC_Icons.pas"/>
         <DCCReference Include="forms\fTrains.pas">
-            <Form>F_SprList</Form>
+            <Form>F_Trains</Form>
         </DCCReference>
         <DCCReference Include="LokoRuc.pas"/>
         <DCCReference Include="net\Resuscitation.pas"/>
@@ -201,17 +201,17 @@
         <DCCReference Include="forms\fRegReq.pas">
             <Form>F_RegReq</Form>
         </DCCReference>
-        <DCCReference Include="forms\fHVPomEdit.pas">
-            <Form>F_HV_Pom</Form>
+        <DCCReference Include="forms\fRVPomEdit.pas">
+            <Form>F_RV_Pom</Form>
         </DCCReference>
         <DCCReference Include="Hash.pas"/>
-        <DCCReference Include="forms\fHVSearch.pas">
-            <Form>F_HVSearch</Form>
+        <DCCReference Include="forms\fRVSearch.pas">
+            <Form>F_RVSearch</Form>
         </DCCReference>
         <DCCReference Include="net\uLIclient.pas"/>
         <DCCReference Include="LokTokens.pas"/>
-        <DCCReference Include="forms\fSprToSlot.pas">
-            <Form>F_SprToSlot</Form>
+        <DCCReference Include="forms\fTrainToSlot.pas">
+            <Form>F_TrainToSlot</Form>
         </DCCReference>
         <DCCReference Include="InterProcessCom.pas"/>
         <DCCReference Include="net\parseHelper.pas"/>

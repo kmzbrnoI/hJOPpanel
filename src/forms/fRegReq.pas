@@ -8,7 +8,7 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, HVDb, ExtCtrls, uLIClient;
+  Dialogs, StdCtrls, ComCtrls, RVDb, ExtCtrls, uLIClient;
 
 type
   TF_RegReq = class(TForm)
@@ -32,20 +32,20 @@ type
     procedure FormCreate(Sender: TObject);
   private
     or_id: string;
-    HVDb: THVDb;
-    destroy_hvdb: boolean;
+    RVDb: TRVDb;
+    destroy_rvdb: boolean;
     maus: boolean;
     B_Slots: array [1 .. TBridgeClient._SLOTS_CNT] of TButton;
 
-    procedure FillHVs(HVDb: THVDb; all_selected: boolean);
+    procedure FillRVs(RVDb: TRVDb; all_selected: boolean);
     procedure CreateSlotsButtons();
 
   public
 
     token_req_sent: boolean;
 
-    procedure Open(HVDb: THVDb; or_id: string; username, firstname, lastname, comment: string; remote: boolean;
-      destroy_hvdb, all_selected, maus: boolean);
+    procedure Open(RVDb: TRVDb; or_id: string; username, firstname, lastname, comment: string; remote: boolean;
+      destroy_rvdb, all_selected, maus: boolean);
     procedure ServerResponseOK();
     procedure ServerResponseErr(err: string);
     procedure ServerCanceled();
@@ -65,12 +65,12 @@ uses ORList, TCPClientPanel, LokTokens;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_RegReq.Open(HVDb: THVDb; or_id: string; username, firstname, lastname, comment: string; remote: boolean;
-  destroy_hvdb, all_selected, maus: boolean);
+procedure TF_RegReq.Open(RVDb: TRVDb; or_id: string; username, firstname, lastname, comment: string; remote: boolean;
+  destroy_rvdb, all_selected, maus: boolean);
 begin
   Self.or_id := or_id;
-  Self.HVDb := HVDb;
-  Self.destroy_hvdb := destroy_hvdb;
+  Self.RVDb := RVDb;
+  Self.destroy_rvdb := destroy_rvdb;
   Self.maus := maus;
 
   Self.L_Username.Caption := username;
@@ -85,9 +85,9 @@ begin
   else
     Self.B_Local.Default := true;
 
-  Self.FillHVs(HVDb, all_selected);
+  Self.FillRVs(RVDb, all_selected);
 
-  Self.L_Stav.Caption := 'Vyberte lokomotivy';
+  Self.L_Stav.Caption := 'Vyberte vozidla';
   Self.L_Stav.Font.Color := clBlack;
 
   Self.P_MausSlot.Visible := maus;
@@ -117,23 +117,23 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_RegReq.FillHVs(HVDb: THVDb; all_selected: boolean);
+procedure TF_RegReq.FillRVs(RVDb: TRVDb; all_selected: boolean);
 begin
   Self.LV_Lokos.Clear();
-  for var HV in HVDb.HVs do
+  for var vehicle in RVDb do
   begin
     var LI := Self.LV_Lokos.Items.Add;
-    LI.Caption := IntToStr(HV.addr);
-    LI.SubItems.Add(HV.name + ' (' + HV.designation + ')');
+    LI.Caption := IntToStr(vehicle.addr);
+    LI.SubItems.Add(vehicle.name + ' (' + vehicle.designation + ')');
     LI.Checked := all_selected;
   end;
 end;
 
 procedure TF_RegReq.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if ((Self.HVDb <> nil) and (Self.destroy_hvdb)) then
-    Self.HVDb.Free();
-  Self.HVDb := nil;
+  if ((Self.RVDb <> nil) and (Self.destroy_RVDb)) then
+    Self.RVDb.Free();
+  Self.RVDb := nil;
   Self.token_req_sent := false;
 end;
 
@@ -155,7 +155,7 @@ begin
 
   if (cnt = 0) then
   begin
-    Application.MessageBox('Vyberte alespoň jedno hnací vozidlo', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte alespoň jedno vozidlo', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
@@ -195,13 +195,13 @@ begin
 
   if (not one) then
   begin
-    Application.MessageBox('Vyberte alespoň jedno hnací vozidlo', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte alespoň jedno vozidlo', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
   PanelTCPClient.SendLn(Self.or_id + ';LOK-REQ;LOK;' + str);
 
-  Self.L_Stav.Caption := 'Odesílám seznam lokomotiv na server...';
+  Self.L_Stav.Caption := 'Odesílám seznam vozidel na server...';
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
-object F_HVDelete: TF_HVDelete
+object F_RVDelete: TF_RVDelete
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
-  Caption = 'Smazat lokomotivu'
+  Caption = 'Smazat vozidlo'
   ClientHeight = 173
   ClientWidth = 242
   Color = clBtnFace
@@ -11,17 +11,15 @@ object F_HVDelete: TF_HVDelete
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 8
     Top = 84
-    Width = 113
+    Width = 85
     Height = 13
-    Caption = 'Odstranit hnac'#237' vozidlo:'
+    Caption = 'Odstranit vozidlo:'
   end
   object StaticText1: TStaticText
     Left = 8
@@ -30,8 +28,8 @@ object F_HVDelete: TF_HVDelete
     Height = 25
     AutoSize = False
     Caption = 
-      'Varov'#225'n'#237': Tato operace povede k '#250'pln'#233'mu odstran'#283'n'#237' hnac'#237'ho vozid' +
-      'la z datab'#225'ze serveru!'
+      'Varov'#225'n'#237': Tato operace povede k '#250'pln'#233'mu odstran'#283'n'#237' vozidla z dat' +
+      'ab'#225'ze serveru!'
     TabOrder = 0
   end
   object StaticText2: TStaticText
@@ -41,11 +39,11 @@ object F_HVDelete: TF_HVDelete
     Height = 26
     AutoSize = False
     Caption = 
-      'Data, jako je vzd'#225'lenost, kterou lokomotiva na koleji'#353'ti najela,' +
-      ' budou bez n'#225'hrady ztracena.'
+      'Data, jako je vzd'#225'lenost, kterou vozidlo na koleji'#353'ti najelo, bu' +
+      'dou bez n'#225'hrady ztracena.'
     TabOrder = 1
   end
-  object CB_HV: TComboBox
+  object CB_RV: TComboBox
     Left = 8
     Top = 103
     Width = 225

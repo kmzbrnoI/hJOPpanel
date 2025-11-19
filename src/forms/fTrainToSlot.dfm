@@ -18,9 +18,9 @@ object F_TrainToSlot: TF_TrainToSlot
   object Label1: TLabel
     Left = 8
     Top = 8
-    Width = 88
+    Width = 57
     Height = 19
-    Caption = 'Lokomotivy:'
+    Caption = 'Vozidla:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -16

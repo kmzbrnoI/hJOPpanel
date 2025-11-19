@@ -22,34 +22,34 @@ uses
   PGraphics in 'panel\PGraphics.pas',
   fSettings in 'forms\fSettings.pas' {F_Settings},
   fSplash in 'forms\fSplash.pas' {F_splash},
-  fSprEdit in 'forms\fSprEdit.pas' {F_SoupravaEdit},
-  fSprHelp in 'forms\fSprHelp.pas' {F_SprHelp},
+  fTrainEdit in 'forms\fTrainEdit.pas' {F_TrainEdit},
+  fTrainHelp in 'forms\fTrainHelp.pas' {F_TrainHelp},
   fZpravy in 'forms\fZpravy.pas' {F_Messages},
   ORList in 'ORList.pas',
   fZprava in 'forms\fZprava.pas' {F_Message},
-  HVDb in 'HVDb.pas',
-  fHVMoveSt in 'forms\fHVMoveSt.pas' {F_HV_Move},
-  fSprHVEdit in 'forms\fSprHVEdit.pas' {F_SprHVEdit},
+  RVDb in 'RVDb.pas',
+  fRVMoveArea in 'forms\fRVMoveArea.pas' {F_RV_Move},
+  fTrainRVEdit in 'forms\fTrainRVEdit.pas' {F_TrainRVEdit},
   CloseTabSheet in 'CloseTabSheet.pas',
   fAuth in 'forms\fAuth.pas' {F_Auth},
-  fHVEdit in 'forms\fHVEdit.pas' {F_HVEdit},
-  fHVDelete in 'forms\fHVDelete.pas' {F_HVDelete},
+  fVehicleEdit in 'forms\fVehicleEdit.pas' {F_VehicleEdit},
+  fRVDelete in 'forms\fRVDelete.pas' {F_RVDelete},
   Zasobnik in 'panel\Zasobnik.pas',
   UPO in 'panel\UPO.pas',
   ModelovyCas in 'ModelovyCas.pas',
   fNastaveni_Casu in 'forms\fNastaveni_Casu.pas' {F_ModelTIme},
   DCC_Icons in 'DCC_Icons.pas',
-  fTrains in 'forms\fTrains.pas' {F_SprList},
+  fTrains in 'forms\fTrains.pas' {F_Trains},
   LokoRuc in 'LokoRuc.pas',
   Resuscitation in 'net\Resuscitation.pas',
   Verze in 'Verze.pas',
   fRegReq in 'forms\fRegReq.pas' {F_RegReq},
-  fHVPomEdit in 'forms\fHVPomEdit.pas' {F_HV_Pom},
+  fRVPomEdit in 'forms\fRVPomEdit.pas' {F_RV_Pom},
   Hash in 'Hash.pas',
-  fHVSearch in 'forms\fHVSearch.pas' {F_HVSearch},
+  fRVSearch in 'forms\fRVSearch.pas' {F_RVSearch},
   uLIclient in 'net\uLIclient.pas',
   LokTokens in 'LokTokens.pas',
-  fSprToSlot in 'forms\fSprToSlot.pas' {F_SprToSlot},
+  fTrainToSlot in 'forms\fTrainToSlot.pas' {F_TrainToSlot},
   InterProcessCom in 'InterProcessCom.pas',
   parseHelper in 'net\parseHelper.pas',
   BlockLinker in 'blocks\BlockLinker.pas',
@@ -87,20 +87,20 @@ begin
   Application.CreateForm(TF_PotvrSekv, F_PotvrSekv);
   Application.CreateForm(TF_StitVyl, F_StitVyl);
   Application.CreateForm(TF_Settings, F_Settings);
-  Application.CreateForm(TF_SoupravaEdit, F_SoupravaEdit);
-  Application.CreateForm(TF_SprHelp, F_SprHelp);
+  Application.CreateForm(TF_TrainEdit, F_TrainEdit);
+  Application.CreateForm(TF_TrainHelp, F_TrainHelp);
   Application.CreateForm(TF_Message, F_Message);
-  Application.CreateForm(TF_HV_Move, F_HV_Move);
-  Application.CreateForm(TF_SprHVEdit, F_SprHVEdit);
+  Application.CreateForm(TF_RV_Move, F_RV_Move);
+  Application.CreateForm(TF_TrainRVEdit, F_TrainRVEdit);
   Application.CreateForm(TF_Auth, F_Auth);
-  Application.CreateForm(TF_HVEdit, F_HVEdit);
-  Application.CreateForm(TF_HVDelete, F_HVDelete);
+  Application.CreateForm(TF_VehicleEdit, F_VehicleEdit);
+  Application.CreateForm(TF_RVDelete, F_RVDelete);
   Application.CreateForm(TF_ModelTIme, F_ModelTIme);
-  Application.CreateForm(TF_SprList, F_SprList);
+  Application.CreateForm(TF_Trains, F_Trains);
   Application.CreateForm(TF_RegReq, F_RegReq);
-  Application.CreateForm(TF_HV_Pom, F_HV_Pom);
-  Application.CreateForm(TF_HVSearch, F_HVSearch);
-  Application.CreateForm(TF_SprToSlot, F_SprToSlot);
+  Application.CreateForm(TF_RV_Pom, F_RV_Pom);
+  Application.CreateForm(TF_RVSearch, F_RVSearch);
+  Application.CreateForm(TF_TrainToSlot, F_TrainToSlot);
   Application.CreateForm(TF_OOdj, F_OOdj);
   if (ParamCount > 0) then
     F_Main.Init(ParamStr(1))

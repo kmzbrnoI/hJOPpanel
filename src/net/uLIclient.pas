@@ -7,7 +7,7 @@ unit uLIClient;
 interface
 
 uses SysUtils, IdTCPClient, ListeningThread, IdTCPConnection, IdGlobal,
-  Classes, Resuscitation, Windows, HVDb, Forms;
+  Classes, Resuscitation, Windows, RVDb, Forms;
 
 const
   _BRIDGE_DEFAULT_PORT = 5733; // default port, na ktere bezi bridge server
@@ -66,7 +66,7 @@ type
     procedure SendLn(str: string);
     procedure Update();
     procedure Auth();
-    procedure LoksToSlot(HVs: THVDb; slot: Integer; ruc: boolean);
+    procedure LoksToSlot(RVs: TRVDb; slot: Integer; ruc: boolean);
     procedure GetSlotsStatus();
 
     property opened: boolean read GetOpened;
@@ -479,12 +479,12 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TBridgeClient.LoksToSlot(HVs: THVDb; slot: Integer; ruc: boolean);
+procedure TBridgeClient.LoksToSlot(RVs: TRVDb; slot: Integer; ruc: boolean);
 var str: string;
 begin
   str := '';
-  for var HV: THV in HVs.HVs do
-    str := str + '{' + IntToStr(HV.addr) + ';' + HV.token + '};';
+  for var vehicle: TRV in RVs do
+    str := str + '{' + IntToStr(vehicle.addr) + ';' + vehicle.token + '};';
 
   if (ruc) then
     Self.SendLn('LOKO-RUC;' + IntToStr(slot) + ';' + str)

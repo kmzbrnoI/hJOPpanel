@@ -2,7 +2,7 @@ object F_RegReq: TF_RegReq
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
-  Caption = 'P'#345'edat hnac'#237' vozidlo na ru'#269'n'#237' '#345#237'zen'#237
+  Caption = 'P'#345'edat vozidlo do ru'#269'n'#237'ho '#345#237'zen'#237
   ClientHeight = 393
   ClientWidth = 433
   Color = clBtnFace
@@ -11,11 +11,9 @@ object F_RegReq: TF_RegReq
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object L_Stav: TLabel
     Left = 8
@@ -108,7 +106,7 @@ object F_RegReq: TF_RegReq
     Top = 151
     Width = 417
     Height = 178
-    Caption = ' Vyberte lokomotivy '
+    Caption = ' Vyberte vozidla '
     TabOrder = 1
     object LV_Lokos: TListView
       Left = 2
@@ -123,7 +121,7 @@ object F_RegReq: TF_RegReq
           Width = 80
         end
         item
-          Caption = 'Lokomotiva'
+          Caption = 'Vozidlo'
           Width = 200
         end>
       ReadOnly = True

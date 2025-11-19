@@ -1,9 +1,9 @@
-object F_HVEdit: TF_HVEdit
+object F_VehicleEdit: TF_VehicleEdit
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'Upravit hnac'#237' vozidlo'
+  Caption = 'Upravit vozidlo'
   ClientHeight = 613
   ClientWidth = 689
   Color = clBtnFace
@@ -17,28 +17,28 @@ object F_HVEdit: TF_HVEdit
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   TextHeight = 13
-  object L_HV: TLabel
+  object L_RV: TLabel
     Left = 8
     Top = 8
-    Width = 66
+    Width = 37
     Height = 13
-    Caption = 'Hnac'#237' vozidlo:'
+    Caption = 'Vozidlo:'
   end
-  object CB_HV: TComboBox
+  object CB_RV: TComboBox
     Left = 8
     Top = 24
     Width = 673
     Height = 21
     Style = csDropDownList
     TabOrder = 0
-    OnChange = CB_HVChange
+    OnChange = CB_RVChange
   end
-  object GB_HV: TGroupBox
+  object GB_RV: TGroupBox
     Left = 8
     Top = 51
     Width = 673
     Height = 518
-    Caption = ' Hnac'#237' vozidlo '
+    Caption = ' Vozidlo '
     TabOrder = 1
     object Label2: TLabel
       Left = 14
@@ -444,7 +444,7 @@ object F_HVEdit: TF_HVEdit
       Top = 132
       Width = 121
       Height = 29
-      Caption = 'Existuje lokomotiva?'
+      Caption = 'Existuje vozidlo?'
       TabOrder = 4
       OnClick = B_SearchClick
     end
@@ -508,9 +508,9 @@ object F_HVEdit: TF_HVEdit
   object B_Refresh: TButton
     Left = 8
     Top = 580
-    Width = 137
+    Width = 164
     Height = 25
-    Caption = 'Aktualizovat seznam HV'
+    Caption = 'Aktualizovat seznam vozidel'
     TabOrder = 4
     OnClick = B_RefreshClick
   end

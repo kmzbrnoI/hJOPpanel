@@ -59,11 +59,11 @@ object F_Trains: TF_Trains
         Width = 80
       end
       item
-        Caption = 'HV1'
+        Caption = 'Vozidlo 1'
         Width = 180
       end
       item
-        Caption = 'HV2'
+        Caption = 'Vozidlo 2'
         Width = 180
       end
       item

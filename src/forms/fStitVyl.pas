@@ -84,7 +84,7 @@ begin
     for var j := 0 to Length(_forbidden_chars) - 1 do
       if (_forbidden_chars[j] = Self.E_Popisek.Text[i]) then
       begin
-        Application.MessageBox(PChar('Poznámka k hnacímu vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
+        Application.MessageBox(PChar('Poznámka k vozidlu obsahuje zakázané znaky!' + #13#10 + 'Zakázané znaky: '
           + GetForbidderChars()), 'Nelze uložit data', MB_OK OR MB_ICONWARNING);
         Exit();
       end;

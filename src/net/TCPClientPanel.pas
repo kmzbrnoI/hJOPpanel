@@ -90,9 +90,9 @@ type
     procedure PanelSetOsv(Sender: string; code: string; state: Integer);
     procedure PanelUpdateOsv(Sender: string);
 
-    procedure PanelHVAdd(Sender: string; data: string);
-    procedure PanelHVRemove(Sender: string; addr: Word);
-    procedure PanelHVEdit(Sender: string; data: string);
+    procedure PanelRVAdd(Sender: string; data: string);
+    procedure PanelRVRemove(Sender: string; addr: Word);
+    procedure PanelRVEdit(Sender: string; data: string);
 
     procedure PanelMessage(senderid: string; recepientid: string; msg: string);
 
@@ -113,8 +113,8 @@ implementation
 
 uses Panel, fMain, fStitVyl, BottomErrors, Sounds, ORList, fZpravy, fDebug, fTrainEdit,
   ModelovyCas, fNastaveni_casu, DCC_Icons, fTrains, LokoRuc, fAuth,
-  GlobalCOnfig, HVDb, fRegReq, fHVEdit, fHVSearch, uLIclient, LokTokens, fTrainToSlot,
-  fHVDelete, parseHelper, fOdlozeniOdjezdu, fHVMoveSt, BlockTypes;
+  GlobalCOnfig, RVDb, fRegReq, fVehicleEdit, fRVSearch, uLIclient, LokTokens, fTrainToSlot,
+  fRVDelete, parseHelper, fOdlozeniOdjezdu, fRVMoveArea, BlockTypes;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -289,20 +289,20 @@ begin
     F_PotvrSekv.Close();
   if (F_Trains.Showing) then
     F_Trains.Close();
-  if (F_HVSearch.Showing) then
-    F_HVSearch.Close();
+  if (F_RVSearch.Showing) then
+    F_RVSearch.Close();
   if (F_Auth.Showing) then
     F_Auth.Close();
   if (F_OOdj.Showing) then
     F_OOdj.Close();
-  if (F_HVEdit.Showing) then
-    F_HVEdit.Close();
-  if (F_HVDelete.Showing) then
-    F_HVDelete.Close();
-  if (F_HVSearch.Showing) then
-    F_HVSearch.Close();
-  if (F_HV_Move.Showing) then
-    F_HV_Move.Close();
+  if (F_VehicleEdit.Showing) then
+    F_VehicleEdit.Close();
+  if (F_RVDelete.Showing) then
+    F_RVDelete.Close();
+  if (F_RVSearch.Showing) then
+    F_RVSearch.Close();
+  if (F_RV_Move.Showing) then
+    F_RV_Move.Close();
 
   SoundsPlay.DeleteAll();
   ModelTime.Reset();
@@ -524,14 +524,14 @@ begin
       F_Trains.ParseLoko('')
 
   else if ((parsed[1] = 'F-VYZN-LIST') and (parsed.Count > 2)) then
-    F_HVEdit.ParseVyznamy(parsed[2])
+    F_VehicleEdit.ParseVyznamy(parsed[2])
 
   else if (parsed[1] = 'HV') and (parsed[2] = 'ASK') then
   begin
     if (parsed[4] = 'FOUND') then
-      F_HVSearch.LokoFound(THV.Create(parsed[5]))
+      F_RVSearch.VehicleFound(TRV.Create(parsed[5]))
     else if (parsed[4] = 'NOT-FOUND') then
-      F_HVSearch.LokoNotFound();
+      F_RVSearch.VehicleNotFound();
   end
 
   else if (parsed[1] = 'PODJ') then
@@ -632,19 +632,19 @@ begin
   end else if (parsed[1] = 'HV') then
   begin
     if (parsed[2] = 'ADD') then
-      F_HVEdit.ServerAddResp(parsed)
+      F_VehicleEdit.ServerAddResp(parsed)
     else if (parsed[2] = 'EDIT') then
-      F_HVEdit.ServerEditResp(parsed)
+      F_VehicleEdit.ServerEditResp(parsed)
     else if (parsed[2] = 'REMOVE') then
-      F_HVDelete.ServerResp(parsed)
+      F_RVDelete.ServerResp(parsed)
     else if (parsed[2] = 'LIST') then
     begin
       if (parsed.Count > 3) then
-        Relief.ORHVList(parsed[0], parsed[3])
+        Relief.ORRVList(parsed[0], parsed[3])
       else
-        Relief.ORHVList(parsed[0], '');
+        Relief.ORRVList(parsed[0], '');
     end else if (parsed[2] = 'MOVE') then
-      F_HV_Move.ServerResp(parsed);
+      F_RV_Move.ServerResp(parsed);
   end;
 
 end;
@@ -815,17 +815,17 @@ end;
 // or;HV;REMOVE;addr             - smazani hnaciho vozdila
 // or;HV;EDIT;data               - editace hnaciho vozidla
 
-procedure TPanelTCPClient.PanelHVAdd(Sender: string; data: string);
+procedure TPanelTCPClient.PanelRVAdd(Sender: string; data: string);
 begin
   Self.SendLn(Sender + ';HV;ADD;' + data);
 end;
 
-procedure TPanelTCPClient.PanelHVRemove(Sender: string; addr: Word);
+procedure TPanelTCPClient.PanelRVRemove(Sender: string; addr: Word);
 begin
   Self.SendLn(Sender + ';HV;REMOVE;' + IntToStr(addr));
 end;
 
-procedure TPanelTCPClient.PanelHVEdit(Sender: string; data: string);
+procedure TPanelTCPClient.PanelRVEdit(Sender: string; data: string);
 begin
   Self.SendLn(Sender + ';HV;EDIT;' + data);
 end;

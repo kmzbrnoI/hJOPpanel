@@ -1,4 +1,4 @@
-unit fHVPomEdit;
+unit fRVPomEdit;
 
 {
   Edit POM values of engine.
@@ -11,7 +11,7 @@ uses
   Dialogs, StdCtrls, Spin;
 
 type
-  TF_HV_Pom = class(TForm)
+  TF_RV_Pom = class(TForm)
     Label1: TLabel;
     SE_CV: TSpinEdit;
     Label2: TLabel;
@@ -30,25 +30,25 @@ type
   end;
 
 var
-  F_HV_Pom: TF_HV_Pom;
+  F_RV_Pom: TF_RV_Pom;
 
 implementation
 
 {$R *.dfm}
 
-procedure TF_HV_Pom.B_OKClick(Sender: TObject);
+procedure TF_RV_Pom.B_OKClick(Sender: TObject);
 begin
   Self.saved := true;
   Self.Close();
 end;
 
-procedure TF_HV_Pom.B_StornoClick(Sender: TObject);
+procedure TF_RV_Pom.B_StornoClick(Sender: TObject);
 begin
   Self.saved := false;
   Self.Close();
 end;
 
-procedure TF_HV_Pom.OpenForm(cv: Integer; val: Byte);
+procedure TF_RV_Pom.OpenForm(cv: Integer; val: Byte);
 begin
   Self.saved := false;
   Self.SE_CV.Value := cv;
@@ -61,7 +61,7 @@ begin
   Self.ShowModal();
 end;
 
-procedure TF_HV_Pom.SE_ValueKeyPress(Sender: TObject; var Key: Char);
+procedure TF_RV_Pom.SE_ValueKeyPress(Sender: TObject; var Key: Char);
 begin
   case (Key) of
     #13:

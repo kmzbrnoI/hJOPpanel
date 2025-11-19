@@ -1,4 +1,4 @@
-﻿unit fHVDelete;
+﻿unit fRVDelete;
 
 {
   Confirmation window for engine delete.
@@ -8,14 +8,14 @@ interface
 
 uses
   Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
-  HVDb, RPConst, TCPClientPanel;
+  RVDb, RPConst, TCPClientPanel;
 
 type
-  TF_HVDelete = class(TForm)
+  TF_RVDelete = class(TForm)
     StaticText1: TStaticText;
     StaticText2: TStaticText;
     Label1: TLabel;
-    CB_HV: TComboBox;
+    CB_RV: TComboBox;
     B_Storno: TButton;
     B_Remove: TButton;
     procedure B_StornoClick(Sender: TObject);
@@ -25,55 +25,55 @@ type
     { Private declarations }
 
     sender_or: string;
-    HVIndexes: TWordAr;
+    RVIndexes: TWordAr;
   public
     { Public declarations }
 
-    procedure OpenForm(sender_or: string; HVs: THVDb);
+    procedure OpenForm(sender_or: string; RVs: TRVDb);
     procedure ServerResp(parsed: TStrings);
   end;
 
 var
-  F_HVDelete: TF_HVDelete;
+  F_RVDelete: TF_RVDelete;
 
 implementation
 
 {$R *.dfm}
 
-procedure TF_HVDelete.B_RemoveClick(Sender: TObject);
+procedure TF_RVDelete.B_RemoveClick(Sender: TObject);
 begin
-  if (Self.CB_HV.ItemIndex < 0) then
+  if (Self.CB_RV.ItemIndex < 0) then
   begin
-    Application.MessageBox('Vyberte hnací vozdilo', 'Nelz pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte vozdilo', 'Nelz pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
 
-  if (Application.MessageBox(PChar('Opravdu odstranit hnací vozidlo ' + Self.CB_HV.Items.Strings[Self.CB_HV.ItemIndex] +
+  if (Application.MessageBox(PChar('Opravdu odstranit vozidlo ' + Self.CB_RV.Items.Strings[Self.CB_RV.ItemIndex] +
     ' z databáze?'), 'Opravdu?', MB_YESNO OR MB_ICONWARNING) = mrYes) then
   begin
-    PanelTCPClient.PanelHVRemove(Self.sender_or, Self.HVIndexes[Self.CB_HV.ItemIndex]);
+    PanelTCPClient.PanelRVRemove(Self.sender_or, Self.RVIndexes[Self.CB_RV.ItemIndex]);
     Screen.Cursor := crHourGlass;
   end;
 end;
 
-procedure TF_HVDelete.B_StornoClick(Sender: TObject);
+procedure TF_RVDelete.B_StornoClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_HVDelete.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_RVDelete.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Screen.Cursor := crDefault;
 end;
 
-procedure TF_HVDelete.OpenForm(sender_or: string; HVs: THVDb);
+procedure TF_RVDelete.OpenForm(sender_or: string; RVs: TRVDb);
 begin
   Self.sender_or := sender_or;
-  HVs.FillHVs(Self.CB_HV, Self.HVIndexes);
+  RVs.Fill(Self.CB_RV, Self.RVIndexes);
   Self.Show();
 end;
 
-procedure TF_HVDelete.ServerResp(parsed: TStrings);
+procedure TF_RVDelete.ServerResp(parsed: TStrings);
 var err: string;
 begin
   if (not Self.Showing) then
@@ -87,11 +87,11 @@ begin
     else
       err := 'neznámá chyba';
 
-    Application.MessageBox(PChar('Při odstraňování HV nastala chyba:' + #13#10 + err), 'Chyba',
+    Application.MessageBox(PChar('Při odstraňování vozidla nastala chyba:' + #13#10 + err), 'Chyba',
       MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
   begin
-    Application.MessageBox(PChar('Lokomotiva ' + parsed[3] + ' odstraněna.'), 'Chyba', MB_OK OR MB_ICONINFORMATION);
+    Application.MessageBox(PChar('Vozidlo ' + parsed[3] + ' odstraněno.'), 'Chyba', MB_OK OR MB_ICONINFORMATION);
     Self.Close();
   end;
 end;

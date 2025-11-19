@@ -6,7 +6,7 @@ unit PanelOR;
 
 interface
 
-uses Generics.Collections, Zasobnik, Types, HVDb, RPConst, Classes, SysUtils,
+uses Generics.Collections, Zasobnik, Types, RVDb, RPConst, Classes, SysUtils,
   PGraphics;
 
 type
@@ -71,7 +71,7 @@ type
     NUZ_status: TNUZstatus;
     RegPlease: TAreaRegPlease;
 
-    HVs: THVDb;
+    RVs: TRVDb;
 
     announcement: Boolean;
 
@@ -157,7 +157,7 @@ begin
       end;
     end;
 
-    Self.HVs := THVDb.Create();
+    Self.RVs := TRVDb.Create();
   finally
     data_main.Free();
     data_osv.Free();
@@ -172,7 +172,7 @@ begin
   Self.stack.Free();
   Self.lights.Free();
   Self.countdown.Free();
-  Self.HVs.Free();
+  Self.RVs.Free();
   inherited;
 end;
 

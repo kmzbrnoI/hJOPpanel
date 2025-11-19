@@ -1,8 +1,8 @@
-object F_HVSearch: TF_HVSearch
+object F_RVSearch: TF_RVSearch
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
-  Caption = 'Vyhledat hnac'#237' vozidlo v datab'#225'zi serveru'
+  Caption = 'Vyhledat vozidlo v datab'#225'zi serveru'
   ClientHeight = 105
   ClientWidth = 249
   Color = clBtnFace

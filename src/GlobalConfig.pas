@@ -112,7 +112,7 @@ var
 
 implementation
 
-uses TCPClientPanel, fMain, fTrainHelp, fHVEdit;
+uses TCPClientPanel, fMain, fTrainHelp, fVehicleEdit;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -219,7 +219,7 @@ begin
     F_Main.T_Main.Interval := ini.ReadInteger('global', 'timer', 200);
 
     F_TrainHelp.LoadData(ini);
-    F_HVEdit.LoadPrechodnost(ini);
+    F_VehicleEdit.LoadPrechodnost(ini);
   finally
     ini.Free();
   end;

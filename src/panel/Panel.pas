@@ -8,7 +8,7 @@ interface
 
 uses DXDraws, Controls, Windows, SysUtils, Graphics, Classes, Forms, Math,
   ExtCtrls, AppEvnts, inifiles, Messages, RPConst, fPotvrSekv, MenuPanel,
-  StrUtils, PGraphics, HVDb, Generics.Collections, Zasobnik, UPO,
+  StrUtils, PGraphics, RVDb, Generics.Collections, Zasobnik, UPO,
   PngImage, DirectX, PanelOR, BlockTypes, Types, BlockPst,
   BlockLinker, BlockLinkerTrain, BlockLock, BlockCrossing, BlocksTrack, BlocksTurnout,
   BlockSignal, BlockTurnout, BlockTrack, BlockDerail, BlockDisconnector, BlockText,
@@ -266,7 +266,7 @@ type
     procedure ORDKClickServer(Sender: string; enable: boolean);
     procedure ORLokReq(Sender: string; parsed: TStrings);
 
-    procedure ORHVList(Sender: string; data: string);
+    procedure ORRVList(Sender: string; data: string);
     procedure ORSprNew(Sender: string);
     procedure ORSprEdit(Sender: string; parsed: TStrings);
     procedure OROsvChange(Sender: string; code: string; state: boolean);
@@ -280,8 +280,8 @@ type
 implementation
 
 uses fStitVyl, TCPClientPanel, fMain, BottomErrors, GlobalConfig, fZpravy,
-  fTrainEdit, fSettings, fHVMoveSt, fAuth, fHVEdit, fHVDelete, ModelovyCas,
-  fNastaveni_casu, LokoRuc, Sounds, fRegReq, fHVSearch, uLIclient, InterProcessCom,
+  fTrainEdit, fSettings, fRVMoveArea, fAuth, fVehicleEdit, fRVDelete, ModelovyCas,
+  fNastaveni_casu, LokoRuc, Sounds, fRegReq, fRVSearch, uLIclient, InterProcessCom,
   parseHelper;
 
 constructor TRelief.Create(aParentForm: TForm);
@@ -1590,15 +1590,15 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.ORHVList(Sender: string; data: string);
+procedure TRelief.ORRVList(Sender: string; data: string);
 begin
   var area: TAreaPanel := Self.GetArea(Sender);
   if (area <> nil) then
   begin
-    area.HVs.ParseHVs(data);
-    area.HVs.HVs.Sort();
-    if ((F_HVEdit.Showing) and (F_HVEdit.area = Sender)) then
-      F_HVEdit.HVListRefreshed();
+    area.RVs.ParseRVs(data);
+    area.RVs.Sort();
+    if ((F_VehicleEdit.Showing) and (F_VehicleEdit.area = Sender)) then
+      F_VehicleEdit.RVListRefreshed();
   end;
 end;
 
@@ -1608,15 +1608,17 @@ begin
   if (area <> nil) then
   begin
     var available := false;
-    for var HV in area.HVs.HVs do
-      if (HV.train = '-') then
+    for var vehicle in area.RVs do
+    begin
+      if (vehicle.train = '-') then
       begin
         available := true;
         Break;
       end;
+    end;
 
     if (available) then
-      F_TrainEdit.NewSpr(area.HVs, area.id)
+      F_TrainEdit.NewTrain(area.RVs, area.id)
     else
       Self.ORInfoMsg('Nejsou volné loko');
   end;
@@ -1626,7 +1628,7 @@ procedure TRelief.ORSprEdit(Sender: string; parsed: TStrings);
 begin
   var area: TAreaPanel := Self.GetArea(Sender);
   if (area <> nil) then
-    F_TrainEdit.EditSpr(parsed, area.HVs, area.id, area.name);
+    F_TrainEdit.EditTrain(parsed, area.RVs, area.id, area.name);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1921,17 +1923,17 @@ begin
   Result := true;
 
   if (item = 'NOVÁ loko') then
-    F_HVEdit.HVAdd(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
+    F_VehicleEdit.RVAdd(Self.areas[obl_r].id, Self.areas[obl_r].RVs)
   else if (item = 'EDIT loko') then
-    F_HVEdit.HVEdit(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
+    F_VehicleEdit.RVEdit(Self.areas[obl_r].id, Self.areas[obl_r].RVs)
   else if (item = 'SMAZAT loko') then
-    F_HVDelete.OpenForm(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
+    F_RVDelete.OpenForm(Self.areas[obl_r].id, Self.areas[obl_r].RVs)
   else if (item = 'PŘEDAT loko') then
-    F_HV_Move.Open(Self.areas[obl_r].id, Self.areas[obl_r].HVs)
+    F_RV_Move.Open(Self.areas[obl_r].id, Self.areas[obl_r].RVs)
   else if (item = 'HLEDAT loko') then
-    F_HVSearch.Show()
+    F_RVSearch.Show()
   else if ((item = 'RUČ loko') or (item = 'MAUS loko')) then
-    F_RegReq.Open(Self.areas[obl_r].HVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
+    F_RegReq.Open(Self.areas[obl_r].RVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
       Self.areas[obl_r].RegPlease.firstname, Self.areas[obl_r].RegPlease.lastname, Self.areas[obl_r].RegPlease.comment,
       (Self.areas[obl_r].RegPlease.status <> TAreaRegPleaseStatus.none), false, false, (item = 'MAUS loko'))
   else
@@ -1944,7 +1946,7 @@ begin
     PanelTCPClient.SendLn(Self.areas[obl_r].id + ';LOK-REQ;DENY')
   else if (item = 'INFO') then
   begin
-    F_RegReq.Open(Self.areas[obl_r].HVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
+    F_RegReq.Open(Self.areas[obl_r].RVs, Self.areas[obl_r].id, Self.areas[obl_r].RegPlease.user,
       Self.areas[obl_r].RegPlease.firstname, Self.areas[obl_r].RegPlease.lastname, Self.areas[obl_r].RegPlease.comment,
       true, false, false, false);
   end;
@@ -2183,10 +2185,10 @@ begin
 
   else if (parsed[2] = 'U-OK') then
   begin
-    var HVDb := THVDb.Create;
-    HVDb.ParseHVs(parsed[3]);
+    var RVDb := TRVDb.Create;
+    RVDb.ParseRVs(parsed[3]);
 
-    F_RegReq.Open(HVDb, area.id, area.RegPlease.user, area.RegPlease.firstname, area.RegPlease.lastname,
+    F_RegReq.Open(RVDb, area.id, area.RegPlease.user, area.RegPlease.firstname, area.RegPlease.lastname,
       area.RegPlease.comment, true, true, true, false);
   end
 

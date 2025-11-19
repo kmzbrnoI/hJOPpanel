@@ -13,10 +13,8 @@ object F_StitVyl: TF_StitVyl
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object L_What: TLabel
     Left = 8

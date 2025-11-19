@@ -245,7 +245,7 @@ object F_TrainEdit: TF_TrainEdit
       TabOrder = 1
     end
   end
-  object PC_HVs: TPageControl
+  object PC_Vehicles: TPageControl
     Left = 8
     Top = 149
     Width = 393
@@ -258,7 +258,7 @@ object F_TrainEdit: TF_TrainEdit
     OnMouseMove = PageControlCloseButtonMouseMove
     OnMouseUp = PageControlCloseButtonMouseUp
   end
-  object BB_HV_Add: TBitBtn
+  object BB_RV_Add: TBitBtn
     Left = 378
     Top = 148
     Width = 21
@@ -291,7 +291,7 @@ object F_TrainEdit: TF_TrainEdit
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     TabOrder = 15
-    OnClick = BB_HV_AddClick
+    OnClick = BB_RV_AddClick
   end
   object SE_Delka: TSpinEdit
     Left = 113

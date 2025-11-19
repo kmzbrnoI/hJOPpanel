@@ -37,7 +37,7 @@ var
 
 implementation
 
-uses TCPClientPanel, HVDb, fRegReq, BottomErrors, uLIClient, fTrainToSlot,
+uses TCPClientPanel, RVDb, fRegReq, BottomErrors, uLIClient, fTrainToSlot,
   parseHelper, GlobalConfig;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -67,50 +67,52 @@ begin
     if (F_TrainToSlot.token_req_sent) then
       F_TrainToSlot.ServerResponseOK();
 
-    var HVs := THVDb.Create();
-    HVs.ParseHVsFromToken(parsed[3]);
+    var vehicles := TRVDb.Create();
+    try
+      vehicles.ParseRVsFromToken(parsed[3]);
 
-    gpurpose.slot := 0;
-    for var HV in HVs.HVs do
-    begin
-      if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(HV.addr, Purpose))) then
-        gpurpose := Purpose
-      else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(HV.addr, Purpose)) or
-        (Purpose.slot <> gpurpose.slot))) then
+      gpurpose.slot := 0;
+      for var vehicle in vehicles do
       begin
-        gpurpose.slot := 0;
-        break;
+        if ((gpurpose.slot = 0) and (Self.tokenPurpose.TryGetValue(vehicle.addr, Purpose))) then
+          gpurpose := Purpose
+        else if ((gpurpose.slot > 0) and ((not Self.tokenPurpose.TryGetValue(vehicle.addr, Purpose)) or
+          (Purpose.slot <> gpurpose.slot))) then
+        begin
+          gpurpose.slot := 0;
+          break;
+        end;
       end;
-    end;
 
-    case (gpurpose.slot) of
-      0:
-        begin
-          if ((GlobConfig.data.reg.reg_fn <> '') and (FileExists(GlobConfig.data.reg.reg_fn))) then
+      case (gpurpose.slot) of
+        0:
           begin
-            try
-              HVs.OpenJerry();
-            except
-              on E: Exception do
-                Errors.writeerror(E.Message, 'Regulátor', '');
-            end;
-          end
-          else
-            Errors.writeerror('Nevyplnìna cesta k regulátoru v nastavení!', 'Regulátor', '');
-        end;
+            if ((GlobConfig.data.reg.reg_fn <> '') and (FileExists(GlobConfig.data.reg.reg_fn))) then
+            begin
+              try
+                vehicles.OpenJerry();
+              except
+                on E: Exception do
+                  Errors.writeerror(E.Message, 'Regulátor', '');
+              end;
+            end
+            else
+              Errors.writeerror('Nevyplnìna cesta k regulátoru v nastavení!', 'Regulátor', '');
+          end;
 
-      1 .. TBridgeClient._SLOTS_CNT:
-        begin
-          if (BridgeClient.opened) then
-            BridgeClient.LoksToSlot(HVs, gpurpose.slot, gpurpose.ruc);
-        end;
+        1 .. TBridgeClient._SLOTS_CNT:
+          begin
+            if (BridgeClient.opened) then
+              BridgeClient.LoksToSlot(vehicles, gpurpose.slot, gpurpose.ruc);
+          end;
 
-    end; // case
+      end; // case
 
-    for var HV in HVs.HVs do
-      Self.tokenPurpose.Remove(HV.addr);
-
-    HVs.Free();
+      for var vehicle in vehicles do
+        Self.tokenPurpose.Remove(vehicle.addr);
+    finally
+      vehicles.Free();
+    end;
   end
 
   else if (parsed[2] = 'ERR') then

@@ -1,4 +1,4 @@
-﻿unit fHVMoveSt;
+﻿unit fRVMoveArea;
 
 {
   Move engine to different area.
@@ -8,16 +8,16 @@ interface
 
 uses
   Windows, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
-  HVDb, RPConst, ComCtrls, SysUtils;
+  RVDb, RPConst, ComCtrls, SysUtils;
 
 type
-  TF_HV_Move = class(TForm)
+  TF_RV_Move = class(TForm)
     Label1: TLabel;
     Label2: TLabel;
     CB_Stanice: TComboBox;
     B_Storno: TButton;
     B_OK: TButton;
-    LV_HVs: TListView;
+    LV_Vehicles: TListView;
     procedure B_StornoClick(Sender: TObject);
     procedure B_OKClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -27,12 +27,12 @@ type
     to_move: Integer;
 
   public
-    procedure Open(Sender: string; HVs: THVDb);
+    procedure Open(Sender: string; RVs: TRVDb);
     procedure ServerResp(parsed: TStrings);
   end;
 
 var
-  F_HV_Move: TF_HV_Move;
+  F_RV_Move: TF_RV_Move;
 
 implementation
 
@@ -42,11 +42,11 @@ uses OrList, TCPClientPanel;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HV_Move.B_OKClick(Sender: TObject);
+procedure TF_RV_Move.B_OKClick(Sender: TObject);
 begin
-  if (Self.LV_HVs.Selected = nil) then
+  if (Self.LV_Vehicles.Selected = nil) then
   begin
-    Application.MessageBox('Vyberte alespoň jedno hnací vozidlo!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
+    Application.MessageBox('Vyberte alespoň jedno vozidlo!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
   if (Self.CB_Stanice.ItemIndex < 0) then
@@ -57,41 +57,41 @@ begin
 
   Self.successfully_moved := 0;
   Self.to_move := 0;
-  for var LI in Self.LV_HVs.Items do
+  for var LI in Self.LV_Vehicles.Items do
     if (LI.Selected) then
       Inc(Self.to_move);
 
-  for var LI in Self.LV_HVs.Items do
+  for var LI in Self.LV_Vehicles.Items do
     if (LI.Selected) then
       PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), areaDb.db_reverse[Self.CB_Stanice.Text]);
 
   Screen.Cursor := crHourGlass;
 end;
 
-procedure TF_HV_Move.B_StornoClick(Sender: TObject);
+procedure TF_RV_Move.B_StornoClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_HV_Move.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_RV_Move.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Screen.Cursor := crDefault;
 end;
 
-procedure TF_HV_Move.Open(Sender: string; HVs: THVDb);
+procedure TF_RV_Move.Open(Sender: string; RVs: TRVDb);
 begin
   Self.sender_id := Sender;
 
-  Self.LV_HVs.Clear();
-  for var HV in HVs.HVs do
+  Self.LV_Vehicles.Clear();
+  for var vehicle in RVs do
   begin
-    if (HV.train = '-') then
+    if (vehicle.train = '-') then
     begin
-      var LI := Self.LV_HVs.Items.Add();
-      LI.Caption := IntToStr(HV.addr);
-      LI.SubItems.Add(HV.name);
-      LI.SubItems.Add(HV.designation);
-      LI.Data := Pointer(HV.addr);
+      var LI := Self.LV_Vehicles.Items.Add();
+      LI.Caption := IntToStr(vehicle.addr);
+      LI.SubItems.Add(vehicle.name);
+      LI.SubItems.Add(vehicle.designation);
+      LI.Data := Pointer(vehicle.addr);
     end;
   end;
 
@@ -99,13 +99,13 @@ begin
   for var name in areaDb.names_sorted do
     Self.CB_Stanice.Items.Add(name);
 
-  Self.ActiveControl := Self.LV_HVs;
+  Self.ActiveControl := Self.LV_Vehicles;
   Self.Show();
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_HV_Move.ServerResp(parsed: TStrings);
+procedure TF_RV_Move.ServerResp(parsed: TStrings);
 var err: string;
 begin
   if (not Self.Showing) then
@@ -119,7 +119,7 @@ begin
     else
       err := 'neznámá chyba';
 
-    Application.MessageBox(PChar('Při přesouvání HV ' + parsed[2] + ' nastala chyba:' + #13#10 + err), 'Chyba',
+    Application.MessageBox(PChar('Při přesouvání vozidla ' + parsed[2] + ' nastala chyba:' + #13#10 + err), 'Chyba',
       MB_OK OR MB_ICONWARNING);
   end else if (parsed[4] = 'OK') then
   begin

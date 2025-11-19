@@ -1,4 +1,4 @@
-object F_TrainHVEdit: TF_TrainHVEdit
+object F_TrainRVEdit: TF_TrainRVEdit
   Left = 0
   Top = 0
   Align = alClient
@@ -31,7 +31,7 @@ object F_TrainHVEdit: TF_TrainHVEdit
     Font.Style = []
     ParentFont = False
   end
-  object CB_HV1_HV: TComboBox
+  object CB_RV: TComboBox
     Left = 7
     Top = 13
     Width = 194
@@ -48,9 +48,9 @@ object F_TrainHVEdit: TF_TrainHVEdit
     Font.Style = []
     ParentFont = False
     TabOrder = 0
-    OnChange = CB_HV1_HVChange
+    OnChange = CB_RVChange
   end
-  object RG_HV1_dir: TRadioGroup
+  object RG_direction: TRadioGroup
     Left = 7
     Top = 38
     Width = 194
@@ -71,7 +71,7 @@ object F_TrainHVEdit: TF_TrainHVEdit
     ParentFont = False
     TabOrder = 1
   end
-  object M_HV1_Notes: TMemo
+  object M_note: TMemo
     Left = 7
     Top = 122
     Width = 194
@@ -83,9 +83,9 @@ object F_TrainHVEdit: TF_TrainHVEdit
     MaxLength = 1000
     ScrollBars = ssVertical
     TabOrder = 2
-    OnKeyPress = M_HV1_NotesKeyPress
+    OnKeyPress = M_noteKeyPress
   end
-  object PC_Funkce: TPageControl
+  object PC_functions: TPageControl
     Left = 206
     Top = 8
     Width = 172

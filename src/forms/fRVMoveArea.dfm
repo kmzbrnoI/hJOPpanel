@@ -1,9 +1,9 @@
-object F_HV_Move: TF_HV_Move
+object F_RV_Move: TF_RV_Move
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'P'#345'edat lokomotivu stanici'
+  Caption = 'P'#345'edat vozidlo stanici'
   ClientHeight = 409
   ClientWidth = 306
   Color = clBtnFace
@@ -12,17 +12,15 @@ object F_HV_Move: TF_HV_Move
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 16
     Top = 8
-    Width = 126
+    Width = 97
     Height = 13
-    Caption = 'Hnac'#237' vozidlo/a k p'#345'esunu:'
+    Caption = 'Vozidlo/a k p'#345'esunu:'
   end
   object Label2: TLabel
     Left = 16
@@ -58,7 +56,7 @@ object F_HV_Move: TF_HV_Move
     TabOrder = 2
     OnClick = B_OKClick
   end
-  object LV_HVs: TListView
+  object LV_Vehicles: TListView
     Left = 16
     Top = 27
     Width = 273
