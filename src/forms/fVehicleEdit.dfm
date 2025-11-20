@@ -347,10 +347,10 @@ object F_VehicleEdit: TF_VehicleEdit
       Height = 123
       Caption = ' Typ '
       Items.Strings = (
-        'parn'#237
-        'dieselov'#225
-        'motorov'#225
-        'elektrick'#225
+        'parn'#237' lokomotiva'
+        'dieselov'#225' lokomotiva'
+        'motorov'#253' v'#367'z'
+        'elektrick'#225' lokomotiva'
         'v'#367'z'
         'jin'#253)
       TabOrder = 6
