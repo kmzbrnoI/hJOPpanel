@@ -93,7 +93,7 @@ implementation
 
 uses fTrainHelp, fMain, TCPClientPanel, ORList, IfThenElse;
 
-// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi dopravna;cilova dopravna
 
 {$R *.dfm}
 /// /////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi stanice;cilova stanice
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;delka;typ;hnaci vozidla;vychozi dopravna;cilova dopravna
 procedure TF_TrainEdit.EditTrain(parsed: TStrings; RVs: TRVDb; sender_id: string; owner: string);
 begin
   Self.RVDb := RVs;
@@ -264,7 +264,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi stanice;cilova stanice
+// format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi dopravna;cilova dopravna
 procedure TF_TrainEdit.B_SaveClick(Sender: TObject);
 begin
   if (Self.E_Nazev.Text = '') then
@@ -286,7 +286,7 @@ begin
 
   if ((Self.CHB_report.Checked) and ((Self.CB_Vychozi.ItemIndex < 1) or (Self.CB_Cilova.ItemIndex < 1))) then
   begin
-    Application.MessageBox('Pro staniční hlášení musí být vyplněna výchozí a cílová stanice!', 'Nelze pokračovat',
+    Application.MessageBox('Pro staniční hlášení musí být vyplněna výchozí a cílová dopravna!', 'Nelze pokračovat',
       MB_OK OR MB_ICONWARNING);
     Exit();
   end;

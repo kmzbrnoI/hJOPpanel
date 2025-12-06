@@ -40,7 +40,7 @@ type
   private
     fname, fid: string;
 
-    // databaze otevrenych zalozek se stanicemi
+    // databaze otevrenych zalozek s dopravnami
     // pozor> poradi nemusi odpovidat poradi na okynku !! (diky umozneni prehazovani)
     clients: TObjectList<TF_Message>;
 

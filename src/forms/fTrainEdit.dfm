@@ -113,16 +113,16 @@ object F_TrainEdit: TF_TrainEdit
   object Label5: TLabel
     Left = 8
     Top = 103
-    Width = 78
+    Width = 89
     Height = 13
-    Caption = 'V'#253'choz'#237' stanice:'
+    Caption = 'V'#253'choz'#237' dopravna:'
   end
   object Label6: TLabel
     Left = 224
     Top = 103
-    Width = 70
+    Width = 81
     Height = 13
-    Caption = 'C'#237'lov'#225' stanice:'
+    Caption = 'C'#237'lov'#225' dopravna:'
   end
   object SB_st_change: TSpeedButton
     Left = 192

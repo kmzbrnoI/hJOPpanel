@@ -312,7 +312,7 @@ begin
   if (F_Main.IL_Ostatni.BkColor <> clBlack) then
     F_Main.IL_Ostatni.BkColor := clBlack;
 
-  // stanice, udalost, bloky:
+  // dopravna, udalost, bloky:
   with (Self.PB_SFP.canvas) do
   begin
     for var i := 0 to Self.m_senders.Count + 1 do

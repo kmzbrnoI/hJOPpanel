@@ -25,11 +25,11 @@ object F_RV_Move: TF_RV_Move
   object Label2: TLabel
     Left = 16
     Top = 309
-    Width = 70
+    Width = 66
     Height = 13
-    Caption = 'C'#237'lov'#225' stanice:'
+    Caption = 'Do dopravny:'
   end
-  object CB_Stanice: TComboBox
+  object CB_Area: TComboBox
     Left = 16
     Top = 328
     Width = 273

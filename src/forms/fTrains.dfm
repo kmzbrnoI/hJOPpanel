@@ -80,11 +80,11 @@ object F_Trains: TF_Trains
         Caption = 'Typ'
       end
       item
-        Caption = 'V'#253'choz'#237' stanice'
+        Caption = 'V'#253'choz'#237' dopravna'
         Width = 100
       end
       item
-        Caption = 'C'#237'lov'#225' stanice'
+        Caption = 'C'#237'lov'#225' dopravna'
         Width = 100
       end>
     Font.Charset = DEFAULT_CHARSET

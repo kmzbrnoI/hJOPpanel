@@ -14,7 +14,7 @@ type
   TF_RV_Move = class(TForm)
     Label1: TLabel;
     Label2: TLabel;
-    CB_Stanice: TComboBox;
+    CB_Area: TComboBox;
     B_Storno: TButton;
     B_OK: TButton;
     LV_Vehicles: TListView;
@@ -49,7 +49,7 @@ begin
     Application.MessageBox('Vyberte alespoň jedno vozidlo!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
   end;
-  if (Self.CB_Stanice.ItemIndex < 0) then
+  if (Self.CB_Area.ItemIndex < 0) then
   begin
     Application.MessageBox('Vyberte stanici!', 'Nelze pokračovat', MB_OK OR MB_ICONWARNING);
     Exit();
@@ -63,7 +63,7 @@ begin
 
   for var LI in Self.LV_Vehicles.Items do
     if (LI.Selected) then
-      PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), areaDb.db_reverse[Self.CB_Stanice.Text]);
+      PanelTCPClient.PanelLokMove(Self.sender_id, Integer(LI.Data), areaDb.db_reverse[Self.CB_Area.Text]);
 
   Screen.Cursor := crHourGlass;
 end;
@@ -95,9 +95,9 @@ begin
     end;
   end;
 
-  Self.CB_Stanice.Clear();
+  Self.CB_Area.Clear();
   for var name in areaDb.names_sorted do
-    Self.CB_Stanice.Items.Add(name);
+    Self.CB_Area.Items.Add(name);
 
   Self.ActiveControl := Self.LV_Vehicles;
   Self.Show();

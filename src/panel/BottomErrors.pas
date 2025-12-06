@@ -19,8 +19,7 @@ type
   TError = class
     err: string;
     tech: string;
-    stanice: string;
-    cas: TDateTime;
+    area: string;
     techStr: string;
   end;
 
@@ -39,7 +38,7 @@ type
 
     procedure Show(obj: TDXDraw);
 
-    procedure WriteError(error: string; system: string; stanice: string);
+    procedure WriteError(error: string; system: string; area: string);
     procedure RemoveVisibleErrors();
     procedure RemoveAllErrors();
 
@@ -80,7 +79,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TErrors.WriteError(error: string; system: string; stanice: string);
+procedure TErrors.WriteError(error: string; system: string; area: string);
 begin
   if (Self.errors.Count > _MAX_ERR) then
     Exit();
@@ -88,7 +87,7 @@ begin
   var err := TError.Create();
   err.err := error;
   err.tech := system;
-  err.stanice := stanice;
+  err.area := area;
 
   system := '! ' + system + ' !';
   if (Length(system) > _TECH_WIDTH) then
@@ -152,7 +151,7 @@ begin
 
   for var i := 0 to len - 1 do
   begin
-    msg := ' ' + Self.errors[i].stanice + ' : ' + Self.errors[i].err;
+    msg := ' ' + Self.errors[i].area + ' : ' + Self.errors[i].err;
     msg := Format('%-' + IntToStr(_ERR_WIDTH) + 's', [msg]);
 
     Symbols.TextOutput(Point(left, top), msg, TJopColor.red, TJopColor.white, obj);
