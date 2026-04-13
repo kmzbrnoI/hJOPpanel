@@ -40,6 +40,8 @@ PC<;Zrušení počátku posunové cesty
 ZAM>;Zamknutí návěstidla do STŮJ
 ZAM<;Odemknutí návěstidla
 STUJ;Přestavení návěstidla na STŮJ
+STUJ>;Přestavení všech návěstidel na STŮJ
+STUJ<;Zrušení přestavení návěstidel na STŮJ
 DN;Dodatečná návěst
 RC;Rušení jízdní cesty
 AB>;Zavedení automatického stavění VC
