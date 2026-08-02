@@ -8,7 +8,7 @@ interface
 
 uses
   Windows, Variants, Classes, Graphics, Controls, Forms, SysUtils,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Vcl.Imaging.pngimage;
 
 type
   TF_splash = class(TForm)
@@ -16,7 +16,7 @@ type
     ST_Version: TStaticText;
     L_Created: TLabel;
     L_BuildTime: TLabel;
-    I_Horasystems: TImage;
+    I_Logo: TImage;
     PB_Progress: TProgressBar;
     L_1: TLabel;
     L_Load: TLabel;
