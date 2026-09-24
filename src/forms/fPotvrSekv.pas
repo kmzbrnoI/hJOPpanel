@@ -8,14 +8,15 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms, Types,
-  Dialogs, ExtCtrls, StdCtrls, Generics.Collections, Symbols;
+  Dialogs, ExtCtrls, StdCtrls, Generics.Collections, Symbols, DateUtils;
 
 const
-  _POTVR_TIMEOUT_MIN = 2;
+  _POTVR_TIMEOUT_SEC = 120;
   _POTVR_ITEMS_PER_PAGE = 13;
   _FG_COLOR = TJopColor.gray;
   _SYMBOL_HEIGHT = 15;
   _SYMBOL_WIDTH = 8;
+  _OK_DELAY_PER_LINE: Real = 0.8;
 
 type
   TPSEnd = (prubeh = 1, success = 2, error = 3);
@@ -57,6 +58,7 @@ type
   private
     m_running: Boolean;
     m_start_time: TDateTime;
+    m_ok_enable_time: TDateTime;
     m_event, m_station: string;
     m_senders: TList<string>;
     m_conditions: TList<TPSCondition>;
@@ -149,12 +151,13 @@ begin
     begin
       Self.L_Description.Caption := 'INFORMAČNÍ STRÁNKA';
       Self.L_ListDescription.Caption := 'INFORMACE';
+      Self.B_OK.Enabled := True;
       Self.B_OK.Caption := 'OK';
       Self.Caption := 'Informační stránka – ' + GlobConfig.panelName;
     end else begin
       Self.L_Description.Caption := '!!! PROBÍHÁ RIZIKOVÁ FUNKCE !!!';
       Self.L_ListDescription.Caption := 'KONTROLOVANÉ PODMÍNKY';
-      Self.B_OK.Caption := 'Souhlasím';
+      Self.B_OK.Enabled := False;
       Self.Caption := 'Riziková funkce – ' + GlobConfig.panelName;
     end;
 
@@ -183,6 +186,10 @@ begin
 
     if (not Self.running) then
       Self.m_start_time := now;
+
+    var seconds: Integer := Round(_OK_DELAY_PER_LINE*(2+Self.m_senders.Count+Self.m_conditions.Count));
+    Self.m_ok_enable_time := Now + EncodeTime(0, seconds div 60, seconds mod 60, 0);
+
     Self.m_running := true;
     Self.T_Main.Enabled := true;
 
@@ -196,7 +203,6 @@ begin
   Self.Show();
   Self.SetPosFromConfig(); // must be here to work on multiple screens
   Self.ShowTexts();
-  Self.B_OK.SetFocus();
   Self.TimerUpdate(Self);
 end;
 
@@ -208,9 +214,24 @@ begin
   Self.ShowFlashing();
 
   Self.L_DateTime.Caption := FormatDateTime('dd.mm.yyyy hh:mm:ss', now);
-  Self.L_Timeout.Caption := FormatDateTime('nn:ss', (now - Self.m_start_time));
+  Self.L_Timeout.Caption := FormatDateTime('nn:ss', (Now - Self.m_start_time));
 
-  if (Self.m_start_time + encodetime(0, _POTVR_TIMEOUT_MIN, 0, 0) < now) then
+  if (Self.m_mode = 'PS') then
+  begin
+    if (Now < Self.m_ok_enable_time) then
+    begin
+      Self.B_OK.Caption := IntToStr(DateUtils.SecondsBetween(Self.m_ok_enable_time, Now)+1);
+    end else begin
+      if (not Self.B_OK.Enabled) then
+      begin
+        Self.B_OK.Enabled := True;
+        Self.B_OK.Caption := 'Souhlasím';
+        Self.B_OK.SetFocus();
+      end;
+    end;
+  end;
+
+  if (Self.m_start_time + encodetime(0, _POTVR_TIMEOUT_SEC div 60, _POTVR_TIMEOUT_SEC mod 60, 0) < now) then
   begin
     Self.Stop('Překročení času potvrzovací sekvence!');
     Errors.writeerror('Překročení času potvrzovací sekvence', 'Potvr. sekvence', '');
@@ -241,7 +262,6 @@ begin
 end;
 
 procedure TF_PotvrSekv.ShowTexts();
-var podm_start, podm_count: Integer;
 begin
   Self.PB_SFP_indexes.canvas.Pen.color := Self.PB_SFP_indexes.color;
   Self.PB_SFP_indexes.canvas.Brush.color := Self.PB_SFP_indexes.color;
@@ -278,8 +298,8 @@ begin
       TextOut(2 * _SYMBOL_WIDTH, 2 * _SYMBOL_HEIGHT + (i * _SYMBOL_HEIGHT), Self.m_senders[i]);
   end;
 
-  podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
-  podm_count := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - podm_start);
+  var podm_start: Integer := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
+  var podm_count: Integer := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - podm_start);
 
   // indexy kontrolovanych podminek
   with (Self.PB_podm_Indexes.canvas) do

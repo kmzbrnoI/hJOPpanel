@@ -3,7 +3,7 @@ object F_PotvrSekv: TF_PotvrSekv
   Top = 202
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
-  Caption = 'Potvrzovac'#237' sekvence'
+  Caption = 'Rizikov'#225' funkce'
   ClientHeight = 401
   ClientWidth = 685
   Color = clBlack
@@ -43,6 +43,7 @@ object F_PotvrSekv: TF_PotvrSekv
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Souhlas'#237'm'
+    Default = True
     TabOrder = 0
     OnClick = B_OKClick
     OnKeyPress = FormKeyPress
@@ -86,9 +87,9 @@ object F_PotvrSekv: TF_PotvrSekv
     object Label3: TLabel
       Left = 42
       Top = 345
-      Width = 24
+      Width = 64
       Height = 15
-      Caption = 'SZZ'
+      Caption = 'SZZ hJOP'
       Font.Charset = EASTEUROPE_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -112,9 +113,9 @@ object F_PotvrSekv: TF_PotvrSekv
     object L_Timeout: TLabel
       Left = 200
       Top = 345
-      Width = 32
+      Width = 40
       Height = 15
-      Caption = '0000'
+      Caption = '00:00'
       Font.Charset = EASTEUROPE_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
