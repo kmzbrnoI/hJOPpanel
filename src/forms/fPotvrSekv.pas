@@ -72,14 +72,14 @@ type
     procedure ShowFlashing();
     function GetPagesCount(): Integer;
 
+    class procedure FillRectangle(canvas: TCanvas; rect: TRect; color: TColor);
+
   public
 
     procedure StartOrUpdate(parsed: TStrings; callback: TEndEvent);
     procedure Stop(reason: string = '');
     procedure OnKeyUp(Key: Integer; var handled: Boolean);
     procedure SetPosFromConfig();
-
-    class procedure FillRectangle(canvas: TCanvas; rect: TRect; color: TColor);
 
     property OnEnd: TEndEvent read m_OnEnd write m_OnEnd;
     property PagesCount: Integer read GetPagesCount;
@@ -298,36 +298,34 @@ begin
       TextOut(2 * _SYMBOL_WIDTH, 2 * _SYMBOL_HEIGHT + (i * _SYMBOL_HEIGHT), Self.m_senders[i]);
   end;
 
-  var podm_start: Integer := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
-  var podm_count: Integer := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - podm_start);
+  var cond_begin: Integer := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
+  var cond_count: Integer := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - cond_begin);
 
   // indexy kontrolovanych podminek
   with (Self.PB_podm_Indexes.canvas) do
-    for var i := 0 to podm_count do
-      TextOut(IfThen(i + podm_start > 8, 0, 8), (i * _SYMBOL_HEIGHT), IntToStr(podm_start + i + 1));
+    for var i := 0 to cond_count do
+      TextOut(IfThen(i + cond_begin > 8, 0, 8), (i * _SYMBOL_HEIGHT), IntToStr(cond_begin + i + 1));
 
   // podminky
   with (Self.PB_Podm.canvas) do
   begin
     Font.color := _FG_COLOR;
-    for var i := 0 to podm_count - 1 do
+    for var i := 0 to cond_count - 1 do
     begin
-      TextOut(2 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), Self.m_conditions[podm_start + i].block);
-      if (Self.m_conditions[podm_start + i].condition <> '') then
-        TextOut(30 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), '# ' + Self.m_conditions[podm_start + i].condition);
+      TextOut(2 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), Self.m_conditions[cond_begin + i].block);
+      if (Self.m_conditions[cond_begin + i].condition <> '') then
+        TextOut(30 * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT), '# ' + Self.m_conditions[cond_begin + i].condition);
     end;
     Font.color := TJopColor.white;
 
-    if (podm_start + podm_count >= Self.m_conditions.Count) then
-      TextOut(2 * _SYMBOL_WIDTH, (podm_count * _SYMBOL_HEIGHT), 'KONEC SEZNAMU')
+    if (cond_begin + cond_count >= Self.m_conditions.Count) then
+      TextOut(2 * _SYMBOL_WIDTH, (cond_count * _SYMBOL_HEIGHT), 'KONEC SEZNAMU')
     else
-      TextOut(2 * _SYMBOL_WIDTH, (podm_count * _SYMBOL_HEIGHT), 'SEZNAM POKRAČUJE');
+      TextOut(2 * _SYMBOL_WIDTH, (cond_count * _SYMBOL_HEIGHT), 'SEZNAM POKRAČUJE');
   end;
 end;
 
 procedure TF_PotvrSekv.ShowFlashing();
-var podm_start, podm_count: Integer;
-  first, second: TColor;
 begin
   if (F_Main.IL_Ostatni.BkColor <> clBlack) then
     F_Main.IL_Ostatni.BkColor := clBlack;
@@ -337,8 +335,8 @@ begin
   begin
     for var i := 0 to Self.m_senders.Count + 1 do
     begin
-      first := IfThen(Self.m_flash, clBlack, _FG_COLOR);
-      second := IfThen(Self.m_flash, _FG_COLOR, clBlack);
+      const first: TColor = IfThen(Self.m_flash, clBlack, _FG_COLOR);
+      const second: TColor = IfThen(Self.m_flash, _FG_COLOR, clBlack);
       FillRectangle(Self.PB_SFP.canvas, rect(0, i * _SYMBOL_HEIGHT, _SYMBOL_WIDTH,
         i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
       FillRectangle(Self.PB_SFP.canvas, rect(0, i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH,
@@ -346,16 +344,16 @@ begin
     end;
   end;
 
-  podm_start := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
-  podm_count := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - podm_start);
+  var cond_begin: Integer := (Self.m_page * (_POTVR_ITEMS_PER_PAGE - 1));
+  var cond_count: Integer := Min(_POTVR_ITEMS_PER_PAGE - 1, Self.m_conditions.Count - cond_begin);
 
   // podminky
   with (Self.PB_Podm.canvas) do
   begin
-    for var i := 0 to podm_count do
+    for var i := 0 to cond_count do
     begin
-      first := IfThen(Self.m_flash, clBlack, _FG_COLOR);
-      second := IfThen(Self.m_flash, _FG_COLOR, clBlack);
+      const first: TColor = IfThen(Self.m_flash, clBlack, _FG_COLOR);
+      const second: TColor = IfThen(Self.m_flash, _FG_COLOR, clBlack);
       FillRectangle(Self.PB_Podm.canvas, rect(0, i * _SYMBOL_HEIGHT, _SYMBOL_WIDTH,
         i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2) - 1), first);
       FillRectangle(Self.PB_Podm.canvas, rect(0, i * _SYMBOL_HEIGHT + (_SYMBOL_HEIGHT div 2), _SYMBOL_WIDTH,
