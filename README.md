@@ -5,7 +5,7 @@ Panel for [hJOP](https://hjop.kmz-brno.cz/).
 - Programming language: Object Pascal
 - Environment: CodeGear RAD Studio 12 (available for free under [Community edition](http://docwiki.embarcadero.com/RADStudio/Athens/en/Community_Edition))
 - For: Microsoft Windows OS
-- Author: Jan Horacek
+- Author: Jan Malina (ex. Horacek)
 
 ## Special components & libraries
 
