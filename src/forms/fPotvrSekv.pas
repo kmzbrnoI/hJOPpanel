@@ -16,7 +16,6 @@ const
   _FG_COLOR = TJopColor.gray;
   _SYMBOL_HEIGHT = 15;
   _SYMBOL_WIDTH = 8;
-  _OK_DELAY_PER_LINE: Real = 0.8;
 
 type
   TPSEnd = (prubeh = 1, success = 2, error = 3);
@@ -187,8 +186,8 @@ begin
     if (not Self.running) then
       Self.m_start_time := now;
 
-    var seconds: Integer := Round(_OK_DELAY_PER_LINE*(2+Self.m_senders.Count+Self.m_conditions.Count));
-    Self.m_ok_enable_time := Now + EncodeTime(0, seconds div 60, seconds mod 60, 0);
+    var milliseconds: Integer := GlobConfig.data.forms.fPotvrSekvAgreeUnlockDelayLineMs*(2+Self.m_senders.Count+Self.m_conditions.Count);
+    Self.m_ok_enable_time := Now + (milliseconds/MSecsPerDay);
 
     Self.m_running := true;
     Self.T_Main.Enabled := true;

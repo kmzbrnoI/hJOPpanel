@@ -58,6 +58,7 @@ type
     fMainFullScreen: Boolean;
     fMainShowSB: Boolean;
     fPotvrSekvPos: TPoint;
+    fPotvrSekvAgreeUnlockDelayLineMs: Cardinal;
   end;
 
   TPODJConfig = record
@@ -200,6 +201,7 @@ begin
 
     Self.data.forms.fPotvrSekvPos.X := ini.ReadInteger('F_PotvrSekv', 'X', 0);
     Self.data.forms.fPotvrSekvPos.Y := ini.ReadInteger('F_PotvrSekv', 'Y', 0);
+    Self.data.forms.fPotvrSekvAgreeUnlockDelayLineMs := ini.ReadInteger('F_PotvrSekv', 'agreeUnlockDelayLineMs', 250);
 
     try
       Self.data.podj.realAbsolute := StrToTime('00:' + ini.ReadString('PODJ', 'realAbsolute', '01:00'));
@@ -283,6 +285,7 @@ begin
 
     ini.WriteInteger('F_PotvrSekv', 'X', Self.data.forms.fPotvrSekvPos.X);
     ini.WriteInteger('F_PotvrSekv', 'Y', Self.data.forms.fPotvrSekvPos.Y);
+    ini.WriteInteger('F_PotvrSekv', 'agreeUnlockDelayLineMs', Self.data.forms.fPotvrSekvAgreeUnlockDelayLineMs);
 
     ini.WriteString('PODJ', 'realAbsolute', FormatDateTime('nn:ss', Self.data.podj.realAbsolute));
     ini.WriteString('PODJ', 'realRelative', FormatDateTime('nn:ss', Self.data.podj.realRelative));
