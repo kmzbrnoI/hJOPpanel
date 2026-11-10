@@ -55,10 +55,10 @@ end;
 procedure TF_RVSearch.VehicleFound(vehicle: TRV);
 var str: string;
 begin
-  str := 'Vozidlo nalezeno!' + #13#10 + 'Název : ' + vehicle.name + #13#10 + 'Majitel : ' + vehicle.owner + #13#10 +
-    'Označení : ' + vehicle.designation + #13#10 + 'Adresa : ' + IntToStr(vehicle.addr) + #13#10 + 'Vlak : ' + vehicle.train +
-    #13#10 + 'Dopravna : ' + vehicle.orid + ' (' + areaDb.db[vehicle.orid] + ')' + #13#10;
-  Application.MessageBox(PChar(str), 'Loko nalezeno', MB_OK OR MB_ICONINFORMATION);
+  str := 'Vozidlo nalezeno!' + #13#10 + 'Název: ' + vehicle.name + #13#10 + 'Majitel: ' + vehicle.owner + #13#10 +
+    'Označení: ' + vehicle.designation + #13#10 + 'Adresa: ' + IntToStr(vehicle.addr) + #13#10 + 'Vlak: ' + vehicle.train +
+    #13#10 + 'Dopravna: ' + vehicle.orid + ' (' + areaDb.db[vehicle.orid] + ')' + #13#10;
+  Application.MessageBox(PChar(str), 'Vozidlo nalezeno', MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TF_RVSearch.VehicleNotFound();
