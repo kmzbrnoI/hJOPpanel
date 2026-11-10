@@ -107,21 +107,13 @@ begin
       LI.SubItems.Add('');
       LI.SubItems.Add('');
     end;
+
     LI.SubItems.Add(sl[2]);
     LI.SubItems.Add(sl[1]);
-    LI.SubItems.Add(sl[4]);
+    LI.SubItems.Add(sl[4] + ' cm');
     LI.SubItems.Add(sl[5]);
-
-    if ((sl.Count > 7) and (areaDb.db.ContainsKey(sl[7]))) then
-      LI.SubItems.Add(areaDb.db[sl[7]])
-    else
-      LI.SubItems.Add('Nevyplněno');
-
-    if ((sl.Count > 8) and (areaDb.db.ContainsKey(sl[8]))) then
-      LI.SubItems.Add(areaDb.db[sl[8]])
-    else
-      LI.SubItems.Add('Nevyplněno');
-
+    LI.SubItems.Add(if ((sl.Count > 7) and (areaDb.db.ContainsKey(sl[7]))) then areaDb.db[sl[7]] else '');
+    LI.SubItems.Add(if ((sl.Count > 8) and (areaDb.db.ContainsKey(sl[8]))) then areaDb.db[sl[8]] else '');
     LI.SubItems.Add(if sl.Count > 11 then sl[11] else '?');
   except
 

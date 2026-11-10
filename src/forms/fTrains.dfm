@@ -2,7 +2,7 @@ object F_Trains: TF_Trains
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  Caption = 'Vlaky ve v'#353'ech dopravn'#225'ch panelu'
+  Caption = 'Vlaky'
   ClientHeight = 477
   ClientWidth = 1085
   Color = clBtnFace
@@ -72,7 +72,7 @@ object F_Trains: TF_Trains
         Width = 150
       end
       item
-        Caption = 'Po'#269'et voz'#367
+        Caption = 'Voz'#367
       end
       item
         Caption = 'D'#233'lka'
