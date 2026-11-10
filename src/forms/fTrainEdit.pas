@@ -91,7 +91,7 @@ var
 
 implementation
 
-uses fTrainHelp, fMain, TCPClientPanel, ORList, IfThenElse;
+uses fTrainHelp, fMain, TCPClientPanel, ORList;
 
 // format dat vlaku: nazev;pocet_vozu;poznamka;smer_Lsmer_S;hnaci vozidla;vychozi dopravna;cilova dopravna
 

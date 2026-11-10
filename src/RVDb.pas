@@ -106,7 +106,7 @@ type
 
 implementation
 
-uses GlobalConfig, fMain, TCPClientPanel, parseHelper, IfThenElse;
+uses GlobalConfig, fMain, TCPClientPanel, parseHelper;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
@@ -422,7 +422,7 @@ begin
 
   Result := Result + IntToStr(Self.maxSpeed) + '|';
   Result := Result + IntToStr(Self.transience) + '|';
-  Result := Result + ite(Self.POMrelease = TPomStatus.manual, 'manual', 'automat') + '|';
+  Result := Result + (if Self.POMrelease = TPomStatus.manual then 'manual' else 'automat') + '|';
   Result := Result + BoolToStr10(Self.multitrackCapable) + '|';
 end;
 
