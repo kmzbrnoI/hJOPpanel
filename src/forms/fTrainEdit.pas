@@ -46,6 +46,7 @@ type
     CHB_report: TCheckBox;
     CHB_MaxSpeed: TCheckBox;
     SE_MaxSpeed: TSpinEdit;
+    CHB_SideTrack: TCheckBox;
     procedure B_HelpClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure B_SaveClick(Sender: TObject);
@@ -148,18 +149,19 @@ begin
 
   Self.E_Nazev.Text := '';
   Self.SE_PocetVozu.Value := 0;
-  Self.CHB_Sipka_L.Checked := false;
-  Self.CHB_Sipka_S.Checked := false;
+  Self.CHB_Sipka_L.Checked := False;
+  Self.CHB_Sipka_S.Checked := False;
 
-  Self.BB_RV_Add.Enabled := true;
+  Self.BB_RV_Add.Enabled := True;
 
   Self.SE_Delka.Value := 0;
   Self.CB_Typ.Text := '';
   Self.M_Poznamka.Text := '';
-  Self.CHB_MaxSpeed.Checked := false;
+  Self.CHB_MaxSpeed.Checked := False;
   Self.CHB_MaxSpeedClick(Self);
-  Self.CHB_report.Enabled := true;
-  Self.CHB_report.Checked := false;
+  Self.CHB_report.Enabled := True;
+  Self.CHB_report.Checked := False;
+  Self.CHB_SideTrack.Checked := False;
 
   Self.FillORs(Sender, '');
   Self.CB_Cilova.ItemIndex := 0;
@@ -226,6 +228,8 @@ begin
     Self.CHB_MaxSpeedClick(Self);
     if ((parsed.Count > 12) and (parsed[12] <> '')) then
       Self.SE_MaxSpeed.Value := StrToInt(parsed[12]);
+
+    Self.CHB_SideTrack.Checked := (if parsed.Count > 14 then StrToBool(parsed[14]) else False);
 
     Self.trainRVs.ParseRVs(parsed[8]);
   except
@@ -304,12 +308,12 @@ begin
     Exit();
   end;
 
-  var sprstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' + Self.M_Poznamka.Text + '};';
+  var trainstr := Self.E_Nazev.Text + ';' + IntToStr(Self.SE_PocetVozu.Value) + ';{' + Self.M_Poznamka.Text + '};';
 
-  sprstr := sprstr + BoolToStr10(Self.CHB_Sipka_L.Checked);
-  sprstr := sprstr + BoolToStr10(Self.CHB_Sipka_S.Checked) + ';';
-  sprstr := sprstr + IntToStr(Self.SE_Delka.Value) + ';' + Self.CB_Typ.Text + ';';
-  sprstr := sprstr + '{';
+  trainstr := trainstr + BoolToStr10(Self.CHB_Sipka_L.Checked);
+  trainstr := trainstr + BoolToStr10(Self.CHB_Sipka_S.Checked) + ';';
+  trainstr := trainstr + IntToStr(Self.SE_Delka.Value) + ';' + Self.CB_Typ.Text + ';';
+  trainstr := trainstr + '{';
 
   var err := '';
   var cannotMultitrack: TRV := nil;
@@ -350,7 +354,7 @@ begin
     end else if (Self.RVs[i].vehicle.typ <> TRVType.car) then
       Inc(noNonCarEngines);
 
-    sprstr := sprstr + Self.RVs[i].GetRVString();
+    trainstr := trainstr + Self.RVs[i].GetRVString();
   end;
 
   if ((cannotMultitrack <> nil) and (noNonCarEngines >= 2)) then
@@ -364,24 +368,15 @@ begin
       MB_DEFBUTTON2) <> mrYes) then
       Exit();
 
-  sprstr := sprstr + '};';
+  trainstr := trainstr + '};';
+  trainstr := trainstr + (if (Self.CB_Vychozi.ItemIndex > 0) then areaDb.db_reverse[CB_Vychozi.Items[CB_Vychozi.ItemIndex]] else '') + ';';
+  trainstr := trainstr + (if (Self.CB_Cilova.ItemIndex > 0) then areaDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]] else '') + ';';
+  trainstr := trainstr + BoolToStr10(Self.CHB_report.Checked) + ';';
+  trainstr := trainstr + (if (Self.CHB_MaxSpeed.Checked) then IntToStr(Self.SE_MaxSpeed.Value) else '') + ';';
+  trainstr := trainstr + ';'; // front track name
+  trainstr := trainStr + (if (Self.CHB_SideTrack.Checked) then '1' else '0') + ';';
 
-  if (Self.CB_Vychozi.ItemIndex > 0) then
-    sprstr := sprstr + areaDb.db_reverse[CB_Vychozi.Items[CB_Vychozi.ItemIndex]];
-  sprstr := sprstr + ';';
-
-  if (Self.CB_Cilova.ItemIndex > 0) then
-    sprstr := sprstr + areaDb.db_reverse[CB_Cilova.Items[CB_Cilova.ItemIndex]];
-  sprstr := sprstr + ';';
-
-  sprstr := sprstr + BoolToStr10(Self.CHB_report.Checked) + ';';
-
-  if (Self.CHB_MaxSpeed.Checked) then
-    sprstr := sprstr + IntToStr(Self.SE_MaxSpeed.Value) + ';'
-  else
-    sprstr := sprstr + ';';
-
-  PanelTCPClient.PanelSprChange(Self.OblR, sprstr);
+  PanelTCPClient.PanelSprChange(Self.OblR, trainstr);
 
   Screen.Cursor := crHourGlass;
   Self.T_Timeout.Enabled := true;

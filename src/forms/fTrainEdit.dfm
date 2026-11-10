@@ -182,7 +182,7 @@ object F_TrainEdit: TF_TrainEdit
     Margins.Bottom = 2
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 13
+    TabOrder = 14
     OnClick = B_SaveClick
   end
   object B_Storno: TButton
@@ -195,7 +195,7 @@ object F_TrainEdit: TF_TrainEdit
     Margins.Right = 2
     Margins.Bottom = 2
     Caption = 'Storno'
-    TabOrder = 14
+    TabOrder = 15
     OnClick = B_StornoClick
   end
   object B_Help: TButton
@@ -290,7 +290,7 @@ object F_TrainEdit: TF_TrainEdit
       FFFFFFFFFFFFFFFFFFFFFFFF000000000000000000AAAAAAFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09090900
       0000000000B3B3B3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-    TabOrder = 15
+    TabOrder = 16
     OnClick = BB_RV_AddClick
   end
   object SE_Delka: TSpinEdit
@@ -383,6 +383,14 @@ object F_TrainEdit: TF_TrainEdit
     MinValue = 0
     TabOrder = 10
     Value = 0
+  end
+  object CHB_SideTrack: TCheckBox
+    Left = 114
+    Top = 565
+    Width = 97
+    Height = 17
+    Caption = 'Odstaven'#253' vlak'
+    TabOrder = 13
   end
   object T_Timeout: TTimer
     Enabled = False
