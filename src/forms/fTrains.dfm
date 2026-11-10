@@ -2,9 +2,9 @@ object F_Trains: TF_Trains
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  Caption = 'Vlaky'
+  Caption = 'Vlaky ve v'#353'ech dopravn'#225'ch panelu'
   ClientHeight = 477
-  ClientWidth = 983
+  ClientWidth = 1085
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,11 +17,12 @@ object F_Trains: TF_Trains
   object P_Top: TPanel
     Left = 0
     Top = 0
-    Width = 983
+    Width = 1085
     Height = 41
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 983
     object B_Refresh: TButton
       Left = 8
       Top = 8
@@ -45,7 +46,7 @@ object F_Trains: TF_Trains
   object LV_Trains: TListView
     Left = 0
     Top = 41
-    Width = 983
+    Width = 1085
     Height = 436
     Margins.Left = 2
     Margins.Top = 2
@@ -86,6 +87,10 @@ object F_Trains: TF_Trains
       item
         Caption = 'C'#237'lov'#225' dopravna'
         Width = 100
+      end
+      item
+        Caption = #268'elo'
+        Width = 100
       end>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -103,5 +108,6 @@ object F_Trains: TF_Trains
     ViewStyle = vsReport
     OnChange = LV_TrainsChange
     OnKeyDown = LV_TrainsKeyDown
+    ExplicitWidth = 983
   end
 end

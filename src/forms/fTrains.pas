@@ -27,9 +27,9 @@ type
 
     listRequest: boolean;
 
-    procedure AddSpr(str: string);
+    procedure AddTrain(str: string);
     function ParseRV(str: string): string;
-    function FindIndexForNewSpr(cislo: Integer): Integer;
+    function FindIndexForNewTrain(cislo: Integer): Integer;
 
   public
 
@@ -59,7 +59,7 @@ begin
     for var i := 0 to sl.Count - 1 do
     begin
       try
-        Self.AddSpr(sl[i]);
+        Self.AddTrain(sl[i]);
       except
 
       end;
@@ -75,7 +75,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TF_Trains.AddSpr(str: string);
+procedure TF_Trains.AddTrain(str: string);
 var sl, slrv: TStrings;
   LI: TListItem;
 begin
@@ -85,7 +85,7 @@ begin
 
   try
     try
-      LI := Self.LV_Trains.Items.Insert(Self.FindIndexForNewSpr(StrToInt(sl[0])));
+      LI := Self.LV_Trains.Items.Insert(Self.FindIndexForNewTrain(StrToInt(sl[0])));
     except
       LI := Self.LV_Trains.Items.Add();
     end;
@@ -121,6 +121,8 @@ begin
       LI.SubItems.Add(areaDb.db[sl[8]])
     else
       LI.SubItems.Add('Nevyplněno');
+
+    LI.SubItems.Add(if sl.Count > 11 then sl[11] else '?');
   except
 
   end;
@@ -229,11 +231,10 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TF_Trains.FindIndexForNewSpr(cislo: Integer): Integer;
-var i: Integer;
+function TF_Trains.FindIndexForNewTrain(cislo: Integer): Integer;
 begin
   try
-    i := Self.LV_Trains.Items.Count - 1;
+    var i: Integer := Self.LV_Trains.Items.Count - 1;
     while ((i >= 0) and (StrToInt(Self.LV_Trains.Items[i].Caption) > cislo)) do
       i := i - 1;
     Result := i + 1;
