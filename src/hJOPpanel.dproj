@@ -233,7 +233,6 @@
             <Form>F_OOdj</Form>
         </DCCReference>
         <DCCReference Include="blocks\BlockPst.pas"/>
-        <DCCReference Include="IfThenElse.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -300,6 +299,12 @@
             <Deployment Version="5">
                 <DeployFile LocalName="..\Output\hJOPpanel.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="..\x86\bin\hJOPpanel.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="..\x86\bin\hJOPpanel.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>hJOPpanel.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>
