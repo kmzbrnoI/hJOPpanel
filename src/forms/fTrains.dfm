@@ -22,7 +22,6 @@ object F_Trains: TF_Trains
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 983
     object B_Refresh: TButton
       Left = 8
       Top = 8
@@ -107,7 +106,7 @@ object F_Trains: TF_Trains
     TabOrder = 1
     ViewStyle = vsReport
     OnChange = LV_TrainsChange
+    OnCompare = LV_TrainsCompare
     OnKeyDown = LV_TrainsKeyDown
-    ExplicitWidth = 983
   end
 end

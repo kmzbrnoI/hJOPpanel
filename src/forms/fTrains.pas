@@ -22,6 +22,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure LV_TrainsKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure LV_TrainsCompare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
   private
     { Private declarations }
 
@@ -29,7 +31,6 @@ type
 
     procedure AddTrain(str: string);
     function ParseRV(str: string): string;
-    function FindIndexForNewTrain(cislo: Integer): Integer;
 
   public
 
@@ -77,19 +78,15 @@ end;
 
 procedure TF_Trains.AddTrain(str: string);
 var sl, slrv: TStrings;
-  LI: TListItem;
 begin
   sl := TStringList.Create();
   slrv := TStringList.Create();
   ExtractStringsEx([';'], [], str, sl);
 
   try
-    try
-      LI := Self.LV_Trains.Items.Insert(Self.FindIndexForNewTrain(StrToInt(sl[0])));
-    except
-      LI := Self.LV_Trains.Items.Add();
-    end;
+    var LI: TListItem := Self.LV_Trains.Items.Add();
 
+    LI.Data := Pointer(StrToInt(sl[0])); // for sorting
     LI.Caption := sl[0];
 
     if (sl.Count > 6) then
@@ -98,10 +95,7 @@ begin
       if (slrv.Count > 0) then
       begin
         LI.SubItems.Add(Self.ParseRV(slrv[0]));
-        if (slrv.Count > 1) then
-          LI.SubItems.Add(Self.ParseRV(slrv[1]))
-        else
-          LI.SubItems.Add('');
+        LI.SubItems.Add(if (slrv.Count > 1) then Self.ParseRV(slrv[1]) else '');
       end;
     end else begin
       LI.SubItems.Add('');
@@ -115,12 +109,12 @@ begin
     LI.SubItems.Add(if ((sl.Count > 7) and (areaDb.db.ContainsKey(sl[7]))) then areaDb.db[sl[7]] else '');
     LI.SubItems.Add(if ((sl.Count > 8) and (areaDb.db.ContainsKey(sl[8]))) then areaDb.db[sl[8]] else '');
     LI.SubItems.Add(if sl.Count > 11 then sl[11] else '?');
-  except
-
+  finally
+    sl.Free();
+    slrv.Free();
   end;
 
-  sl.Free();
-  slrv.Free();
+  Self.LV_Trains.AlphaSort(); // see LV_TrainsCompare
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -214,25 +208,17 @@ begin
     Self.B_RemoveTrain.Caption := 'Smazat vlak';
 end;
 
+procedure TF_Trains.LV_TrainsCompare(Sender: TObject; Item1, Item2: TListItem;
+  Data: Integer; var Compare: Integer);
+begin
+  Compare := (if Integer(Item1.Data) < Integer(Item2.Data) then -1 else 1);
+end;
+
 procedure TF_Trains.LV_TrainsKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if ((Key = VK_DELETE) and (Self.B_RemoveTrain.Enabled)) then
     Self.B_RemoveTrainClick(Self);
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-function TF_Trains.FindIndexForNewTrain(cislo: Integer): Integer;
-begin
-  try
-    var i: Integer := Self.LV_Trains.Items.Count - 1;
-    while ((i >= 0) and (StrToInt(Self.LV_Trains.Items[i].Caption) > cislo)) do
-      i := i - 1;
-    Result := i + 1;
-  except
-    Result := Self.LV_Trains.Items.Count;
-  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
