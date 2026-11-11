@@ -17,13 +17,13 @@ object F_TrainRVEdit: TF_TrainRVEdit
   object L_S09: TLabel
     Left = 7
     Top = 105
-    Width = 145
+    Width = 101
     Height = 13
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
     Margins.Bottom = 2
-    Caption = 'Pozn'#225'mka k hnac'#237'mu vozidlu :'
+    Caption = 'Pozn'#225'mka k vozidlu :'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -66,8 +66,8 @@ object F_TrainRVEdit: TF_TrainRVEdit
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     Items.Strings = (
-      'L'
-      'S')
+      'lich'#233'm'
+      'sud'#233'm')
     ParentFont = False
     TabOrder = 1
   end

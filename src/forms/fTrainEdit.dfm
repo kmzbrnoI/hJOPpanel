@@ -229,19 +229,19 @@ object F_TrainEdit: TF_TrainEdit
     Caption = ' Ozna'#269'en'#237' sm'#283'ru '
     TabOrder = 5
     object CHB_Sipka_L: TCheckBox
-      Left = 52
+      Left = 36
       Top = 18
-      Width = 25
+      Width = 57
       Height = 17
-      Caption = 'L'
+      Caption = 'lich'#253
       TabOrder = 0
     end
     object CHB_Sipka_S: TCheckBox
       Left = 99
       Top = 18
-      Width = 33
+      Width = 54
       Height = 17
-      Caption = 'S'
+      Caption = 'sud'#253
       TabOrder = 1
     end
   end
