@@ -1,7 +1,7 @@
 MP;Místní provoz
 DP;Dálkový provoz
 OSV;Osvětlení
-LOKO;Lokomotivy
+LOKO;Vozidla
 MSG;Zprávy
 CAS>;Spustit modelový čas
 CAS<;Zastavit modelový čas
@@ -69,10 +69,10 @@ RBP;Rušení poruchy blokové podmínky
 BP>;Zavedení blokové podmínky
 BP<;Zrušení blokové podmínky
 
-NOVÝ vlak;Zavedení nové soupravy
-EDIT vlak;Úprava soupravy
-ZRUŠ vlak;Odstranění soupravy z kolejiště
-UVOL vlak;Odstranění soupravy z bloku
+NOVÝ vlak;Zavedení nového vlaku
+EDIT vlak;Úprava vlaku
+ZRUŠ vlak;Odstranění vlaku z kolejiště
+UVOL vlak;Odstranění vlaku z bloku
 VEZMI vlak;Vrátit vlak do kontroly počítače
 PŘESUŇ vlak>;Přesunout vlak na jinou kolej
 PŘESUŇ vlak<;Ukončit přesouvání vlaku
@@ -89,13 +89,13 @@ ZVUK>;Zapnout zvuky všech HV na celém kolejišti
 ZVUK ztlum;Dočasně vypnout zvuky všech HV na celém kolejišti
 ZVUK obnov;Zapnout dříve ztišené zvuky HV
 
-NOVÁ loko;Vytvořit novou lokomotivu
-EDIT loko;Upravit parametry lokomotiv
-SMAZAT loko;Smazat lokomotivu
-PŘEDAT loko;Předat lokomotivu do jiné stanice
-HLEDAT loko;Vyhledat lokomotivu v databázi serveru
-RUČ loko;Lokomotivu do ručního ovladače
-MAUS loko;Převzít lokomotivu na multiMaus (uLI-master)
+NOVÁ loko;Vytvořit nové vozidlo
+EDIT loko;Upravit parametry vozidel
+SMAZAT loko;Smazat vozidlo
+PŘEDAT loko;Předat vozidlo do jiné dopravny
+HLEDAT loko;Vyhledat vozidlo v databázi serveru
+RUČ loko;Vozidlo do ručního ovladače
+MAUS loko;Převzít vozidlo na ovladač (uLI-master)
 
 UK;Uvolnění klíče
 ZUK;Zrušení uvolnění klíče
