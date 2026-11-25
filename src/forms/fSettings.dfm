@@ -48,7 +48,7 @@ object F_Settings: TF_Settings
     Top = 8
     Width = 629
     Height = 273
-    ActivePage = TS_Panel
+    ActivePage = TS_ORAuth
     TabOrder = 2
     object TS_Server: TTabSheet
       Caption = 'P'#345'ipojen'#237
@@ -322,14 +322,14 @@ object F_Settings: TF_Settings
       end
     end
     object TS_ORAuth: TTabSheet
-      Caption = 'Autorizace O'#344
+      Caption = 'Autorizace dopraven'
       ImageIndex = 8
       object GroupBox1: TGroupBox
         Left = 176
         Top = 16
         Width = 268
         Height = 203
-        Caption = ' Automatick'#225' autorizace oblast'#237' '#345#237'zen'#237' '
+        Caption = ' Automatick'#225' autorizace dopraven '
         TabOrder = 0
         object Label16: TLabel
           Left = 16
